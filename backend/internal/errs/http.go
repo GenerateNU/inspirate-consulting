@@ -1,0 +1,88 @@
+package errs
+
+import (
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"strings"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+type HTTPErrorInterface interface {
+	GetStatus() int
+}
+
+type HTTPError struct {
+	Code    int `json:"code"`
+	Message any `json:"message"`
+}
+
+func (e HTTPError) GetStatus() int {
+	return e.Code
+}
+
+func (e HTTPError) Error() string {
+	return fmt.Sprintf("http error: %d %v", e.Code, e.Message)
+}
+
+func NewHTTPError(code int, err error) HTTPError {
+	return HTTPError{
+		Code:    code,
+		Message: err.Error(),
+	}
+}
+
+func BadRequest(msg string) HTTPError {
+	return NewHTTPError(http.StatusBadRequest, errors.New(msg))
+}
+
+func Unauthorized() HTTPError {
+	return NewHTTPError(http.StatusUnauthorized, errors.New("unauthorized"))
+}
+
+func NotFound(title string, withKey string, withValue any) HTTPError {
+	return NewHTTPError(http.StatusNotFound, fmt.Errorf("%s with %s='%v' not found", title, withKey, withValue))
+}
+
+func Conflict(title string, withKey string, withValue any) HTTPError {
+	return NewHTTPError(http.StatusConflict, fmt.Errorf("conflict: %s with %s='%s' already exists", title, withKey, withValue))
+}
+
+func InvalidRequestData(errors map[string]string) HTTPError {
+	return HTTPError{
+		Code:    http.StatusUnprocessableEntity,
+		Message: errors,
+	}
+}
+
+// InvalidJSON accepts optional custom message
+func InvalidJSON(msg ...string) HTTPError {
+	message := "invalid json"
+	if len(msg) > 0 && msg[0] != "" {
+		message = msg[0]
+	}
+	return NewHTTPError(http.StatusBadRequest, errors.New(message))
+}
+
+func InternalServerError(optionalMessage ...string) HTTPError {
+	if len(optionalMessage) > 0 {
+		return NewHTTPError(http.StatusInternalServerError, errors.New("internal server error: "+strings.Join(optionalMessage, ", ")))
+	}
+	return NewHTTPError(http.StatusInternalServerError, errors.New("internal server error"))
+}
+
+func ErrorHandler(c *fiber.Ctx, err error) error {
+	var httpErr HTTPError
+	if errors.As(err, &httpErr) {
+		// err is already an HTTPError, use it directly
+	} else {
+		// err is not an HTTPError, treat as internal server error
+		httpErr = InternalServerError()
+	}
+
+	slog.Error("HTTP API error", "err", err.Error(), "method", c.Method(), "path", c.Path())
+
+	return c.Status(httpErr.Code).JSON(httpErr)
+}
