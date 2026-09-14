@@ -1,0 +1,12 @@
+# Backend
+
+## Fiber
+
+
+## Backend Flow
+We get an HTTP request from our front end ->
+Hits Fiber HTTP Server ->
+Goes to Huma Route ->
+Context and params get passed down to Handler ->
+Store will interact with the DB ->
+Supabase DB, SQL
