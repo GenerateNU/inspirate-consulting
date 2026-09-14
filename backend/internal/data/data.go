@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	"inspirate-consulting/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -34,5 +35,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
+		Greeting: greetingRepository.NewGreetingRepository(db),
 	}
 }

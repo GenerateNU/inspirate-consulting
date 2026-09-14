@@ -8,17 +8,10 @@ import (
 )
 
 func (h *Handler) CreateGreeting(ctx context.Context, input *models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
-	name := input.Name
-	fmt.Println("At CreateGreeting handler")
-	// Note we would catch this error way earlier normally
-	if len(name) < 2 {
-		return nil, fmt.Errorf("Name '%s' must be longer than 1 character")
+	fmt.Println("Made it to the CreateGreeting handler")
+	greeting, err := h.GreetingRepository.CreateGreeting(ctx, *input)
+	if err != nil {
+		return nil, err
 	}
-	greetingWithName := fmt.Sprintf("Hello, %s!", name)
-	greetingResponse := models.CreateGreetingOutput{
-		Body: models.MessageBody{
-			Message: greetingWithName,
-		},
-	}
-	return &greetingResponse, nil
+	return greeting, nil
 }
