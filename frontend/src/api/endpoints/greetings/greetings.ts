@@ -51,7 +51,7 @@ export const getGetGreetingUrl = (name: string,) => {
 
 
 
-  return `http://127.0.0.1:3001/greeting/${name}`
+  return `http://127.0.0.1:8080/greeting/${name}`
 }
 
 /**
