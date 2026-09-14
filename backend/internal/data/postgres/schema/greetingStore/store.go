@@ -1,11 +1,11 @@
-package greetingStore
+package greetingRepository
 
 import "github.com/jackc/pgx/v5/pgxpool"
 
-type GreetingStore struct {
+type GreetingRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewGreetingStore(db *pgxpool.Pool) *GreetingStore {
-	return &GreetingStore{db: db}
+func NewGreetingRepository(db *pgxpool.Pool) *GreetingRepository {
+	return &GreetingRepository{db: db}
 }

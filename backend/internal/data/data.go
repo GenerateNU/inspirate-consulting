@@ -1,12 +1,21 @@
 package data
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"context"
+	"inspirate-consulting/internal/models"
 
-//For each schema, their interfaces are to be defined here
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+// For each schema, their interfaces are to be defined here
+type GreetingRepository interface {
+	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
+}
 
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
+	Greeting GreetingRepository
 }
 
 // Close closes the database connection pool

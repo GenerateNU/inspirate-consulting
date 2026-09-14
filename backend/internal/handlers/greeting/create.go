@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/GenerateNU/inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/models"
 )
 
 func (h *Handler) CreateGreeting(ctx context.Context, input *models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {

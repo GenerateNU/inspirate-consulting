@@ -1,13 +1,13 @@
 # Data Layer
 
-This folder is our data access layer. Any layers above this such as the handlers will call methods on a Store object, and the Store objects are created in this layer. 
+This folder is our data access layer. Any layers above this such as the handlers will call methods on a Repository object, and the Repository objects are created in this layer. 
 
 ## Folder Structure
 
 **The `/postgres` folder:**
 This folder has the implementation
 The `postgres/storage.go` file handles database connection setup. We build a pgx connection pool using the configuration in `internal/config.db`. Then `storage.go` pings the database, and returns it.
-`postgres/schema/*` are where the database queries will live. We create packages based off of the entity they relate to. Every package contains a `store.go` file which defined the struct and constructor. Then you can make additional `<operation>.go` files for each operation, like `schema/greeting/create.go` to create a greeting. 
+`postgres/schema/*` are where the database queries will live. We create packages based off of the entity they relate to. Every package contains a `repository.go` file which defined the struct and constructor. Then you can make additional `<operation>.go` files for each operation, like `schema/greeting/create.go` to create a greeting. 
 Talk about SQL:
 
 ## Concepts

@@ -4,15 +4,16 @@ import (
 	"context"
 	"net/http"
 
-	storage "github.com/GenerateNU/inspirate-consulting/internal/data"
-	"github.com/GenerateNU/inspirate-consulting/internal/handlers/greeting"
-	"github.com/GenerateNU/inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/handlers/greeting"
+	"inspirate-consulting/internal/models"
+
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpGreetingRoutes(api huma.API, store *storage.Store) {
-	greetingHandler := greeting.NewHandler(store.Greeting)
-	// store := greetingStore.GreetingStore.CreateGreeting()
+func SetUpGreetingRoutes(api huma.API, repository *data.Repository) {
+	greetingHandler := greeting.NewHandler(repository.Greeting)
+	// repository := greetingRepository.GreetingRepository.CreateGreeting()
 	// Register GET /greeting/{name} handler.
 	// The handler function takes in a struct that defines its inputs ('name' in this case)
 	// and returns the CreateGreetingOutput model built in the models

@@ -1,13 +1,13 @@
-package greetingStore
+package greetingRepository
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/GenerateNU/inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/models"
 )
 
-func (r *GreetingStore) CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
+func (r *GreetingRepository) CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
 	fmt.Println("You need to create the greeting")
 	var fakeCreatedGreeting models.CreateGreetingOutput = models.CreateGreetingOutput{
 		Body: models.MessageBody{
@@ -18,3 +18,4 @@ func (r *GreetingStore) CreateGreeting(ctx context.Context, greeting models.Crea
 	return &fakeCreatedGreeting, nil
 
 }
+
