@@ -1,0 +1,5 @@
+# air build output
+tmp/
+
+# local build output
+bin/

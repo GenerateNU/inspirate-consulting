@@ -1,0 +1,31 @@
+services:
+  backend:
+    # Tag for dev and prod so files never overwrite each other
+    image: inspirate-consulting-backend:prod
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      ENVIRONMENT: production
+      PORT: "8080"
+      CORS_ALLOWED_ORIGINS: ${PUBLIC_FRONTEND_URL:-http://localhost:3000}
+      ALLOWED_ORIGINS: ${PUBLIC_FRONTEND_URL:-http://localhost:3000}
+      FRONTEND_URL: ${PUBLIC_FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+  frontend:
+    image: inspirate-consulting-frontend:prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy

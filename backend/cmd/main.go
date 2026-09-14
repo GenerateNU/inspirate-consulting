@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"inspirate-consulting/internal/config"
+	"inspirate-consulting/internal/routes"
 
-	// "inspirate-consulting/internal/service"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/sethvargo/go-envconfig"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 	}
 
 	// Initialize application with config
-	app, err := service.InitApp(*cfg)
+	app, err := routes.InitApp(*cfg)
 	if err != nil {
 		log.Fatalf("Failed to initialize application: %v", err)
 	}
@@ -62,34 +64,16 @@ func main() {
 }
 
 func LoadConfig() (*config.Config, error) {
-	// environment := os.Getenv("ENVIRONMENT")
-	// testMode := os.Getenv("TEST_MODE")
+	testMode := os.Getenv("TEST_MODE")
 
 	var cfg config.Config
-	// switch environment {
-	// case "production":
-	// 	// Load configuration from environment variables for production
-	// 	err := envconfig.Process(context.Background(), &cfg)
-	// 	if err != nil {
-	// 		log.Fatalln("Error processing environment variables: ", err)
-	// 	}
-	// case "development":
-	// 	log.Println("Loading configuration from environment variables for development")
-	// 	// Load configuration from environment variables for development
-	// 	err := godotenv.Overload("../.local.env")
-	// 	if err != nil {
-	// 		log.Fatalln("Error loading .local.env file: ", err)
-	// 	}
-	// 	err = envconfig.Process(context.Background(), &cfg)
-	// 	if err != nil {
-	// 		log.Fatalln("Error processing environment variables: ", err)
-	// 	}
-	// default:
-	// 	log.Fatalln("Invalid environment name: ", environment, "The environment name must be one of either production or development")
-	// 	return nil, fmt.Errorf("invalid environment name: %s", environment)
-	// }
+	// Load configuration from environment variables for production
+	err := envconfig.Process(context.Background(), &cfg)
+	if err != nil {
+		log.Fatalln("Error processing environment variables: ", err)
+	}
 
-	// cfg.TestMode = testMode == "true"
+	cfg.TestMode = testMode == "true"
 
 	return &cfg, nil
 }

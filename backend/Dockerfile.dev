@@ -1,5 +1,7 @@
-FROM golang:1.24-alpine
+FROM golang:1.25-alpine
 
+# air watches the source tree and rebuilds/restarts on change
+RUN go install github.com/air-verse/air@v1.67.0
 
 # Set the working directory (this is /backend in inspirate-consulting)
 WORKDIR /app
@@ -8,9 +10,4 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the entire project
-COPY . .
-
-WORKDIR /app/cmd 
-
-CMD ["go", "run", "main.go"]
+CMD ["air", "-c", ".air.toml"]

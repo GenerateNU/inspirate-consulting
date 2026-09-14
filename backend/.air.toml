@@ -1,0 +1,20 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ./cmd"
+  bin = "./tmp/main"
+  include_ext = ["go", "mod", "sum", "yaml", "yml", "json"]
+  exclude_dir = ["tmp", "bin", "vendor"]
+  exclude_regex = ["_test\\.go"]
+  delay = 300
+  # Keep the last good binary running when a build fails
+  stop_on_error = true
+  send_interrupt = true
+  kill_delay = "2s"
+
+[log]
+  time = true
+
+[misc]
+  clean_on_exit = false
