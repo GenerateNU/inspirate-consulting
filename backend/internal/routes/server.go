@@ -2,11 +2,13 @@ package routes
 
 import (
 	"context"
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/postgres"
 	"inspirate-consulting/internal/errs"
 	"os"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humafiber"
@@ -61,12 +63,14 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	if allowedOrigins == "" {
 		allowedOrigins = "http://localhost:3000,http://localhost:8080,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost:5173,http://localhost"
 	}
+	splitAllowedOrigins := strings.Split(allowedOrigins, ",")
+
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     allowedOrigins,
-		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowOrigins:     splitAllowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
-		ExposeHeaders:    "Content-Length, X-Request-ID",
+		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
 	// Create Huma API with OpenAPI configuration
 	humaConfig := huma.DefaultConfig("Inspirate Consulting API", "1.0.0")
@@ -81,9 +85,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	humaAPI := humafiber.New(app, humaConfig)
 
 	// Register public routes BEFORE auth middleware
-	routes.SetupAuthRoutes(humaAPI, repo, config)
-	routes.SetupManagerRoutes(humaAPI, repo, config)
-	routes.SetupUserRoutes(humaAPI, repo)
+	// routes.SetupAuthRoutes(humaAPI, repo, config)
 
 	// Apply auth middleware — only affects routes registered after this point
 	if !config.TestMode {
@@ -94,7 +96,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	// setupDocsRoutes(app, "/app/api")
 
 	// Root route
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
