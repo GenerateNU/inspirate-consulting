@@ -1,0 +1,41 @@
+services:
+  backend:
+    # Tag so that dev and prod files never overwrite each other
+    image: inspirate-consulting-backend:dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    environment:
+      ENVIRONMENT: development
+      PORT: "8080"
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,https://cdn.scalar.com
+      ALLOWED_ORIGINS: http://localhost:5173
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "8080:8080"
+    volumes:
+      # Air rebuilds on change
+      - ./backend:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+  frontend:
+    image: inspirate-consulting-frontend:dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_API_URL: http://localhost:8080
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  go-mod-cache:
+  go-build-cache:

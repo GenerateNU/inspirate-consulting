@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type HTTPErrorInterface interface {
@@ -73,7 +73,7 @@ func InternalServerError(optionalMessage ...string) HTTPError {
 	return NewHTTPError(http.StatusInternalServerError, errors.New("internal server error"))
 }
 
-func ErrorHandler(c *fiber.Ctx, err error) error {
+func ErrorHandler(c fiber.Ctx, err error) error {
 	var httpErr HTTPError
 	if errors.As(err, &httpErr) {
 		// err is already an HTTPError, use it directly
