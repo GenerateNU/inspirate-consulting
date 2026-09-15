@@ -111,5 +111,6 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	// Attach each of the routes to the API here
+	SetUpGreetingRoutes(api, repo)
 	return nil
 }

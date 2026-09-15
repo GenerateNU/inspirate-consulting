@@ -8,12 +8,12 @@ project_id = "internal"
 enabled = true
 # Port to use for the API URL.
 port = 54321
-# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
+# Schemas to expose in your API. Tables, views and repositoryd procedures in this schema will get API
 # endpoints. `public` and `graphql_public` schemas are included by default.
 schemas = ["public", "graphql_public"]
 # Extra schemas to add to the search_path of every request.
 extra_search_path = ["public", "extensions"]
-# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
+# The maximum number of rows returns from a view, table, or repositoryd procedure. Limits payload size
 # for accidental or malicious requests.
 max_rows = 1000
 
@@ -53,7 +53,7 @@ max_client_conn = 100
 enabled = true
 # Specifies an ordered list of schema files that describe your database.
 # Supports glob patterns relative to supabase directory: "./schemas/*.sql"
-schema_paths = [./migrations/*.sql]
+schema_paths = ["./migrations/*.sql"]
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
@@ -120,7 +120,7 @@ enabled = true
 # [storage.image_transformation]
 # enabled = true
 
-# Store analytical data in S3 for running ETL jobs over Iceberg Catalog
+# Repository analytical data in S3 for running ETL jobs over Iceberg Catalog
 # This feature is only available on the hosted platform.
 [storage.analytics]
 enabled = false
@@ -131,7 +131,7 @@ max_catalogs = 2
 # Analytics Buckets is available to Supabase Pro plan.
 # [storage.analytics.buckets.my-warehouse]
 
-# Store vector embeddings in S3 for large and durable datasets
+# Repository vector embeddings in S3 for large and durable datasets
 # This feature is only available on the hosted platform.
 [storage.vector]
 enabled = false
