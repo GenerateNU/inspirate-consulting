@@ -1,21 +1,87 @@
 # Data Layer
 
-This folder is our data access layer. Any layers above this such as the handlers will call methods on a Repository object, and the Repository objects are created in this layer. 
+The data layer is the only part of the application that should know how data is
+stored. Handlers ask it to perform operations such as "create a greeting"; the
+PostgreSQL implementation decides which SQL to run.
 
-## Folder Structure
+Keeping SQL here prevents routes and handlers from depending on database
+details. It also lets handler tests replace PostgreSQL with a mock.
 
-**The `/postgres` folder:**
-This folder has the implementation
-The `postgres/storage.go` file handles database connection setup. We build a pgx connection pool using the configuration in `internal/config.db`. Then `storage.go` pings the database, and returns it.
-`postgres/schema/*` are where the database queries will live. We create packages based off of the entity they relate to. Every package contains a `repository.go` file which defined the struct and constructor. Then you can make additional `<operation>.go` files for each operation, like `schema/greeting/create.go` to create a greeting. 
-Talk about SQL:
+## Request Flow
 
-## Concepts
+For the greeting feature, a database call moves through these pieces:
 
-### pgx
+```text
+Greeting handler
+	-> GreetingRepository interface in data.go
+	-> PostgreSQL implementation in postgres/schema/greetingStore
+	-> pgx connection pool
+	-> PostgreSQL
+```
 
-This is the Go library we are using to talk to PostgreSQL. We pass in SQL strings and arguments to pgx, and pgx sends the arguments to our database, and returns rows back. So pgx is what opens a connection to Postgres, and communicates our arguments and responses to and from our database.
+The caller passes a `context.Context` through every step. The context allows a
+database query to be cancelled if the HTTP request ends or times out.
 
-### pgxpool
+## Interfaces and Implementations
 
-One connection to postgres can only run one query at a time, so we need to use pgxpool to create a connection pool, so we can run multiple queries concurrently. `pgxpool` handles a pool of connections that can be reused, and controls configurations like how many connections to keep open, etc.
+[`data.go`](data.go) defines repository interfaces. An interface lists the
+methods a handler is allowed to call.
+
+An interface contains no SQL. A concrete type satisfies it by implementing all
+of its methods. Go does this automatically; there is no `implements` keyword.
+
+The top-level `Repository` groups the feature repositories used by the app.
+`NewRepository` receives one database pool and constructs each concrete
+repository.
+
+## Folder Guide
+
+- [`data.go`](data.go) defines repository interfaces and wires implementations.
+- [`postgres/db-connection.go`](postgres/db-connection.go) opens and verifies
+	the shared PostgreSQL connection pool.
+- [`postgres/schema`](postgres/schema) contains SQL grouped by feature.
+- [`repo-mocks`](repo-mocks/README.md) contains test replacements for repository
+	interfaces.
+- [`db-interface`](db-interface/db-interface.go) defines query methods shared by
+	pools and transactions.
+
+See the [PostgreSQL guide](postgres/README.md) for query-writing conventions and
+the [Supabase guide](../supabase/README.md) for tables and migrations.
+
+## pgx and pgxpool
+
+**pgx** is the Go library used to send parameterized SQL to PostgreSQL and scan
+returned columns into Go values.
+
+**pgxpool** manages several reusable database connections. A web server may
+handle many requests at once, while a single connection can process only one
+query at a time. The pool lends a connection to each query and returns it when
+the query finishes. Application code should share the pool instead of opening a
+new connection for every request.
+
+Common pgx methods are:
+
+- `QueryRow(...).Scan(...)` for an operation returning one row.
+- `Query(...)` for an operation returning multiple rows.
+- `Exec(...)` for an operation returning no rows.
+
+Always use placeholders such as `$1` and `$2` for values. Do not join user input
+into an SQL string.
+
+## Adding a Data Operation
+
+For another operation on an existing feature:
+
+1. Add the method signature to the feature interface in `data.go`.
+2. Add an operation file, such as `get.go`, to its PostgreSQL store package.
+3. Implement the method with the exact same parameters and return types.
+4. Update or regenerate the repository mock.
+5. Add tests and run `go test ./...` from `backend`.
+
+For a new feature, also create its store package, add it as a field on
+`Repository`, and initialize it in `NewRepository`. If its table or columns are
+new, create a [Supabase migration](../supabase/README.md) before running the query.
+
+Repository methods must return database errors to their caller,
+the handler and central HTTP error layer need the error to produce the correct response 
+and log useful details.
