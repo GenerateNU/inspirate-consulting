@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"inspirate-consulting/internal/data"
@@ -25,7 +24,6 @@ func SetUpGreetingRoutes(api huma.API, repository *data.Repository) {
 		Description: "Get a greeting for a person by name.",
 		Tags:        []string{"Greetings"},
 	}, func(ctx context.Context, input *models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
-		fmt.Println("Made it to router")
 		greeting, err := greetingHandler.CreateGreeting(ctx, input)
 		if err != nil {
 			return nil, err

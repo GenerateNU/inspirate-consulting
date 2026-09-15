@@ -8,7 +8,6 @@ import (
 )
 
 func (r *GreetingRepository) CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
-	fmt.Println("Made it to data layer")
 	createdGreeting := &models.CreateGreetingOutput{}
 	greetingMessage := fmt.Sprintf("Hello, %s!", greeting.Name)
 
