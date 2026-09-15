@@ -59,25 +59,6 @@ components:
           format: uri
           type: string
       type: object
-    Get-greetingRequest:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - http://127.0.0.1:3001/schemas/Get-greetingRequest.json
-          format: uri
-          readOnly: true
-          type: string
-        Name:
-          description: Name to greet
-          examples:
-            - world
-          maxLength: 30
-          type: string
-      required:
-        - Name
-      type: object
     CreateGreetingOutputBody:
       additionalProperties: false
       properties:
