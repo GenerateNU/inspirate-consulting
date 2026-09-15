@@ -12,7 +12,7 @@ export default defineConfig({
       target: 'src/api/endpoints',
       schemas: 'src/api/models',
       mock: true,
-      baseUrl: 'http://127.0.0.1:3001'
+      baseUrl: 'http://127.0.0.1:8080'
     },
   },
   zodSchemas: {

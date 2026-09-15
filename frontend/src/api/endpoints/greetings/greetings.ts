@@ -129,7 +129,7 @@ export const getCreateGreetingMutationFetcher = ( options?: RequestInit) => {
     return createGreeting(arg, options);
   }
 }
-export const getCreateGreetingMutationKey = () => [`http://127.0.0.1:3001/greeting`] as const;
+export const getCreateGreetingMutationKey = () => [`http://127.0.0.1:8080/greeting`] as const;
 
 export type CreateGreetingMutationResult = NonNullable<Awaited<ReturnType<typeof createGreeting>>>
 
