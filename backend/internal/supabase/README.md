@@ -42,7 +42,6 @@ If and only if your PR has been merged, you can apply migrations using the supab
 5. Apply changes to prod with `supabase db push`
 
 You should check the prod Supabase Studio to check and make sure your changes are applied.
-
 ## Why Supabase?
 
 Supabase has a lot of built in features that you get for free like auth, edge functions, an always-active database, localization and much more. Using it allows for us to focus our time on the product and delivering for clients rather than fighting with infra.
