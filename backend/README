@@ -1,12 +1,65 @@
 # Backend
 
-## Fiber
+This is the Go API for Inspirate Consulting. It receives HTTP requests from the
+frontend, checks authentication, runs application logic, and reads or writes
+data in PostgreSQL. The API is served by [Fiber](https://gofiber.io/), routes
+and API documentation are defined with [Huma](https://huma.rocks/), and
+PostgreSQL is accessed with `pgx`.
 
+Start with the [setup guide](../SETUP.md) for local tools, environment
+variables, Supabase, and running the application.
 
-## Backend Flow
-We get an HTTP request from our front end ->
-Hits Fiber HTTP Server ->
-Goes to Huma Route ->
-Context and params get passed down to Handler ->
-Repository will interact with the DB ->
-Supabase DB, SQL
+## How the backend is structured
+
+Each layer has one job. Requests move downward; results and errors move back
+upward:
+
+```text
+Fiber server and middleware
+				-> Huma route
+				-> feature handler
+				-> repository interface
+				-> PostgreSQL repository
+				-> Supabase PostgreSQL database
+```
+
+- [`cmd`](cmd) starts the process, loads configuration, and shuts the server
+	down cleanly.
+- [`internal/config`](internal/config) describes configuration loaded from
+	environment variables.
+- [`internal/routes`](internal/routes/README.md) creates Fiber and Huma,
+	installs middleware, and registers endpoints.
+- [`internal/handlers`](internal/handlers/README.md) contains feature logic.
+- [`internal/models`](internal/models/README.md) defines request and response
+	shapes used by Huma and OpenAPI.
+- [`internal/data`](internal/data/README.md) hides database details behind Go
+	interfaces. Its [PostgreSQL guide](internal/data/postgres/README.md) explains
+	the concrete database implementation.
+- [`internal/auth`](internal/auth/README.md) verifies Supabase JWT cookies.
+- [`internal/supabase`](internal/supabase/README.md) contains local Supabase
+	configuration and database migrations.
+
+## Why use layers?
+
+Keeping HTTP, feature logic, and SQL separate makes each part easier to change
+and test. A handler depends on a repository interface, not on PostgreSQL
+syntax. Tests can therefore provide a mock repository without starting a
+database. A new feature normally adds one route, one handler, one model, one
+repository interface, and one PostgreSQL implementation.
+
+## Adding a feature
+
+Follow the existing greeting feature from the outside inward:
+(If setting things up in a different order makes more sense to you, go for it.
+This is just a recommended approach if you don't know where to start.)
+
+1. Define request and response models in [`internal/models`](internal/models).
+2. Add a repository interface in [`internal/data/data.go`](internal/data/data.go).
+3. Implement the SQL in `internal/data/postgres/schema/<feature>` and wire it
+	 into `data.NewRepository`.
+4. Add handler logic in [`internal/handlers`](internal/handlers).
+5. Register the endpoint in [`internal/routes`](internal/routes).
+6. Add a Supabase migration if the database schema changes.
+
+Read the linked package guides before changing a layer; each one explains its
+responsibility and the next place to look.
