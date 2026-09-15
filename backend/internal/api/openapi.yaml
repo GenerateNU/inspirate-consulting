@@ -18,7 +18,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:3001/schemas/ErrorModel.json
+            - http://localhost:8080/schemas/ErrorModel.json
           format: uri
           readOnly: true
           type: string
@@ -59,50 +59,67 @@ components:
           format: uri
           type: string
       type: object
-    CreateGreetingOutputBody:
+    GreetingRequestBody:
       additionalProperties: false
       properties:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:3001/schemas/CreateGreetingOutputBody.json
+            - http://localhost:8080/schemas/GreetingRequestBody.json
           format: uri
           readOnly: true
           type: string
-        message:
+        name:
+          description: Name to greet
+          examples:
+            - world
+          maxLength: 30
+          type: string
+      required:
+        - name
+      type: object
+    GreetingMessageBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/GreetingMessageBody.json
+          format: uri
+          readOnly: true
+          type: string
+        greeting:
           description: Greeting message
           examples:
             - Hello, world!
           type: string
       required:
-        - message
+        - greeting
       type: object
 info:
-  title: My API
+  contact:
+    name: Inspirate Consulting Team
+  description: API for the Inspirate Consulting application
+  title: Inspirate Consulting API
   version: 1.0.0
 openapi: 3.1.0
 paths:
-  /greeting/{name}:
-    get:
-      description: Get a greeting for a person by name.
-      operationId: get-greeting
-      parameters:
-        - description: Name to greet
-          in: path
-          name: name
-          required: true
-          schema:
-            description: Name to greet
-            examples:
-              - world
-            maxLength: 30
-            type: string
+  /greeting:
+    post:
+      description: Create a greeting for a person by name.
+      operationId: create-greeting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GreetingRequestBody"
+        required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateGreetingOutputBody"
+                $ref: "#/components/schemas/GreetingMessageBody"
           description: OK
         default:
           content:
@@ -113,4 +130,5 @@ paths:
       tags:
         - Greetings
 servers:
-  - url: http://127.0.0.1:3001
+  - description: Local development server
+    url: http://localhost:8080

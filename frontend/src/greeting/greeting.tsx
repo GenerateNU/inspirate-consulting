@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getGreeting } from '../api/endpoints';
+import { createGreeting } from '../api/endpoints';
 
 export default function Greeting() {
     const [name, setName] = useState('');
@@ -13,15 +13,14 @@ export default function Greeting() {
         // Prevent default form submission
         event.preventDefault();
         try {
-            const result = await getGreeting(name);
-            // getGreeting returns 'CreateGreetingOutputBody | ErrorModel' so first, check if there is any
-            // error (no data or message), then, TS will allow us to access data.message after we are sure it exists
-            if (!result.data || !('message' in result.data)) {
+            const result = await createGreeting({ name });
+            // createGreeting returns 'GreetingMessageBody | ErrorModel' so check if greeting is present
+            if (!result.data || !('greeting' in result.data)) {
                 setGreeting('Something went wrong.');
                 return;
             }
 
-            setGreeting(result.data.message);
+            setGreeting(result.data.greeting);
   
         } catch (err) {
             console.error(err);

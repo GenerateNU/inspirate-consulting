@@ -9,7 +9,7 @@ import (
 
 func (r *GreetingRepository) CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
 	createdGreeting := &models.CreateGreetingOutput{}
-	greetingMessage := fmt.Sprintf("Hello, %s!", greeting.Name)
+	greetingMessage := fmt.Sprintf("Hello, %s!", greeting.Body.Name)
 
 	const insertQuery = `
 	INSERT INTO public.greetings (
@@ -23,7 +23,7 @@ func (r *GreetingRepository) CreateGreeting(ctx context.Context, greeting models
 	err := r.db.QueryRow(
 		ctx,
 		insertQuery,
-		greeting.Name,
+		greeting.Body.Name,
 		greetingMessage,
 	).Scan(&createdGreeting.Body.Message)
 	if err != nil {

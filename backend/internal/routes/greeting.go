@@ -13,15 +13,14 @@ import (
 
 func SetUpGreetingRoutes(api huma.API, repository *data.Repository) {
 	greetingHandler := greeting.NewHandler(repository.Greeting)
-	// repository := greetingRepository.GreetingRepository.CreateGreeting()
-	// Register GET /greeting/{name} handler.
-	// The handler function takes in a struct that defines its inputs ('name' in this case)
+	// Register POST /greeting handler.
+	// The handler function takes in a struct that defines its inputs ('Body' in this case)
 	// and returns the CreateGreetingOutput model built in the models
 	huma.Register(api, huma.Operation{
-		OperationID: "get-greeting",
-		Method:      http.MethodGet,
-		Path:        "/greeting/{name}",
-		Description: "Get a greeting for a person by name.",
+		OperationID: "create-greeting",
+		Method:      http.MethodPost,
+		Path:        "/greeting",
+		Description: "Create a greeting for a person by name.",
 		Tags:        []string{"Greetings"},
 	}, func(ctx context.Context, input *models.CreateGreetingInput) (*models.CreateGreetingOutput, error) {
 		greeting, err := greetingHandler.CreateGreeting(ctx, input)
