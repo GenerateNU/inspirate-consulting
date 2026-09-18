@@ -2,7 +2,7 @@ package routes
 
 import (
 	"context"
-	"inspirate-consulting/internal/auth"
+	// "inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/postgres"
@@ -88,9 +88,9 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	// routes.SetupAuthRoutes(humaAPI, repo, config)
 
 	// Apply auth middleware — only affects routes registered after this point
-	if !config.TestMode {
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
-	}
+	// if !config.TestMode {
+	// 	humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
+	// }
 
 	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
 	// setupDocsRoutes(app, "/app/api")
