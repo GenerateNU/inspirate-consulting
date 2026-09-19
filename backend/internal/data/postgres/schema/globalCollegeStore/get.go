@@ -10,8 +10,8 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *GlobalCollegeRepository) GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error) {
-	globalCollege := &models.GlobalCollege{}
+func (r *GlobalCollegeRepository) GetGlobalCollege(ctx context.Context, id int64) (*models.GetGlobalCollegeOutput, error) {
+	globalCollege := models.GlobalCollege{}
 
 	const selectQuery = `
 	SELECT id, created_at, updated_at, school_name, school_location, ea_deadline, ed_deadline, rd_deadline
@@ -40,5 +40,5 @@ func (r *GlobalCollegeRepository) GetGlobalCollege(ctx context.Context, id int64
 		return nil, err
 	}
 
-	return globalCollege, nil
+	return &models.GetGlobalCollegeOutput{Body: globalCollege}, nil
 }

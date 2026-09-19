@@ -15,9 +15,9 @@ type GreetingRepository interface {
 
 // To represent the Global College schema
 type GlobalCollegeRepository interface {
-	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeInput) (*models.GlobalCollege, error)
-	GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error)
-	ListGlobalColleges(ctx context.Context) ([]*models.GlobalCollege, error)
+	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeInput) (*models.CreateGlobalCollegeOutput, error)
+	GetGlobalCollege(ctx context.Context, id int64) (*models.GetGlobalCollegeOutput, error)
+	ListGlobalColleges(ctx context.Context) (*models.ListGlobalCollegesOutput, error)
 }
 
 type Repository struct {

@@ -21,27 +21,30 @@ func TestCreateGlobalCollege(t *testing.T) {
 	edDeadline := time.Now().Add(30 * 24 * time.Hour).UTC().Truncate(time.Second)
 
 	input := models.CreateGlobalCollegeInput{
-		SchoolName: "Test University",
-		SchoolLocation: "Test City, TS",
-		EADeadline: nil,
-		EDDeadline: &edDeadline,
-		RDDeadline: nil,
+		Body: models.CreateGlobalCollegeRequestBody{
+			SchoolName: "Test University",
+			SchoolLocation: "Test City, TS",
+			EADeadline: nil,
+			EDDeadline: &edDeadline,
+			RDDeadline: nil,
+		},
 	}
 
-	created, err := repo.CreateGlobalCollege(ctx, input)
+	output, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("CreateGlobalCollege failed: %v", err)
 	}
+	created := output.Body
 	cleanupCollege(t, db, created.ID)
 
 	if created.ID == 0 {
 		t.Error("expected a generated ID, got 0")
 	}
-	if created.SchoolName != input.SchoolName {
-		t.Errorf("expected SchoolName %q, got %q", input.SchoolName, created.SchoolName)
+	if created.SchoolName != input.Body.SchoolName {
+		t.Errorf("expected SchoolName %q, got %q", input.Body.SchoolName, created.SchoolName)
 	}
-	if created.SchoolLocation != input.SchoolLocation {
-		t.Errorf("expected SchoolLocation %q, got %q", input.SchoolLocation, created.SchoolLocation)
+	if created.SchoolLocation != input.Body.SchoolLocation {
+		t.Errorf("expected SchoolLocation %q, got %q", input.Body.SchoolLocation, created.SchoolLocation)
 	}
 	if created.EADeadline != nil {
 		t.Errorf("expected nil EADeadline, got %v", created.EADeadline)
@@ -73,14 +76,17 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeInput{
-		SchoolName: "No Deadlines University",
-		SchoolLocation: "Nowhere, NA",
+		Body: models.CreateGlobalCollegeRequestBody{
+			SchoolName: "No Deadlines University",
+			SchoolLocation: "Nowhere, NA",
+		},
 	}
 
-	created, err := repo.CreateGlobalCollege(ctx, input)
+	output, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("expected create with all-nil deadlines to succeed, got error: %v", err)
 	}
+	created := output.Body
 	cleanupCollege(t, db, created.ID)
 
 	if created.EADeadline != nil || created.EDDeadline != nil || created.RDDeadline != nil {
@@ -89,8 +95,7 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 	}
 }
 
-// test duplication handling for global college creation 
-// (case-insensitive unique index on (school_name, school_location))
+// test duplicate global college creation with same school_name and school_location fails
 func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
@@ -101,24 +106,27 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeInput{
-		SchoolName: "Duplicate University",
-		SchoolLocation: "Dupe City, DC",
+		Body: models.CreateGlobalCollegeRequestBody{
+			SchoolName: "Duplicate University",
+			SchoolLocation: "Dupe City, DC",
+		},
 	}
 
 	first, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("first CreateGlobalCollege failed: %v", err)
 	}
-	cleanupCollege(t, db, first.ID)
+	cleanupCollege(t, db, first.Body.ID)
 
 	// Same name/location, different casing, should still collide.
 	dupInput := models.CreateGlobalCollegeInput{
-		SchoolName: "duplicate university",
-		SchoolLocation: "DUPE CITY, DC",
+		Body: models.CreateGlobalCollegeRequestBody{
+			SchoolName: "duplicate university",
+			SchoolLocation: "DUPE CITY, DC",
+		},
 	}
 	_, err = repo.CreateGlobalCollege(ctx, dupInput)
 	if err == nil {
 		t.Fatal("expected an error creating a case-insensitive duplicate, got nil")
 	}
 }
-

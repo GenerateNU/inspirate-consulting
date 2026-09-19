@@ -6,7 +6,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]*models.GlobalCollege, error) {
+func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) (*models.ListGlobalCollegesOutput, error) {
 
 	const listQuery = `
 	SELECT id, created_at, updated_at, school_name, school_location, ea_deadline, ed_deadline, rd_deadline
@@ -19,10 +19,10 @@ func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]*mo
 	}
 	defer rows.Close()
 
-	globalColleges := []*models.GlobalCollege{}
+	globalColleges := []models.GlobalCollege{}
 
 	for rows.Next() {
-		globalCollege := &models.GlobalCollege{}
+		var globalCollege models.GlobalCollege
 		if err := rows.Scan(
 			&globalCollege.ID,
 			&globalCollege.CreatedAt,
@@ -42,5 +42,5 @@ func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]*mo
 		return nil, err
 	}
 
-	return globalColleges, nil
+	return &models.ListGlobalCollegesOutput{Body: globalColleges}, nil
 }

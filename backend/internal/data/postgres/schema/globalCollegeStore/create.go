@@ -10,8 +10,8 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeInput) (*models.GlobalCollege, error) {
-	createdGlobalCollege := &models.GlobalCollege{}
+func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeInput) (*models.CreateGlobalCollegeOutput, error) {
+	createdGlobalCollege := models.GlobalCollege{}
 
 	const insertQuery = `
 	INSERT INTO public.global_colleges (
@@ -25,11 +25,11 @@ func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, input
 	err := r.db.QueryRow(
 		ctx,
 		insertQuery,
-		inputGlobalCollege.SchoolName,
-		inputGlobalCollege.SchoolLocation,
-		inputGlobalCollege.EADeadline,
-		inputGlobalCollege.EDDeadline,
-		inputGlobalCollege.RDDeadline,
+		inputGlobalCollege.Body.SchoolName,
+		inputGlobalCollege.Body.SchoolLocation,
+		inputGlobalCollege.Body.EADeadline,
+		inputGlobalCollege.Body.EDDeadline,
+		inputGlobalCollege.Body.RDDeadline,
 	).Scan(
 		&createdGlobalCollege.ID,
 		&createdGlobalCollege.CreatedAt,
@@ -45,11 +45,11 @@ func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, input
 
 		// to return a conflict error if the school_name and school_location combination already exists
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return nil, errs.Conflict("global college", "school_name/school_location", inputGlobalCollege.SchoolName+" / "+inputGlobalCollege.SchoolLocation)
+			return nil, errs.Conflict("global college", "school_name/school_location", inputGlobalCollege.Body.SchoolName+" / "+inputGlobalCollege.Body.SchoolLocation)
 		}
 		
 		return nil, err
 	}
 
-	return createdGlobalCollege, nil
+	return &models.CreateGlobalCollegeOutput{Body: createdGlobalCollege}, nil
 }

@@ -18,19 +18,24 @@ func TestGetGlobalCollege(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeInput{
-		SchoolName: "Findable University",
-		SchoolLocation: "Search City, SC",
+		Body: models.CreateGlobalCollegeRequestBody{
+			SchoolName: "Findable University",
+			SchoolLocation: "Search City, SC",
+		},
 	}
-	created, err := repo.CreateGlobalCollege(ctx, input)
+	createOutput, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("setup CreateGlobalCollege failed: %v", err)
 	}
+	created := createOutput.Body
 	cleanupCollege(t, db, created.ID)
 
-	fetched, err := repo.GetGlobalCollege(ctx, created.ID)
+	getOutput, err := repo.GetGlobalCollege(ctx, created.ID)
 	if err != nil {
 		t.Fatalf("GetGlobalCollege failed: %v", err)
 	}
+	fetched := getOutput.Body
+
 	if fetched.ID != created.ID {
 		t.Errorf("expected ID %d, got %d", created.ID, fetched.ID)
 	}
@@ -39,7 +44,7 @@ func TestGetGlobalCollege(t *testing.T) {
 	}
 }
 
-// test retrieval of a non-existent global college by ID
+// test retrieval of a global college with a nonexistent ID returns an error
 func TestGetGlobalCollege_NotFound(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")

@@ -19,11 +19,11 @@ func TestListGlobalColleges(t *testing.T) {
 	repo, db := setupTestRepo(t)
 	ctx := context.Background()
 
-	before, err := repo.ListGlobalColleges(ctx)
+	beforeOutput, err := repo.ListGlobalColleges(ctx)
 	if err != nil {
 		t.Fatalf("ListGlobalColleges failed: %v", err)
 	}
-	beforeCount := len(before)
+	beforeCount := len(beforeOutput.Body)
 
 	eaDeadline := time.Now().Add(10 * 24 * time.Hour).UTC().Truncate(time.Second)
 	edDeadline := time.Now().Add(20 * 24 * time.Hour).UTC().Truncate(time.Second)
@@ -31,40 +31,49 @@ func TestListGlobalColleges(t *testing.T) {
 
 	inputs := []models.CreateGlobalCollegeInput{
 		{
-			SchoolName:     "Alpha University",
-			SchoolLocation: "Alpha City, AA",
-			EADeadline:     &eaDeadline,
+			Body: models.CreateGlobalCollegeRequestBody{
+				SchoolName: "Alpha University",
+				SchoolLocation: "Alpha City, AA",
+				EADeadline: &eaDeadline,
+			},
 		},
 		{
-			SchoolName:     "Beta College",
-			SchoolLocation: "Beta Town, BB",
-			EDDeadline:     &edDeadline,
+			Body: models.CreateGlobalCollegeRequestBody{
+				SchoolName: "Beta College",
+				SchoolLocation: "Beta Town, BB",
+				EDDeadline: &edDeadline,
+			},
 		},
 		{
-			SchoolName:     "Gamma Institute",
-			SchoolLocation: "Gamma Village, CC",
-			RDDeadline:     &rdDeadline,
+			Body: models.CreateGlobalCollegeRequestBody{
+				SchoolName: "Gamma Institute",
+				SchoolLocation: "Gamma Village, CC",
+				RDDeadline: &rdDeadline,
+			},
 		},
 		{
-			SchoolName:     "Delta State",
-			SchoolLocation: "Delta City, DD",
+			Body: models.CreateGlobalCollegeRequestBody{
+				SchoolName: "Delta State",
+				SchoolLocation: "Delta City, DD",
+			},
 		},
 	}
 
-	created := make([]*models.GlobalCollege, 0, len(inputs))
+	created := make([]models.GlobalCollege, 0, len(inputs))
 	for _, input := range inputs {
-		c, err := repo.CreateGlobalCollege(ctx, input)
+		output, err := repo.CreateGlobalCollege(ctx, input)
 		if err != nil {
-			t.Fatalf("setup CreateGlobalCollege(%q) failed: %v", input.SchoolName, err)
+			t.Fatalf("setup CreateGlobalCollege(%q) failed: %v", input.Body.SchoolName, err)
 		}
-		cleanupCollege(t, db, c.ID)
-		created = append(created, c)
+		cleanupCollege(t, db, output.Body.ID)
+		created = append(created, output.Body)
 	}
 
-	after, err := repo.ListGlobalColleges(ctx)
+	afterOutput, err := repo.ListGlobalColleges(ctx)
 	if err != nil {
 		t.Fatalf("ListGlobalColleges failed: %v", err)
 	}
+	after := afterOutput.Body
 
 	if len(after) != beforeCount+len(inputs) {
 		t.Errorf("expected %d colleges after creating %d new ones, got %d",
@@ -72,9 +81,9 @@ func TestListGlobalColleges(t *testing.T) {
 	}
 
 	// Every created college should be present in the list, with matching fields.
-	byID := make(map[int64]*models.GlobalCollege, len(after))
-	for i := range after {
-		byID[after[i].ID] = after[i]
+	byID := make(map[int64]models.GlobalCollege, len(after))
+	for _, c := range after {
+		byID[c.ID] = c
 	}
 
 	for _, want := range created {
