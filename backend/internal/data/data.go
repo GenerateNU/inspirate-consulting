@@ -13,10 +13,18 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
+// To represent the Global College schema
+type GlobalCollegeRepository interface {
+	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeInput) (*models.GlobalCollege, error)
+	GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error)
+	ListGlobalColleges(ctx context.Context) ([]*models.GlobalCollege, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
 	Greeting GreetingRepository
+	GlobalCollege GlobalCollegeRepository
 }
 
 // Close closes the database connection pool

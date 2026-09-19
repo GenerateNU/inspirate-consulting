@@ -1,0 +1,56 @@
+package globalCollegeRepository
+
+import (
+	"context"
+	"testing"
+
+	"inspirate-consulting/internal/models"
+)
+
+// test normal global college retrieval with valid input/ID
+func TestGetGlobalCollege(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, db := setupTestRepo(t)
+	ctx := context.Background()
+
+	input := models.CreateGlobalCollegeInput{
+		SchoolName: "Findable University",
+		SchoolLocation: "Search City, SC",
+	}
+	created, err := repo.CreateGlobalCollege(ctx, input)
+	if err != nil {
+		t.Fatalf("setup CreateGlobalCollege failed: %v", err)
+	}
+	cleanupCollege(t, db, created.ID)
+
+	fetched, err := repo.GetGlobalCollege(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("GetGlobalCollege failed: %v", err)
+	}
+	if fetched.ID != created.ID {
+		t.Errorf("expected ID %d, got %d", created.ID, fetched.ID)
+	}
+	if fetched.SchoolName != created.SchoolName {
+		t.Errorf("expected SchoolName %q, got %q", created.SchoolName, fetched.SchoolName)
+	}
+}
+
+// test retrieval of a non-existent global college by ID
+func TestGetGlobalCollege_NotFound(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, _ := setupTestRepo(t)
+	ctx := context.Background()
+
+	_, err := repo.GetGlobalCollege(ctx, -1)
+	if err == nil {
+		t.Fatal("expected an error for a nonexistent id, got nil")
+	}
+}
