@@ -32,9 +32,15 @@ type CreateGlobalCollegeOutput struct {
 	Body GlobalCollege
 }
 
+type GetGlobalCollegeInput struct {
+	ID int64 `path:"id"`
+}
+
 type GetGlobalCollegeOutput struct {
 	Body GlobalCollege
 }
+
+type ListGlobalCollegesInput struct {}
 
 type ListGlobalCollegesOutput struct {
 	Body []GlobalCollege
