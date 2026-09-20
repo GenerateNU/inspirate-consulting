@@ -20,12 +20,10 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 	ctx := context.Background()
 	edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	input := &models.CreateGlobalCollegeInput{
-		Body: models.CreateGlobalCollegeRequestBody{
-			SchoolName: "Northeastern University",
-			SchoolLocation: "Boston, MA",
-			EDDeadline: &edDeadline,
-		},
+	input := models.CreateGlobalCollegeRequestBody{
+		SchoolName: "Northeastern University",
+		SchoolLocation: "Boston, MA",
+		EDDeadline: &edDeadline,
 	}
 
 	createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -37,26 +35,25 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		SchoolLocation: "Boston, MA",
 		EDDeadline: &edDeadline,
 	}
-	expectedOutput := &models.CreateGlobalCollegeOutput{Body: *expectedEntity}
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		mockRepo.On("CreateGlobalCollege", mock.Anything, input.Body).Return(expectedEntity, nil)
+		mockRepo.On("CreateGlobalCollege", mock.Anything, input).Return(expectedEntity, nil)
 
 		handler := NewHandler(mockRepo)
 		res, err := handler.CreateGlobalCollege(ctx, input)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedOutput, res)
+		assert.Equal(t, expectedEntity, res)
 	})
 
 	t.Run("repository error propagates (e.g. duplicate conflict from the DB)", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		mockRepo.On("CreateGlobalCollege", mock.Anything, input.Body).
+		mockRepo.On("CreateGlobalCollege", mock.Anything, input).
 			Return(nil, errors.New("global college with school_name/school_location='Northeastern University / Boston, MA' already exists"))
 
 		handler := NewHandler(mockRepo)

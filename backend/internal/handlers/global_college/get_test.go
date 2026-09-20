@@ -18,7 +18,7 @@ func TestHandler_GetGlobalCollege(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	input := &models.GetGlobalCollegeInput{ID: 1}
+	var id int64 = 1
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
@@ -31,27 +31,26 @@ func TestHandler_GetGlobalCollege(t *testing.T) {
 			SchoolName: "Northeastern University",
 			SchoolLocation: "Boston, MA",
 		}
-		expectedOutput := &models.GetGlobalCollegeOutput{Body: *expectedEntity}
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		mockRepo.On("GetGlobalCollege", mock.Anything, input.ID).Return(expectedEntity, nil)
+		mockRepo.On("GetGlobalCollege", mock.Anything, id).Return(expectedEntity, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetGlobalCollege(ctx, input)
+		res, err := handler.GetGlobalCollege(ctx, id)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedOutput, res)
+		assert.Equal(t, expectedEntity, res)
 	})
 
 	t.Run("not found propagates repository error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		mockRepo.On("GetGlobalCollege", mock.Anything, input.ID).
+		mockRepo.On("GetGlobalCollege", mock.Anything, id).
 			Return(nil, errors.New("global college with id='1' not found"))
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetGlobalCollege(ctx, input)
+		res, err := handler.GetGlobalCollege(ctx, id)
 
 		assert.Error(t, err)
 		assert.Nil(t, res)
