@@ -6,10 +6,13 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
+// CreateGlobalCollege creates a new global college entry in the database
 func (h *Handler) CreateGlobalCollege(ctx context.Context, input *models.CreateGlobalCollegeInput) (*models.CreateGlobalCollegeOutput, error) {
-	globalCollege, err := h.GlobalCollegeRepository.CreateGlobalCollege(ctx, *input)
+
+	createdGlobalCollege, err := h.GlobalCollegeRepository.CreateGlobalCollege(ctx, input.Body)
 	if err != nil {
 		return nil, err
 	}
-	return globalCollege, nil
+ 
+	return &models.CreateGlobalCollegeOutput{Body: *createdGlobalCollege}, nil
 }

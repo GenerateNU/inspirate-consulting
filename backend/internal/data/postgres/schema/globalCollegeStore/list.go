@@ -3,10 +3,12 @@ package globalCollegeRepository
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
+
 	"inspirate-consulting/internal/models"
 )
 
-func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) (*models.ListGlobalCollegesOutput, error) {
+func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error) {
 
 	const listQuery = `
 	SELECT id, created_at, updated_at, school_name, school_location, ea_deadline, ed_deadline, rd_deadline
@@ -19,28 +21,10 @@ func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) (*mode
 	}
 	defer rows.Close()
 
-	globalColleges := []models.GlobalCollege{}
-
-	for rows.Next() {
-		var globalCollege models.GlobalCollege
-		if err := rows.Scan(
-			&globalCollege.ID,
-			&globalCollege.CreatedAt,
-			&globalCollege.UpdatedAt,
-			&globalCollege.SchoolName,
-			&globalCollege.SchoolLocation,
-			&globalCollege.EADeadline,
-			&globalCollege.EDDeadline,
-			&globalCollege.RDDeadline,
-		); err != nil {
-			return nil, err
-		}
-		globalColleges = append(globalColleges, globalCollege)
-	}
-
-	if err := rows.Err(); err != nil {
+	globalColleges, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.GlobalCollege])
+	if err != nil {
 		return nil, err
 	}
 
-	return &models.ListGlobalCollegesOutput{Body: globalColleges}, nil
+	return globalColleges, nil
 }

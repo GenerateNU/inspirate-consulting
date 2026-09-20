@@ -86,7 +86,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	// Register public routes BEFORE auth middleware
 	// routes.SetupAuthRoutes(humaAPI, repo, config)
-
+	
 	// Apply auth middleware — only affects routes registered after this point
 	if !config.TestMode {
 		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
@@ -112,5 +112,6 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
+	SetUpGlobalCollegeRoutes(api, repo)
 	return nil
 }

@@ -11,5 +11,5 @@ func (h *Handler) ListGlobalColleges(ctx context.Context, input *models.ListGlob
 	if err != nil {
 		return nil, err
 	}
-	return globalColleges, nil
+	return &models.ListGlobalCollegesOutput{Body: globalColleges}, nil
 }

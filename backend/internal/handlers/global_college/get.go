@@ -11,5 +11,5 @@ func (h *Handler) GetGlobalCollege(ctx context.Context, input *models.GetGlobalC
 	if err != nil {
 		return nil, err
 	}
-	return globalCollege, nil
+	return &models.GetGlobalCollegeOutput{Body: *globalCollege}, nil
 }

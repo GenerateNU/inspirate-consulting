@@ -17,24 +17,22 @@ func TestGetGlobalCollege(t *testing.T) {
 	repo, db := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := models.CreateGlobalCollegeInput{
-		Body: models.CreateGlobalCollegeRequestBody{
-			SchoolName: "Findable University",
-			SchoolLocation: "Search City, SC",
-		},
+	input := models.CreateGlobalCollegeRequestBody{
+		SchoolName: "Findable University",
+		SchoolLocation: "Search City, SC",
 	}
 	createOutput, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("setup CreateGlobalCollege failed: %v", err)
 	}
-	created := createOutput.Body
+	created := createOutput
 	cleanupCollege(t, db, created.ID)
 
 	getOutput, err := repo.GetGlobalCollege(ctx, created.ID)
 	if err != nil {
 		t.Fatalf("GetGlobalCollege failed: %v", err)
 	}
-	fetched := getOutput.Body
+	fetched := getOutput
 
 	if fetched.ID != created.ID {
 		t.Errorf("expected ID %d, got %d", created.ID, fetched.ID)

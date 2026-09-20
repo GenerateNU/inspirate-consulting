@@ -23,39 +23,31 @@ func TestListGlobalColleges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListGlobalColleges failed: %v", err)
 	}
-	beforeCount := len(beforeOutput.Body)
+	beforeCount := len(beforeOutput)
 
 	eaDeadline := time.Now().Add(10 * 24 * time.Hour).UTC().Truncate(time.Second)
 	edDeadline := time.Now().Add(20 * 24 * time.Hour).UTC().Truncate(time.Second)
 	rdDeadline := time.Now().Add(90 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	inputs := []models.CreateGlobalCollegeInput{
+	inputs := []models.CreateGlobalCollegeRequestBody{
 		{
-			Body: models.CreateGlobalCollegeRequestBody{
-				SchoolName: "Alpha University",
-				SchoolLocation: "Alpha City, AA",
-				EADeadline: &eaDeadline,
-			},
+			SchoolName: "Alpha University",
+			SchoolLocation: "Alpha City, AA",
+			EADeadline: &eaDeadline,
 		},
 		{
-			Body: models.CreateGlobalCollegeRequestBody{
-				SchoolName: "Beta College",
-				SchoolLocation: "Beta Town, BB",
-				EDDeadline: &edDeadline,
-			},
+			SchoolName: "Beta College",
+			SchoolLocation: "Beta Town, BB",
+			EDDeadline: &edDeadline,
 		},
 		{
-			Body: models.CreateGlobalCollegeRequestBody{
-				SchoolName: "Gamma Institute",
-				SchoolLocation: "Gamma Village, CC",
-				RDDeadline: &rdDeadline,
-			},
+			SchoolName: "Gamma Institute",
+			SchoolLocation: "Gamma Village, CC",
+			RDDeadline: &rdDeadline,
 		},
 		{
-			Body: models.CreateGlobalCollegeRequestBody{
-				SchoolName: "Delta State",
-				SchoolLocation: "Delta City, DD",
-			},
+			SchoolName: "Delta State",
+			SchoolLocation: "Delta City, DD",
 		},
 	}
 
@@ -63,17 +55,17 @@ func TestListGlobalColleges(t *testing.T) {
 	for _, input := range inputs {
 		output, err := repo.CreateGlobalCollege(ctx, input)
 		if err != nil {
-			t.Fatalf("setup CreateGlobalCollege(%q) failed: %v", input.Body.SchoolName, err)
+			t.Fatalf("setup CreateGlobalCollege(%q) failed: %v", input.SchoolName, err)
 		}
-		cleanupCollege(t, db, output.Body.ID)
-		created = append(created, output.Body)
+		cleanupCollege(t, db, output.ID)
+		created = append(created, *output)
 	}
 
 	afterOutput, err := repo.ListGlobalColleges(ctx)
 	if err != nil {
 		t.Fatalf("ListGlobalColleges failed: %v", err)
 	}
-	after := afterOutput.Body
+	after := afterOutput
 
 	if len(after) != beforeCount+len(inputs) {
 		t.Errorf("expected %d colleges after creating %d new ones, got %d",
