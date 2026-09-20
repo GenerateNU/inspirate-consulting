@@ -6,10 +6,10 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (h *Handler) ListGlobalColleges(ctx context.Context, input *models.ListGlobalCollegesInput) (*models.ListGlobalCollegesOutput, error) {
+func (h *Handler) ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error) {
 	globalColleges, err := h.GlobalCollegeRepository.ListGlobalColleges(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &models.ListGlobalCollegesOutput{Body: globalColleges}, nil
+	return globalColleges, nil
 }

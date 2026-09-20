@@ -24,11 +24,11 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository) {
 		Description: "Create a global college with a name, location, and optional EA/ED/RD deadlines.",
 		Tags:        []string{"Global Colleges"},
 	}, func(ctx context.Context, input *models.CreateGlobalCollegeInput) (*models.CreateGlobalCollegeOutput, error) {
-		created, err := globalCollegeHandler.CreateGlobalCollege(ctx, input)
+		created, err := globalCollegeHandler.CreateGlobalCollege(ctx, input.Body)
 		if err != nil {
 			return nil, err
 		}
-		return created, nil
+		return &models.CreateGlobalCollegeOutput{Body: *created}, nil
 	})
 
 	// Register GET /colleges/{id} handler.
@@ -39,11 +39,11 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository) {
 		Description: "Get a global college by ID.",
 		Tags:        []string{"Global Colleges"},
 	}, func(ctx context.Context, input *models.GetGlobalCollegeInput) (*models.GetGlobalCollegeOutput, error) {
-		college, err := globalCollegeHandler.GetGlobalCollege(ctx, input)
+		college, err := globalCollegeHandler.GetGlobalCollege(ctx, input.ID)
 		if err != nil {
 			return nil, err
 		}
-		return college, nil
+		return &models.GetGlobalCollegeOutput{Body: *college}, nil
 	})
 
 	// Register GET /colleges handler.
@@ -54,10 +54,10 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository) {
 		Description: "List all global colleges.",
 		Tags:        []string{"Global Colleges"},
 	}, func(ctx context.Context, input *models.ListGlobalCollegesInput) (*models.ListGlobalCollegesOutput, error) {
-		colleges, err := globalCollegeHandler.ListGlobalColleges(ctx, input)
+		colleges, err := globalCollegeHandler.ListGlobalColleges(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return colleges, nil
+		return &models.ListGlobalCollegesOutput{Body: colleges}, nil
 	})
 }
