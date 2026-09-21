@@ -113,7 +113,14 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
+<<<<<<< HEAD
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
+<<<<<<< HEAD
 	SetupUserRoutes(api, repo, &config)
+=======
+=======
+	SetupUserRoutes(api, repo, &config)
+>>>>>>> 2f031e7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
+>>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
 	return nil
 }
