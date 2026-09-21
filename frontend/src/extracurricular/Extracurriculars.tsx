@@ -46,9 +46,14 @@ export default function Extracurriculars() {
     }
     setEditing(item.id)
     setForm({
-      ...item,
+      name: item.name,
+      status: item.status,
+      type: item.type,
+      description: item.description,
+      leadership_role: item.leadership_role ?? null,
       start_date: isoToYMD(item.start_date) as any,
       end_date: isoToYMD(item.end_date ?? undefined) as any,
+      organization: item.organization,
     })
   }
 
@@ -66,10 +71,15 @@ export default function Extracurriculars() {
         return str.length >= 10 ? str.slice(0, 10) : str
       }
       const payload = {
-        ...form,
         student_id: TEST_STUDENT_ID,
+        name: form.name,
+        status: form.status,
+        type: form.type,
+        description: form.description,
+        leadership_role: form.leadership_role ?? null,
         start_date: isoToYMD(form.start_date),
         end_date: form.end_date ? isoToYMD(form.end_date) : null,
+        organization: form.organization,
       }
       const res = await fetch(`${API_BASE}/extracurriculars/` + editing, {
         method: 'PATCH',
