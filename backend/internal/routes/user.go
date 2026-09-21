@@ -22,6 +22,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *models.CreateUserInput) (*models.CreateUserOutput, error) {
 		userOutput, err := userHandler.CreateUser(ctx, input, config)
+<<<<<<< HEAD
 		if err != nil {
 			return nil, err
 		}
@@ -36,6 +37,8 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *models.FetchUserInput) (*models.FetchUserOutput, error) {
 		userOutput, err := userHandler.FetchUser(ctx, input)
+=======
+>>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
 		if err != nil {
 			return nil, err
 		}
