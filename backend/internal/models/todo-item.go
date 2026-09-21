@@ -20,3 +20,13 @@ type CreateTodoItemRequestBody struct {
 	CompletedAt     *time.Time `json:"completed_at"`
 	Deadline        *time.Time `json:"deadline"`
 }
+
+type CreateTodoItemInput struct{
+	Body CreateTodoItemRequestBody
+}
+
+type CreateTodoItemOutput struct{
+	Body TodoItem
+}
+
+
