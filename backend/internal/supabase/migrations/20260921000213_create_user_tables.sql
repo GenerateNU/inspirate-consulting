@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS counselor (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS student (
+CREATE TABLE student (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id),
     year YEAR NOT NULL,

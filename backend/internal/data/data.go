@@ -21,11 +21,16 @@ type GlobalCollegeRepository interface {
 	ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error)
 }
 
+type UserRepository interface {
+	CreateUser(ctx context.Context, user models.CreateUserInput) (*models.CreateUserOutput, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
 	Greeting      GreetingRepository
 	GlobalCollege GlobalCollegeRepository
+	User          UserRepository
 }
 
 // Close closes the database connection pool
