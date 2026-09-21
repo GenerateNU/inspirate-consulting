@@ -21,7 +21,7 @@ func TestCreateTodoItem(t *testing.T) {
 
 	deadline := time.Now().Add(7 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	input := &models.TodoItem{
+	input := &models.CreateTodoItemRequestBody{
 		StudentID:       uuid.NewString(),
 		UserID:          uuid.NewString(),
 		TodoDescription: "Finish the Common App essay",
@@ -73,7 +73,7 @@ func TestCreateTodoItem_NilDeadline(t *testing.T) {
 	repo, db := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := &models.TodoItem{
+	input := &models.CreateTodoItemRequestBody{
 		StudentID:       uuid.NewString(),
 		UserID:          uuid.NewString(),
 		TodoDescription: "Someday task with no deadline",
@@ -103,7 +103,7 @@ func TestCreateTodoItem_InvalidStudentID(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := &models.TodoItem{
+	input := &models.CreateTodoItemRequestBody{
 		StudentID:       "not-a-uuid",
 		UserID:          uuid.NewString(),
 		TodoDescription: "Should never be inserted",

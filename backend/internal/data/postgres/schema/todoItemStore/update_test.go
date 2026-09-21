@@ -21,7 +21,7 @@ func TestUpdateTodoItemCompletedAt(t *testing.T) {
 
 	deadline := time.Now().Add(3 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	input := &models.TodoItem{
+	input := &models.CreateTodoItemRequestBody{
 		StudentID:       uuid.NewString(),
 		UserID:          uuid.NewString(),
 		TodoDescription: "Submit the FAFSA",
@@ -93,7 +93,7 @@ func TestUpdateTodoItemCompletedAt_Clear(t *testing.T) {
 	repo, db := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := &models.TodoItem{
+	input := &models.CreateTodoItemRequestBody{
 		StudentID:       uuid.NewString(),
 		UserID:          uuid.NewString(),
 		TodoDescription: "Completed by mistake",

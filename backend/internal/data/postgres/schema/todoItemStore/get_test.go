@@ -25,7 +25,7 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 
 	deadline := time.Now().Add(14 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	inputs := []*models.TodoItem{
+	inputs := []*models.CreateTodoItemRequestBody{
 		{
 			StudentID:       studentID,
 			UserID:          userID,

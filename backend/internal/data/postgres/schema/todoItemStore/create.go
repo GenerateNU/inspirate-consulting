@@ -5,7 +5,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.TodoItem) (*models.TodoItem, error) {
+func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
 	createdItem := &models.TodoItem{}
 
 	const insertQuery = `

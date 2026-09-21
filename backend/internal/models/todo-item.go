@@ -12,3 +12,11 @@ type TodoItem struct {
 	CompletedAt     *time.Time `json:"completed_at"`
 	Deadline        *time.Time `json:"deadline"`
 }
+
+type CreateTodoItemRequestBody struct {
+	StudentID       string     `json:"student_id"`
+	UserID          string     `json:"user_id"`
+	TodoDescription string     `json:"todo_description"`
+	CompletedAt     *time.Time `json:"completed_at"`
+	Deadline        *time.Time `json:"deadline"`
+}
