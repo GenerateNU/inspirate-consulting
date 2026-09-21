@@ -40,8 +40,10 @@ type Counselor struct {
 
 type CreateUserInput struct {
 	Body struct {
-		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Name     string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email    string  `json:"email" doc:"email of user for supabase signup"`
+		Password string  `json:"password" doc:"password of user for supabase signup"`
 	}
 }
 

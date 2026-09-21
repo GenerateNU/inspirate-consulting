@@ -10,6 +10,8 @@ import (
 	"inspirate-consulting/internal/models"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -38,7 +40,7 @@ type PersonalCollegeApplicationRepository interface {
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
 type UserRepository interface {
-	CreateUser(ctx context.Context, user models.CreateUserInput) (*models.CreateUserOutput, error)
+	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 }
 
 type Repository struct {
