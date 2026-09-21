@@ -1,6 +1,8 @@
 package user
 
-import storage "inspirate-consulting/internal/data"
+import (
+	storage "inspirate-consulting/internal/data"
+)
 
 // The greeting Handler has a dependency on GreetingRepository
 // in other words, greeting handler logic depends on there being a
