@@ -4,7 +4,6 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
@@ -22,9 +21,12 @@ type GreetingRepository interface {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 0e51bbc (Todo item repository and model (#48))
+=======
+>>>>>>> 4985949 (misc changes)
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
@@ -51,18 +53,12 @@ type UserRepository interface {
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-<<<<<<< HEAD
 	Greeting                   GreetingRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
-=======
-	Greeting GreetingRepository
-	GlobalCollege GlobalCollegeRepository
-	PersonalCollegeApplication PersonalCollegeApplicationRepository
-	TodoItem      TodoItemRepository
->>>>>>> 51cebd3 (Todo item repository and model (#48))
+
 }
 
 // Close closes the database connection pool
