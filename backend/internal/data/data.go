@@ -47,6 +47,7 @@ type PersonalCollegeApplicationRepository interface {
 =======
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+	FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 >>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
 

@@ -8,8 +8,13 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
+<<<<<<< HEAD
 func (r *UserRepository) FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error) {
 	User := &models.FetchUserOutput{Body: &models.User{}}
+=======
+func (r *UserRepository) FetcheUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error) {
+	User := &models.FetchUserOutput{}
+>>>>>>> 4d96216 (added get user flow)
 
 	query, err := schema.ReadSQLBaseScript("get_user.sql", SqlUserFiles)
 	if err != nil {
@@ -20,8 +25,13 @@ func (r *UserRepository) FetchUser(ctx context.Context, user models.FetchUserInp
 	err = r.db.QueryRow(
 		ctx,
 		query,
+<<<<<<< HEAD
 		user.ID,
 	).Scan(&User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey)
+=======
+		User,
+	).Scan(&User.Body.ID, &User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey)
+>>>>>>> 4d96216 (added get user flow)
 	if err != nil {
 		return nil, err
 	}
