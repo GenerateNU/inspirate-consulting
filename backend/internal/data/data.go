@@ -97,12 +97,6 @@ type EssayReviewRepository interface {
 	LinkRefund(ctx context.Context, db dbinterface.QueryInterface, chargeID, reversalID uuid.UUID) (*models.EssayReviewTransaction, error)
 	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
-<<<<<<< HEAD
-=======
-type UserRepository interface {
-	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
-}
->>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
 
 type Repository struct {
 	db *pgxpool.Pool
