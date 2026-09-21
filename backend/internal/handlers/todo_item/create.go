@@ -5,10 +5,10 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func(h *Handler) CreateNewTodoItem(ctx context.Context, input models.CreateTodoItemRequestBody) (*models.TodoItem, error){
+func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
 
-	createdTodoItem, err := h.CreateNewTodoItem(ctx, input)
-	if(err != nil){
+	createdTodoItem, err := h.TodoItemRepository.CreateTodoItem(ctx, input)
+	if err != nil {
 		return nil, err
 	}
 	return createdTodoItem, nil
