@@ -5,6 +5,8 @@ import (
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	"inspirate-consulting/internal/models"
 
+	"github.com/google/uuid"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -14,7 +16,7 @@ type GreetingRepository interface {
 }
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, user models.CreateUserInput) (*models.CreateUserOutput, error)
+	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 }
 
 type Repository struct {
