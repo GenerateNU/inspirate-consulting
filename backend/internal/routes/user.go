@@ -41,4 +41,5 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		}
 		return userOutput, nil
 	})
+
 }
