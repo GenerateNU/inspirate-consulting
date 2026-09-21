@@ -4,12 +4,9 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-<<<<<<< HEAD
-	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
-=======
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
->>>>>>> 51cebd3 (Todo item repository and model (#48))
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
 
@@ -22,7 +19,6 @@ import (
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
-
 
 // To represent Todo Item schema
 type TodoItemRepository interface {
@@ -41,7 +37,8 @@ type GlobalCollegeRepository interface {
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 	FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error)
-// To represent the Personal College Application schema
+	// To represent the Personal College Application schema
+}
 type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
@@ -50,11 +47,11 @@ type PersonalCollegeApplicationRepository interface {
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting GreetingRepository
-	GlobalCollege GlobalCollegeRepository
-	User          UserRepository
+	Greeting                   GreetingRepository
+	GlobalCollege              GlobalCollegeRepository
+	User                       UserRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
-	TodoItem      TodoItemRepository
+	TodoItem                   TodoItemRepository
 }
 
 // Close closes the database connection pool
@@ -73,10 +70,10 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting: greetingRepository.NewGreetingRepository(db),
-		TodoItem: todoItemRepository.NewTodoItemRepository(db),
-		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
-		User:          userRepository.NewUserRepository(db),
+		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
+		User:                       userRepository.NewUserRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
 }
