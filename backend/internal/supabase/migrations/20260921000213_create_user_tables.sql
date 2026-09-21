@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS student (
     user_id UUID NOT NULL REFERENCES users(id),
     year YEAR NOT NULL,
     organization TEXT,
+    gpa INT NOT NULL,
     review_balance INT NOT NULL,
     counselor_id UUID NOT NULL REFERENCES counselor(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

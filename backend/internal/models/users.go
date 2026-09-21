@@ -28,6 +28,7 @@ type Student struct {
 	UserID        uuid.UUID  `json:"user_id"`
 	Year          Year       `json:"year"`
 	Organization  *string    `json:"organization"`
+	GPA           int        `json:"gpa"`
 	ReviewBalance int        `json:"review_balance"`
 	CounselorID   *uuid.UUID `json:"counselor_id"`
 }
