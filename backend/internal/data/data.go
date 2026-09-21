@@ -4,8 +4,9 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
 
@@ -16,7 +17,6 @@ import (
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
-
 
 // To represent Todo Item schema
 type TodoItemRepository interface {
@@ -37,14 +37,18 @@ type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
+type UserRepository interface {
+	CreateUser(ctx context.Context, user models.CreateUserInput) (*models.CreateUserOutput, error)
+}
 
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting GreetingRepository
-	GlobalCollege GlobalCollegeRepository
+	Greeting                   GreetingRepository
+	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
-	TodoItem      TodoItemRepository
+	TodoItem                   TodoItemRepository
+	User                       UserRepository
 }
 
 // Close closes the database connection pool
@@ -63,9 +67,10 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting: greetingRepository.NewGreetingRepository(db),
-		TodoItem: todoItemRepository.NewTodoItemRepository(db),
-		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
+		User:                       userRepository.NewUserRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
 }
