@@ -26,6 +26,7 @@ type GlobalCollegeRepository interface {
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+	FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 
 type Repository struct {
