@@ -2,7 +2,7 @@ package data
 
 import (
 	"context"
-	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
+	extracurricularRepository "inspirate-consulting/internal/data/postgres/schema/extracurricularStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	"inspirate-consulting/internal/models"
 
@@ -14,18 +14,17 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
-// To represent the Global College schema
-type GlobalCollegeRepository interface {
-	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error)
-	GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error)
-	ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error)
+type ExtracurricularRepository interface {
+	CreateExtracurricular(ctx context.Context, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
+	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
+	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
 }
 
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting      GreetingRepository
-	GlobalCollege GlobalCollegeRepository
+	Greeting        GreetingRepository
+	Extracurricular ExtracurricularRepository
 }
 
 // Close closes the database connection pool
@@ -44,7 +43,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting:      greetingRepository.NewGreetingRepository(db),
-		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		Greeting:        greetingRepository.NewGreetingRepository(db),
+		Extracurricular: extracurricularRepository.NewExtracurricularRepository(db),
 	}
 }
