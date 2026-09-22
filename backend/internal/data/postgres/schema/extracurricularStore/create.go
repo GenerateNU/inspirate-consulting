@@ -130,7 +130,7 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, e
 	return createdExtracurricular, nil
 }
 
-// ListExtracurriculars retrieves extracurriculars for a student.
+// ListExtracurriculars retrieves extracurriculars for a student
 func (r *ExtracurricularRepository) ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error) {
 	const selectQuery = `
 	SELECT
@@ -219,7 +219,7 @@ func (r *ExtracurricularRepository) ListExtracurriculars(ctx context.Context, st
 	return out, nil
 }
 
-// UpdateExtracurricular updates an extracurricular record.
+// UpdateExtracurricular updates an extracurricular
 func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error) {
 	studentID := extracurricular.Body.StudentID
 	if studentID == nil || *studentID == "" {

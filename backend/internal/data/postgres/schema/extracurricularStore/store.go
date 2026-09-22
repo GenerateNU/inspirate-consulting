@@ -7,6 +7,5 @@ type ExtracurricularRepository struct {
 }
 
 func NewExtracurricularRepository(db *pgxpool.Pool) *ExtracurricularRepository {
-	return &ExtracurricularRepository{db: db} // Constructor present
+	return &ExtracurricularRepository{db: db}
 }
-
