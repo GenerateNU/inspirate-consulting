@@ -9,7 +9,7 @@ import (
 )
 
 func (r *UserRepository) FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error) {
-	User := &models.FetchUserOutput{}
+	User := &models.FetchUserOutput{Body: &models.User{}}
 
 	query, err := schema.ReadSQLBaseScript("get_user.sql", SqlUserFiles)
 	if err != nil {
@@ -20,8 +20,8 @@ func (r *UserRepository) FetchUser(ctx context.Context, user models.FetchUserInp
 	err = r.db.QueryRow(
 		ctx,
 		query,
-		User,
-	).Scan(&User.Body.ID, &User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey)
+		user.ID,
+	).Scan(&User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey)
 	if err != nil {
 		return nil, err
 	}
