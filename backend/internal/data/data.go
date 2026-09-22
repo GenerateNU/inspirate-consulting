@@ -4,6 +4,7 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
+	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
@@ -53,5 +54,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		// For each interface, add an instance of the interface here
 		Greeting:      greetingRepository.NewGreetingRepository(db),
 		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		User:          userRepository.NewUserRepository(db),
 	}
 }
