@@ -5,6 +5,7 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
+	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
@@ -27,6 +28,10 @@ type GlobalCollegeRepository interface {
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 	FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error)
+// To represent the Personal College Application schema
+type PersonalCollegeApplicationRepository interface {
+	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
 
 type Repository struct {
@@ -35,6 +40,7 @@ type Repository struct {
 	Greeting      GreetingRepository
 	GlobalCollege GlobalCollegeRepository
 	User          UserRepository
+	PersonalCollegeApplication PersonalCollegeApplicationRepository
 }
 
 // Close closes the database connection pool
@@ -56,5 +62,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		Greeting:      greetingRepository.NewGreetingRepository(db),
 		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
 		User:          userRepository.NewUserRepository(db),
+		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
 }
