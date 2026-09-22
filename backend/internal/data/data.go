@@ -4,7 +4,9 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	"inspirate-consulting/internal/models"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,11 +16,26 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
+<<<<<<< HEAD
+=======
+// To represent Todo Item schema
+type TodoItemRepository interface {
+	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
+	GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error)
+	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
+}
+
+>>>>>>> 72db4f8 (Introduced request body struct in parameters for CreateTodoItem)
 // To represent the Global College schema
 type GlobalCollegeRepository interface {
 	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error)
 	GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error)
 	ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error)
+}
+type TodoItemRepository interface {
+	CreateTodoItem(ctx context.Context, item *models.TodoItem) (*models.TodoItem, error)
+	GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error)
+	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
 }
 
 type Repository struct {
@@ -26,6 +43,7 @@ type Repository struct {
 	// For each interface, add a field here
 	Greeting      GreetingRepository
 	GlobalCollege GlobalCollegeRepository
+	TodoItem      TodoItemRepository
 }
 
 // Close closes the database connection pool
@@ -46,5 +64,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		// For each interface, add an instance of the interface here
 		Greeting:      greetingRepository.NewGreetingRepository(db),
 		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		TodoItem:      todoItemRepository.NewTodoItemRepository(db),
 	}
 }
