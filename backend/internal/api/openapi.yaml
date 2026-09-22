@@ -1,5 +1,74 @@
 components:
   schemas:
+    CreateGlobalCollegeRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateGlobalCollegeRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        ea_deadline:
+          description: Early admission deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        ed_deadline:
+          description: Early decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        rd_deadline:
+          description: Regular decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        school_location:
+          description: Location of the college
+          examples:
+            - Cambridge, MA
+          type: string
+        school_name:
+          description: Name of the college
+          examples:
+            - Harvard University
+          type: string
+      required:
+        - school_name
+        - school_location
+      type: object
+    CreateTodoItemRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateTodoItemRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        completed_at:
+          format: date-time
+          type: string
+        deadline:
+          format: date-time
+          type: string
+        student_id:
+          type: string
+        todo_description:
+          type: string
+        user_id:
+          type: string
+      required:
+        - student_id
+        - user_id
+        - todo_description
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -59,6 +128,69 @@ components:
           format: uri
           type: string
       type: object
+    GlobalCollege:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/GlobalCollege.json
+          format: uri
+          readOnly: true
+          type: string
+        created_at:
+          description: Timestamp when the college was created
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        ea_deadline:
+          description: Early admission deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        ed_deadline:
+          description: Early decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier for the college
+          examples:
+            - 1
+          format: int64
+          type: integer
+        rd_deadline:
+          description: Regular decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        school_location:
+          description: Location of the college
+          examples:
+            - Cambridge, MA
+          type: string
+        school_name:
+          description: Name of the college
+          examples:
+            - Harvard University
+          type: string
+        updated_at:
+          description: Timestamp when the college was last updated
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+      required:
+        - id
+        - created_at
+        - updated_at
+        - school_name
+        - school_location
+      type: object
     GreetingMessageBody:
       additionalProperties: false
       properties:
@@ -96,6 +228,65 @@ components:
       required:
         - name
       type: object
+    TodoItem:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/TodoItem.json
+          format: uri
+          readOnly: true
+          type: string
+        completed_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        created_at:
+          format: date-time
+          type: string
+        deadline:
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        student_id:
+          type: string
+        todo_description:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        user_id:
+          type: string
+      required:
+        - id
+        - created_at
+        - updated_at
+        - student_id
+        - user_id
+        - todo_description
+        - completed_at
+        - deadline
+      type: object
+    UpdateTodoItemCompletedAtInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemCompletedAtInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        completed:
+          type: boolean
+      required:
+        - completed
+      type: object
 info:
   contact:
     name: Inspirate Consulting Team
@@ -104,6 +295,79 @@ info:
   version: 1.0.0
 openapi: 3.1.0
 paths:
+  /colleges:
+    get:
+      description: List all global colleges.
+      operationId: list-global-colleges
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/GlobalCollege"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
+    post:
+      description: Create a global college with a name, location, and optional EA/ED/RD deadlines.
+      operationId: create-global-college
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGlobalCollegeRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalCollege"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
+  /colleges/{id}:
+    get:
+      description: Get a global college by ID.
+      operationId: get-global-college
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalCollege"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
   /greeting:
     post:
       description: Create a greeting for a person by name.
@@ -129,6 +393,84 @@ paths:
           description: Error
       tags:
         - Greetings
+  /todo-items:
+    get:
+      description: Get a student's to-do items
+      operationId: get-todo-items
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/TodoItem"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+    post:
+      description: Create a to-do item with a description and optional deadline
+      operationId: create-todo-item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTodoItemRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}:
+    patch:
+      description: Update a to-do item's completion status
+      operationId: update-todo-item-completed
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemCompletedAtInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
 servers:
   - description: Local development server
     url: http://localhost:8080
