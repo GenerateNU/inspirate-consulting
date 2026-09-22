@@ -4,7 +4,10 @@ import (
 	"context"
 	"testing"
 
+<<<<<<< HEAD
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
+=======
+>>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	"inspirate-consulting/internal/models"
 )
 
@@ -15,8 +18,12 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		t.Skip("skipping integration test in short mode")
 	}
 
+<<<<<<< HEAD
 	db := testutils.SetupTestDB(t)
 	repo := NewPersonalCollegeApplicationRepository(db)
+=======
+	repo, db := setupTestRepo(t)
+>>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	ctx := context.Background()
 
 	studentID := "00000000-0000-0000-0000-000000000099"
@@ -33,6 +40,10 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
 	}
+<<<<<<< HEAD
+=======
+	cleanupApplication(t, db, appA.ID)
+>>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 
 	appB, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeB,
@@ -42,6 +53,10 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
 	}
+<<<<<<< HEAD
+=======
+	cleanupApplication(t, db, appB.ID)
+>>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 
 	// A different student's application should not show up in studentID's results.
 	otherApp, err := repo.CreatePersonalCollegeApplication(ctx, otherStudentID, models.CreatePersonalCollegeApplicationRequestBody{
@@ -52,6 +67,10 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication (other student) failed: %v", err)
 	}
+<<<<<<< HEAD
+=======
+	cleanupApplication(t, db, otherApp.ID)
+>>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 
 	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, studentID)
 	if err != nil {
@@ -83,7 +102,11 @@ func TestListPersonalCollegeApplicationsByStudentID_NoApplications(t *testing.T)
 	}
 	t.Parallel()
 
+<<<<<<< HEAD
 	repo := NewPersonalCollegeApplicationRepository(testutils.SetupTestDB(t))
+=======
+	repo, _ := setupTestRepo(t)
+>>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	ctx := context.Background()
 
 	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, "00000000-0000-0000-0000-000000000077")
