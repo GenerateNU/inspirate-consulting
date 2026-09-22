@@ -2,13 +2,15 @@ package data
 
 import (
 	"context"
+	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	"inspirate-consulting/internal/models"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -37,13 +39,23 @@ type PersonalCollegeApplicationRepository interface {
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
 
+// To represent the Essay Review Transaction schema
+type EssayReviewRepository interface {
+	RequestEssayReview(ctx context.Context, input models.RequestEssayReviewRequestBody) (*models.EssayReviewTransaction, error)
+	RefundEssayReview(ctx context.Context, id uuid.UUID) (*models.RefundEssayReviewResponseBody, error)
+	CompleteEssayReview(ctx context.Context, id uuid.UUID) (*models.EssayReviewTransaction, error)
+	GetEssayReviewStatus(ctx context.Context, essayID uuid.UUID) (*models.EssayReviewStatus, error)
+	SetReviewBalance(ctx context.Context, id uuid.UUID, reviewBalance int) (*models.Student, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting GreetingRepository
-	TodoItem TodoItemRepository
-	GlobalCollege GlobalCollegeRepository
+	Greeting                   GreetingRepository
+	TodoItem                   TodoItemRepository
+	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	EssayReview                EssayReviewRepository
 }
 
 // Close closes the database connection pool
@@ -62,9 +74,10 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting: greetingRepository.NewGreetingRepository(db),
-		TodoItem: todoItemRepository.NewTodoItemRepository(db),
-		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
+		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 	}
 }
