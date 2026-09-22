@@ -2,18 +2,18 @@ package data
 
 import (
 	"context"
+	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
-	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
+	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
 
 	"github.com/google/uuid"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -54,18 +54,26 @@ type VideoRepository interface {
 	ListVideos(ctx context.Context) ([]models.Video, error)
 }
 
-type MediaRepository interface{
-	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error)
-	GetMedia(ctx context.Context, id string)(*models.Media, error)
-	ListAllMedia(ctx context.Context)([]models.Media, error)
-	DeleteMedia(ctx context.Context, id string)error
+type MediaRepository interface {
+	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error)
+	GetMedia(ctx context.Context, id string) (*models.Media, error)
+	ListAllMedia(ctx context.Context) ([]models.Media, error)
+	DeleteMedia(ctx context.Context, id string) error
 }
 
-type MediaAccessRepository interface{
-	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody)(*models.MediaAccess,error)
-	RevokeMediaAccess(ctx context.Context, id string)error
-	ListAccessibleMedia(ctx context.Context, studentID string)([]models.Media, error)
+type MediaAccessRepository interface {
+	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
+	RevokeMediaAccess(ctx context.Context, id string) error
+	ListAccessibleMedia(ctx context.Context, studentID string) ([]models.Media, error)
+}
 
+// To represent the Essay Review Transaction schema
+type EssayReviewRepository interface {
+	RequestEssayReview(ctx context.Context, input models.RequestEssayReviewRequestBody) (*models.EssayReviewTransaction, error)
+	RefundEssayReview(ctx context.Context, id uuid.UUID) (*models.RefundEssayReviewResponseBody, error)
+	CompleteEssayReview(ctx context.Context, id uuid.UUID) (*models.EssayReviewTransaction, error)
+	GetEssayReviewStatus(ctx context.Context, essayID uuid.UUID) (*models.EssayReviewStatus, error)
+	SetReviewBalance(ctx context.Context, id uuid.UUID, reviewBalance int) (*models.Student, error)
 }
 
 type Repository struct {
@@ -74,11 +82,12 @@ type Repository struct {
 	Greeting                   GreetingRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
-	Media MediaRepository
-	MediaAccess MediaAccessRepository
+	Media                      MediaRepository
+	MediaAccess                MediaAccessRepository
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
 	Video                      VideoRepository
+	EssayReview                EssayReviewRepository
 }
 
 // Close closes the database connection pool
@@ -101,8 +110,9 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
-		Media: mediaRepository.NewMediaRepository(db),
-		MediaAccess: mediaAccessRepository.NewMediaAccessRepository(db),
+		Media:                      mediaRepository.NewMediaRepository(db),
+		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
+		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 	}
 }

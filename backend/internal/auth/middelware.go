@@ -85,6 +85,8 @@ func AuthMiddleware(api huma.API, cfg *config.Supabase) func(ctx huma.Context, n
 			return
 		}
 
+		// TODO: write the verified claims into the request context. Handlers
+		// cannot enforce per-caller guards without the caller's identity.
 		_, err = NewVerifier("").Verify(cookie.Value)
 		if err != nil {
 			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Invalid/Expired Token")
