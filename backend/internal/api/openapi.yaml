@@ -18,7 +18,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://localhost:8080/schemas/ErrorModel.json
+            - http://localhost:8081/schemas/ErrorModel.json
           format: uri
           readOnly: true
           type: string
@@ -65,7 +65,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://localhost:8080/schemas/GreetingMessageBody.json
+            - http://localhost:8081/schemas/GreetingMessageBody.json
           format: uri
           readOnly: true
           type: string
@@ -83,7 +83,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://localhost:8080/schemas/GreetingRequestBody.json
+            - http://localhost:8081/schemas/GreetingRequestBody.json
           format: uri
           readOnly: true
           type: string
@@ -131,4 +131,4 @@ paths:
         - Greetings
 servers:
   - description: Local development server
-    url: http://localhost:8080
+    url: http://localhost:8081
