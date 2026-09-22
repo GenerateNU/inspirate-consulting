@@ -11,7 +11,7 @@ import (
 )
 
 func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error) {
-	createdUser := &models.CreateUserOutput{}
+	createdUser := &models.CreateUserOutput{Body: &models.User{}}
 
 	query, err := schema.ReadSQLBaseScript("create_user.sql", SqlUserFiles)
 	if err != nil {
@@ -25,7 +25,10 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 		user.Body.Name,
 		supabase_id,
 		user.Body.PfpKey,
+<<<<<<< HEAD
 		createdUser,
+=======
+>>>>>>> 4d06ba2 (fixed create user flow)
 	).Scan(&createdUser.Body.ID, &createdUser.Body.Name, &createdUser.Body.SupabaseID, &createdUser.Body.PfpKey)
 	if err != nil {
 		return nil, err
