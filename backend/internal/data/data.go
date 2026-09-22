@@ -5,7 +5,10 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+<<<<<<< HEAD
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+=======
+>>>>>>> 850b194 (fixed create user flow)
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
@@ -48,6 +51,7 @@ type PersonalCollegeApplicationRepository interface {
 }
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 
 type Repository struct {
