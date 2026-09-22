@@ -16,7 +16,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 	query, err := schema.ReadSQLBaseScript("create_user.sql", SqlUserFiles)
 	if err != nil {
 		err := errs.InternalServerError("Failed to read base query: ", err.Error())
-		return nil, err
+		return nil, &err
 	}
 
 	err = r.db.QueryRow(
