@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	dbinterface "inspirate-consulting/internal/data/db-interface"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
@@ -41,11 +42,24 @@ type PersonalCollegeApplicationRepository interface {
 
 // To represent the Essay Review Transaction schema
 type EssayReviewRepository interface {
-	RequestEssayReview(ctx context.Context, input models.RequestEssayReviewRequestBody) (*models.EssayReviewTransaction, error)
-	RefundEssayReview(ctx context.Context, id uuid.UUID) (*models.RefundEssayReviewResponseBody, error)
-	CompleteEssayReview(ctx context.Context, id uuid.UUID) (*models.EssayReviewTransaction, error)
-	GetEssayReviewStatus(ctx context.Context, essayID uuid.UUID) (*models.EssayReviewStatus, error)
-	SetReviewBalance(ctx context.Context, id uuid.UUID, reviewBalance int) (*models.Student, error)
+	// WithTx runs fn inside one transaction; DB returns the pool for
+	// single-statement reads. Together they let callers own the transaction
+	// boundary without importing pgx.
+	WithTx(ctx context.Context, fn func(db dbinterface.QueryInterface) error) error
+	DB() dbinterface.QueryInterface
+
+	LockStudent(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.Student, error)
+	SetStudentBalance(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID, reviewBalance int) error
+	AdjustStudentBalance(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID, delta int) error
+
+	LockTransaction(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
+	FindOpenReviewForEssay(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*uuid.UUID, error)
+	FindEssayReviewStatus(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*models.EssayReviewStatus, error)
+	InsertSpend(ctx context.Context, db dbinterface.QueryInterface, studentID, essayID uuid.UUID, amount int) (*models.EssayReviewTransaction, error)
+	InsertRefund(ctx context.Context, db dbinterface.QueryInterface, charge *models.EssayReviewTransaction) (*models.EssayReviewTransaction, error)
+	InsertAdjustment(ctx context.Context, db dbinterface.QueryInterface, studentID uuid.UUID, delta int) error
+	LinkRefund(ctx context.Context, db dbinterface.QueryInterface, chargeID, reversalID uuid.UUID) (*models.EssayReviewTransaction, error)
+	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
 
 type Repository struct {
