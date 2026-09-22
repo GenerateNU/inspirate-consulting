@@ -8,6 +8,67 @@
 import * as zod from 'zod/mini';
 
 /**
+ * List all global colleges.
+ */
+export const ListGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
+})
+export const ListGlobalCollegesResponse = /*#__PURE__*/ zod.array(ListGlobalCollegesResponseItem)
+
+
+/**
+ * Create a global college with a name, location, and optional EA/ED/RD deadlines.
+ */
+export const CreateGlobalCollegeBody = /*#__PURE__*/ zod.object({
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college'))
+})
+
+export const CreateGlobalCollegeResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
+})
+
+
+/**
+ * Get a global college by ID.
+ */
+export const GetGlobalCollegeParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int()
+})
+
+export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
+})
+
+
+/**
  * Create a greeting for a person by name.
  */
 export const createGreetingBodyNameMax = 30;
