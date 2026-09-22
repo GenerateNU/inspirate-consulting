@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"inspirate-consulting/internal/config"
@@ -23,6 +24,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 	}, func(ctx context.Context, input *models.CreateUserInput) (*models.CreateUserOutput, error) {
 		userOutput, err := userHandler.CreateUser(ctx, input, config.Supabase)
 		if err != nil {
+			fmt.Println("[route] CreateUser error:", err)
 			return nil, err
 		}
 		return userOutput, nil
