@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"inspirate-consulting/internal/config"
@@ -21,8 +22,10 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Description: "Create a user (student/counselor)",
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *models.CreateUserInput) (*models.CreateUserOutput, error) {
+		fmt.Println("[route] CreateUser called")
 		userOutput, err := userHandler.CreateUser(ctx, input, config)
 		if err != nil {
+			fmt.Println("[route] CreateUser error:", err)
 			return nil, err
 		}
 		return userOutput, nil
@@ -30,7 +33,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 
 	huma.Register(api, huma.Operation{
 		OperationID: "fetch-user",
-		Method:      http.MethodPost,
+		Method:      http.MethodGet,
 		Path:        "/user/{id}",
 		Description: "fetch a user (student/counselor)",
 		Tags:        []string{"User"},
