@@ -8,7 +8,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *UserRepository) FetcheUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error) {
+func (r *UserRepository) FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error) {
 	User := &models.FetchUserOutput{}
 
 	query, err := schema.ReadSQLBaseScript("get_user.sql", SqlUserFiles)
