@@ -29,4 +29,19 @@ type CreateTodoItemOutput struct{
 	Body TodoItem
 }
 
+type GetTodoItemsByStudentInput struct{}
 
+type GetTodoItemsByStudentOutput struct{
+	Body []TodoItem
+}
+
+type UpdateTodoItemCompletedAtInput struct{
+	ID   string `path:"id"`
+	Body struct {
+		Completed bool `json:"completed"`
+	}
+}
+
+type UpdateTodoItemCompletedAtOutput struct{
+	Body TodoItem
+}
