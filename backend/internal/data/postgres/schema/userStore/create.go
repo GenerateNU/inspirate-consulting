@@ -2,7 +2,6 @@ package userRepository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 
@@ -12,12 +11,10 @@ import (
 )
 
 func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error) {
-
 	createdUser := &models.CreateUserOutput{Body: &models.User{}}
 
 	query, err := schema.ReadSQLBaseScript("create_user.sql", SqlUserFiles)
 	if err != nil {
-		fmt.Println("[db] ReadSQLBaseScript error:", err)
 		err := errs.InternalServerError("Failed to read base query: ", err.Error())
 		return nil, err
 	}
@@ -30,7 +27,6 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 		user.Body.PfpKey,
 	).Scan(&createdUser.Body.ID, &createdUser.Body.Name, &createdUser.Body.SupabaseID, &createdUser.Body.PfpKey)
 	if err != nil {
-		fmt.Println("[db] QueryRow/Scan error:", err)
 		return nil, err
 	}
 
