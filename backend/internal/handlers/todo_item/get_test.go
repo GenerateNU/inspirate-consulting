@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
@@ -18,7 +19,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	studentID := uuid.NewString()
+	studentID := auth.GetStudentID(ctx)
 	userID := uuid.NewString()
 
 	expectedOutput := []models.TodoItem{
