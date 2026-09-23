@@ -51,6 +51,7 @@ jobs:
         run: bun run build
     
   orval_generate:
+    runs-on: ubuntu-latest
     steps:
       - name: Use Bun
         uses: oven-sh/setup-bun@v1
