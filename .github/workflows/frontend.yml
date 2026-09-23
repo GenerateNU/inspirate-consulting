@@ -52,4 +52,21 @@ jobs:
     
   orval_generate:
     steps:
-      run: echo "hi"
+      - name: Use Bun
+        uses: oven-sh/setup-bun@v1
+ 
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: bun install
+ 
+      - name: Generate API client + schemas with Orval
+        working-directory: frontend
+        run: bunx orval
+ 
+      - name: Check for stale generated client/schemas
+        run: |
+          git diff --exit-code \
+            frontend/src/api/endpoints \
+            frontend/src/api/models \
+            frontend/src/api/schemas || \
+          (echo "::error::Generated Orval output is out of date. Run 'npx orval' in frontend/ and commit." && exit 1)
