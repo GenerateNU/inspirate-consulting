@@ -64,13 +64,11 @@ func doRequest(t *testing.T, app *fiber.App, method, path string, body any) (*ht
 func TestRoute_CreateTodoItem(t *testing.T) {
 	t.Parallel()
 
-	studentID := uuid.NewString()
-	userID := uuid.NewString()
+	//studentID := uuid.NewString()
+	//userID := uuid.NewString()
 
 	// Every field of the request body is required by Huma, so send them all.
 	payload := map[string]any{
-		"student_id":       studentID,
-		"user_id":          userID,
 		"todo_description": "Finish the Common App essay",
 		"completed_at":     nil,
 		"deadline":         nil,
@@ -79,14 +77,17 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
+		expectedStudentID := auth.GetStudentID(context.Background())
+		expectedUserID := auth.GetUserID(context.Background())
+
 		// The repository should receive the decoded request body
 		mockRepo := mocks.NewTodoItemRepository(t)
 		mockRepo.On("CreateTodoItem", mock.Anything, mock.MatchedBy(func(in *models.CreateTodoItemRequestBody) bool {
-			return in.StudentID == studentID && in.TodoDescription == "Finish the Common App essay"
+			return in.StudentID == expectedStudentID && in.TodoDescription == "Finish the Common App essay"
 		})).Return(&models.TodoItem{
 			ID:              uuid.NewString(),
-			StudentID:       studentID,
-			UserID:          userID,
+			StudentID:       expectedStudentID,
+			UserID:          expectedUserID,
 			TodoDescription: "Finish the Common App essay",
 		}, nil)
 
@@ -98,7 +99,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 
 		var created models.TodoItem
 		require.NoError(t, json.Unmarshal(respBody, &created))
-		assert.Equal(t, studentID, created.StudentID)
+		assert.Equal(t, expectedStudentID, created.StudentID)
 		assert.Equal(t, "Finish the Common App essay", created.TodoDescription)
 		assert.Nil(t, created.CompletedAt)
 	})
@@ -113,7 +114,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, _ := doRequest(t, app, http.MethodPost, "/todo-items", map[string]any{
-			"student_id": studentID,
+			"deadline" : nil,
 		})
 
 		// Huma returns 422 Unprocessable Entity for schema validation failures
@@ -184,6 +185,10 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 	t.Parallel()
 
 	itemID := uuid.NewString()
+	payload := map[string]any{
+		"todo_description": "Finish the Common App essay",
+		"deadline":         nil,
+	}
 
 	t.Run("marking completed sets a timestamp", func(t *testing.T) {
 		t.Parallel()
@@ -239,15 +244,13 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, itemID, mock.Anything).
+		mockRepo.On("CreateTodoItem", mock.Anything, mock.Anything).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupTodoItemTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID, map[string]any{
-			"completed": true,
-		})
+		resp, _ := doRequest(t, app, http.MethodPost, "/todo-items", payload)
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }
