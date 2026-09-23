@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App'
 import Greeting from './greeting/greeting'
+import CreateTask from './task/CreateTask'
+import TaskList from './task/TaskList'
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -10,6 +13,8 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/greeting" element={<Greeting />} />
+        <Route path="/create-task" element={<CreateTask />} />
+        <Route path="/tasks" element={<TaskList />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
