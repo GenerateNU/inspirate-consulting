@@ -49,3 +49,7 @@ jobs:
       - name: Build
         working-directory: ./frontend
         run: bun run build
+    
+  orval_generate:
+    steps:
+      run: echo "hi"

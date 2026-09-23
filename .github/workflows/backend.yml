@@ -193,3 +193,7 @@ jobs:
               repo: context.repo.repo,
               body: body
             });
+
+  orval_generate:
+    steps:
+      run: echo "hi"
