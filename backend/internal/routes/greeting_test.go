@@ -64,7 +64,7 @@ func TestRoute_CreateGreeting(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		// Verify 200 OK status
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -101,7 +101,7 @@ func TestRoute_CreateGreeting(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		// Huma returns 422 Unprocessable Entity for schema validation failures
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)

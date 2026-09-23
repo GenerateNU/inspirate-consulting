@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
@@ -16,7 +17,8 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Create Test University", "Create City, CT")
@@ -31,7 +33,6 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreatePersonalCollegeApplication failed: %v", err)
 	}
-	cleanupApplication(t, db, created.ID)
 
 	if created.ID == 0 {
 		t.Error("expected a generated ID, got 0")
@@ -63,7 +64,8 @@ func TestCreatePersonalCollegeApplication_InvalidApplicationType(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Invalid Type University", "Invalid City, IV")
@@ -87,7 +89,8 @@ func TestCreatePersonalCollegeApplication_InvalidCategory(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Invalid Category University", "Invalid City, IC")
@@ -110,7 +113,7 @@ func TestCreatePersonalCollegeApplication_NonexistentGlobalCollege(t *testing.T)
 	}
 	t.Parallel()
 
-	repo, _ := setupTestRepo(t)
+	repo := NewPersonalCollegeApplicationRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
 	input := models.CreatePersonalCollegeApplicationRequestBody{

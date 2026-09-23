@@ -78,7 +78,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -122,7 +122,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
@@ -153,7 +153,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
@@ -182,7 +182,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
@@ -210,7 +210,7 @@ func TestRoute_ListPersonalCollegeApplications(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -239,7 +239,7 @@ func TestRoute_ListPersonalCollegeApplications(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
