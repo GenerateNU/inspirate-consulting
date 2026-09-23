@@ -194,6 +194,22 @@ jobs:
               body: body
             });
 
-  orval_generate:
+  generate-openapi-spec:
+    runs-on: ubuntu-latest
     steps:
-      run: echo "hi"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+
+      - name: Generate OpenAPI spec
+        run: |
+          go run ./backend/cmd/apispec
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code backend/internal/api/openapi.yaml || \
+          (echo "::error::OpenAPI spec is out of date. Run 'go run ./backend/cmd/apispec' locally and commit the changes." && exit 1)
