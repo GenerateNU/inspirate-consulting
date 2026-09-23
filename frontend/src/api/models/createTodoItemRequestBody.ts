@@ -11,7 +11,7 @@ export interface CreateTodoItemRequestBody {
   readonly $schema?: string;
   completed_at?: string;
   deadline?: string;
-  student_id: string;
+  student_id?: string;
   todo_description: string;
-  user_id: string;
+  user_id?: string;
 }
