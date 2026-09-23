@@ -207,7 +207,8 @@ jobs:
 
       - name: Generate OpenAPI spec
         run: |
-          go run ./backend/cmd/apispec
+          cd backend
+          go run ./cmd/apispec
 
       - name: Check for uncommitted changes
         run: |
