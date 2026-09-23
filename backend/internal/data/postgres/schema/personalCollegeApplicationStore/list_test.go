@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
@@ -14,7 +15,8 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		t.Skip("skipping integration test in short mode")
 	}
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
 	studentID := "00000000-0000-0000-0000-000000000099"
@@ -31,7 +33,6 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
 	}
-	cleanupApplication(t, db, appA.ID)
 
 	appB, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeB,
@@ -41,7 +42,6 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
 	}
-	cleanupApplication(t, db, appB.ID)
 
 	// A different student's application should not show up in studentID's results.
 	otherApp, err := repo.CreatePersonalCollegeApplication(ctx, otherStudentID, models.CreatePersonalCollegeApplicationRequestBody{
@@ -52,7 +52,6 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication (other student) failed: %v", err)
 	}
-	cleanupApplication(t, db, otherApp.ID)
 
 	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, studentID)
 	if err != nil {
@@ -84,7 +83,7 @@ func TestListPersonalCollegeApplicationsByStudentID_NoApplications(t *testing.T)
 	}
 	t.Parallel()
 
-	repo, _ := setupTestRepo(t)
+	repo := NewPersonalCollegeApplicationRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
 	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, "00000000-0000-0000-0000-000000000077")
