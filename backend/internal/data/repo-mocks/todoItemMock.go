@@ -17,7 +17,11 @@ type TodoItemRepository struct {
 }
 
 // CreateTodoItem provides a mock function with given fields: ctx, item
+<<<<<<< HEAD
 func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
+=======
+func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.TodoItem) (*models.TodoItem, error) {
+>>>>>>> 0e51bbc (Todo item repository and model (#48))
 	ret := _m.Called(ctx, item)
 
 	if len(ret) == 0 {
@@ -26,10 +30,17 @@ func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.C
 
 	var r0 *models.TodoItem
 	var r1 error
+<<<<<<< HEAD
 	if rf, ok := ret.Get(0).(func(context.Context, *models.CreateTodoItemRequestBody) (*models.TodoItem, error)); ok {
 		return rf(ctx, item)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *models.CreateTodoItemRequestBody) *models.TodoItem); ok {
+=======
+	if rf, ok := ret.Get(0).(func(context.Context, *models.TodoItem) (*models.TodoItem, error)); ok {
+		return rf(ctx, item)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *models.TodoItem) *models.TodoItem); ok {
+>>>>>>> 0e51bbc (Todo item repository and model (#48))
 		r0 = rf(ctx, item)
 	} else {
 		if ret.Get(0) != nil {
@@ -37,7 +48,11 @@ func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.C
 		}
 	}
 
+<<<<<<< HEAD
 	if rf, ok := ret.Get(1).(func(context.Context, *models.CreateTodoItemRequestBody) error); ok {
+=======
+	if rf, ok := ret.Get(1).(func(context.Context, *models.TodoItem) error); ok {
+>>>>>>> 0e51bbc (Todo item repository and model (#48))
 		r1 = rf(ctx, item)
 	} else {
 		r1 = ret.Error(1)

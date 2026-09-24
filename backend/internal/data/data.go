@@ -4,6 +4,7 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
@@ -20,6 +21,10 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0e51bbc (Todo item repository and model (#48))
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
@@ -46,11 +51,18 @@ type UserRepository interface {
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
+<<<<<<< HEAD
 	Greeting                   GreetingRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
+=======
+	Greeting GreetingRepository
+	GlobalCollege GlobalCollegeRepository
+	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	TodoItem      TodoItemRepository
+>>>>>>> 51cebd3 (Todo item repository and model (#48))
 }
 
 // Close closes the database connection pool
@@ -70,8 +82,14 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		db: db,
 		// For each interface, add an instance of the interface here
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
+<<<<<<< HEAD
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
+=======
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),,
+		TodoItem: todoItemRepository.NewTodoItemRepository(db),
+		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
+>>>>>>> 0e51bbc (Todo item repository and model (#48))
 		User:                       userRepository.NewUserRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
