@@ -32,6 +32,8 @@
     "globals": "^17.12.0",
     "msw": "^2.15.0",
     "orval": "^8.36.0",
+    "oxlint": "^1.85.0",
+    "oxlint-tsgolint": "^7.0.2002",
     "swr": "^2.5.1",
     "typescript": "^7.0.2",
     "typescript-eslint": "^8.70.1",
