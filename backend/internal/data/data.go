@@ -4,8 +4,10 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	"inspirate-consulting/internal/models"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -13,6 +15,14 @@ import (
 // For each schema, their interfaces are to be defined here
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
+}
+
+
+// To represent Todo Item schema
+type TodoItemRepository interface {
+	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
+	GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error)
+	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
 }
 
 // To represent the Global College schema
@@ -31,9 +41,10 @@ type PersonalCollegeApplicationRepository interface {
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting      GreetingRepository
+	Greeting GreetingRepository
 	GlobalCollege GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	TodoItem      TodoItemRepository
 }
 
 // Close closes the database connection pool
@@ -52,7 +63,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting:      greetingRepository.NewGreetingRepository(db),
+		Greeting: greetingRepository.NewGreetingRepository(db),
+		TodoItem: todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
