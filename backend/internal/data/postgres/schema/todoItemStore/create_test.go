@@ -16,7 +16,7 @@ func TestCreateTodoItem(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
 	deadline := time.Now().Add(7 * 24 * time.Hour).UTC().Truncate(time.Second)
@@ -32,7 +32,6 @@ func TestCreateTodoItem(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTodoItem failed: %v", err)
 	}
-	cleanupTodoItem(t, db, created.ID)
 
 	if created.ID == "" {
 		t.Error("expected a generated ID, got empty string")
@@ -70,7 +69,7 @@ func TestCreateTodoItem_NilDeadline(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
 	input := &models.CreateTodoItemRequestBody{
@@ -83,7 +82,6 @@ func TestCreateTodoItem_NilDeadline(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected create with a nil deadline to succeed, got error: %v", err)
 	}
-	cleanupTodoItem(t, db, created.ID)
 
 	if created.Deadline != nil {
 		t.Errorf("expected nil Deadline, got %v", created.Deadline)
