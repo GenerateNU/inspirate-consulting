@@ -17,7 +17,7 @@ type TodoItemRepository struct {
 }
 
 // CreateTodoItem provides a mock function with given fields: ctx, item
-func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.TodoItem) (*models.TodoItem, error) {
+func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
 	ret := _m.Called(ctx, item)
 
 	if len(ret) == 0 {
@@ -26,10 +26,10 @@ func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.T
 
 	var r0 *models.TodoItem
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *models.TodoItem) (*models.TodoItem, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *models.CreateTodoItemRequestBody) (*models.TodoItem, error)); ok {
 		return rf(ctx, item)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *models.TodoItem) *models.TodoItem); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *models.CreateTodoItemRequestBody) *models.TodoItem); ok {
 		r0 = rf(ctx, item)
 	} else {
 		if ret.Get(0) != nil {
@@ -37,7 +37,7 @@ func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.T
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *models.TodoItem) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *models.CreateTodoItemRequestBody) error); ok {
 		r1 = rf(ctx, item)
 	} else {
 		r1 = ret.Error(1)
