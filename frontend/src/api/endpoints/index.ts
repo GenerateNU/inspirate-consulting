@@ -7,4 +7,7 @@ export type { HTTPStatusCodes } from './global-colleges/global-colleges';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
 export * from './personal-college-applications/personal-college-applications';
+<<<<<<< HEAD
 export * from './todo-items/todo-items';
+=======
+>>>>>>> 12c77b6 (ci: enforce api spec and orval generation to be up to date (#75))
