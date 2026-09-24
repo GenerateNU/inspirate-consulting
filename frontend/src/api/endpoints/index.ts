@@ -1,9 +1,11 @@
-export type { HTTPStatusCode1xx } from './global-colleges/global-colleges';
-export type { HTTPStatusCode2xx } from './global-colleges/global-colleges';
-export type { HTTPStatusCode3xx } from './global-colleges/global-colleges';
-export type { HTTPStatusCode4xx } from './global-colleges/global-colleges';
-export type { HTTPStatusCode5xx } from './global-colleges/global-colleges';
-export type { HTTPStatusCodes } from './global-colleges/global-colleges';
+export type { HTTPStatusCode1xx } from './essay-reviews/essay-reviews';
+export type { HTTPStatusCode2xx } from './essay-reviews/essay-reviews';
+export type { HTTPStatusCode3xx } from './essay-reviews/essay-reviews';
+export type { HTTPStatusCode4xx } from './essay-reviews/essay-reviews';
+export type { HTTPStatusCode5xx } from './essay-reviews/essay-reviews';
+export type { HTTPStatusCodes } from './essay-reviews/essay-reviews';
+export * from './essay-reviews/essay-reviews';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
 export * from './personal-college-applications/personal-college-applications';
+export * from './students/students';

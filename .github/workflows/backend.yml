@@ -213,4 +213,4 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code backend/internal/api/openapi.yaml || \
-          (echo "::error::OpenAPI spec is out of date. Run 'go run ./backend/cmd/apispec' locally and commit the changes." && exit 1)
+          (echo "::error::OpenAPI spec is out of date. From ./backend run 'go run ./cmd/apispec' locally and commit the changes." && exit 1)
