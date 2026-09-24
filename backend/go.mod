@@ -32,6 +32,7 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/gofiber/fiber/v2 v2.52.14 // indirect
 	github.com/gofiber/schema v1.8.2 // indirect
 	github.com/gofiber/utils/v2 v2.2.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
