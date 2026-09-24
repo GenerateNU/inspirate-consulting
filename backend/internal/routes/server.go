@@ -66,7 +66,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
-		allowedOrigins = "http://localhost:3000,http://localhost:8081,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost:5173,http://localhost"
+		allowedOrigins = "http://localhost:3000,http://localhost:8080,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost:5173,http://localhost"
 	}
 	splitAllowedOrigins := strings.Split(allowedOrigins, ",")
 
@@ -77,35 +77,27 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
-	// Create Huma API with OpenAPI configuration
+
 	humaConfig := huma.DefaultConfig("Inspirate Consulting API", "1.0.0")
 	humaConfig.Info.Description = "API for the Inspirate Consulting application"
 	humaConfig.Info.Contact = &huma.Contact{
 		Name: "Inspirate Consulting Team",
 	}
 	humaConfig.Servers = []*huma.Server{
-		{URL: "http://localhost:8081", Description: "Local development server"},
+		{URL: "http://localhost:8080", Description: "Local development server"},
 	}
 
 	humaAPI := humafiber.New(app, humaConfig)
-
-	// Register public routes BEFORE auth middleware
-	// routes.SetupAuthRoutes(humaAPI, repo, config)
 
 	// Apply auth middleware — only affects routes registered after this point
 	if !config.TestMode {
 		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
 	}
 
-	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
-	// setupDocsRoutes(app, "/app/api")
-
-	// Root route
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
-	// Register protected Huma endpoints
 	if err := setupProtectedHumaRoutes(humaAPI, repo, config); err != nil {
 		return nil, nil, err
 	}
@@ -115,7 +107,6 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
-	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpEssayRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
