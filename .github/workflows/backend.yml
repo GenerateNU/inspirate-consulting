@@ -28,9 +28,9 @@ jobs:
         with:
           go-version: "1.25.5"
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64.2
+          version: v2.13.2
           working-directory: ./backend/
           args: --timeout=5m
 
@@ -193,3 +193,24 @@ jobs:
               repo: context.repo.repo,
               body: body
             });
+
+  generate-openapi-spec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+
+      - name: Generate OpenAPI spec
+        run: |
+          cd backend
+          go run ./cmd/apispec
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code backend/internal/api/openapi.yaml || \
+          (echo "::error::OpenAPI spec is out of date. Run 'go run ./backend/cmd/apispec' locally and commit the changes." && exit 1)

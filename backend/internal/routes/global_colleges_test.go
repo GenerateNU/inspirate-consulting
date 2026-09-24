@@ -71,7 +71,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -109,7 +109,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		// The repository's unique-index violation is translated to errs.Conflict,
 		// which the central ErrorHandler surfaces as a real 409.
@@ -137,7 +137,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
@@ -164,7 +164,7 @@ func TestRoute_ListGlobalColleges(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -192,7 +192,7 @@ func TestRoute_ListGlobalColleges(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -230,7 +230,7 @@ func TestRoute_GetGlobalCollege(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -258,7 +258,7 @@ func TestRoute_GetGlobalCollege(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		// GetGlobalCollege's repository returns an errs.NotFound (HTTPError).
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
