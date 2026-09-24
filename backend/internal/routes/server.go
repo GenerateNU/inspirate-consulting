@@ -61,7 +61,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
-		allowedOrigins = "http://localhost:3000,http://localhost:8081,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost:5173,http://localhost"
+		allowedOrigins = "http://localhost:3000,http://localhost:8080,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost:5173,http://localhost"
 	}
 	splitAllowedOrigins := strings.Split(allowedOrigins, ",")
 
@@ -79,7 +79,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		Name: "Inspirate Consulting Team",
 	}
 	humaConfig.Servers = []*huma.Server{
-		{URL: "http://localhost:8081", Description: "Local development server"},
+		{URL: "http://localhost:8080", Description: "Local development server"},
 	}
 
 	humaAPI := humafiber.New(app, humaConfig)
@@ -113,14 +113,8 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
-<<<<<<< HEAD
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
-<<<<<<< HEAD
 	SetupUserRoutes(api, repo, &config)
-=======
-=======
-	SetupUserRoutes(api, repo, &config)
->>>>>>> 2f031e7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
->>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
+
 	return nil
 }
