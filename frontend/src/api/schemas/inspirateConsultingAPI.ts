@@ -8,6 +8,43 @@
 import * as zod from 'zod/mini';
 
 /**
+ * List all college applications for the authenticated student.
+ */
+export const ListPersonalCollegeApplicationsResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+export const ListPersonalCollegeApplicationsResponse = /*#__PURE__*/ zod.array(ListPersonalCollegeApplicationsResponseItem)
+
+
+/**
+ * Create a personal college application for the authenticated student.
+ */
+export const CreatePersonalCollegeApplicationBody = /*#__PURE__*/ zod.object({
+  "application_type": /*#__PURE__*/ zod.enum(['EA', 'ED', 'RD']).check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by')),
+  "category": /*#__PURE__*/ zod.enum(['safety', 'target', 'reach']).check(/*#__PURE__*/ zod.describe('How the student categorizes this school')),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to'))
+})
+
+export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
  * List all global colleges.
  */
 export const ListGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
