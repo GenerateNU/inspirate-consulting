@@ -42,6 +42,39 @@ components:
         - school_name
         - school_location
       type: object
+    CreatePersonalCollegeApplicationRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreatePersonalCollegeApplicationRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        application_type:
+          description: Which deadline the student is applying by
+          enum:
+            - EA
+            - ED
+            - RD
+          type: string
+        category:
+          description: How the student categorizes this school
+          enum:
+            - safety
+            - target
+            - reach
+          type: string
+        global_college_id:
+          description: ID of the global college being applied to
+          format: int64
+          type: integer
+      required:
+        - global_college_id
+        - application_type
+        - category
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -201,6 +234,52 @@ components:
       required:
         - name
       type: object
+    PersonalCollegeApplication:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/PersonalCollegeApplication.json
+          format: uri
+          readOnly: true
+          type: string
+        application_type:
+          description: "Which deadline the student is applying by: EA, ED, or RD"
+          examples:
+            - ED
+          type: string
+        category:
+          description: "How the student categorizes this school: safety, target, or reach"
+          examples:
+            - reach
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        global_college_id:
+          description: ID of the global college being applied to
+          format: int64
+          type: integer
+        id:
+          description: Unique identifier for the application
+          format: int64
+          type: integer
+        student_id:
+          description: ID of the student who owns this application
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+      required:
+        - id
+        - student_id
+        - global_college_id
+        - application_type
+        - category
+        - created_at
+        - updated_at
+      type: object
 info:
   contact:
     name: Inspirate Consulting Team
@@ -209,6 +288,53 @@ info:
   version: 1.0.0
 openapi: 3.1.0
 paths:
+  /applications:
+    get:
+      description: List all college applications for the authenticated student.
+      operationId: list-personal-college-applications
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/PersonalCollegeApplication"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Personal College Applications
+    post:
+      description: Create a personal college application for the authenticated student.
+      operationId: create-personal-college-application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePersonalCollegeApplicationRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalCollegeApplication"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Personal College Applications
   /colleges:
     get:
       description: List all global colleges.
