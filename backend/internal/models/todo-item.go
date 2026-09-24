@@ -21,27 +21,27 @@ type CreateTodoItemRequestBody struct {
 	Deadline        *time.Time `json:"deadline,omitempty"`
 }
 
-type CreateTodoItemInput struct{
+type CreateTodoItemInput struct {
 	Body CreateTodoItemRequestBody
 }
 
-type CreateTodoItemOutput struct{
+type CreateTodoItemOutput struct {
 	Body TodoItem
 }
 
 type GetTodoItemsByStudentInput struct{}
 
-type GetTodoItemsByStudentOutput struct{
+type GetTodoItemsByStudentOutput struct {
 	Body []TodoItem
 }
 
-type UpdateTodoItemCompletedAtInput struct{
+type UpdateTodoItemCompletedAtInput struct {
 	ID   string `path:"id"`
 	Body struct {
 		Completed bool `json:"completed"`
 	}
 }
 
-type UpdateTodoItemCompletedAtOutput struct{
+type UpdateTodoItemCompletedAtOutput struct {
 	Body TodoItem
 }
