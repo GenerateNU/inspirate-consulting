@@ -213,4 +213,8 @@ jobs:
       - name: Check for uncommitted changes
         run: |
           git diff --exit-code backend/internal/api/openapi.yaml || \
+<<<<<<< HEAD
           (echo "::error::OpenAPI spec is out of date. Run 'go run ./cmd/apispec' in ./backend locally and commit the changes." && exit 1)
+=======
+          (echo "::error::OpenAPI spec is out of date. Run 'go run ./backend/cmd/apispec' locally and commit the changes." && exit 1)
+>>>>>>> 12c77b6 (ci: enforce api spec and orval generation to be up to date (#75))
