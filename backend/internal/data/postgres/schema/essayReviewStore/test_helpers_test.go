@@ -2,44 +2,22 @@ package essayReviewRepository
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
-// setupTestRepo connects to the local Supabase Postgres instance.
-// Only called from tests that are skipped in short mode
 func setupTestRepo(t *testing.T) (*EssayReviewRepository, *pgxpool.Pool) {
 	t.Helper()
 
-	connStr := os.Getenv("TEST_DATABASE_URL")
-	if connStr == "" {
-		connStr = "postgres://postgres:postgres@localhost:54322/postgres"
-	}
-
-	config, err := pgxpool.ParseConfig(connStr)
-	if err != nil {
-		t.Fatalf("failed to parse test db config: %v", err)
-	}
-	// Mirror db-connection.go so tests exercise the protocol the app uses.
-	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
-
-	db, err := pgxpool.NewWithConfig(context.Background(), config)
-	if err != nil {
-		t.Fatalf("failed to connect to test db: %v", err)
-	}
-	t.Cleanup(db.Close)
-
+	db := testutils.SetupTestDB(t)
 	return NewEssayReviewRepository(db), db
 }
 
-// createTestStudent inserts the users -> counselor -> student chain a ledger
-// row needs, and removes all of it when the test finishes.
 func createTestStudent(t *testing.T, db *pgxpool.Pool, reviewBalance int) uuid.UUID {
 	t.Helper()
 	ctx := context.Background()
@@ -59,27 +37,6 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, reviewBalance int) uuid.U
 		userID, reviewBalance, counselorID).Scan(&studentID); err != nil {
 		t.Fatalf("failed to create test student: %v", err)
 	}
-
-	t.Cleanup(func() {
-		// the self-referencing refund column has to be cleared before delete
-		if _, err := db.Exec(ctx,
-			`UPDATE public.essay_review_transaction SET refund = NULL WHERE student_id = $1`, studentID); err != nil {
-			t.Logf("cleanup failed unlinking refunds for student=%s: %v", studentID, err)
-		}
-		for _, stmt := range []struct {
-			sql string
-			arg uuid.UUID
-		}{
-			{`DELETE FROM public.essay_review_transaction WHERE student_id = $1`, studentID},
-			{`DELETE FROM public.student WHERE id = $1`, studentID},
-			{`DELETE FROM public.counselor WHERE id = $1`, counselorID},
-			{`DELETE FROM public.users WHERE id = $1`, userID},
-		} {
-			if _, err := db.Exec(ctx, stmt.sql, stmt.arg); err != nil {
-				t.Logf("cleanup failed for %s: %v", stmt.arg, err)
-			}
-		}
-	})
 
 	return studentID
 }
