@@ -5,7 +5,10 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+<<<<<<< HEAD
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+=======
+>>>>>>> df39997 (misc)
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
@@ -54,7 +57,7 @@ type PersonalCollegeApplicationRepository interface {
 =======
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
-	FetchUser(ctx context.Context, user models.FetchUserInput) (*models.FetchUserOutput, error)
+	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 >>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
 
@@ -91,5 +94,9 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
+<<<<<<< HEAD
+=======
+		User:                       userRepository.NewUserRepository(db),
+>>>>>>> df39997 (misc)
 	}
 }
