@@ -7,9 +7,13 @@
  */
 
 export * from './createGlobalCollegeRequestBody';
+export * from './createPersonalCollegeApplicationRequestBody';
+export * from './createPersonalCollegeApplicationRequestBodyApplicationType';
+export * from './createPersonalCollegeApplicationRequestBodyCategory';
 export * from './errorDetail';
 export * from './errorModel';
 export * from './globalCollege';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
 export * from './greetingRequestBody';
+export * from './personalCollegeApplication';
