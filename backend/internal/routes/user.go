@@ -27,4 +27,18 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		}
 		return userOutput, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "fetch-user",
+		Method:      http.MethodGet,
+		Path:        "/user/{id}",
+		Description: "fetch a user (student/counselor)",
+		Tags:        []string{"User"},
+	}, func(ctx context.Context, input *models.FetchUserInput) (*models.FetchUserOutput, error) {
+		userOutput, err := userHandler.FetchUser(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return userOutput, nil
+	})
 }

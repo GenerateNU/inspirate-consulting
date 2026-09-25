@@ -2,7 +2,7 @@ package config
 
 // Application holds application-level configuration
 type Application struct {
-	Port           string `env:"PORT, default=8080"`
+	Port           string `env:"PORT, default=8081"`
 	Environment    string `env:"ENVIRONMENT, default=development"`
 	AllowedOrigins string `env:"ALLOWED_ORIGINS, default=http://localhost:3000"`
 	FrontendURL    string `env:"FRONTEND_URL, default=http://localhost:5173"`
