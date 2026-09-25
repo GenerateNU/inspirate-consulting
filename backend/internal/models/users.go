@@ -37,3 +37,24 @@ type Counselor struct {
 	ID     uuid.UUID `json:"id"`
 	UserID uuid.UUID `json:"user_id"`
 }
+
+type CreateUserInput struct {
+	Body struct {
+		Name     string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email    string  `json:"email" doc:"email of user for supabase signup"`
+		Password string  `json:"password" doc:"password of user for supabase signup"`
+	}
+}
+
+type CreateUserOutput struct {
+	Body *User `json:"body"`
+}
+
+type FetchUserInput struct {
+	ID uuid.UUID `path:"id" required:"true"`
+}
+
+type FetchUserOutput struct {
+	Body *User `json:"body"`
+}
