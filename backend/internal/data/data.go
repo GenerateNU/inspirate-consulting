@@ -5,10 +5,7 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
-<<<<<<< HEAD
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
-=======
->>>>>>> 850b194 (fixed create user flow)
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
@@ -51,7 +48,6 @@ type PersonalCollegeApplicationRepository interface {
 }
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
-	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 
 type Repository struct {
@@ -62,7 +58,6 @@ type Repository struct {
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
-
 }
 
 // Close closes the database connection pool
@@ -83,11 +78,16 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		// For each interface, add an instance of the interface here
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
 <<<<<<< HEAD
+<<<<<<< HEAD
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 =======
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),,
 		TodoItem: todoItemRepository.NewTodoItemRepository(db),
+=======
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
+		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+>>>>>>> 78cc8c1 (misc)
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 >>>>>>> 0e51bbc (Todo item repository and model (#48))
 		User:                       userRepository.NewUserRepository(db),
