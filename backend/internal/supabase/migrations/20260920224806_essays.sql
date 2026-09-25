@@ -1,11 +1,10 @@
-create type status as enum ('Submitted', 'Draft', 'Review', 'Archived')
+CREATE TYPE status AS ENUM ('Submitted', 'Draft', 'Review', 'Archived');
 
-
-create table essays (
-    id uuid primary key default gen_random_uuid(),
-    student_id uuid not null references students(id), 
-    type text not null,
-    college_id bigint references global_colleges(id),
-    link_to_content text not null,
-    status status not null default 'Draft'
+CREATE TABLE essays (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID NOT NULL REFERENCES students(id),
+    type TEXT NOT NULL,
+    college_id BIGINT REFERENCES global_colleges(id),
+    link_to_content TEXT NOT NULL,
+    status status NOT NULL DEFAULT 'Draft'
 );
