@@ -16,7 +16,7 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
 	studentID := uuid.NewString()
@@ -50,7 +50,7 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("setup CreateTodoItem(%q) failed: %v", input.TodoDescription, err)
 		}
-		cleanupTodoItem(t, db, output.ID)
+		
 		created = append(created, *output)
 	}
 

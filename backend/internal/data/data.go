@@ -5,6 +5,7 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	"inspirate-consulting/internal/models"
 	"time"
 
@@ -30,12 +31,19 @@ type GlobalCollegeRepository interface {
 	ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error)
 }
 
+// To represent the Personal College Application schema
+type PersonalCollegeApplicationRepository interface {
+	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
 	Greeting GreetingRepository
 	TodoItem TodoItemRepository
 	GlobalCollege GlobalCollegeRepository
+	PersonalCollegeApplication PersonalCollegeApplicationRepository
 }
 
 // Close closes the database connection pool
@@ -57,5 +65,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		Greeting: greetingRepository.NewGreetingRepository(db),
 		TodoItem: todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
 }
