@@ -75,6 +75,33 @@ components:
         - application_type
         - category
       type: object
+    CreateTodoItemRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateTodoItemRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        completed_at:
+          format: date-time
+          type: string
+        deadline:
+          format: date-time
+          type: string
+        student_id:
+          type: string
+        todo_description:
+          type: string
+        user_id:
+          type: string
+      required:
+        - student_id
+        - user_id
+        - todo_description
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -280,6 +307,65 @@ components:
         - created_at
         - updated_at
       type: object
+    TodoItem:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/TodoItem.json
+          format: uri
+          readOnly: true
+          type: string
+        completed_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        created_at:
+          format: date-time
+          type: string
+        deadline:
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        student_id:
+          type: string
+        todo_description:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        user_id:
+          type: string
+      required:
+        - id
+        - created_at
+        - updated_at
+        - student_id
+        - user_id
+        - todo_description
+        - completed_at
+        - deadline
+      type: object
+    UpdateTodoItemCompletedAtInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemCompletedAtInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        completed:
+          type: boolean
+      required:
+        - completed
+      type: object
 info:
   contact:
     name: Inspirate Consulting Team
@@ -433,6 +519,84 @@ paths:
           description: Error
       tags:
         - Greetings
+  /todo-items:
+    get:
+      description: Get a student's to-do items
+      operationId: get-todo-items
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/TodoItem"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+    post:
+      description: Create a to-do item with a description and optional deadline
+      operationId: create-todo-item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTodoItemRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}:
+    patch:
+      description: Update a to-do item's completion status
+      operationId: update-todo-item-completed
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemCompletedAtInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
 servers:
   - description: Local development server
     url: http://localhost:8080
