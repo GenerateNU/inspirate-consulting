@@ -20,13 +20,6 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 0e51bbc (Todo item repository and model (#48))
-=======
->>>>>>> 4985949 (misc changes)
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
@@ -48,6 +41,7 @@ type PersonalCollegeApplicationRepository interface {
 }
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 
 type Repository struct {
@@ -77,20 +71,9 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		db: db,
 		// For each interface, add an instance of the interface here
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
-<<<<<<< HEAD
-<<<<<<< HEAD
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
-=======
-		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),,
-		TodoItem: todoItemRepository.NewTodoItemRepository(db),
-=======
-		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
-		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
->>>>>>> 78cc8c1 (misc)
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
->>>>>>> 0e51bbc (Todo item repository and model (#48))
 		User:                       userRepository.NewUserRepository(db),
-		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
 }
