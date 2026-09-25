@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
+	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -66,6 +68,11 @@ type MediaAccessRepository interface{
 	RevokeMediaAccess(ctx context.Context, id string)error
 	ListAccessibleMedia(ctx context.Context, studentID string)([]models.Media, error)
 
+// Essay Repository
+type EssayRepository interface {
+	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) error
+	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	CreateEssay(ctx context.Context, essay models.Essays) error
 }
 
 type Repository struct {
@@ -79,6 +86,8 @@ type Repository struct {
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
 	Video                      VideoRepository
+	Greeting GreetingRepository
+	Essay    EssayRepository
 }
 
 // Close closes the database connection pool
@@ -104,5 +113,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		Media: mediaRepository.NewMediaRepository(db),
 		MediaAccess: mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
+		Greeting: greetingRepository.NewGreetingRepository(db),
+		Essay:    essayRepository.NewEssayRepository(db),
 	}
 }
