@@ -16,7 +16,7 @@ func TestUpdateTodoItemCompletedAt(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
 	deadline := time.Now().Add(3 * 24 * time.Hour).UTC().Truncate(time.Second)
@@ -31,7 +31,6 @@ func TestUpdateTodoItemCompletedAt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}
-	cleanupTodoItem(t, db, created.ID)
 
 	completedAt := time.Now().UTC().Truncate(time.Second)
 
@@ -90,7 +89,7 @@ func TestUpdateTodoItemCompletedAt_Clear(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
 	input := &models.CreateTodoItemRequestBody{
@@ -102,7 +101,6 @@ func TestUpdateTodoItemCompletedAt_Clear(t *testing.T) {
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}
-	cleanupTodoItem(t, db, created.ID)
 
 	completedAt := time.Now().UTC().Truncate(time.Second)
 	if _, err := repo.UpdateTodoItemCompletedAt(ctx, created.ID, &completedAt); err != nil {

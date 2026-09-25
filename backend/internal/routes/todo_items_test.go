@@ -52,7 +52,9 @@ func doRequest(t *testing.T, app *fiber.App, method, path string, body any) (*ht
 
 	resp, err := app.Test(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() {
+	_ = resp.Body.Close()
+	}()	
 
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
@@ -185,10 +187,6 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 	t.Parallel()
 
 	itemID := uuid.NewString()
-	payload := map[string]any{
-		"todo_description": "Finish the Common App essay",
-		"deadline":         nil,
-	}
 
 	t.Run("marking completed sets a timestamp", func(t *testing.T) {
 		t.Parallel()
@@ -244,13 +242,15 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("CreateTodoItem", mock.Anything, mock.Anything).
+		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, itemID, mock.Anything).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupTodoItemTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, _ := doRequest(t, app, http.MethodPost, "/todo-items", payload)
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID, map[string]any{
+			"completed": true,
+		})
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }
