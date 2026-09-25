@@ -120,3 +120,68 @@ export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "greeting": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Greeting message'))
 })
+
+
+/**
+ * Get a student's to-do items
+ */
+export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponseItem)
+
+
+/**
+ * Create a to-do item with a description and optional deadline
+ */
+export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Update a to-do item's completion status
+ */
+export const UpdateTodoItemCompletedParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const UpdateTodoItemCompletedBody = /*#__PURE__*/ zod.object({
+  "completed": /*#__PURE__*/ zod.boolean()
+})
+
+export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})

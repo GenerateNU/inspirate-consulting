@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
@@ -15,7 +16,8 @@ func TestCreateGlobalCollege(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewGlobalCollegeRepository(db)
 	ctx := context.Background()
 
 	edDeadline := time.Now().Add(30 * 24 * time.Hour).UTC().Truncate(time.Second)
@@ -33,7 +35,6 @@ func TestCreateGlobalCollege(t *testing.T) {
 		t.Fatalf("CreateGlobalCollege failed: %v", err)
 	}
 	created := output
-	cleanupCollege(t, db, created.ID)
 
 	if created.ID == 0 {
 		t.Error("expected a generated ID, got 0")
@@ -70,7 +71,8 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewGlobalCollegeRepository(db)
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeRequestBody{
@@ -83,7 +85,6 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 		t.Fatalf("expected create with all-nil deadlines to succeed, got error: %v", err)
 	}
 	created := output
-	cleanupCollege(t, db, created.ID)
 
 	if created.EADeadline != nil || created.EDDeadline != nil || created.RDDeadline != nil {
 		t.Errorf("expected all deadlines nil, got EA=%v ED=%v RD=%v",
@@ -98,7 +99,8 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewGlobalCollegeRepository(db)
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeRequestBody{
@@ -106,11 +108,10 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 		SchoolLocation: "Dupe City, DC",
 	}
 
-	first, err := repo.CreateGlobalCollege(ctx, input)
+	_, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("first CreateGlobalCollege failed: %v", err)
 	}
-	cleanupCollege(t, db, first.ID)
 
 	// Same name/location, different casing, should still collide.
 	dupInput := models.CreateGlobalCollegeRequestBody{
