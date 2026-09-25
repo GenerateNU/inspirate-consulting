@@ -120,3 +120,26 @@ export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "greeting": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Greeting message'))
 })
+
+
+/**
+ * Create a user (student/counselor)
+ */
+export const createUserBodyNameMax = 200;
+
+
+
+export const CreateUserBody = /*#__PURE__*/ zod.object({
+  "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
+  "password": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('password of user for supabase signup')),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+})
+
+export const CreateUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
