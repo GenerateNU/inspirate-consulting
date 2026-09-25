@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
@@ -18,7 +19,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	studentID := uuid.NewString()
+	studentID := auth.GetStudentID(ctx)
 	userID := uuid.NewString()
 
 	expectedOutput := []models.TodoItem{
@@ -45,7 +46,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx, studentID)
+		res, err := handler.GetTodoItemsByStudent(ctx)
 
 		// Verify result
 		assert.NoError(t, err)
@@ -61,7 +62,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 		mockRepo.On("GetTodoItemsByStudent", mock.Anything, studentID).Return([]models.TodoItem{}, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx, studentID)
+		res, err := handler.GetTodoItemsByStudent(ctx)
 
 		assert.NoError(t, err)
 		assert.Empty(t, res)
@@ -76,7 +77,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx, studentID)
+		res, err := handler.GetTodoItemsByStudent(ctx)
 
 		// Verify error propagation
 		assert.Error(t, err)

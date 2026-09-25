@@ -17,7 +17,6 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
-
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
@@ -42,9 +41,9 @@ type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
 	Greeting GreetingRepository
+	TodoItem TodoItemRepository
 	GlobalCollege GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
-	TodoItem      TodoItemRepository
 }
 
 // Close closes the database connection pool
