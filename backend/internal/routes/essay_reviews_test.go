@@ -58,7 +58,7 @@ func doJSON(t *testing.T, app *fiber.App, method, path string, payload any) (*ht
 
 	resp, err := app.Test(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
