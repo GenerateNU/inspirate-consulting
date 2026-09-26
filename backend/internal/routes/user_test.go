@@ -132,7 +132,8 @@ func TestRoute_CreateUser(t *testing.T) {
 
 func TestRoute_FetchUser(t *testing.T) {
 	t.Parallel()
-	test_uuid := uuid.New()
+	test_uuid := uuid.MustParse("7bebfe6e-36ca-4343-a46c-d9430a951ba7")
+	//test_uuid_two := uuid.MustParse("ba0ccc36-6c60-4ad3-90ad-0fed4378f3df")
 	s1 := uuid.New()
 	key := ""
 
@@ -147,16 +148,12 @@ func TestRoute_FetchUser(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewUserRepository(t)
-		mockRepo.On("FetchUser", mock.Anything, mock.MatchedBy(func(in models.FetchUserInput) bool {
-
-			return in.ID == test_uuid
-		})).Return(&models.FetchUserOutput{
-			Body: &userTest,
-		}, nil)
+		input := models.FetchUserInput{ID: test_uuid}
+		mockRepo.On("FetchUser", mock.Anything, input).Return(&models.FetchUserOutput{Body: &userTest}, nil)
 		app, err := setupTestAppWithUser(mockRepo, &config.MockSupabase{})
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/users/"+test_uuid.String(), nil)
+		req, err := http.NewRequest(http.MethodGet, "/user/"+test_uuid.String(), nil)
 		require.NoError(t, err)
 
 		resp, err := app.Test(req)
@@ -169,7 +166,7 @@ func TestRoute_FetchUser(t *testing.T) {
 		require.NoError(t, err)
 
 		var output models.FetchUserOutput
-		err = json.Unmarshal(respBody, &output)
+		err = json.Unmarshal(respBody, &output.Body)
 		require.NoError(t, err)
 		assert.Equal(t, test_uuid, output.Body.ID)
 	})
@@ -179,20 +176,23 @@ func TestRoute_FetchUser(t *testing.T) {
 
 		mockRepo := mocks.NewUserRepository(t)
 
-		mockRepo.On("FetchUser", mock.Anything, int64(999)).
-			Return(nil, errs.NotFound("user", "id", "999"))
+		input := models.FetchUserInput{ID: test_uuid}
+
+		mockRepo.On("FetchUser", mock.Anything, input).
+			Return(nil, errs.NotFound("user", "user id", test_uuid.String()))
 
 		app, err := setupTestAppWithUser(mockRepo, &config.MockSupabase{})
+		println(app)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/users/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/user/"+test_uuid.String(), nil)
 		require.NoError(t, err)
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
 		defer func() { _ = resp.Body.Close() }()
 
-		// GetGlobalCollege's repository returns an errs.NotFound (HTTPError).
+		// User repository returns an errs.NotFound (HTTPError).
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
