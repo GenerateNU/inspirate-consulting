@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './createEssayBody';
 export * from './createGlobalCollegeRequestBody';
 export * from './createPersonalCollegeApplicationRequestBody';
 export * from './createPersonalCollegeApplicationRequestBodyApplicationType';
@@ -15,6 +16,8 @@ export * from './createUserInputBody';
 export * from './errorDetail';
 export * from './errorModel';
 export * from './getVideoParams';
+export * from './essayListBody';
+export * from './essays';
 export * from './globalCollege';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
@@ -23,6 +26,8 @@ export * from './personalCollegeApplication';
 export * from './presignUploadRequestBody';
 export * from './presignUploadResponse';
 export * from './todoItem';
+export * from './updateStatusBody';
+export * from './updateStatusBodyStatus';
 export * from './updateTodoItemCompletedAtInputBody';
 export * from './user';
 export * from './video';
