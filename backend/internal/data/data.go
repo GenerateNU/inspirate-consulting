@@ -44,13 +44,6 @@ type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
-<<<<<<< HEAD
-=======
-type UserRepository interface {
-	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
-	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
-}
->>>>>>> adc89c7 (added db layer, handler with appropriate delegation to create supabase acc, sql file, and utils file for reading sql file)
 
 type Repository struct {
 	db *pgxpool.Pool
