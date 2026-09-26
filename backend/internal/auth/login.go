@@ -1,73 +1,73 @@
 package auth
 
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"inspirate-consulting/internal/config"
-	"inspirate-consulting/internal/errs"
-	"inspirate-consulting/internal/models"
-	"io"
-	"log/slog"
-	"net/http"
-)
+// import (
+// 	"bytes"
+// 	"encoding/json"
+// 	"fmt"
 
-func SupabaseLogin(cfg *config.Supabase, email string, password string) (models.LoginResponse, error) {
-	supabaseURL := cfg.URL
-	serviceroleKey := cfg.ServiceRoleKey
+// 	"inspirate-consulting/internal/errs"
+// 	"inspirate-consulting/internal/models"
+// 	"io"
+// 	"log/slog"
+// 	"net/http"
+// )
 
-	payload := models.SignUpPayload{
-		Email:    email,
-		Password: password,
-	}
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return models.LoginResponse{}, err
-	}
+// func SupabaseLogin(cfg *config.Supabase, email string, password string) (models.LoginResponse, error) {
+// 	supabaseURL := cfg.URL
+// 	serviceroleKey := cfg.ServiceRoleKey
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/token?grant_type=password", supabaseURL), bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return models.LoginResponse{}, err
-	}
+// 	payload := models.SignUpPayload{
+// 		Email:    email,
+// 		Password: password,
+// 	}
+// 	payloadBytes, err := json.Marshal(payload)
+// 	if err != nil {
+// 		return models.LoginResponse{}, err
+// 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", serviceroleKey))
-	req.Header.Set("apikey", serviceroleKey)
+// 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/token?grant_type=password", supabaseURL), bytes.NewBuffer(payloadBytes))
+// 	if err != nil {
+// 		return models.LoginResponse{}, err
+// 	}
 
-	res, err := Client.Do(req)
-	if err != nil {
-		slog.Error("Failed to execute Request", "err", err)
-		return models.LoginResponse{}, errs.BadRequest("Failed to execute Request")
-	}
+// 	req.Header.Set("Content-Type", "application/json")
+// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", serviceroleKey))
+// 	req.Header.Set("apikey", serviceroleKey)
 
-	defer func() { _ = res.Body.Close() }()
+// 	res, err := Client.Do(req)
+// 	if err != nil {
+// 		slog.Error("Failed to execute Request", "err", err)
+// 		return models.LoginResponse{}, errs.BadRequest("Failed to execute Request")
+// 	}
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		slog.Error("Failed to read response body", "err", err)
-		return models.LoginResponse{}, errs.BadRequest("Failed to read response body")
-	}
+// 	defer func() { _ = res.Body.Close() }()
 
-	if res.StatusCode != http.StatusOK {
-		supabaseError := &models.SupabaseError{}
-		if err := json.Unmarshal(body, supabaseError); err != nil {
-			slog.Error("Error parsing response: ", "err", err)
-			return models.LoginResponse{}, err
-		}
-		slog.Error("Error Response: ", "res.StatusCode", res.StatusCode, "body", string(body))
-		return models.LoginResponse{}, errs.NewHTTPError(res.StatusCode, supabaseError)
-	}
+// 	body, err := io.ReadAll(res.Body)
+// 	if err != nil {
+// 		slog.Error("Failed to read response body", "err", err)
+// 		return models.LoginResponse{}, errs.BadRequest("Failed to read response body")
+// 	}
 
-	var signInResponse models.LoginResponse
-	err = json.Unmarshal(body, &signInResponse)
-	if err != nil {
-		slog.Error("Failed to parse response body", "body", err)
-		return models.LoginResponse{}, errs.BadRequest("Failed to parse response body")
-	}
+// 	if res.StatusCode != http.StatusOK {
+// 		supabaseError := &models.SupabaseError{}
+// 		if err := json.Unmarshal(body, supabaseError); err != nil {
+// 			slog.Error("Error parsing response: ", "err", err)
+// 			return models.LoginResponse{}, err
+// 		}
+// 		slog.Error("Error Response: ", "res.StatusCode", res.StatusCode, "body", string(body))
+// 		return models.LoginResponse{}, errs.NewHTTPError(res.StatusCode, supabaseError)
+// 	}
 
-	if signInResponse.Error != nil {
-		return models.LoginResponse{}, errs.BadRequest(fmt.Sprintf("Sign In Response Error %v", signInResponse.Error))
-	}
+// 	var signInResponse models.LoginResponse
+// 	err = json.Unmarshal(body, &signInResponse)
+// 	if err != nil {
+// 		slog.Error("Failed to parse response body", "body", err)
+// 		return models.LoginResponse{}, errs.BadRequest("Failed to parse response body")
+// 	}
 
-	return signInResponse, nil
-}
+// 	if signInResponse.Error != nil {
+// 		return models.LoginResponse{}, errs.BadRequest(fmt.Sprintf("Sign In Response Error %v", signInResponse.Error))
+// 	}
+
+// 	return signInResponse, nil
+// }
