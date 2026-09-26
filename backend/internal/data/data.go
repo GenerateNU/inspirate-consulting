@@ -5,8 +5,8 @@ import (
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	"inspirate-consulting/internal/models"
 	"time"
 
@@ -21,9 +21,11 @@ type GreetingRepository interface {
 
 // Essay Repository
 type EssayRepository interface {
-	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) error
+	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
 	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, essay models.Essays) error
+}
+
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
@@ -47,10 +49,10 @@ type PersonalCollegeApplicationRepository interface {
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting GreetingRepository
-	Essay    EssayRepository
-	TodoItem TodoItemRepository
-	GlobalCollege GlobalCollegeRepository
+	Greeting                   GreetingRepository
+	Essay                      EssayRepository
+	TodoItem                   TodoItemRepository
+	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 }
 
@@ -70,10 +72,10 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting: greetingRepository.NewGreetingRepository(db),
-		Essay:    essayRepository.NewEssayRepository(db),
-		TodoItem: todoItemRepository.NewTodoItemRepository(db),
-		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		Essay:                      essayRepository.NewEssayRepository(db),
+		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 	}
 }

@@ -2,12 +2,11 @@ package essayRepository
 
 import (
 	"context"
-	"fmt"
 
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
-	"://github.com"
+	"github.com/jackc/pgx/v5"
 )
 
 func (r *EssayRepository) UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error) {

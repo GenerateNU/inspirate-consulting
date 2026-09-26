@@ -66,21 +66,33 @@ func (_m *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID u
 }
 
 // UpdateStatus provides a mock function with given fields: ctx, essayID, status
-func (_m *EssayRepository) UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) error {
+func (_m *EssayRepository) UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error) {
 	ret := _m.Called(ctx, essayID, status)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateStatus")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.Status) error); ok {
+	var r0 *models.Essays
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.Status) (*models.Essays, error)); ok {
+		return rf(ctx, essayID, status)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.Status) *models.Essays); ok {
 		r0 = rf(ctx, essayID, status)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Essays)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, models.Status) error); ok {
+		r1 = rf(ctx, essayID, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // NewEssayRepository creates a new instance of EssayRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

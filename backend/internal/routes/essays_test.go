@@ -155,7 +155,7 @@ func TestRoute_CreateEssay(t *testing.T) {
 		// Send invalid payload exceeding 100 characters
 		payload := map[string]any{
 			"student_id":      uuid.New().String(),
-			"type":            strings.Repeat("a", 101), // maxLength constraint is 100
+			"type":            strings.Repeat("a", 101),
 			"link_to_content": "https://docs.google.com/document/d/abc123",
 		}
 		bodyBytes, err := json.Marshal(payload)
@@ -184,7 +184,15 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 
 		// Mock the repository call expected for valid input
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("UpdateStatus", mock.Anything, essayID, models.Submitted).Return(nil)
+		mockRepo.On(
+			"UpdateStatus",
+			mock.Anything,
+			essayID,
+			models.Submitted,
+		).Return(&models.Essays{
+			ID:     essayID,
+			Status: models.Submitted,
+		}, nil)
 
 		app, err := setupEssayTestApp(mockRepo)
 		require.NoError(t, err)
@@ -196,7 +204,11 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPatch, "/essays/"+essayID.String()+"/status", bytes.NewReader(bodyBytes))
+		req, err := http.NewRequest(
+			http.MethodPatch,
+			"/essays/"+essayID.String()+"/status",
+			bytes.NewReader(bodyBytes),
+		)
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 
@@ -224,7 +236,11 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPatch, "/essays/"+uuid.New().String()+"/status", bytes.NewReader(bodyBytes))
+		req, err := http.NewRequest(
+			http.MethodPatch,
+			"/essays/"+uuid.New().String()+"/status",
+			bytes.NewReader(bodyBytes),
+		)
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 
