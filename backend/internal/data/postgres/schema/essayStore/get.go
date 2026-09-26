@@ -7,7 +7,7 @@ import (
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
-	"://github.com" // Make sure this is imported
+	"github.com/jackc/pgx/v5"
 )
 
 func (r *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error) {
@@ -21,9 +21,8 @@ func (r *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uu
 		return nil, err
 	}
 
-
 	essays, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.Essays])
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to collect essays: %w", err)
 	}

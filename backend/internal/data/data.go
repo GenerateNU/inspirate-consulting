@@ -24,6 +24,13 @@ type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
 
+// Essay Repository
+type EssayRepository interface {
+	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
+	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	CreateEssay(ctx context.Context, essay models.Essays) error
+}
+
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
@@ -115,5 +122,4 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		User:                       userRepository.NewUserRepository(db),
 		Greeting: greetingRepository.NewGreetingRepository(db),
 		Essay:    essayRepository.NewEssayRepository(db),
-	}
 }
