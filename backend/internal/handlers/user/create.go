@@ -7,9 +7,9 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, config *config.Config) (*models.CreateUserOutput, error) {
+func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, supabase config.SupabaseInterface) (*models.CreateUserOutput, error) {
 
-	signup_response, err := auth.SupabaseSignup(&config.Supabase, input.Body.Email, input.Body.Password)
+	signup_response, err := supabase.Signup(input.Body.Email, input.Body.Password, auth.Client)
 	if err != nil {
 		return nil, err
 	}

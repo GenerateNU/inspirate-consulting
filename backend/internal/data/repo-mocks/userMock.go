@@ -5,6 +5,8 @@ import (
 
 	models "inspirate-consulting/internal/models"
 
+	"github.com/google/uuid"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,7 +15,7 @@ type UserRepository struct {
 }
 
 // CreateUser provides a mock function with given fields: ctx, user
-func (_m *UserRepository) CreateUser(ctx context.Context, user models.CreateUserInput) (*models.CreateUserOutput, error) {
+func (_m *UserRepository) CreateUser(ctx context.Context, user models.CreateUserInput, id uuid.UUID) (*models.CreateUserOutput, error) {
 	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {

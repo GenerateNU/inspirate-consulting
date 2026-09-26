@@ -4,7 +4,7 @@ package config
 type Config struct {
 	Application Application
 	DB          DB
-	Supabase    Supabase
+	Supabase    SupabaseInterface
 	// TestMode=true will skip the auth middleware
 	TestMode bool
 }
