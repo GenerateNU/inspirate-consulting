@@ -56,4 +56,6 @@ type UpdateStatusInput struct {
 	Body    UpdateStatusBody
 }
 
-type UpdateStatusOutput struct{}
+type UpdateStatusOutput struct{
+	Essay *Essays `json:"essay"`
+}
