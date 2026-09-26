@@ -43,6 +43,15 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 }
 
+// To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos
+// Get and List generate fresh presigned URLs to avoid expiration issues
+type VideoRepository interface {
+	// generates a unique S3 key and a presigned PUT URL for a new video upload.
+	PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error)
+	GetVideo(ctx context.Context, s3Key string) (*models.Video, error)
+	ListVideos(ctx context.Context) ([]models.Video, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
@@ -51,6 +60,7 @@ type Repository struct {
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
+	Video                      VideoRepository
 }
 
 // Close closes the database connection pool
@@ -70,8 +80,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		db: db,
 		// For each interface, add an instance of the interface here
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
-		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 	}
