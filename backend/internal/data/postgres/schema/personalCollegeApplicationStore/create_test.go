@@ -4,10 +4,8 @@ import (
 	"context"
 	"testing"
 
-<<<<<<< HEAD
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
-=======
->>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
+
 	"inspirate-consulting/internal/models"
 )
 
@@ -20,12 +18,8 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	}
 	t.Parallel()
 
-<<<<<<< HEAD
 	db := testutils.SetupTestDB(t)
 	repo := NewPersonalCollegeApplicationRepository(db)
-=======
-	repo, db := setupTestRepo(t)
->>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Create Test University", "Create City, CT")
@@ -33,17 +27,13 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	}
 
 	created, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)
 	if err != nil {
 		t.Fatalf("CreatePersonalCollegeApplication failed: %v", err)
 	}
-<<<<<<< HEAD
-=======
-	cleanupApplication(t, db, created.ID)
->>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 
 	if created.ID == 0 {
 		t.Error("expected a generated ID, got 0")
@@ -75,12 +65,8 @@ func TestCreatePersonalCollegeApplication_InvalidApplicationType(t *testing.T) {
 	}
 	t.Parallel()
 
-<<<<<<< HEAD
 	db := testutils.SetupTestDB(t)
 	repo := NewPersonalCollegeApplicationRepository(db)
-=======
-	repo, db := setupTestRepo(t)
->>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Invalid Type University", "Invalid City, IV")
@@ -88,7 +74,7 @@ func TestCreatePersonalCollegeApplication_InvalidApplicationType(t *testing.T) {
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "NOT_A_REAL_TYPE",
-		Category: "reach",
+		Category:        "reach",
 	}
 
 	_, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)
@@ -104,12 +90,8 @@ func TestCreatePersonalCollegeApplication_InvalidCategory(t *testing.T) {
 	}
 	t.Parallel()
 
-<<<<<<< HEAD
 	db := testutils.SetupTestDB(t)
 	repo := NewPersonalCollegeApplicationRepository(db)
-=======
-	repo, db := setupTestRepo(t)
->>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Invalid Category University", "Invalid City, IC")
@@ -117,7 +99,7 @@ func TestCreatePersonalCollegeApplication_InvalidCategory(t *testing.T) {
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "not_a_real_category",
+		Category:        "not_a_real_category",
 	}
 
 	_, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)
@@ -132,17 +114,13 @@ func TestCreatePersonalCollegeApplication_NonexistentGlobalCollege(t *testing.T)
 	}
 	t.Parallel()
 
-<<<<<<< HEAD
 	repo := NewPersonalCollegeApplicationRepository(testutils.SetupTestDB(t))
-=======
-	repo, _ := setupTestRepo(t)
->>>>>>> b05cbbe (feat: personal college applications backend (#37, #38, #39) (#56))
 	ctx := context.Background()
 
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: -999999,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	}
 
 	_, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)

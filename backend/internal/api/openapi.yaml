@@ -75,7 +75,6 @@ components:
         - application_type
         - category
       type: object
-<<<<<<< HEAD
     CreateTodoItemRequestBody:
       additionalProperties: false
       properties:
@@ -103,8 +102,6 @@ components:
         - user_id
         - todo_description
       type: object
-=======
->>>>>>> 12c77b6 (ci: enforce api spec and orval generation to be up to date (#75))
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -310,7 +307,6 @@ components:
         - created_at
         - updated_at
       type: object
-<<<<<<< HEAD
     TodoItem:
       additionalProperties: false
       properties:
@@ -370,8 +366,6 @@ components:
       required:
         - completed
       type: object
-=======
->>>>>>> 12c77b6 (ci: enforce api spec and orval generation to be up to date (#75))
 info:
   contact:
     name: Inspirate Consulting Team
