@@ -63,7 +63,9 @@ func TestRoute_GetEssaysFromStudent(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		// Verify 200 OK status
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -94,7 +96,9 @@ func TestRoute_GetEssaysFromStudent(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		// Huma returns 422 Unprocessable Entity for schema validation failures
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
@@ -137,7 +141,9 @@ func TestRoute_CreateEssay(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		// The output envelope has no Body, so Huma responds 204 No Content
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
@@ -167,7 +173,9 @@ func TestRoute_CreateEssay(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		// Huma returns 422 Unprocessable Entity for schema validation failures
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
@@ -214,7 +222,9 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		// The output envelope has no Body, so Huma responds 204 No Content
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
@@ -246,7 +256,9 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		// Huma returns 422 Unprocessable Entity for schema validation failures
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
