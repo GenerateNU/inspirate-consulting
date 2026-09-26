@@ -28,11 +28,11 @@ type App struct {
 }
 
 // Initialize the App union type containing a fiber app and repository.
-func InitApp(cfg config.Config) (*App, error) {
+func InitApp(config config.Config) (*App, error) {
 	ctx := context.Background()
-	repo := postgres.NewRepository(ctx, cfg.DB)
+	repo := postgres.NewRepository(ctx, config.DB)
 
-	app, humaAPI, err := SetupApp(cfg, repo)
+	app, humaAPI, err := SetupApp(config, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func InitApp(cfg config.Config) (*App, error) {
 }
 
 // Setup the fiber app with the specified configuration and database.
-func SetupApp(cfg config.Config, repo *data.Repository) (*fiber.App, huma.API, error) {
+func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API, error) {
 	app := fiber.New(fiber.Config{
 		JSONEncoder:  go_json.Marshal,
 		JSONDecoder:  go_json.Unmarshal,
@@ -72,7 +72,7 @@ func SetupApp(cfg config.Config, repo *data.Repository) (*fiber.App, huma.API, e
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
-
+	// Create Huma API with OpenAPI configuration
 	humaConfig := huma.DefaultConfig("Inspirate Consulting API", "1.0.0")
 	humaConfig.Info.Description = "API for the Inspirate Consulting application"
 	humaConfig.Info.Contact = &huma.Contact{
@@ -84,17 +84,24 @@ func SetupApp(cfg config.Config, repo *data.Repository) (*fiber.App, huma.API, e
 
 	humaAPI := humafiber.New(app, humaConfig)
 
+	// Register public routes BEFORE auth middleware
+	// routes.SetupAuthRoutes(humaAPI, repo, config)
+
 	// Apply auth middleware — only affects routes registered after this point
-	if !cfg.TestMode {
-		sup, _ := cfg.Supabase.(*config.Supabase)
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, sup))
+	if !config.TestMode {
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
 	}
 
+	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
+	// setupDocsRoutes(app, "/app/api")
+
+	// Root route
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
-	if err := setupProtectedHumaRoutes(humaAPI, repo, cfg); err != nil {
+	// Register protected Huma endpoints
+	if err := setupProtectedHumaRoutes(humaAPI, repo, config); err != nil {
 		return nil, nil, err
 	}
 
@@ -102,11 +109,12 @@ func SetupApp(cfg config.Config, repo *data.Repository) (*fiber.App, huma.API, e
 }
 
 // Setup protected Huma routes (behind auth middleware)
-func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, cfg config.Config) error {
+func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
+	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpTodoItemRoutes(api, repo)
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
-	SetupUserRoutes(api, repo, &cfg)
+	SetupUserRoutes(api, repo, &config)
 	return nil
 }
