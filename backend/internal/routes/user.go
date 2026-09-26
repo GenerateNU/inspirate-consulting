@@ -21,8 +21,12 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Description: "Create a user (student/counselor)",
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *models.CreateUserInput) (*models.CreateUserOutput, error) {
+<<<<<<< HEAD
 		userOutput, err := userHandler.CreateUser(ctx, input, config)
 <<<<<<< HEAD
+=======
+		userOutput, err := userHandler.CreateUser(ctx, input, config.Supabase)
+>>>>>>> 5a7b7bb (route tests added)
 		if err != nil {
 			return nil, err
 		}

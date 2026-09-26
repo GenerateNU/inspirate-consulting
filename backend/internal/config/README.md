@@ -6,7 +6,7 @@ Go process does not load `.env` files itself.
 
 ## Main variables
 
-- `PORT` defaults to `8080`.
+- `PORT` defaults to `8081`.
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME` are required.
 - `DB_SSLMODE` defaults to `require`; use `disable` for local PostgreSQL when
   appropriate.

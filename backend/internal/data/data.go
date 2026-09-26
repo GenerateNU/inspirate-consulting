@@ -5,10 +5,8 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
-<<<<<<< HEAD
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
-=======
->>>>>>> df39997 (misc)
+
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
@@ -85,9 +83,5 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
-<<<<<<< HEAD
-=======
-		User:                       userRepository.NewUserRepository(db),
->>>>>>> df39997 (misc)
 	}
 }
