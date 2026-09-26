@@ -106,7 +106,10 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, cfg config.Co
 	SetUpGreetingRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6d540c9 (route tests)
 	SetupUserRoutes(api, repo, &cfg)
 	return nil
 }
