@@ -30,32 +30,42 @@ func TestHandler_UpdateStatus(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		// Set up mock repository expectation: the ID comes from the path and
-		// the status from the body, so both must reach the repository
-		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("UpdateStatus", mock.Anything, essayID, models.Submitted).Return(nil)
+		updatedEssay := &models.Essays{
+			ID:     essayID,
+			Status: models.Submitted,
+		}
 
-		// Execute handler
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On(
+			"UpdateStatus",
+			mock.Anything,
+			essayID,
+			models.Submitted,
+		).Return(updatedEssay, nil)
+
 		handler := NewHandler(mockRepo)
 		res, err := handler.UpdateStatus(ctx, input)
 
-		// Verify result
 		assert.NoError(t, err)
-		assert.Equal(t, &models.UpdateStatusOutput{}, res)
+		assert.Equal(t, &models.UpdateStatusOutput{
+			Essay: updatedEssay,
+		}, res)
 	})
 
 	t.Run("repository error", func(t *testing.T) {
 		t.Parallel()
 
-		// Simulate database repository failure
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("UpdateStatus", mock.Anything, essayID, models.Submitted).Return(errors.New("database error"))
+		mockRepo.On(
+			"UpdateStatus",
+			mock.Anything,
+			essayID,
+			models.Submitted,
+		).Return((*models.Essays)(nil), errors.New("database error"))
 
-		// Execute handler
 		handler := NewHandler(mockRepo)
 		res, err := handler.UpdateStatus(ctx, input)
 
-		// Verify error propagation
 		assert.Error(t, err)
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")

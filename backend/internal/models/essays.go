@@ -38,7 +38,7 @@ type CreateEssayBody struct {
 	Type      string    `json:"type" maxLength:"100" example:"personal-statement"`
 	CollegeID *int64    `json:"college_id" required:"false" doc:"Optional college this essay targets"`
 	// Might integrate eiditing the essay on the website might change
-	LinkToContent string `json:"link_to_content" example:"https://docs.google.com/document/d/abc123"`
+	LinkToContent string `json:"link_to_content" minLength:"10" example:"https://docs.google.com/document/d/abc123"`
 }
 
 type CreateEssayInput struct {
@@ -56,4 +56,6 @@ type UpdateStatusInput struct {
 	Body    UpdateStatusBody
 }
 
-type UpdateStatusOutput struct{}
+type UpdateStatusOutput struct{
+	Essay *Essays `json:"essay"`
+}

@@ -7,9 +7,12 @@ import (
 )
 
 func (h *Handler) UpdateStatus(ctx context.Context, input *models.UpdateStatusInput) (*models.UpdateStatusOutput, error) {
-	if err := h.EssayRepository.UpdateStatus(ctx, input.EssayID, input.Body.Status); err != nil {
+	updatedEssay, err := h.EssayRepository.UpdateStatus(ctx, input.EssayID, input.Body.Status)
+	if err != nil {
 		return nil, err
 	}
 
-	return &models.UpdateStatusOutput{}, nil
+	return &models.UpdateStatusOutput{
+		Essay: updatedEssay,
+	}, nil
 }
