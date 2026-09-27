@@ -5,7 +5,6 @@ export default function CreateUser() {
     const [Name, setName] = useState('');
     const [Email, setEmail] = useState('');
     const [Password, setPassword] = useState('');
-    const [Pfpkey, setPfpkey] = useState('');
     const [Status, setStatus] = useState('');
 
 
@@ -19,7 +18,7 @@ export default function CreateUser() {
             name: Name,
             email: Email,
             password: Password,
-            pfp_key: Pfpkey,
+            pfp_key: null,
 
         })
         if (response.status === 200) {
