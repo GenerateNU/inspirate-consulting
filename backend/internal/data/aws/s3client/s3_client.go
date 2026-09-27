@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 const (
 	// how long a presigned upload (PUT) URL remains valid.
 	UploadURLExpiry = 15 * time.Minute
@@ -23,9 +22,9 @@ const (
 // wraps AWS S3 client for a single bucket
 // methods for: generating/getting presigned URLs, generating object keys, listing objects, and deleting objects
 type Client struct {
-	s3Client *s3.Client
+	s3Client      *s3.Client
 	presignClient *s3.PresignClient
-	bucket string
+	bucket        string
 }
 
 // loads AWS config using the SDK's default credential chain (.env vars, ~/.aws/credentials & ~/.aws/config, etc.)
@@ -44,9 +43,9 @@ func NewClient(ctx context.Context, bucket string) (*Client, error) {
 	presignClient := s3.NewPresignClient(s3Client)
 
 	return &Client{
-		s3Client: s3Client,
+		s3Client:      s3Client,
 		presignClient: presignClient,
-		bucket: bucket,
+		bucket:        bucket,
 	}, nil
 }
 
@@ -60,7 +59,7 @@ func GenerateObjectKey(originalFilename string) string {
 func (c *Client) PresignUpload(ctx context.Context, key string) (string, error) {
 	request, err := c.presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(c.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	}, s3.WithPresignExpires(UploadURLExpiry))
 	if err != nil {
 		return "", fmt.Errorf("s3client: failed to upload object: %w", err)
@@ -72,7 +71,7 @@ func (c *Client) PresignUpload(ctx context.Context, key string) (string, error) 
 func (c *Client) PresignDownload(ctx context.Context, key string) (string, error) {
 	request, err := c.presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(c.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	}, s3.WithPresignExpires(DownloadURLExpiry))
 	if err != nil {
 		return "", fmt.Errorf("s3client: failed to retrieve object: %w", err)
@@ -100,7 +99,7 @@ func (c *Client) ListObjectKeys(ctx context.Context) ([]string, error) {
 func (c *Client) DeleteObject(ctx context.Context, key string) error {
 	_, err := c.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(c.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	})
 	if err != nil {
 		return fmt.Errorf("s3client: failed to delete object: %w", err)
