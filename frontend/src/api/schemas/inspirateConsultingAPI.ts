@@ -145,9 +145,9 @@ export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponse
 export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
-  "student_id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "todo_description": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.string()
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
 })
 
 export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({

@@ -98,8 +98,6 @@ components:
         user_id:
           type: string
       required:
-        - student_id
-        - user_id
         - todo_description
       type: object
     ErrorDetail:
