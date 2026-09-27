@@ -9,6 +9,7 @@ import CreateCollege from './college/create-college'
 import CollegeList from './college/college-list'
 import CreateCollegeApplication from './college/create-application'
 import CollegeApplicationList from './college/colleges'
+import CreateUser from './user/create-user'
 
 
 
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/college-list" element={<CollegeList />} />
         <Route path="/create-application" element={<CreateCollegeApplication />} />
         <Route path="/colleges" element={<CollegeApplicationList />} />
+        <Route path="/create-account" element={<CreateUser />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
