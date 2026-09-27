@@ -12,10 +12,7 @@ import (
 )
 
 func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error) {
-<<<<<<< HEAD
-=======
-	fmt.Println("[db] CreateUser called")
->>>>>>> a6f19c6 (fixed create flow)
+
 	createdUser := &models.CreateUserOutput{Body: &models.User{}}
 
 	query, err := schema.ReadSQLBaseScript("create_user.sql", SqlUserFiles)
