@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
+
 	"inspirate-consulting/internal/models"
 )
 
@@ -26,7 +27,7 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	}
 
 	created, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)
@@ -73,7 +74,7 @@ func TestCreatePersonalCollegeApplication_InvalidApplicationType(t *testing.T) {
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "NOT_A_REAL_TYPE",
-		Category: "reach",
+		Category:        "reach",
 	}
 
 	_, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)
@@ -98,7 +99,7 @@ func TestCreatePersonalCollegeApplication_InvalidCategory(t *testing.T) {
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "not_a_real_category",
+		Category:        "not_a_real_category",
 	}
 
 	_, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)
@@ -119,7 +120,7 @@ func TestCreatePersonalCollegeApplication_NonexistentGlobalCollege(t *testing.T)
 	input := models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: -999999,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	}
 
 	_, err := repo.CreatePersonalCollegeApplication(ctx, testStudentID, input)

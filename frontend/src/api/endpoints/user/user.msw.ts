@@ -18,10 +18,11 @@ import type {
 } from '../../models';
 
 import {
-  getCreateUserResponseMock
+  getCreateUserResponseMock,
+  getFetchUserResponseMock
 } from './user.faker';
 
-export { getCreateUserResponseMock } from './user.faker';
+export { getCreateUserResponseMock, getFetchUserResponseMock } from './user.faker';
 
 
 export const getCreateUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
@@ -35,6 +36,19 @@ export const getCreateUserMockHandler = (overrideResponse?: User | ((info: Param
       })
   }, options)
 }
+
+export const getFetchUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
+  return http.get('*/user/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getFetchUserResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getUserMock = () => [
-  getCreateUserMockHandler()
+  getCreateUserMockHandler(),
+  getFetchUserMockHandler()
 ]

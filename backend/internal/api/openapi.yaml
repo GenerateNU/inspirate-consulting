@@ -678,6 +678,31 @@ paths:
           description: Error
       tags:
         - User
+  /user/{id}:
+    get:
+      description: fetch a user (student/counselor)
+      operationId: fetch-user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
 servers:
   - description: Local development server
     url: http://localhost:8080
