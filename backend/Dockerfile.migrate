@@ -1,0 +1,27 @@
+# Applies the Supabase migrations to whatever Postgres DATABASE_URL points at.
+#
+# Used for PR previews on the droplet, where each pull request gets its own
+# database. Run as a one-off container before the backend starts, so a failed
+# migration fails the preview rather than leaving the app on an old schema.
+#
+# Production migrations are applied from the release workflow against Supabase.
+FROM alpine:3.22
+
+# Pinned so a preview cannot start failing because upstream cut a release.
+ARG SUPABASE_CLI_VERSION=2.117.0
+
+RUN apk add --no-cache ca-certificates \
+ && wget -qO /tmp/supabase.tar.gz \
+      "https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_${SUPABASE_CLI_VERSION}_linux_amd64.tar.gz" \
+ && tar -xzf /tmp/supabase.tar.gz -C /usr/local/bin supabase \
+ && rm /tmp/supabase.tar.gz
+
+WORKDIR /app
+
+# The CLI expects ./supabase/config.toml and ./supabase/migrations relative to
+# the working directory, which is why this is not copied in flat.
+COPY internal/supabase/ ./supabase/
+
+# --include-all lets a PR branched before a recently-added migration still
+# apply out-of-order history instead of aborting.
+CMD ["sh", "-c", "supabase db push --db-url \"$DATABASE_URL\" --include-all --yes"]

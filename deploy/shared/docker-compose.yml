@@ -1,0 +1,60 @@
+# Shared droplet infrastructure. ONE of these per droplet, regardless of how
+# many projects it hosts. Each project's own stack joins the `edge` network
+# created here.
+#
+# Caddy is the label-driven variant: it watches the Docker socket and builds
+# its config from container labels. That is what makes per-PR previews work
+# without editing a Caddyfile or reloading anything -- a preview container
+# starts with a `caddy` label and routes itself, TLS included.
+name: shared
+
+services:
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:2.9-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CADDY_INGRESS_NETWORKS: edge
+    volumes:
+      # Read-only: Caddy only needs to observe containers, never control them.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+    labels:
+      # Where Let's Encrypt sends expiry warnings.
+      caddy.email: ${ACME_EMAIL:?set ACME_EMAIL in deploy/shared/.env}
+
+  # Preview databases only. Production data lives in Supabase, so nothing here
+  # is worth backing up -- losing this volume costs you nothing but a redeploy
+  # of any open previews. No ports are published: it is reachable only from
+  # other containers on the `edge` network.
+  preview-db:
+    image: postgres:17-alpine
+    container_name: preview-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${PREVIEW_DB_PASSWORD:?set PREVIEW_DB_PASSWORD in deploy/shared/.env}
+    volumes:
+      - preview_db_data:/var/lib/postgresql/data
+    networks:
+      - edge
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  # Created by this stack; every project stack joins it as external.
+  edge:
+    name: edge
+
+volumes:
+  caddy_data:
+  caddy_config:
+  preview_db_data:
