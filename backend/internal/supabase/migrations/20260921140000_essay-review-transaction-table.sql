@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS essay_review_transaction (
     subtotal     INT NOT NULL,
     student_id   UUID NOT NULL REFERENCES student(id),
     entry_type   review_entry_type NOT NULL,
-    -- NULL for an adjustment. No FK yet: the essays table does not exist.
-    essay_id     UUID,
+    -- This is NULLABLE because an adjustment doesn't have an essay associated with it.
+    essay_id     UUID REFERENCES essays(id),
     completed_at TIMESTAMPTZ,
     -- The row that reversed this charge. UNIQUE: a reversal serves one charge.
     refund       UUID UNIQUE REFERENCES essay_review_transaction(id),
