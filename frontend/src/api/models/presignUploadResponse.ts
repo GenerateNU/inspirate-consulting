@@ -6,12 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CreateTodoItemRequestBody {
+export interface PresignUploadResponse {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  completed_at?: string;
-  deadline?: string;
-  student_id?: string;
-  todo_description: string;
-  user_id?: string;
+  /** The S3 key/path to store elsewhere, e.g. in a media table */
+  s3_key: string;
+  /** A presigned URL the client PUTs the raw video bytes to */
+  upload_url: string;
 }

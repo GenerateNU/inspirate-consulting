@@ -6,12 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CreateTodoItemRequestBody {
+export interface Video {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  completed_at?: string;
-  deadline?: string;
-  student_id?: string;
-  todo_description: string;
-  user_id?: string;
+  /** A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires. */
+  download_url: string;
+  /** The video's S3 object key/path, e.g. video-bucket/common-app-tips.mp4 */
+  s3_key: string;
 }

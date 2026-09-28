@@ -40,6 +40,10 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     continue-on-error: false # Tests block PR
+    env:
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       - uses: actions/checkout@v3

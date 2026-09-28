@@ -145,9 +145,9 @@ export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponse
 export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
-  "student_id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "todo_description": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.string()
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
 })
 
 export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
@@ -184,4 +184,66 @@ export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Create a user (student/counselor)
+ */
+export const createUserBodyNameMax = 200;
+
+
+
+export const CreateUserBody = /*#__PURE__*/ zod.object({
+  "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
+  "password": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('password of user for supabase signup')),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+})
+
+export const CreateUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * List all videos in the S3 bucket.
+ */
+export const ListVideosResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "download_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The video\'s S3 object key/path, e.g. video-bucket/common-app-tips.mp4'))
+})
+export const ListVideosResponse = /*#__PURE__*/ zod.array(ListVideosResponseItem)
+
+
+/**
+ * Upload a new video to the S3 bucket.
+ */
+export const UploadVideoBody = /*#__PURE__*/ zod.object({
+  "original_filename": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The filename of the video about to be uploaded'))
+})
+
+export const UploadVideoResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The S3 key/path to store elsewhere, e.g. in a media table')),
+  "upload_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned URL the client PUTs the raw video bytes to'))
+})
+
+
+/**
+ * Get a video by its S3 key.
+ */
+export const GetVideoQueryParams = /*#__PURE__*/ zod.object({
+  "s3_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The S3 key/path of the video to fetch'))
+})
+
+export const GetVideoResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "download_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The video\'s S3 object key/path, e.g. video-bucket/common-app-tips.mp4'))
 })

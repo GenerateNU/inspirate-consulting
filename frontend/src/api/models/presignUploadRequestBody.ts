@@ -6,12 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CreateTodoItemRequestBody {
+export interface PresignUploadRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  completed_at?: string;
-  deadline?: string;
-  student_id?: string;
-  todo_description: string;
-  user_id?: string;
+  /** The filename of the video about to be uploaded */
+  original_filename: string;
 }

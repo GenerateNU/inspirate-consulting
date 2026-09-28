@@ -4,12 +4,15 @@ import (
 	"context"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -38,6 +41,18 @@ type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
+type UserRepository interface {
+	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+}
+
+// To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos
+// Get and List generate fresh presigned URLs to avoid expiration issues
+type VideoRepository interface {
+	// generates a unique S3 key and a presigned PUT URL for a new video upload.
+	PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error)
+	GetVideo(ctx context.Context, s3Key string) (*models.Video, error)
+	ListVideos(ctx context.Context) ([]models.Video, error)
+}
 
 type MediaRepository interface{
 	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error)
@@ -56,12 +71,14 @@ type MediaAccessRepository interface{
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
-	Greeting GreetingRepository
-	TodoItem TodoItemRepository
-	GlobalCollege GlobalCollegeRepository
+	Greeting                   GreetingRepository
+	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	Media MediaRepository
 	MediaAccess MediaAccessRepository
+	TodoItem                   TodoItemRepository
+	User                       UserRepository
+	Video                      VideoRepository
 }
 
 // Close closes the database connection pool
@@ -80,11 +97,12 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,
 		// For each interface, add an instance of the interface here
-		Greeting: greetingRepository.NewGreetingRepository(db),
-		TodoItem: todoItemRepository.NewTodoItemRepository(db),
-		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
+		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
+		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 		Media: mediaRepository.NewMediaRepository(db),
 		MediaAccess: mediaAccessRepository.NewMediaAccessRepository(db),
+		User:                       userRepository.NewUserRepository(db),
 	}
 }

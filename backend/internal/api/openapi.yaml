@@ -98,9 +98,39 @@ components:
         user_id:
           type: string
       required:
-        - student_id
-        - user_id
         - todo_description
+      type: object
+    CreateUserInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateUserInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          description: email of user for supabase signup
+          type: string
+        name:
+          description: Name of the user
+          maxLength: 200
+          minLength: 1
+          type: string
+        password:
+          description: password of user for supabase signup
+          type: string
+        pfp_key:
+          description: pfp key of user
+          type:
+            - string
+            - "null"
+      required:
+        - name
+        - pfp_key
+        - email
+        - password
       type: object
     ErrorDetail:
       additionalProperties: false
@@ -307,6 +337,42 @@ components:
         - created_at
         - updated_at
       type: object
+    PresignUploadRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/PresignUploadRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        original_filename:
+          description: The filename of the video about to be uploaded
+          type: string
+      required:
+        - original_filename
+      type: object
+    PresignUploadResponse:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/PresignUploadResponse.json
+          format: uri
+          readOnly: true
+          type: string
+        s3_key:
+          description: The S3 key/path to store elsewhere, e.g. in a media table
+          type: string
+        upload_url:
+          description: A presigned URL the client PUTs the raw video bytes to
+          type: string
+      required:
+        - s3_key
+        - upload_url
+      type: object
     TodoItem:
       additionalProperties: false
       properties:
@@ -365,6 +431,52 @@ components:
           type: boolean
       required:
         - completed
+      type: object
+    User:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/User.json
+          format: uri
+          readOnly: true
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        supabase_id:
+          type: string
+      required:
+        - id
+        - name
+        - supabase_id
+        - pfp_key
+      type: object
+    Video:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Video.json
+          format: uri
+          readOnly: true
+          type: string
+        download_url:
+          description: A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires.
+          type: string
+        s3_key:
+          description: The video's S3 object key/path, e.g. video-bucket/common-app-tips.mp4
+          type: string
+      required:
+        - s3_key
+        - download_url
       type: object
 info:
   contact:
@@ -597,6 +709,105 @@ paths:
           description: Error
       tags:
         - Todo Items
+  /user:
+    post:
+      description: Create a user (student/counselor)
+      operationId: create-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+  /videos:
+    get:
+      description: List all videos in the S3 bucket.
+      operationId: list-videos
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Video"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Videos
+    post:
+      description: Upload a new video to the S3 bucket.
+      operationId: upload-video
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PresignUploadRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresignUploadResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Videos
+  /videos/lookup:
+    get:
+      description: Get a video by its S3 key.
+      operationId: get-video
+      parameters:
+        - description: The S3 key/path of the video to fetch
+          explode: false
+          in: query
+          name: s3_key
+          schema:
+            description: The S3 key/path of the video to fetch
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Videos
 servers:
   - description: Local development server
     url: http://localhost:8080

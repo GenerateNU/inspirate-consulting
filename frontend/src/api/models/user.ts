@@ -6,12 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CreateTodoItemRequestBody {
+export interface User {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  completed_at?: string;
-  deadline?: string;
-  student_id?: string;
-  todo_description: string;
-  user_id?: string;
+  id: string;
+  name: string;
+  /** @nullable */
+  pfp_key: string | null;
+  supabase_id: string;
 }

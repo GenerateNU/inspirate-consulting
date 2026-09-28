@@ -8,3 +8,5 @@ export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
 export * from './personal-college-applications/personal-college-applications';
 export * from './todo-items/todo-items';
+export * from './user/user';
+export * from './videos/videos';
