@@ -22,8 +22,6 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 		return nil, err
 	}
 
-	fmt.Println("[db] CreateUser gurt")
-
 	err = r.db.QueryRow(
 		ctx,
 		query,
