@@ -211,7 +211,6 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
 
 
 /**
-<<<<<<< HEAD
  * List all videos in the S3 bucket.
  */
 export const ListVideosResponseItem = /*#__PURE__*/ zod.object({
@@ -247,18 +246,4 @@ export const GetVideoResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "download_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires.')),
   "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The video\'s S3 object key/path, e.g. video-bucket/common-app-tips.mp4'))
-=======
- * fetch a user (student/counselor)
- */
-export const FetchUserParams = /*#__PURE__*/ zod.object({
-  "id": /*#__PURE__*/ zod.string()
-})
-
-export const FetchUserResponse = /*#__PURE__*/ zod.object({
-  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "id": /*#__PURE__*/ zod.string(),
-  "name": /*#__PURE__*/ zod.string(),
-  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "supabase_id": /*#__PURE__*/ zod.string()
->>>>>>> 70557c2 (orval)
 })

@@ -792,15 +792,6 @@ paths:
           name: s3_key
           schema:
             description: The S3 key/path of the video to fetch
-  /user/{id}:
-    get:
-      description: fetch a user (student/counselor)
-      operationId: fetch-user
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
             type: string
       responses:
         "200":
@@ -808,7 +799,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Video"
-                $ref: "#/components/schemas/User"
           description: OK
         default:
           content:
@@ -818,7 +808,6 @@ paths:
           description: Error
       tags:
         - Videos
-        - User
 servers:
   - description: Local development server
     url: http://localhost:8080
