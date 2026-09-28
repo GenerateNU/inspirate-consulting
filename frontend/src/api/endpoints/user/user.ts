@@ -83,7 +83,7 @@ export const getCreateUserUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/user`
+  return `/api/user`
 }
 
 /**
@@ -129,7 +129,7 @@ export const getCreateUserMutationFetcher = ( options?: RequestInit) => {
     return createUser(arg, options);
   }
 }
-export const getCreateUserMutationKey = () => [`http://127.0.0.1:8080/user`] as const;
+export const getCreateUserMutationKey = () => [`/api/user`] as const;
 
 export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
 
