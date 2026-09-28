@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"inspirate-consulting/internal/config"
@@ -29,15 +28,9 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		return userOutput, nil
 	})
 
-		if err != nil {
-			return nil, err
-		}
-		return userOutput, nil
-	})
-
 	huma.Register(api, huma.Operation{
 		OperationID: "fetch-user",
-		Method:      http.MethodPost,
+		Method:      http.MethodGet,
 		Path:        "/user/{id}",
 		Description: "fetch a user (student/counselor)",
 		Tags:        []string{"User"},
@@ -48,5 +41,4 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		}
 		return userOutput, nil
 	})
->>>>>>> 80e29d8 (added get user flow)
 }
