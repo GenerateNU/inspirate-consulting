@@ -6,7 +6,6 @@ import (
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
-	"inspirate-consulting/internal/models"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -35,6 +34,20 @@ type GlobalCollegeRepository interface {
 type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
+}
+
+type MediaRepository interface{
+	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error)
+	GetMedia(ctx context.Context, id string)(*models.Media, error)
+	ListAllMedia(ctx context.Context)([]models.Media, error)
+	DeleteMedia(ctx context.Context, id string)error
+}
+
+type MediaAccessRepository interface{
+	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody)(*models.MediaAccess,error)
+	RevokeMediaAccess(ctx context.Context, id string)error
+	ListAccessibleMedia(ctx context.Context, studentID string)([]models.MediaAccess, error)
+
 }
 
 type Repository struct {
