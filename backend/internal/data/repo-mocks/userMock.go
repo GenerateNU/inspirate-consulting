@@ -80,7 +80,7 @@ func NewUserRepository(t interface {
 	Cleanup(func())
 }) *UserRepository {
 	mock := &UserRepository{}
-	mock.Mock.Test(t)
+	mock.Test(t)
 
 	t.Cleanup(func() { mock.AssertExpectations(t) })
 
