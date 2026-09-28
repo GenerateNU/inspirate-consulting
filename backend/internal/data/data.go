@@ -6,6 +6,9 @@ import (
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
+	"inspirate-consulting/internal/models"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -46,7 +49,7 @@ type MediaRepository interface{
 type MediaAccessRepository interface{
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody)(*models.MediaAccess,error)
 	RevokeMediaAccess(ctx context.Context, id string)error
-	ListAccessibleMedia(ctx context.Context, studentID string)([]models.MediaAccess, error)
+	ListAccessibleMedia(ctx context.Context, studentID string)([]models.Media, error)
 
 }
 
@@ -57,6 +60,8 @@ type Repository struct {
 	TodoItem TodoItemRepository
 	GlobalCollege GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	Media MediaRepository
+	MediaAccess MediaAccessRepository
 }
 
 // Close closes the database connection pool
@@ -79,5 +84,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		TodoItem: todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege: globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
+		Media: mediaRepository.NewMediaRepository(db),
+		MediaAccess: mediaAccessRepository.NewMediaAccessRepository(db),
 	}
 }
