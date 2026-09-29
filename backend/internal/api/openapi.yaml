@@ -42,6 +42,37 @@ components:
         - school_name
         - school_location
       type: object
+    CreateMediaRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateMediaRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        length_in_mins:
+          format: int64
+          type: integer
+        s3_key:
+          type: string
+        school_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        title:
+          type: string
+      required:
+        - title
+        - description
+        - length_in_mins
+        - school_year
+        - s3_key
+      type: object
     CreatePersonalCollegeApplicationRequestBody:
       additionalProperties: false
       properties:
@@ -254,6 +285,24 @@ components:
         - school_name
         - school_location
       type: object
+    GrantMediaAccessRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/GrantMediaAccessRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        media_id:
+          type: string
+        student_id:
+          type: string
+      required:
+        - student_id
+        - media_id
+      type: object
     GreetingMessageBody:
       additionalProperties: false
       properties:
@@ -290,6 +339,61 @@ components:
           type: string
       required:
         - name
+      type: object
+    Media:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Media.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        length_in_mins:
+          format: int64
+          type: integer
+        s3_key:
+          type: string
+        school_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - length_in_mins
+        - school_year
+        - s3_key
+      type: object
+    MediaAccess:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/MediaAccess.json
+          format: uri
+          readOnly: true
+          type: string
+        id:
+          type: string
+        media_id:
+          type: string
+        student_id:
+          type: string
+      required:
+        - id
+        - student_id
+        - media_id
       type: object
     PersonalCollegeApplication:
       additionalProperties: false
@@ -631,6 +735,166 @@ paths:
           description: Error
       tags:
         - Greetings
+  /media:
+    get:
+      description: Fetch all videos, through counselor view
+      operationId: list-media
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Media"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+    post:
+      description: Create a media/video
+      operationId: create-media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMediaRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+  /media-access:
+    get:
+      description: Allow students to fetch only videos they have access to
+      operationId: get-media-access
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Media"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
+    post:
+      description: Allow a counselor to give a student access to a video
+      operationId: create-media-access
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrantMediaAccessRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAccess"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
+  /media-access/{id}:
+    delete:
+      description: Allow a counselor to revoke a student access to a video
+      operationId: delete-media-access
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
+  /media/{id}:
+    delete:
+      description: Delete a video, through counselor view
+      operationId: delete-media
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+    get:
+      description: Get a media/video
+      operationId: get-media
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
   /todo-items:
     get:
       description: Get a student's to-do items

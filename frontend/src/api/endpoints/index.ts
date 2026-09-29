@@ -6,6 +6,8 @@ export type { HTTPStatusCode5xx } from './global-colleges/global-colleges';
 export type { HTTPStatusCodes } from './global-colleges/global-colleges';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
+export * from './media/media';
+export * from './media-access/media-access';
 export * from './personal-college-applications/personal-college-applications';
 export * from './todo-items/todo-items';
 export * from './user/user';
