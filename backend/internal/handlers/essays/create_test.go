@@ -19,7 +19,7 @@ func TestHandler_CreateEssay(t *testing.T) {
 
 	ctx := context.Background()
 	studentID := uuid.New()
-	collegeID := uuid.New()
+	collegeID := int64(42)
 
 	input := &models.CreateEssayInput{
 		Body: models.CreateEssayBody{

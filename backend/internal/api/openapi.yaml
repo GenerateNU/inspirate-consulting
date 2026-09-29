@@ -12,7 +12,10 @@ components:
           type: string
         college_id:
           description: Optional college this essay targets
-          type: string
+          format: int64
+          type:
+            - integer
+            - "null"
         essay_group_id:
           description: optional group this essay belongs to
           type: string
@@ -248,7 +251,10 @@ components:
       additionalProperties: false
       properties:
         college_id:
-          type: string
+          format: int64
+          type:
+            - integer
+            - "null"
         essay_group_id:
           type: string
         id:
