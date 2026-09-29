@@ -54,15 +54,19 @@ type ListChatsOutput struct {
 	Body []ChatSummary
 }
 
-// keyset pagination: pass the id of the oldest message already loaded as before to get the next page
 type ListChatMessagesInput struct {
 	UserID uuid.UUID `path:"user_id" doc:"The other user in the conversation"`
-	Before string    `query:"before" format:"uuid" required:"false" doc:"Return messages older than this message ID"`
+	Cursor string    `query:"cursor" required:"false" doc:"next_cursor from the previous page; omit to get the newest messages"`
 	Limit  int       `query:"limit" default:"50" minimum:"1" maximum:"100"`
 }
 
+type ChatMessagePage struct {
+	Messages   []ChatMessage `json:"messages" doc:"Newest first"`
+	NextCursor *string       `json:"next_cursor" doc:"Pass as cursor to get older messages; null when there are none"`
+}
+
 type ListChatMessagesOutput struct {
-	Body []ChatMessage
+	Body ChatMessagePage
 }
 
 type EditChatMessageInput struct {
