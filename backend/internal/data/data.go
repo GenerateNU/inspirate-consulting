@@ -70,9 +70,6 @@ type MediaAccessRepository interface {
 
 // To represent the Essay Review Transaction schema
 type EssayReviewRepository interface {
-	// WithTx runs fn inside one transaction; DB returns the pool for
-	// single-statement reads. Together they let callers own the transaction
-	// boundary without importing pgx.
 	WithTx(ctx context.Context, fn func(db dbinterface.QueryInterface) error) error
 	DB() dbinterface.QueryInterface
 
