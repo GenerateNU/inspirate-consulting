@@ -51,6 +51,7 @@ func TestWithTxRollsBackEveryWrite(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 4)
+	essayID := createTestEssay(t, db, studentID)
 	boom := errors.New("boom")
 
 	err := repo.WithTx(ctx, func(tx dbinterface.QueryInterface) error {
@@ -60,7 +61,7 @@ func TestWithTxRollsBackEveryWrite(t *testing.T) {
 		if err := repo.InsertAdjustment(ctx, tx, studentID, -1); err != nil {
 			return err
 		}
-		if _, err := repo.InsertSpend(ctx, tx, studentID, uuid.New(), 1); err != nil {
+		if _, err := repo.InsertSpend(ctx, tx, studentID, essayID, 1); err != nil {
 			return err
 		}
 		return boom
@@ -123,11 +124,12 @@ func TestLedgerReconcilesWithBalance(t *testing.T) {
 	// spend 2
 	var charge = func() uuid.UUID {
 		var id uuid.UUID
+		essayID := createTestEssay(t, db, studentID)
 		if err := repo.WithTx(ctx, func(tx dbinterface.QueryInterface) error {
 			if err := repo.AdjustStudentBalance(ctx, tx, studentID, -2); err != nil {
 				return err
 			}
-			spend, err := repo.InsertSpend(ctx, tx, studentID, uuid.New(), 2)
+			spend, err := repo.InsertSpend(ctx, tx, studentID, essayID, 2)
 			if err != nil {
 				return err
 			}

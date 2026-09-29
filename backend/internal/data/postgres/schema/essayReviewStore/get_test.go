@@ -67,7 +67,7 @@ func TestLockTransaction(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 5)
-	spend := spendFor(t, repo, db, studentID, uuid.New(), 1)
+	spend := spendFor(t, repo, db, studentID, createTestEssay(t, db, studentID), 1)
 
 	locked, err := repo.LockTransaction(ctx, db, spend.ID)
 	if err != nil {
@@ -114,7 +114,7 @@ func TestFindOpenReviewForEssay(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 9)
-	essayID := uuid.New()
+	essayID := createTestEssay(t, db, studentID)
 
 	found, err := repo.FindOpenReviewForEssay(ctx, db, essayID)
 	if err != nil {
@@ -158,7 +158,7 @@ func TestFindEssayReviewStatusIgnoresReversals(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 9)
-	essayID := uuid.New()
+	essayID := createTestEssay(t, db, studentID)
 
 	charge := spendFor(t, repo, db, studentID, essayID, 1)
 	reversal, err := repo.InsertRefund(ctx, db, charge)
@@ -198,7 +198,7 @@ func TestFindEssayReviewStatusReturnsLatestSpend(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 9)
-	essayID := uuid.New()
+	essayID := createTestEssay(t, db, studentID)
 
 	first := spendFor(t, repo, db, studentID, essayID, 1)
 	if _, err := repo.MarkCompleted(ctx, db, first.ID); err != nil {

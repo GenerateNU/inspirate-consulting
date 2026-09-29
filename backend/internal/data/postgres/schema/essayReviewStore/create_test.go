@@ -19,7 +19,7 @@ func TestInsertSpend(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 5)
-	essayID := uuid.New()
+	essayID := createTestEssay(t, db, studentID)
 
 	created, err := repo.InsertSpend(ctx, db, studentID, essayID, 3)
 	if err != nil {
@@ -63,7 +63,7 @@ func TestInsertRefund(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 5)
-	essayID := uuid.New()
+	essayID := createTestEssay(t, db, studentID)
 	charge := spendFor(t, repo, db, studentID, essayID, 2)
 
 	reversal, err := repo.InsertRefund(ctx, db, charge)

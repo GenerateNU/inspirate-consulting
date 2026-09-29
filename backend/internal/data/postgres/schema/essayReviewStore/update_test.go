@@ -102,7 +102,7 @@ func TestMarkCompleted(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 5)
-	spend := spendFor(t, repo, db, studentID, uuid.New(), 1)
+	spend := spendFor(t, repo, db, studentID, createTestEssay(t, db, studentID), 1)
 
 	completed, err := repo.MarkCompleted(ctx, db, spend.ID)
 	if err != nil {
@@ -134,7 +134,7 @@ func TestLinkRefund(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 5)
-	charge := spendFor(t, repo, db, studentID, uuid.New(), 1)
+	charge := spendFor(t, repo, db, studentID, createTestEssay(t, db, studentID), 1)
 
 	reversal, err := repo.InsertRefund(ctx, db, charge)
 	if err != nil {
@@ -168,8 +168,8 @@ func TestLinkRefundRejectsReusedReversal(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := createTestStudent(t, db, 9)
-	first := spendFor(t, repo, db, studentID, uuid.New(), 1)
-	second := spendFor(t, repo, db, studentID, uuid.New(), 1)
+	first := spendFor(t, repo, db, studentID, createTestEssay(t, db, studentID), 1)
+	second := spendFor(t, repo, db, studentID, createTestEssay(t, db, studentID), 1)
 
 	reversal, err := repo.InsertRefund(ctx, db, first)
 	if err != nil {

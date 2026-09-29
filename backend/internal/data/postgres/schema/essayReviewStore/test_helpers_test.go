@@ -41,6 +41,19 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, reviewBalance int) uuid.U
 	return studentID
 }
 
+func createTestEssay(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID) uuid.UUID {
+	t.Helper()
+
+	var essayID uuid.UUID
+	if err := db.QueryRow(context.Background(),
+		`INSERT INTO public.essays (student_id, type, link_to_content)
+		 VALUES ($1, 'personal statement', 'https://example.com/essay') RETURNING id`,
+		studentID).Scan(&essayID); err != nil {
+		t.Fatalf("failed to create test essay: %v", err)
+	}
+	return essayID
+}
+
 // readBalance returns a student's current review_balance.
 func readBalance(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID) int {
 	t.Helper()
