@@ -23,7 +23,8 @@ export default function UploadVideo() {
             }
 
             // will need s3 key to store in database
-            const { s3_key, upload_url } = presignResult.data;
+            // const { s3_key, upload_url } = presignResult.data;
+            const { upload_url } = presignResult.data;
 
             // 2. PUT the file to the fetched presigned URL (S3)
             const uploadResponse = await fetch(upload_url, {
