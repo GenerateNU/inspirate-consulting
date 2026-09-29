@@ -7,6 +7,7 @@ import (
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
+	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
@@ -15,6 +16,7 @@ import (
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/pagination"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -98,12 +100,23 @@ type EssayReviewRepository interface {
 	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
 
+// To represent the Chat Message schema
+type ChatMessageRepository interface {
+	CreateChatMessage(ctx context.Context, senderID uuid.UUID, body models.CreateChatMessageRequestBody) (*models.ChatMessage, error)
+	ListChats(ctx context.Context, userID uuid.UUID) ([]models.ChatSummary, error)
+	ListChatMessages(ctx context.Context, userID uuid.UUID, otherUserID uuid.UUID, before *pagination.TimeIDKey, limit int) ([]models.ChatMessage, error)
+	EditChatMessage(ctx context.Context, id uuid.UUID, senderID uuid.UUID, message string) (*models.ChatMessage, error)
+	UpdateChatMessageReadAt(ctx context.Context, id uuid.UUID, recipientID uuid.UUID, readAt *time.Time) (*models.ChatMessage, error)
+	MarkChatRead(ctx context.Context, userID uuid.UUID, otherUserID uuid.UUID) error
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
 	// For each interface, add a field here
 	Greeting                   GreetingRepository
 	Essay                      EssayRepository
+	ChatMessage                ChatMessageRepository
 	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
@@ -131,6 +144,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		db:                         db,
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
 		Essay:                      essayRepository.NewEssayRepository(db),
+		ChatMessage:                chatMessageRepository.NewChatMessageRepository(db),
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
