@@ -123,6 +123,112 @@ export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Fetch all videos, through counselor view
+ */
+export const ListMediaResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.int(),
+  "s3_key": /*#__PURE__*/ zod.string(),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "title": /*#__PURE__*/ zod.string()
+})
+export const ListMediaResponse = /*#__PURE__*/ zod.array(ListMediaResponseItem)
+
+
+/**
+ * Create a media/video
+ */
+export const CreateMediaBody = /*#__PURE__*/ zod.object({
+  "description": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.int(),
+  "s3_key": /*#__PURE__*/ zod.string(),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "title": /*#__PURE__*/ zod.string()
+})
+
+export const CreateMediaResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.int(),
+  "s3_key": /*#__PURE__*/ zod.string(),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "title": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Allow students to fetch only videos they have access to
+ */
+export const GetMediaAccessResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.int(),
+  "s3_key": /*#__PURE__*/ zod.string(),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "title": /*#__PURE__*/ zod.string()
+})
+export const GetMediaAccessResponse = /*#__PURE__*/ zod.array(GetMediaAccessResponseItem)
+
+
+/**
+ * Allow a counselor to give a student access to a video
+ */
+export const CreateMediaAccessBody = /*#__PURE__*/ zod.object({
+  "media_id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string()
+})
+
+export const CreateMediaAccessResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Allow a counselor to revoke a student access to a video
+ */
+export const DeleteMediaAccessParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const DeleteMediaAccessResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Delete a video, through counselor view
+ */
+export const DeleteMediaParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const DeleteMediaResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Get a media/video
+ */
+export const GetMediaParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const GetMediaResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.int(),
+  "s3_key": /*#__PURE__*/ zod.string(),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "title": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Get a student's to-do items
  */
 export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
