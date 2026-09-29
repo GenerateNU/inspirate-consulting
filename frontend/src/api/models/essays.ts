@@ -7,8 +7,7 @@
  */
 
 export interface Essays {
-  /** @nullable */
-  college_id: number | null;
+  college_id: string;
   essay_group_id: string;
   id: string;
   link_to_content: string;

@@ -15,7 +15,7 @@ type Essays struct {
 	ID uuid.UUID `json:"id"`
 	StudentID uuid.UUID `json:"student_id"`
 	Type string `json:"type"`
-	CollegeID *uuid.UUID `json:"college_id"`
+	CollegeID *int64 `json:"college_id"`
 	LinkToContent string `json:"link_to_content"`
 	/* I added this to help the studetns keep track of their progress*/
 	Status Status `json:"status"`
@@ -38,7 +38,7 @@ type GetEssaysFromStudentOutput struct {
 type CreateEssayBody struct {
 	StudentID uuid.UUID `json:"student_id" doc:"Student the essay belongs to"`
 	Type      string    `json:"type" maxLength:"100" example:"personal-statement"`
-	CollegeID *uuid.UUID    `json:"college_id" required:"false" doc:"Optional college this essay targets"`
+	CollegeID *int64    `json:"college_id" required:"false" doc:"Optional college this essay targets"`
 	// Might integrate eiditing the essay on the website might change
 	LinkToContent string `json:"link_to_content" minLength:"10" example:"https://docs.google.com/document/d/abc123"`
 	EssayGroupID *uuid.UUID  `json:"essay_group_id" doc:"optional group this essay belongs to" required:"false" ` 
