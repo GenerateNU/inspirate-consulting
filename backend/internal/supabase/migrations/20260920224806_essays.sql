@@ -5,7 +5,7 @@ CREATE TABLE essays (
     /* this is a fk table does not exist yet though so its a place holder*/
     student_id UUID NOT NULL DEFAULT gen_random_uuid() /*REFERENCES students(id)*/,
     type TEXT NOT NULL,
-    college_id BIGINT REFERENCES global_colleges(id),
+    college_id UUID REFERENCES global_colleges(id),
     link_to_content TEXT NOT NULL,
     status status NOT NULL DEFAULT 'Draft'
 );

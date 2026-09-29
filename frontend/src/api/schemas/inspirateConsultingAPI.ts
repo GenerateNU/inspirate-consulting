@@ -116,6 +116,7 @@ export const createEssayBodyTypeMax = 100;
 
 export const CreateEssayBody = /*#__PURE__*/ zod.object({
   "college_id": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Optional college this essay targets')),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('optional group this essay belongs to')),
   "link_to_content": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(createEssayBodyLinkToContentMin)),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the essay belongs to')),
   "type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.maxLength(createEssayBodyTypeMax))
@@ -166,6 +167,7 @@ export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "essays": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
   "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "essay_group_id": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "link_to_content": /*#__PURE__*/ zod.string(),
   "status": /*#__PURE__*/ zod.string(),
