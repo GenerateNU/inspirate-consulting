@@ -8,7 +8,6 @@ import (
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
-	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
 	"time"
@@ -90,7 +89,6 @@ type Repository struct {
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	Media MediaRepository
 	MediaAccess MediaAccessRepository
-	TodoItem                   TodoItemRepository
 	User                       UserRepository
 	Video                      VideoRepository
 	Greeting GreetingRepository
