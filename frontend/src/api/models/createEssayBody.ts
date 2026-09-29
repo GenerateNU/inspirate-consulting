@@ -9,8 +9,11 @@
 export interface CreateEssayBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  /** Optional college this essay targets */
-  college_id?: string;
+  /**
+     * Optional college this essay targets
+     * @nullable
+     */
+  college_id?: number | null;
   /** optional group this essay belongs to */
   essay_group_id?: string;
   /** @minLength 10 */
