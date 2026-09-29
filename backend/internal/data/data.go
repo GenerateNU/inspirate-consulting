@@ -5,6 +5,8 @@ import (
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
@@ -52,12 +54,28 @@ type VideoRepository interface {
 	ListVideos(ctx context.Context) ([]models.Video, error)
 }
 
+type MediaRepository interface{
+	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error)
+	GetMedia(ctx context.Context, id string)(*models.Media, error)
+	ListAllMedia(ctx context.Context)([]models.Media, error)
+	DeleteMedia(ctx context.Context, id string)error
+}
+
+type MediaAccessRepository interface{
+	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody)(*models.MediaAccess,error)
+	RevokeMediaAccess(ctx context.Context, id string)error
+	ListAccessibleMedia(ctx context.Context, studentID string)([]models.Media, error)
+
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 	// For each interface, add a field here
 	Greeting                   GreetingRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	Media MediaRepository
+	MediaAccess MediaAccessRepository
 	TodoItem                   TodoItemRepository
 	User                       UserRepository
 	Video                      VideoRepository
@@ -83,6 +101,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
+		Media: mediaRepository.NewMediaRepository(db),
+		MediaAccess: mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 	}
 }
