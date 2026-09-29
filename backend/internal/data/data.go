@@ -2,17 +2,17 @@ package data
 
 import (
 	"context"
-	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
-	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
-	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
-	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
-	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
-	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
-	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
-	"inspirate-consulting/internal/models"
 	"time"
 
-	"github.com/google/uuid"
+	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
+	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
+	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
+	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
+	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
+	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
+	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -49,6 +49,7 @@ type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
+
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 }
@@ -62,37 +63,32 @@ type VideoRepository interface {
 	ListVideos(ctx context.Context) ([]models.Video, error)
 }
 
-type MediaRepository interface{
-	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error)
-	GetMedia(ctx context.Context, id string)(*models.Media, error)
-	ListAllMedia(ctx context.Context)([]models.Media, error)
-	DeleteMedia(ctx context.Context, id string)error
+type MediaRepository interface {
+	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error)
+	GetMedia(ctx context.Context, id string) (*models.Media, error)
+	ListAllMedia(ctx context.Context) ([]models.Media, error)
+	DeleteMedia(ctx context.Context, id string) error
 }
 
-type MediaAccessRepository interface{
-	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody)(*models.MediaAccess,error)
-	RevokeMediaAccess(ctx context.Context, id string)error
-	ListAccessibleMedia(ctx context.Context, studentID string)([]models.Media, error)
-
-// Essay Repository
-type EssayRepository interface {
-	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) error
-	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
-	CreateEssay(ctx context.Context, essay models.Essays) error
+type MediaAccessRepository interface {
+	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
+	RevokeMediaAccess(ctx context.Context, id string) error
+	ListAccessibleMedia(ctx context.Context, studentID string) ([]models.Media, error)
 }
 
 type Repository struct {
 	db *pgxpool.Pool
+
 	// For each interface, add a field here
 	Greeting                   GreetingRepository
+	Essay                      EssayRepository
+	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
-	Media MediaRepository
-	MediaAccess MediaAccessRepository
+	Media                      MediaRepository
+	MediaAccess                MediaAccessRepository
 	User                       UserRepository
 	Video                      VideoRepository
-	Greeting GreetingRepository
-	Essay    EssayRepository
 }
 
 // Close closes the database connection pool
@@ -109,15 +105,15 @@ func (r *Repository) GetDB() *pgxpool.Pool {
 // NewRepository creates a new Repository instance with the given database pool
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
-		db: db,
-		// For each interface, add an instance of the interface here
+		db:                         db,
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		Essay:                      essayRepository.NewEssayRepository(db),
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
-		Media: mediaRepository.NewMediaRepository(db),
-		MediaAccess: mediaAccessRepository.NewMediaAccessRepository(db),
+		Media:                      mediaRepository.NewMediaRepository(db),
+		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
-		Greeting: greetingRepository.NewGreetingRepository(db),
-		Essay:    essayRepository.NewEssayRepository(db),
+		// Video:                    videoRepository.NewVideoRepository(db),
+	}
 }
