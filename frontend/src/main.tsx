@@ -11,6 +11,9 @@ import CreateCollegeApplication from './college/create-application'
 import CollegeApplicationList from './college/colleges'
 import VideoList from './video/videos'
 import UploadVideo from './video/upload-video'
+import UploadMedia from './media/upload-media'
+import StudentMediaList from './media/student-media-list'
+import CounselorMediaList from './media/counselor-media-list'
 
 
 
@@ -28,6 +31,9 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/colleges" element={<CollegeApplicationList />} />
         <Route path="/upload-video" element={<UploadVideo />} />
         <Route path="/videos" element={<VideoList />} />
+        <Route path="/upload-media" element={<UploadMedia />}/>
+        <Route path="/student-media-list" element={<StudentMediaList />}/>
+        <Route path="/counselor-media-list" element={<CounselorMediaList />}/>
       </Routes>
     </BrowserRouter>
   </StrictMode>,
