@@ -27,3 +27,59 @@ type GrantMediaAccessRequestBody struct{
 	StudentID string `json:"student_id"`
 	MediaID string `json:"media_id"`
 }
+
+type CreateMediaInput struct{
+	Body CreateMediaRequestBody
+}
+
+type CreateMediaOutput struct{
+	Body Media
+}
+
+type GetMediaInput struct{
+	ID   string `path:"id"`
+}
+
+type GetMediaOutput struct{
+	Body Media
+}
+
+type ListAllMediaInput struct{
+
+}
+
+type ListAllMediaOutput struct{
+	Body []Media
+}
+
+type DeleteMediaInput struct{
+	ID   string `path:"id"`
+}
+
+type DeleteMediaOutput struct{
+
+}
+
+type GrantMediaAccessInput struct {
+	Body GrantMediaAccessRequestBody
+}
+
+type GrantMediaAccessOutput struct {
+	Body MediaAccess
+}
+
+type RevokeMediaAccessInput struct{
+	ID   string `path:"id"`
+}
+
+type RevokeMediaAccessOutput struct{
+
+}
+
+type ListAccessibleMediaInput struct{
+
+}
+
+type ListAccessibleMediaOutput struct {
+	Body []Media
+}
