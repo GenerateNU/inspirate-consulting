@@ -16,6 +16,9 @@ components:
           type:
             - integer
             - "null"
+        essay_group_id:
+          description: optional group this essay belongs to
+          type: string
         link_to_content:
           examples:
             - https://docs.google.com/document/d/abc123
@@ -252,6 +255,8 @@ components:
           type:
             - integer
             - "null"
+        essay_group_id:
+          type: string
         id:
           type: string
         link_to_content:
@@ -269,6 +274,7 @@ components:
         - college_id
         - link_to_content
         - status
+        - essay_group_id
       type: object
     GlobalCollege:
       additionalProperties: false
