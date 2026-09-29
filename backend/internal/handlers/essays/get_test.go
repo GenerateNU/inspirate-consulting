@@ -19,7 +19,7 @@ func TestHandler_GetEssaysFromStudent(t *testing.T) {
 
 	ctx := context.Background()
 	studentID := uuid.New()
-	collegeID := int64(42)
+	collegeID := uuid.New()
 
 	input := &models.GetEssaysFromStudentInput{
 		StudentID: studentID,
