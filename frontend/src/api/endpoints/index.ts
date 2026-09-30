@@ -1,7 +1,8 @@
-export type { HTTPStatusCode1xx } from './greetings/greetings';
-export type { HTTPStatusCode2xx } from './greetings/greetings';
-export type { HTTPStatusCode3xx } from './greetings/greetings';
-export type { HTTPStatusCode4xx } from './greetings/greetings';
-export type { HTTPStatusCode5xx } from './greetings/greetings';
-export type { HTTPStatusCodes } from './greetings/greetings';
+export type { HTTPStatusCode1xx } from './extracurriculars/extracurriculars';
+export type { HTTPStatusCode2xx } from './extracurriculars/extracurriculars';
+export type { HTTPStatusCode3xx } from './extracurriculars/extracurriculars';
+export type { HTTPStatusCode4xx } from './extracurriculars/extracurriculars';
+export type { HTTPStatusCode5xx } from './extracurriculars/extracurriculars';
+export type { HTTPStatusCodes } from './extracurriculars/extracurriculars';
+export * from './extracurriculars/extracurriculars';
 export * from './greetings/greetings';

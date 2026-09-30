@@ -1,106 +1,90 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-const API_BASE = 'http://localhost:8080'
-const TEST_STUDENT_ID = '00000000-0000-0000-0000-000000000002'
+import {
+  updateExtracurricular,
+  useListExtracurriculars,
+} from '../api/endpoints/extracurriculars/extracurriculars'
+import {
+  UpdateExtracurricularRequestStatus,
+  UpdateExtracurricularRequestType,
+  type Extracurricular,
+  type UpdateExtracurricularRequest,
+} from '../api/models'
 
-type Extracurricular = {
-  id: number
-  name: string
-  status: string
-  type: string
-  description: string
-  leadership_role?: string | null
-  start_date: string
-  end_date?: string | null
-  organization: string
-}
+// Normalize ISO datetimes (e.g. "2026-09-21T00:00:00Z") to yyyy-MM-dd for date inputs
+const toDateInput = (value?: string | null) => (value ? value.slice(0, 10) : '')
 
 export default function Extracurriculars() {
-  const [list, setList] = useState<Extracurricular[]>([])
+  const { data, error, isLoading, mutate } = useListExtracurriculars()
   const [editing, setEditing] = useState<number | null>(null)
-  const [form, setForm] = useState<Partial<Extracurricular>>({})
+  const [form, setForm] = useState<UpdateExtracurricularRequest>({})
   const [msg, setMsg] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
-  const fetchList = async () => {
-    setMsg(null)
-    try {
-      const res = await fetch(`${API_BASE}/extracurriculars?student_id=${TEST_STUDENT_ID}`)
-      if (!res.ok) throw new Error(await res.text())
-      const data = await res.json()
-      const listData = data?.body ?? data?.Body ?? data
-      setList(Array.isArray(listData) ? listData : [])
-    } catch (err: any) {
-      setMsg('Error: ' + (err.message || String(err)))
-    }
-  }
-
-  useEffect(() => { fetchList() }, [])
+  const list: Extracurricular[] = data?.status === 200 ? data.data ?? [] : []
+  const listError = error
+    ? String(error)
+    : data && data.status !== 200
+      ? JSON.stringify(data.data)
+      : null
 
   const startEdit = (item: Extracurricular) => {
-    // Normalize ISO datetimes (e.g. "2026-09-21T00:00:00Z") to yyyy-MM-dd
-    const isoToYMD = (s?: string | null) => {
-      if (!s) return ''
-      const t = s.indexOf('T')
-      if (t > 0) return s.slice(0, t)
-      return s.length >= 10 ? s.slice(0, 10) : s
-    }
+    setMsg(null)
     setEditing(item.id)
     setForm({
       name: item.name,
-      status: item.status,
-      type: item.type,
+      status: item.status as UpdateExtracurricularRequestStatus,
+      type: item.type as UpdateExtracurricularRequestType,
       description: item.description,
-      leadership_role: item.leadership_role ?? null,
-      start_date: isoToYMD(item.start_date) as any,
-      end_date: isoToYMD(item.end_date ?? undefined) as any,
+      leadership_role: item.leadership_role ?? undefined,
+      start_date: toDateInput(item.start_date),
+      end_date: toDateInput(item.end_date) || undefined,
       organization: item.organization,
     })
   }
 
-  const cancelEdit = () => { setEditing(null); setForm({}) }
+  const cancelEdit = () => {
+    setEditing(null)
+    setForm({})
+  }
 
   const saveEdit = async () => {
-    if (!editing) return
+    if (editing === null) return
     setMsg(null)
+    setSaving(true)
+
+    // Optional fields are sent only when filled in
+    const payload: UpdateExtracurricularRequest = {
+      ...form,
+      leadership_role: form.leadership_role || undefined,
+      end_date: form.end_date || undefined,
+    }
+
     try {
-      const isoToYMD = (s?: string | null | number) => {
-        if (!s) return null
-        const str = String(s)
-        const t = str.indexOf('T')
-        if (t > 0) return str.slice(0, t)
-        return str.length >= 10 ? str.slice(0, 10) : str
+      const res = await updateExtracurricular(editing, payload)
+      if (res.status === 200) {
+        await mutate()
+        cancelEdit()
+      } else {
+        setMsg('Error: ' + JSON.stringify(res.data))
       }
-      const payload = {
-        student_id: TEST_STUDENT_ID,
-        name: form.name,
-        status: form.status,
-        type: form.type,
-        description: form.description,
-        leadership_role: form.leadership_role ?? null,
-        start_date: isoToYMD(form.start_date),
-        end_date: form.end_date ? isoToYMD(form.end_date) : null,
-        organization: form.organization,
-      }
-      const res = await fetch(`${API_BASE}/extracurriculars/` + editing, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) throw new Error(await res.text())
-      await fetchList()
-      setEditing(null)
-    } catch (err: any) {
-      setMsg('Error: ' + (err.message || String(err)))
+    } catch (err) {
+      setMsg('Error: ' + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      setSaving(false)
     }
   }
 
-  const updateField = (k: keyof Extracurricular, v: any) => setForm(prev => ({ ...prev, [k]: v }))
+  const updateField = <K extends keyof UpdateExtracurricularRequest>(key: K, value: UpdateExtracurricularRequest[K]) =>
+    setForm(prev => ({ ...prev, [key]: value }))
 
   return (
     <div>
       <h2>Extracurriculars</h2>
+      {listError && <p>Error: {listError}</p>}
       {msg && <p>{msg}</p>}
-      <button onClick={fetchList}>Refresh</button>
+      <button onClick={() => mutate()}>Refresh</button>
+      {isLoading && <p>Loading...</p>}
       <ul>
         {list.map(item => (
           <li key={item.id} style={{ marginBottom: 12 }}>
@@ -110,15 +94,17 @@ export default function Extracurriculars() {
                   <label>Name: <input value={form.name ?? ''} onChange={e => updateField('name', e.target.value)} /></label>
                 </div>
                 <div>
-                  <label>Status: <select value={form.status ?? ''} onChange={e => updateField('status', e.target.value)}>
-                    <option value="doing">doing</option>
-                    <option value="have_done">have_done</option>
+                  <label>Status: <select value={form.status ?? ''} onChange={e => updateField('status', e.target.value as UpdateExtracurricularRequestStatus)}>
+                    {Object.values(UpdateExtracurricularRequestStatus).map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
                   </select></label>
                 </div>
                 <div>
-                  <label>Type: <select value={form.type ?? ''} onChange={e => updateField('type', e.target.value)}>
-                    <option value="maintenance">maintenance</option>
-                    <option value="investment">investment</option>
+                  <label>Type: <select value={form.type ?? ''} onChange={e => updateField('type', e.target.value as UpdateExtracurricularRequestType)}>
+                    {Object.values(UpdateExtracurricularRequestType).map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
                   </select></label>
                 </div>
                 <div>
@@ -139,8 +125,8 @@ export default function Extracurriculars() {
                   <label>Organization: <input value={form.organization ?? ''} onChange={e => updateField('organization', e.target.value)} /></label>
                 </div>
                 <div>
-                  <button onClick={saveEdit}>Save</button>
-                  <button onClick={cancelEdit}>Cancel</button>
+                  <button onClick={saveEdit} disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                  <button onClick={cancelEdit} disabled={saving}>Cancel</button>
                 </div>
               </div>
             ) : (

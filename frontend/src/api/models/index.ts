@@ -6,8 +6,15 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './createExtracurricularRequest';
+export * from './createExtracurricularRequestStatus';
+export * from './createExtracurricularRequestType';
 export * from './errorDetail';
 export * from './errorModel';
+export * from './extracurricular';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
 export * from './greetingRequestBody';
+export * from './updateExtracurricularRequest';
+export * from './updateExtracurricularRequestStatus';
+export * from './updateExtracurricularRequestType';

@@ -1,31 +1,30 @@
 import { useState } from 'react'
 
-const API_BASE = 'http://localhost:8080'
+import { useCreateExtracurricular } from '../api/endpoints/extracurriculars/extracurriculars'
+import {
+  CreateExtracurricularRequestStatus,
+  CreateExtracurricularRequestType,
+  type CreateExtracurricularRequest,
+} from '../api/models'
+
+// TODO: replace with the logged-in student's id once auth is wired up
 const TEST_STUDENT_ID = '00000000-0000-0000-0000-000000000002'
 
-type FormState = {
-  name: string
-  status: 'doing' | 'have_done'
-  type: 'maintenance' | 'investment'
-  description: string
-  leadership_role: string
-  start_date: string
-  end_date: string
-  organization: string
+const emptyForm: CreateExtracurricularRequest = {
+  name: '',
+  status: CreateExtracurricularRequestStatus.doing,
+  type: CreateExtracurricularRequestType.maintenance,
+  description: '',
+  leadership_role: undefined,
+  start_date: '',
+  end_date: undefined,
+  organization: '',
 }
 
 export default function CreateExtracurricular() {
-  const [form, setForm] = useState<FormState>({
-    name: '',
-    status: 'doing',
-    type: 'maintenance',
-    description: '',
-    leadership_role: '',
-    start_date: '',
-    end_date: '',
-    organization: '',
-  })
+  const [form, setForm] = useState<CreateExtracurricularRequest>(emptyForm)
   const [msg, setMsg] = useState<string | null>(null)
+  const { trigger, isMutating } = useCreateExtracurricular(TEST_STUDENT_ID)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -35,31 +34,24 @@ export default function CreateExtracurricular() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setMsg(null)
-    const payload = {
-      student_id: TEST_STUDENT_ID,
-      user_id: TEST_STUDENT_ID,
-      name: form.name,
-      status: form.status,
-      type: form.type,
-      description: form.description,
-      leadership_role: form.leadership_role || null,
-      start_date: form.start_date,
-      end_date: form.end_date || null,
-      organization: form.organization,
+
+    // Optional fields are sent only when filled in
+    const payload: CreateExtracurricularRequest = {
+      ...form,
+      leadership_role: form.leadership_role || undefined,
+      end_date: form.end_date || undefined,
     }
 
     try {
-      const res = await fetch(`${API_BASE}/extracurriculars`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) throw new Error(await res.text())
-      const data = await res.json()
-      const created = data?.body ?? data?.Body ?? data
-      setMsg('Created id: ' + (created?.id ?? 'unknown'))
-    } catch (err: any) {
-      setMsg('Error: ' + (err.message || String(err)))
+      const res = await trigger(payload)
+      if (res.status === 200) {
+        setMsg('Created id: ' + res.data.id)
+        setForm(emptyForm)
+      } else {
+        setMsg('Error: ' + JSON.stringify(res.data))
+      }
+    } catch (err) {
+      setMsg('Error: ' + (err instanceof Error ? err.message : String(err)))
     }
   }
 
@@ -73,16 +65,18 @@ export default function CreateExtracurricular() {
         <div>
           <label>Status: 
             <select name="status" value={form.status} onChange={handleChange}>
-              <option value="doing">doing</option>
-              <option value="have_done">have_done</option>
+              {Object.values(CreateExtracurricularRequestStatus).map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
             </select>
           </label>
         </div>
         <div>
           <label>Type: 
             <select name="type" value={form.type} onChange={handleChange}>
-              <option value="maintenance">maintenance</option>
-              <option value="investment">investment</option>
+              {Object.values(CreateExtracurricularRequestType).map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
           </label>
         </div>
@@ -92,19 +86,21 @@ export default function CreateExtracurricular() {
           </label>
         </div>
         <div>
-          <label>Leadership role: <input name="leadership_role" value={form.leadership_role} onChange={handleChange} /></label>
+          <label>Leadership role: <input name="leadership_role" value={form.leadership_role ?? ''} onChange={handleChange} /></label>
         </div>
         <div>
           <label>Start date: <input type="date" name="start_date" value={form.start_date} onChange={handleChange} /></label>
         </div>
         <div>
-          <label>End date: <input type="date" name="end_date" value={form.end_date} onChange={handleChange} /></label>
+          <label>End date: <input type="date" name="end_date" value={form.end_date ?? ''} onChange={handleChange} /></label>
         </div>
         <div>
           <label>Organization: <input name="organization" value={form.organization} onChange={handleChange} /></label>
         </div>
         <div>
-          <button type="submit">Create</button>
+          <button type="submit" disabled={isMutating}>
+            {isMutating ? 'Creating...' : 'Create'}
+          </button>
         </div>
       </form>
       {msg && <p>{msg}</p>}
