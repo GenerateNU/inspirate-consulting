@@ -229,6 +229,7 @@ components:
           type: string
       type: object
     EssayListBody:
+    EssayReviewStatus:
       additionalProperties: false
       properties:
         $schema:
@@ -457,6 +458,116 @@ components:
       required:
         - s3_key
         - upload_url
+      type: object
+    RefundEssayReviewResponseBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/RefundEssayReviewResponseBody.json
+          format: uri
+          readOnly: true
+          type: string
+        refund:
+          $ref: "#/components/schemas/EssayReviewTransaction"
+          description: The negative row that reversed the charge
+        transaction:
+          $ref: "#/components/schemas/EssayReviewTransaction"
+          description: The original charge, now marked refunded
+      required:
+        - transaction
+        - refund
+      type: object
+    RequestEssayReviewRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/RequestEssayReviewRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        amount:
+          default: 1
+          description: Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.
+          examples:
+            - 1
+          format: int64
+          minimum: 1
+          type: integer
+        essay_id:
+          description: Essay to review
+          examples:
+            - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
+          type: string
+        student_id:
+          description: Student requesting the review
+          examples:
+            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
+          type: string
+      required:
+        - student_id
+        - essay_id
+        - amount
+      type: object
+    SetStudentReviewBalanceRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/SetStudentReviewBalanceRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        review_balance:
+          description: Absolute value to set the student's review balance to
+          examples:
+            - 5
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+        - review_balance
+      type: object
+    Student:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Student.json
+          format: uri
+          readOnly: true
+          type: string
+        counselor_id:
+          type: string
+        gpa:
+          format: int64
+          type: integer
+        id:
+          type: string
+        organization:
+          type:
+            - string
+            - "null"
+        review_balance:
+          format: int64
+          type: integer
+        user_id:
+          type: string
+        year:
+          type: string
+      required:
+        - id
+        - user_id
+        - year
+        - organization
+        - gpa
+        - review_balance
+        - counselor_id
       type: object
     TodoItem:
       additionalProperties: false
@@ -906,6 +1017,31 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateUserInputBody"
         required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+  /user/{id}:
+    get:
+      description: fetch a user (student/counselor)
+      operationId: fetch-user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           content:

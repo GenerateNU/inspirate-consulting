@@ -5,6 +5,8 @@ import (
 	"time"
 
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
+	dbinterface "inspirate-consulting/internal/data/db-interface"
+	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
@@ -52,6 +54,7 @@ type PersonalCollegeApplicationRepository interface {
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 
 // To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos
@@ -76,6 +79,25 @@ type MediaAccessRepository interface {
 	ListAccessibleMedia(ctx context.Context, studentID string) ([]models.Media, error)
 }
 
+// To represent the Essay Review Transaction schema
+type EssayReviewRepository interface {
+	WithTx(ctx context.Context, fn func(db dbinterface.QueryInterface) error) error
+	DB() dbinterface.QueryInterface
+
+	LockStudent(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.Student, error)
+	SetStudentBalance(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID, reviewBalance int) error
+	AdjustStudentBalance(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID, delta int) error
+
+	LockTransaction(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
+	FindOpenReviewForEssay(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*uuid.UUID, error)
+	FindEssayReviewStatus(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*models.EssayReviewStatus, error)
+	InsertSpend(ctx context.Context, db dbinterface.QueryInterface, studentID, essayID uuid.UUID, amount int) (*models.EssayReviewTransaction, error)
+	InsertRefund(ctx context.Context, db dbinterface.QueryInterface, charge *models.EssayReviewTransaction) (*models.EssayReviewTransaction, error)
+	InsertAdjustment(ctx context.Context, db dbinterface.QueryInterface, studentID uuid.UUID, delta int) error
+	LinkRefund(ctx context.Context, db dbinterface.QueryInterface, chargeID, reversalID uuid.UUID) (*models.EssayReviewTransaction, error)
+	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
@@ -89,6 +111,7 @@ type Repository struct {
 	MediaAccess                MediaAccessRepository
 	User                       UserRepository
 	Video                      VideoRepository
+	EssayReview                EssayReviewRepository
 }
 
 // Close closes the database connection pool
@@ -115,5 +138,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 		// Video:                    videoRepository.NewVideoRepository(db),
+		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 	}
 }
