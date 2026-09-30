@@ -44,6 +44,7 @@ type PersonalCollegeApplicationRepository interface {
 }
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
+	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 }
 
 // To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos

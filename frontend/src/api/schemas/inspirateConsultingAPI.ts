@@ -348,6 +348,22 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * fetch a user (student/counselor)
+ */
+export const FetchUserParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const FetchUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * List all videos in the S3 bucket.
  */
 export const ListVideosResponseItem = /*#__PURE__*/ zod.object({

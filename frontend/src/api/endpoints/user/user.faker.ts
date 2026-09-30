@@ -16,3 +16,5 @@ import type {
 
 export const getCreateUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
+export const getFetchUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
