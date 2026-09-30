@@ -1,9 +1,10 @@
-export type { HTTPStatusCode1xx } from './essay-reviews/essay-reviews';
-export type { HTTPStatusCode2xx } from './essay-reviews/essay-reviews';
-export type { HTTPStatusCode3xx } from './essay-reviews/essay-reviews';
-export type { HTTPStatusCode4xx } from './essay-reviews/essay-reviews';
-export type { HTTPStatusCode5xx } from './essay-reviews/essay-reviews';
-export type { HTTPStatusCodes } from './essay-reviews/essay-reviews';
+export type { HTTPStatusCode1xx } from './chat/chat';
+export type { HTTPStatusCode2xx } from './chat/chat';
+export type { HTTPStatusCode3xx } from './chat/chat';
+export type { HTTPStatusCode4xx } from './chat/chat';
+export type { HTTPStatusCode5xx } from './chat/chat';
+export type { HTTPStatusCodes } from './chat/chat';
+export * from './chat/chat';
 export * from './essay-reviews/essay-reviews';
 export * from './essays/essays';
 export * from './global-colleges/global-colleges';
