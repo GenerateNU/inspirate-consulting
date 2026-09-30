@@ -2,34 +2,48 @@ package extracurricularRepository
 
 import (
 	"context"
-	"fmt"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 
 	"inspirate-consulting/internal/models"
 )
 
+// extracurricularColumns is the column list shared by every query that returns
+// a full extracurricular row. Order doesn't matter for RowToStructByName, but
+// every column must match a db tag on models.Extracurricular.
+const extracurricularColumns = `
+		id,
+		created_at,
+		updated_at,
+		student_id,
+		user_id,
+		name,
+		status,
+		type,
+		description,
+		leadership_role,
+		start_date,
+		end_date,
+		organization`
+
 // CreateExtracurricular inserts a new extracurricular row into the
 // public.extracurriculars table and returns the created record back to the caller.
-func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error) {
-	createdExtracurricular := &models.CreateExtracurricularOutput{}
+func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, userID string, input models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error) {
+	body := input.Body
 
-	studentID := extracurricular.Body.StudentID
-	if studentID == nil || *studentID == "" {
-		return nil, fmt.Errorf("student id is required")
-	}
-
-	startDate, err := models.ParseDate(extracurricular.Body.StartDate)
+	startDate, err := models.ParseDate(body.StartDate)
 	if err != nil {
 		return nil, err
 	}
 
 	var endDate *time.Time
-	if extracurricular.Body.EndDate != nil {
-		parsedEndDate, err := models.ParseDate(*extracurricular.Body.EndDate)
+	if body.EndDate != nil {
+		parsed, err := models.ParseDate(*body.EndDate)
 		if err != nil {
 			return nil, err
 		}
-		endDate = &parsedEndDate
+		endDate = &parsed
 	}
 
 	const insertQuery = `
@@ -47,106 +61,38 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, e
 	) VALUES (
 		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 	)
-	RETURNING
-		id,
-		created_at,
-		updated_at,
-		student_id,
-		user_id,
-		name,
-		status,
-		type,
-		description,
-		leadership_role,
-		start_date,
-		end_date,
-		organization
-	`
+	RETURNING` + extracurricularColumns
 
-	var (
-		id           int64
-		createdAt    time.Time
-		updatedAt    time.Time
-		studentIDRow string
-		userID       string
-		name         string
-		status       string
-		extracType   string
-		description  string
-		leadership   *string
-		startDateRow time.Time
-		endDateRow   *time.Time
-		organization string
-	)
-
-	err = r.db.QueryRow(
+	rows, err := r.db.Query(
 		ctx,
 		insertQuery,
-		*studentID,
-		extracurricular.Body.UserID,
-		extracurricular.Body.Name,
-		extracurricular.Body.Status,
-		extracurricular.Body.Type,
-		extracurricular.Body.Description,
-		extracurricular.Body.LeadershipRole,
+		input.StudentID,
+		userID,
+		body.Name,
+		body.Status,
+		body.Type,
+		body.Description,
+		body.LeadershipRole,
 		startDate,
 		endDate,
-		extracurricular.Body.Organization,
-	).Scan(
-		&id,
-		&createdAt,
-		&updatedAt,
-		&studentIDRow,
-		&userID,
-		&name,
-		&status,
-		&extracType,
-		&description,
-		&leadership,
-		&startDateRow,
-		&endDateRow,
-		&organization,
+		body.Organization,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	createdExtracurricular.Body = models.Extracurricular{
-		ID:             id,
-		CreatedAt:      createdAt,
-		UpdatedAt:      updatedAt,
-		StudentID:      studentIDRow,
-		UserID:         userID,
-		Name:           name,
-		Status:         models.ExtracurricularStatus(status),
-		Type:           models.ExtracurricularType(extracType),
-		Description:    description,
-		LeadershipRole: leadership,
-		StartDate:      startDateRow,
-		EndDate:        endDateRow,
-		Organization:   organization,
+	created, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Extracurricular])
+	if err != nil {
+		return nil, err
 	}
 
-	return createdExtracurricular, nil
+	return &models.CreateExtracurricularOutput{Body: created}, nil
 }
 
 // ListExtracurriculars retrieves extracurriculars for a student
 func (r *ExtracurricularRepository) ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error) {
 	const selectQuery = `
-	SELECT
-		id,
-		created_at,
-		updated_at,
-		student_id,
-		user_id,
-		name,
-		status,
-		type,
-		description,
-		leadership_role,
-		start_date,
-		end_date,
-		organization
+	SELECT` + extracurricularColumns + `
 	FROM public.extracurriculars
 	WHERE student_id = $1
 	ORDER BY start_date DESC
@@ -156,194 +102,72 @@ func (r *ExtracurricularRepository) ListExtracurriculars(ctx context.Context, st
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var out []models.Extracurricular
-
-	for rows.Next() {
-		var (
-			id           int64
-			createdAt    time.Time
-			updatedAt    time.Time
-			studentIDRow string
-			userID       string
-			name         string
-			status       string
-			extracType   string
-			description  string
-			leadership   *string
-			startDate    time.Time
-			endDate      *time.Time
-			organization string
-		)
-
-		if err := rows.Scan(
-			&id,
-			&createdAt,
-			&updatedAt,
-			&studentIDRow,
-			&userID,
-			&name,
-			&status,
-			&extracType,
-			&description,
-			&leadership,
-			&startDate,
-			&endDate,
-			&organization,
-		); err != nil {
-			return nil, err
-		}
-
-		out = append(out, models.Extracurricular{
-			ID:             id,
-			CreatedAt:      createdAt,
-			UpdatedAt:      updatedAt,
-			StudentID:      studentIDRow,
-			UserID:         userID,
-			Name:           name,
-			Status:         models.ExtracurricularStatus(status),
-			Type:           models.ExtracurricularType(extracType),
-			Description:    description,
-			LeadershipRole: leadership,
-			StartDate:      startDate,
-			EndDate:        endDate,
-			Organization:   organization,
-		})
-	}
-
-	if rows.Err() != nil {
-		return nil, rows.Err()
-	}
-
-	return out, nil
+	// CollectRows closes rows, checks rows.Err(), and returns an empty
+	// (non-nil) slice when there are no results, so the API returns [] not null.
+	return pgx.CollectRows(rows, pgx.RowToStructByName[models.Extracurricular])
 }
 
 // UpdateExtracurricular updates an extracurricular
-func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error) {
-	studentID := extracurricular.Body.StudentID
-	if studentID == nil || *studentID == "" {
-		return nil, fmt.Errorf("student id is required")
-	}
+// Fields left nil in the request keep their existing value via COALESCE.
+// The student ID is taken from the existing row, not the request.
+// Returns pgx.ErrNoRows if no extracurricular with the given id exists.
+func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, id int64, input models.UpdateExtracurricularInput) (*models.Extracurricular, error) {
+	body := input.Body
 
-	name := extracurricular.Body.Name
-	status := extracurricular.Body.Status
-	extracType := extracurricular.Body.Type
-	description := extracurricular.Body.Description
-	leadership := extracurricular.Body.LeadershipRole
-	organization := extracurricular.Body.Organization
-	startDate := extracurricular.Body.StartDate
-	endDate := extracurricular.Body.EndDate
-
-	if name == nil {
-		name = new(string)
-	}
-	if status == nil {
-		status = new(models.ExtracurricularStatus)
-	}
-	if extracType == nil {
-		extracType = new(models.ExtracurricularType)
-	}
-	if description == nil {
-		description = new(string)
-	}
-	if leadership == nil {
-		leadership = new(string)
-	}
-	if organization == nil {
-		organization = new(string)
-	}
-
-	var parsedStartDate *time.Time
-	if startDate != nil {
-		parsed, err := models.ParseDate(*startDate)
+	var startDate *time.Time
+	if body.StartDate != nil {
+		parsed, err := models.ParseDate(*body.StartDate)
 		if err != nil {
 			return nil, err
 		}
-		parsedStartDate = &parsed
+		startDate = &parsed
 	}
 
-	var parsedEndDate *time.Time
-	if endDate != nil {
-		parsed, err := models.ParseDate(*endDate)
+	var endDate *time.Time
+	if body.EndDate != nil {
+		parsed, err := models.ParseDate(*body.EndDate)
 		if err != nil {
 			return nil, err
 		}
-		parsedEndDate = &parsed
+		endDate = &parsed
 	}
 
 	const updateQuery = `
 	UPDATE public.extracurriculars SET
-		name = $1,
-		status = $2,
-		type = $3,
-		description = $4,
-		leadership_role = $5,
-		start_date = $6,
-		end_date = $7,
-		organization = $8,
-		updated_at = now()
-	WHERE id = $9 AND student_id = $10
-	RETURNING
-		id,
-		created_at,
-		updated_at,
-		student_id,
-		user_id,
-		name,
-		status,
-		type,
-		description,
-		leadership_role,
-		start_date,
-		end_date,
-		organization
-	`
+		name            = COALESCE($1, name),
+		status          = COALESCE($2, status),
+		type            = COALESCE($3, type),
+		description     = COALESCE($4, description),
+		leadership_role = COALESCE($5, leadership_role),
+		start_date      = COALESCE($6, start_date),
+		end_date        = COALESCE($7, end_date),
+		organization    = COALESCE($8, organization),
+		updated_at      = now()
+	WHERE id = $9
+	RETURNING` + extracurricularColumns
 
-	var (
-		out        models.Extracurricular
-		leadershipRow *string
-		endDateRow *time.Time
-		extracTypeRow string
-		statusRow string
-	)
-
-	err := r.db.QueryRow(
+	rows, err := r.db.Query(
 		ctx,
 		updateQuery,
-		*name,
-		*status,
-		*extracType,
-		*description,
-		leadership,
-		parsedStartDate,
-		parsedEndDate,
-		*organization,
+		body.Name,
+		body.Status,
+		body.Type,
+		body.Description,
+		body.LeadershipRole,
+		startDate,
+		endDate,
+		body.Organization,
 		id,
-		*studentID,
-	).Scan(
-		&out.ID,
-		&out.CreatedAt,
-		&out.UpdatedAt,
-		&out.StudentID,
-		&out.UserID,
-		&out.Name,
-		&statusRow,
-		&extracTypeRow,
-		&out.Description,
-		&leadershipRow,
-		&out.StartDate,
-		&endDateRow,
-		&out.Organization,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	out.Status = models.ExtracurricularStatus(statusRow)
-	out.Type = models.ExtracurricularType(extracTypeRow)
-	out.LeadershipRole = leadershipRow
-	out.EndDate = endDateRow
+	updated, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Extracurricular])
+	if err != nil {
+		return nil, err
+	}
 
-	return &out, nil
+	return &updated, nil
 }

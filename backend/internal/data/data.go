@@ -15,7 +15,7 @@ type GreetingRepository interface {
 }
 
 type ExtracurricularRepository interface {
-	CreateExtracurricular(ctx context.Context, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
+	CreateExtracurricular(ctx context.Context, userID string, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
 	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
 	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
 }
