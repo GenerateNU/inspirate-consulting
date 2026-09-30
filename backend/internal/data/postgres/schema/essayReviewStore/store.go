@@ -2,6 +2,7 @@ package essayReviewRepository
 
 import (
 	"context"
+	"embed"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,6 +14,9 @@ import (
 type EssayReviewRepository struct {
 	db *pgxpool.Pool
 }
+
+//go:embed sql/*.sql
+var SqlEssayReviewFiles embed.FS
 
 func NewEssayReviewRepository(db *pgxpool.Pool) *EssayReviewRepository {
 	return &EssayReviewRepository{db: db}
@@ -38,8 +42,6 @@ func (r *EssayReviewRepository) WithTx(ctx context.Context, fn func(db dbinterfa
 
 	return tx.Commit(ctx)
 }
-
-const transactionColumns = `id, subtotal, student_id, entry_type, essay_id, completed_at, refund, status, actor_id, created_at, updated_at`
 
 func collectOne(ctx context.Context, db dbinterface.QueryInterface, sql string, args ...any) (*models.EssayReviewTransaction, error) {
 	rows, err := db.Query(ctx, sql, args...)

@@ -1,22 +1,23 @@
 package mediaRepository
 
-import(
+import (
 	"context"
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 )
 
-func(r *MediaRepository) DeleteMedia(ctx context.Context, id string)error{
+func (r *MediaRepository) DeleteMedia(ctx context.Context, id string) error {
 
-	const deleteQuery = `
-	DELETE FROM public.media
-	WHERE id = $1
-	`
-	result, err := r.db.Exec(ctx, deleteQuery, id)
-	if(err != nil){
+	deleteQuery, err := schema.ReadSQLBaseScript("delete_media.sql", SqlMediaFiles)
+	if err != nil {
 		return err
 	}
-	
-	if result.RowsAffected()==0{
+	result, err := r.db.Exec(ctx, deleteQuery, id)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
 		return errs.NotFound("media", "id", id)
 	}
 

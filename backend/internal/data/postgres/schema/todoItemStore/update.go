@@ -4,20 +4,19 @@ import (
 	"context"
 	"time"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
 
 func (r *TodoItemRepository) UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error) {
 	updatedItem := &models.TodoItem{}
 
-	const updateQuery = `
-	UPDATE public.todo_items
-	SET completed_at = $1, updated_at = now()
-	WHERE id = $2
-	RETURNING id, created_at, updated_at, student_id, user_id, todo_description, completed_at, deadline
-	`
+	updateQuery, err := schema.ReadSQLBaseScript("update_todo_item_completed_at.sql", SqlTodoItemFiles)
+	if err != nil {
+		return nil, err
+	}
 
-	err := r.db.QueryRow(
+	err = r.db.QueryRow(
 		ctx,
 		updateQuery,
 		completedAt,

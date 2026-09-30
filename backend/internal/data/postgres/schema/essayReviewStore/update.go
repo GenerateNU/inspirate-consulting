@@ -8,16 +8,16 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 )
 
 func (r *EssayReviewRepository) SetStudentBalance(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID, reviewBalance int) error {
-	const updateQuery = `
-	UPDATE public.student
-	SET review_balance = $2, updated_at = NOW()
-	WHERE id = $1
-	`
+	updateQuery, err := schema.ReadSQLBaseScript("set_student_review_balance.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return err
+	}
 
 	tag, err := db.Exec(ctx, updateQuery, id, reviewBalance)
 	if err != nil {
@@ -31,11 +31,10 @@ func (r *EssayReviewRepository) SetStudentBalance(ctx context.Context, db dbinte
 }
 
 func (r *EssayReviewRepository) AdjustStudentBalance(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID, delta int) error {
-	const adjustQuery = `
-	UPDATE public.student
-	SET review_balance = review_balance + $2, updated_at = NOW()
-	WHERE id = $1
-	`
+	adjustQuery, err := schema.ReadSQLBaseScript("adjust_student_review_balance.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return err
+	}
 
 	tag, err := db.Exec(ctx, adjustQuery, id, delta)
 	if err != nil {
@@ -50,11 +49,10 @@ func (r *EssayReviewRepository) AdjustStudentBalance(ctx context.Context, db dbi
 
 // LinkRefund points a charge at the row that reversed it.
 func (r *EssayReviewRepository) LinkRefund(ctx context.Context, db dbinterface.QueryInterface, chargeID, reversalID uuid.UUID) (*models.EssayReviewTransaction, error) {
-	const updateQuery = `
-	UPDATE public.essay_review_transaction
-	SET refund = $2, updated_at = NOW()
-	WHERE id = $1
-	RETURNING ` + transactionColumns
+	updateQuery, err := schema.ReadSQLBaseScript("link_essay_review_refund.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	transaction, err := collectOne(ctx, db, updateQuery, chargeID, reversalID)
 	if err != nil {
@@ -68,11 +66,10 @@ func (r *EssayReviewRepository) LinkRefund(ctx context.Context, db dbinterface.Q
 }
 
 func (r *EssayReviewRepository) MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error) {
-	const updateQuery = `
-	UPDATE public.essay_review_transaction
-	SET completed_at = NOW(), updated_at = NOW()
-	WHERE id = $1
-	RETURNING ` + transactionColumns
+	updateQuery, err := schema.ReadSQLBaseScript("update_essay_review.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	transaction, err := collectOne(ctx, db, updateQuery, id)
 	if err != nil {
