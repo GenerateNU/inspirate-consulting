@@ -66,12 +66,12 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository){
 		Path:        "/media/{id}",
 		Description: "Delete a video, through counselor view",
 		Tags:        []string{"Media"},
-	}, func(ctx context.Context, input *models.DeleteMediaInput)(*models.DeleteMediaOutput, error){
+	}, func(ctx context.Context, input *models.DeleteMediaInput)(*struct{}, error){
 		err := mediaHandler.DeleteMedia(ctx, input.ID)
 		if(err !=nil){
 			return nil, err
 		}
-		return &models.DeleteMediaOutput{}, nil
+		return nil, nil
 	})
 
 }

@@ -56,9 +56,6 @@ type DeleteMediaInput struct{
 	ID   string `path:"id"`
 }
 
-type DeleteMediaOutput struct{
-
-}
 
 type GrantMediaAccessInput struct {
 	Body GrantMediaAccessRequestBody
@@ -72,9 +69,6 @@ type RevokeMediaAccessInput struct{
 	ID   string `path:"id"`
 }
 
-type RevokeMediaAccessOutput struct{
-
-}
 
 type ListAccessibleMediaInput struct{
 
