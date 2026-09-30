@@ -1,5 +1,134 @@
 components:
   schemas:
+    ChatMessage:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ChatMessage.json
+          format: uri
+          readOnly: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        edited_at:
+          description: Null if the message was never edited
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        message:
+          type: string
+        read_at:
+          description: Null if the recipient has not read the message
+          format: date-time
+          type:
+            - string
+            - "null"
+        recipient_id:
+          type: string
+        sender_id:
+          type: string
+      required:
+        - id
+        - sender_id
+        - recipient_id
+        - message
+        - created_at
+        - edited_at
+        - read_at
+      type: object
+    ChatMessagePage:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ChatMessagePage.json
+          format: uri
+          readOnly: true
+          type: string
+        messages:
+          description: Newest first
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+          type:
+            - array
+            - "null"
+        next_cursor:
+          description: Pass as cursor to get older messages; null when there are none
+          type:
+            - string
+            - "null"
+      required:
+        - messages
+        - next_cursor
+      type: object
+    ChatSummary:
+      additionalProperties: false
+      properties:
+        last_message:
+          type: string
+        last_message_at:
+          format: date-time
+          type: string
+        last_message_id:
+          type: string
+        last_message_read_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        last_sender_id:
+          type: string
+        other_user_id:
+          type: string
+        other_user_name:
+          type: string
+        other_user_pfp_key:
+          type:
+            - string
+            - "null"
+        unread_count:
+          description: Messages from the other user the current user has not read
+          format: int64
+          type: integer
+      required:
+        - other_user_id
+        - other_user_name
+        - other_user_pfp_key
+        - last_message_id
+        - last_message
+        - last_sender_id
+        - last_message_at
+        - last_message_read_at
+        - unread_count
+      type: object
+    CreateChatMessageRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateChatMessageRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        message:
+          description: Message text
+          minLength: 1
+          type: string
+        recipient_id:
+          description: User ID of the message recipient
+          type: string
+      required:
+        - recipient_id
+        - message
+      type: object
     CreateEssayBody:
       additionalProperties: false
       properties:
@@ -168,6 +297,23 @@ components:
         - pfp_key
         - email
         - password
+      type: object
+    EditChatMessageRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EditChatMessageRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        message:
+          description: New message text
+          minLength: 1
+          type: string
+      required:
+        - message
       type: object
     ErrorDetail:
       additionalProperties: false
@@ -738,6 +884,22 @@ components:
         - completed_at
         - deadline
       type: object
+    UpdateChatMessageReadInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateChatMessageReadInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        read:
+          description: False marks the message as unread
+          type: boolean
+      required:
+        - read
+      type: object
     UpdateStatusBody:
       additionalProperties: false
       properties:
@@ -875,6 +1037,95 @@ paths:
           description: Error
       tags:
         - Personal College Applications
+  /chats:
+    get:
+      description: List the current user's conversations with their latest message and unread count, most recent first.
+      operationId: list-chats
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ChatSummary"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /chats/{user_id}/messages:
+    get:
+      description: Get a page of messages between the current user and another user, newest first.
+      operationId: list-chat-messages
+      parameters:
+        - description: The other user in the conversation
+          in: path
+          name: user_id
+          required: true
+          schema:
+            description: The other user in the conversation
+            type: string
+        - description: next_cursor from the previous page; omit to get the newest messages
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: next_cursor from the previous page; omit to get the newest messages
+            type: string
+        - explode: false
+          in: query
+          name: limit
+          schema:
+            default: 50
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagePage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /chats/{user_id}/read:
+    post:
+      description: Mark every message the other user sent to the current user as read.
+      operationId: mark-chat-read
+      parameters:
+        - description: The other user in the conversation
+          in: path
+          name: user_id
+          required: true
+          schema:
+            description: The other user in the conversation
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
   /colleges:
     get:
       description: List all global colleges.
@@ -1054,6 +1305,93 @@ paths:
           description: Error
       tags:
         - Greetings
+  /messages:
+    post:
+      description: Send a message from the current user to another user.
+      operationId: create-chat-message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatMessageRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /messages/{id}:
+    patch:
+      description: Edit the text of a message the current user sent.
+      operationId: edit-chat-message
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditChatMessageRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /messages/{id}/read:
+    patch:
+      description: Mark a message the current user received as read or unread.
+      operationId: update-chat-message-read
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChatMessageReadInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
   /reviews:
     post:
       description: Spend a student's review balance to open a review on an essay.
