@@ -2,7 +2,7 @@ package routes
 
 import (
 	"context"
-	// "inspirate-consulting/internal/auth"
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/postgres"
@@ -84,26 +84,23 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	humaAPI := humafiber.New(app, humaConfig)
 
-	// Local test middleware is handled at the route-level (headers are read into
-	// route input structs) so we don't add global test middleware here.
-
 	// Register public routes BEFORE auth middleware
 	// routes.SetupAuthRoutes(humaAPI, repo, config)
+
+	// Apply auth middleware — only affects routes registered after this point
+	if !config.TestMode {
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
+	}
 
 	// Root route
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
-	// Register protected Huma endpoints BEFORE auth middleware is applied
+	// Register protected Huma endpoints
 	if err := setupProtectedHumaRoutes(humaAPI, repo, config); err != nil {
 		return nil, nil, err
 	}
-
-	// Apply auth middleware — only affects routes registered after this point
-	// if !config.TestMode {
-	// 	humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
-	// }
 
 	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
 	// setupDocsRoutes(app, "/app/api")
@@ -115,6 +112,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
+	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpExtracurricularRoutes(api, repo)
 	return nil
 }
