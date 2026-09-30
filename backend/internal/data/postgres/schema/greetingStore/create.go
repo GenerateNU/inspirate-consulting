@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
 
@@ -11,16 +12,12 @@ func (r *GreetingRepository) CreateGreeting(ctx context.Context, greeting models
 	createdGreeting := &models.CreateGreetingOutput{}
 	greetingMessage := fmt.Sprintf("Hello, %s!", greeting.Body.Name)
 
-	const insertQuery = `
-	INSERT INTO public.greetings (
-		name, greeting_string
-	) VALUES (
-		$1, $2
-	)
-	RETURNING greeting_string
-	`
+	insertQuery, err := schema.ReadSQLBaseScript("create_greeting.sql", SqlGreetingFiles)
+	if err != nil {
+		return nil, err
+	}
 
-	err := r.db.QueryRow(
+	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
 		greeting.Body.Name,

@@ -2,22 +2,19 @@ package todoItemRepository
 
 import (
 	"context"
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
 
 func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
 	createdItem := &models.TodoItem{}
 
-	const insertQuery = `
-	INSERT INTO public.todo_items (
-		student_id, user_id, todo_description, deadline
-	) VALUES (
-		$1, $2, $3, $4
-	)
-	RETURNING id, created_at, updated_at, student_id, user_id, todo_description, completed_at, deadline
-	`
+	insertQuery, err := schema.ReadSQLBaseScript("create_todo_item.sql", SqlTodoItemFiles)
+	if err != nil {
+		return nil, err
+	}
 
-	err := r.db.QueryRow(
+	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
 		item.StudentID,

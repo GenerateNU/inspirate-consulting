@@ -2,6 +2,7 @@ package essayReviewRepository
 
 import (
 	"context"
+	"embed"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,6 +14,9 @@ import (
 type EssayReviewRepository struct {
 	db *pgxpool.Pool
 }
+
+//go:embed sql/*.sql
+var SqlEssayReviewFiles embed.FS
 
 func NewEssayReviewRepository(db *pgxpool.Pool) *EssayReviewRepository {
 	return &EssayReviewRepository{db: db}

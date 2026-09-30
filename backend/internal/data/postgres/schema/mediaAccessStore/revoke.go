@@ -1,18 +1,19 @@
 package mediaAccessRepository
 
-import(
+import (
 	"context"
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 )
 
-func(r *MediaAccessRepository) RevokeMediaAccess(ctx context.Context, id string)error {
+func (r *MediaAccessRepository) RevokeMediaAccess(ctx context.Context, id string) error {
 
-	const deleteQuery = `
-	DELETE FROM public.media_access
-	WHERE id = $1
-	`
+	deleteQuery, err := schema.ReadSQLBaseScript("revoke_media_access.sql", SqlMediaAccessFiles)
+	if err != nil {
+		return err
+	}
 	result, err := r.db.Exec(ctx, deleteQuery, id)
-	if(err != nil){
+	if err != nil {
 		return err
 	}
 

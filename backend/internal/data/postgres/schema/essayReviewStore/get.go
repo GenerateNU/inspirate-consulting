@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 )
@@ -15,15 +16,13 @@ import (
 // LockStudent reads a student and holds a row lock until the surrounding
 // transaction ends.
 func (r *EssayReviewRepository) LockStudent(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.Student, error) {
-	const lockQuery = `
-	SELECT id, user_id, year, organization, gpa, review_balance, counselor_id
-	FROM public.student
-	WHERE id = $1
-	FOR UPDATE
-	`
+	lockQuery, err := schema.ReadSQLBaseScript("get_essay_review.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	student := &models.Student{}
-	err := db.QueryRow(ctx, lockQuery, id).Scan(
+	err = db.QueryRow(ctx, lockQuery, id).Scan(
 		&student.ID,
 		&student.UserID,
 		&student.Year,
@@ -45,12 +44,10 @@ func (r *EssayReviewRepository) LockStudent(ctx context.Context, db dbinterface.
 // LockTransaction reads a transaction row and holds a row lock until the
 // surrounding transaction ends.
 func (r *EssayReviewRepository) LockTransaction(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error) {
-	const lockQuery = `
-	SELECT ` + transactionColumns + `
-	FROM public.essay_review_transaction
-	WHERE id = $1
-	FOR UPDATE
-	`
+	lockQuery, err := schema.ReadSQLBaseScript("lock_essay_review_transaction.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	transaction, err := collectOne(ctx, db, lockQuery, id)
 	if err != nil {
@@ -65,12 +62,10 @@ func (r *EssayReviewRepository) LockTransaction(ctx context.Context, db dbinterf
 
 // FindOpenReviewForEssay returns nil when the essay has no review in flight.
 func (r *EssayReviewRepository) FindOpenReviewForEssay(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*uuid.UUID, error) {
-	const selectQuery = `
-	SELECT id
-	FROM public.essay_review_transaction
-	WHERE essay_id = $1 AND status = 'open'
-	LIMIT 1
-	`
+	selectQuery, err := schema.ReadSQLBaseScript("find_open_essay_review.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	var openReviewID uuid.UUID
 	switch err := db.QueryRow(ctx, selectQuery, essayID).Scan(&openReviewID); {
@@ -85,13 +80,10 @@ func (r *EssayReviewRepository) FindOpenReviewForEssay(ctx context.Context, db d
 
 // FindEssayReviewStatus returns the most recent spend for an essay.
 func (r *EssayReviewRepository) FindEssayReviewStatus(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*models.EssayReviewStatus, error) {
-	const selectQuery = `
-	SELECT id AS transaction_id, essay_id, student_id, status, created_at AS requested_at, completed_at
-	FROM public.essay_review_transaction
-	WHERE essay_id = $1 AND entry_type = 'spend'
-	ORDER BY created_at DESC, id DESC
-	LIMIT 1
-	`
+	selectQuery, err := schema.ReadSQLBaseScript("get_essay_review_status.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := db.Query(ctx, selectQuery, essayID)
 	if err != nil {
