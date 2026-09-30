@@ -43,8 +43,6 @@ func (r *EssayReviewRepository) WithTx(ctx context.Context, fn func(db dbinterfa
 	return tx.Commit(ctx)
 }
 
-const transactionColumns = `id, subtotal, student_id, entry_type, essay_id, completed_at, refund, status, actor_id, created_at, updated_at`
-
 func collectOne(ctx context.Context, db dbinterface.QueryInterface, sql string, args ...any) (*models.EssayReviewTransaction, error) {
 	rows, err := db.Query(ctx, sql, args...)
 	if err != nil {
