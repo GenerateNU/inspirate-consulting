@@ -5,6 +5,7 @@ export type { HTTPStatusCode4xx } from './essay-reviews/essay-reviews';
 export type { HTTPStatusCode5xx } from './essay-reviews/essay-reviews';
 export type { HTTPStatusCodes } from './essay-reviews/essay-reviews';
 export * from './essay-reviews/essay-reviews';
+export * from './essays/essays';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
 export * from './personal-college-applications/personal-college-applications';

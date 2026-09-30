@@ -2,6 +2,9 @@ package data
 
 import (
 	"context"
+	"time"
+
+	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
@@ -12,7 +15,6 @@ import (
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,6 +23,13 @@ import (
 // For each schema, their interfaces are to be defined here
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
+}
+
+// Essay Repository
+type EssayRepository interface {
+	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
+	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	CreateEssay(ctx context.Context, essay models.Essays) error
 }
 
 // To represent Todo Item schema
@@ -42,6 +51,7 @@ type PersonalCollegeApplicationRepository interface {
 	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
 }
+
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
@@ -90,13 +100,15 @@ type EssayReviewRepository interface {
 
 type Repository struct {
 	db *pgxpool.Pool
+
 	// For each interface, add a field here
 	Greeting                   GreetingRepository
+	Essay                      EssayRepository
+	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
 	Media                      MediaRepository
 	MediaAccess                MediaAccessRepository
-	TodoItem                   TodoItemRepository
 	User                       UserRepository
 	Video                      VideoRepository
 	EssayReview                EssayReviewRepository
@@ -116,15 +128,16 @@ func (r *Repository) GetDB() *pgxpool.Pool {
 // NewRepository creates a new Repository instance with the given database pool
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
-		db: db,
-		// For each interface, add an instance of the interface here
+		db:                         db,
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		Essay:                      essayRepository.NewEssayRepository(db),
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
 		PersonalCollegeApplication: personalCollegeApplicationRepository.NewPersonalCollegeApplicationRepository(db),
 		Media:                      mediaRepository.NewMediaRepository(db),
 		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
+		// Video:                    videoRepository.NewVideoRepository(db),
 		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 	}
 }
