@@ -247,6 +247,132 @@ components:
       required:
         - essays
       type: object
+    EssayReviewStatus:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayReviewStatus.json
+          format: uri
+          readOnly: true
+          type: string
+        completed_at:
+          description: When a counselor completed it
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        essay_id:
+          description: Essay the review is for
+          examples:
+            - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
+          type: string
+        requested_at:
+          description: When the review was requested
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        status:
+          description: open, completed, or refunded
+          examples:
+            - open
+          type: string
+        student_id:
+          description: Student who requested the review
+          examples:
+            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
+          type: string
+        transaction_id:
+          description: Ledger row this status came from
+          examples:
+            - 7a1f0c9e-0b4e-4f1a-9f2d-0c3b5a6d7e8f
+          type: string
+      required:
+        - transaction_id
+        - essay_id
+        - student_id
+        - status
+        - requested_at
+      type: object
+    EssayReviewTransaction:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayReviewTransaction.json
+          format: uri
+          readOnly: true
+          type: string
+        actor_id:
+          description: User who caused the movement. Null until auth provides the caller.
+          examples:
+            - d4e5f6a7-b8c9-4a71-bc2d-3e4f5a6b7c8d
+          type: string
+        completed_at:
+          description: When a counselor marked the review complete
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        created_at:
+          description: Timestamp when the transaction was created
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        entry_type:
+          description: "Kind of movement: spend, refund, or adjustment"
+          examples:
+            - spend
+          type: string
+        essay_id:
+          description: Essay under review. Null for an adjustment.
+          examples:
+            - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
+          type: string
+        id:
+          description: Unique identifier for the transaction
+          examples:
+            - 7a1f0c9e-0b4e-4f1a-9f2d-0c3b5a6d7e8f
+          type: string
+        refund:
+          description: The negative row that reversed this charge, if it was refunded
+          examples:
+            - c3d4e5f6-a7b8-4960-ab1c-2d3e4f5a6b7c
+          type: string
+        status:
+          description: "Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows."
+          examples:
+            - open
+          type: string
+        student_id:
+          description: Student whose balance moved
+          examples:
+            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
+          type: string
+        subtotal:
+          description: Signed change to the student's balance. Negative for a spend, positive for a refund or grant. Sums to the balance.
+          examples:
+            - -1
+          format: int64
+          type: integer
+        updated_at:
+          description: Timestamp when the transaction was last updated
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+      required:
+        - id
+        - subtotal
+        - student_id
+        - entry_type
+        - created_at
+        - updated_at
+      type: object
     Essays:
       additionalProperties: false
       properties:
@@ -255,6 +381,8 @@ components:
           type:
             - integer
             - "null"
+        essay_group_id:
+          type: string
         id:
           type: string
         link_to_content:
@@ -272,6 +400,7 @@ components:
         - college_id
         - link_to_content
         - status
+        - essay_group_id
       type: object
     GlobalCollege:
       additionalProperties: false
@@ -843,6 +972,33 @@ paths:
           description: Error
       tags:
         - Essays
+  /essays/{essay_id}/review-status:
+    get:
+      description: Get the current review status of an essay, from its most recent review request.
+      operationId: get-essay-review-status
+      parameters:
+        - description: ID of the essay to look up
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: ID of the essay to look up
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayReviewStatus"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
   /essays/{essay_id}/status:
     patch:
       description: updates the status of a students essay
@@ -901,6 +1057,118 @@ paths:
           description: Error
       tags:
         - Greetings
+  /reviews:
+    post:
+      description: Spend a student's review balance to open a review on an essay.
+      operationId: request-essay-review
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestEssayReviewRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayReviewTransaction"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /reviews/{id}/complete:
+    post:
+      description: Mark a review as having been completed by a counselor.
+      operationId: complete-essay-review
+      parameters:
+        - description: ID of the review to mark complete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the review to mark complete
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayReviewTransaction"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /reviews/{id}/refund:
+    post:
+      description: Refund a review that has not been completed, crediting the balance back to the student.
+      operationId: refund-essay-review
+      parameters:
+        - description: ID of the charge to refund
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the charge to refund
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefundEssayReviewResponseBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /students/{id}/review-balance:
+    patch:
+      description: Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
+      operationId: set-student-review-balance
+      parameters:
+        - description: ID of the student
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the student
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetStudentReviewBalanceRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
   /students/{student_id}/essays:
     get:
       description: Shows all essays of a student
