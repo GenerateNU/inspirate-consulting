@@ -12,13 +12,15 @@ const (
 )
 
 type Essays struct {
-	ID            uuid.UUID `json:"id"`
-	StudentID     uuid.UUID `json:"student_id"`
-	Type          string    `json:"type"`
-	CollegeID     *int64    `json:"college_id"`
-	LinkToContent string    `json:"link_to_content"`
+	ID uuid.UUID `json:"id"`
+	StudentID uuid.UUID `json:"student_id"`
+	Type string `json:"type"`
+	CollegeID *int64 `json:"college_id"`
+	LinkToContent string `json:"link_to_content"`
 	/* I added this to help the studetns keep track of their progress*/
 	Status Status `json:"status"`
+	EssayGroupID *uuid.UUID `json:"essay_group_id"`
+
 }
 
 type GetEssaysFromStudentInput struct {
@@ -39,6 +41,7 @@ type CreateEssayBody struct {
 	CollegeID *int64    `json:"college_id" required:"false" doc:"Optional college this essay targets"`
 	// Might integrate eiditing the essay on the website might change
 	LinkToContent string `json:"link_to_content" minLength:"10" example:"https://docs.google.com/document/d/abc123"`
+	EssayGroupID *uuid.UUID  `json:"essay_group_id" doc:"optional group this essay belongs to" required:"false" ` 
 }
 
 type CreateEssayInput struct {

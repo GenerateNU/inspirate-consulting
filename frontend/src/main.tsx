@@ -19,8 +19,15 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/essay" element={<Essay />} />
         <Route path="/create-college" element={<CreateCollege />} />
         <Route path="/college-list" element={<CollegeList />} />
-        <Route path="/create-application" element={<CreateCollegeApplication />} />
+        <Route
+          path="/create-application"
+          element={<CreateCollegeApplication />}
+        />
         <Route path="/colleges" element={<CollegeApplicationList />} />
+        <Route path="/upload-video" element={<UploadVideo />} />
+        <Route path="/videos" element={<VideoList />} />
+        <Route path="/student" element={<Student />} />
+        <Route path="/counselor" element={<Counselor />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
