@@ -37,8 +37,6 @@ func (m *mockUserRepository) FetchUser(ctx context.Context, input models.FetchUs
 func TestHandler_CreateUser(t *testing.T) {
 	t.Parallel()
 
-	cfg := &config.Config{}
-
 	input := &models.CreateUserInput{}
 	input.Body.Name = "Alice"
 	input.Body.Email = "alice@example.com"
@@ -52,7 +50,7 @@ func TestHandler_CreateUser(t *testing.T) {
 			Return(nil, errors.New("database error"))
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.CreateUser(context.Background(), input, cfg)
+		res, err := handler.CreateUser(context.Background(), input, &config.MockSupabase{})
 
 		assert.Error(t, err)
 		assert.Nil(t, res)

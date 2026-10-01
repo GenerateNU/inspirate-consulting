@@ -23,7 +23,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *models.CreateUserInput) (*models.CreateUserOutput, error) {
 		fmt.Println("[route] CreateUser called")
-		userOutput, err := userHandler.CreateUser(ctx, input, config)
+		userOutput, err := userHandler.CreateUser(ctx, input, config.Supabase)
 		if err != nil {
 			fmt.Println("[route] CreateUser error:", err)
 			return nil, err

@@ -15,9 +15,6 @@ import (
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
-	"time"
-
-	"github.com/google/uuid"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
