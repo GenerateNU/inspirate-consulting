@@ -13,6 +13,7 @@ import VideoList from "./video/videos";
 import UploadVideo from "./video/upload-video";
 import Student from "./student/student";
 import Counselor from "./counselor/counselor";
+import CreateUser from "./user/create-user";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -33,6 +34,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/videos" element={<VideoList />} />
         <Route path="/student" element={<Student />} />
         <Route path="/counselor" element={<Counselor />} />
+        <Route path="/create-account" element={<CreateUser />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
