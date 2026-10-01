@@ -1,9 +1,3 @@
-export type { HTTPStatusCode1xx } from './essays/essays';
-export type { HTTPStatusCode2xx } from './essays/essays';
-export type { HTTPStatusCode3xx } from './essays/essays';
-export type { HTTPStatusCode4xx } from './essays/essays';
-export type { HTTPStatusCode5xx } from './essays/essays';
-export type { HTTPStatusCodes } from './essays/essays';
 export type { HTTPStatusCode1xx } from './essay-reviews/essay-reviews';
 export type { HTTPStatusCode2xx } from './essay-reviews/essay-reviews';
 export type { HTTPStatusCode3xx } from './essay-reviews/essay-reviews';

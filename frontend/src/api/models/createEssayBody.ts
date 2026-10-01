@@ -14,6 +14,8 @@ export interface CreateEssayBody {
      * @nullable
      */
   college_id?: number | null;
+  /** optional group this essay belongs to */
+  essay_group_id?: string;
   /** @minLength 10 */
   link_to_content: string;
   /** Student the essay belongs to */
