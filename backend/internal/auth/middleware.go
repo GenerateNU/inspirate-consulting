@@ -2,7 +2,7 @@ package auth
 
 import (
 	"errors"
-	"inspirate-consulting/internal/config"
+	"inspirate-consulting/internal/supabase"
 	"log/slog"
 	"net/http"
 	"os"
@@ -65,7 +65,7 @@ func (v *Verifier) Verify(tokenString string) (*SupabaseClaims, error) {
 	return claims, nil
 }
 
-func AuthMiddleware(api huma.API, cfg config.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
+func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
 		"/api/v1/health": true,
 	}

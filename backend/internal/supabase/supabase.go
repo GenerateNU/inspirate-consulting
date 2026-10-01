@@ -1,16 +1,16 @@
-package config
+package supabase
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-
-	"inspirate-consulting/internal/errs"
-	"inspirate-consulting/internal/models"
 	"io"
 	"log/slog"
 	"net/http"
 	"regexp"
+
+	"inspirate-consulting/internal/errs"
+	"inspirate-consulting/internal/models"
 )
 
 type SupabaseInterface interface {
@@ -29,34 +29,27 @@ func (s *Supabase) Signup(email string, password string, Client *http.Client) (m
 		return models.SignupResponse{}, err
 	}
 
-	supabaseURL := s.URL
-	apiKey := s.ServiceRoleKey
-
-	payload := models.SignUpPayload{
-		Email:    email,
-		Password: password,
-	}
+	payload := models.SignUpPayload{Email: email, Password: password}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return models.SignupResponse{}, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/signup", supabaseURL), bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/signup", s.URL), bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		slog.Error("Error in Request Creation: ", "err", err)
 		return models.SignupResponse{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
-	req.Header.Set("apikey", apiKey)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.ServiceRoleKey))
+	req.Header.Set("apikey", s.ServiceRoleKey)
 
 	res, err := Client.Do(req)
 	if err != nil {
 		slog.Error("Error executing request: ", "err", err)
 		return models.SignupResponse{}, err
 	}
-
 	defer func() { _ = res.Body.Close() }()
 
 	body, err := io.ReadAll(res.Body)
@@ -85,33 +78,26 @@ func (s *Supabase) Signup(email string, password string, Client *http.Client) (m
 }
 
 func (s *Supabase) SupabaseLogin(email string, password string, Client *http.Client) (models.LoginResponse, error) {
-	supabaseURL := s.URL
-	serviceroleKey := s.ServiceRoleKey
-
-	payload := models.SignUpPayload{
-		Email:    email,
-		Password: password,
-	}
+	payload := models.SignUpPayload{Email: email, Password: password}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return models.LoginResponse{}, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/token?grant_type=password", supabaseURL), bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/token?grant_type=password", s.URL), bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return models.LoginResponse{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", serviceroleKey))
-	req.Header.Set("apikey", serviceroleKey)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.ServiceRoleKey))
+	req.Header.Set("apikey", s.ServiceRoleKey)
 
 	res, err := Client.Do(req)
 	if err != nil {
 		slog.Error("Failed to execute Request", "err", err)
 		return models.LoginResponse{}, errs.BadRequest("Failed to execute Request")
 	}
-
 	defer func() { _ = res.Body.Close() }()
 
 	body, err := io.ReadAll(res.Body)
@@ -131,8 +117,7 @@ func (s *Supabase) SupabaseLogin(email string, password string, Client *http.Cli
 	}
 
 	var signInResponse models.LoginResponse
-	err = json.Unmarshal(body, &signInResponse)
-	if err != nil {
+	if err := json.Unmarshal(body, &signInResponse); err != nil {
 		slog.Error("Failed to parse response body", "body", err)
 		return models.LoginResponse{}, errs.BadRequest("Failed to parse response body")
 	}
