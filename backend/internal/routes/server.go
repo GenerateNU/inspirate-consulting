@@ -94,7 +94,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	// Apply auth middleware — only affects routes registered after this point
 	if !config.TestMode {
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
 	}
 
 	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
