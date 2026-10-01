@@ -119,12 +119,12 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
+	SetUpEssayRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpTodoItemRoutes(api, repo)
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
 	SetupUserRoutes(api, repo, &config)
 	SetUpVideoRoutes(api, repo)
-	SetUpEssayRoutes(api, repo)
 	SetUpEssayReviewRoutes(api, repo)
 	SetUpStudentRoutes(api, repo)
 	return nil
