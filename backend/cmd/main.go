@@ -66,24 +66,14 @@ func main() {
 func LoadConfig() (*config.Config, error) {
 	testMode := os.Getenv("TEST_MODE")
 
-	type Conf struct {
-		Application config.Application
-		DB          config.DB
-		Supabase    config.Supabase
-	}
-
-	var conf Conf
-
+	var cfg config.Config
 	// Load configuration from environment variables for production
-	err := envconfig.Process(context.Background(), &conf)
+	err := envconfig.Process(context.Background(), &cfg)
 	if err != nil {
 		log.Fatalln("Error processing environment variables: ", err)
 	}
 
-	return &config.Config{
-		Application: conf.Application,
-		DB:          conf.DB,
-		Supabase:    &conf.Supabase,
-		TestMode:    testMode == "true",
-	}, nil
+	cfg.TestMode = testMode == "true"
+
+	return &cfg, nil
 }
