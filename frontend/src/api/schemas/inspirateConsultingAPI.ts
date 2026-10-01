@@ -397,6 +397,7 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
+  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "supabase_id": /*#__PURE__*/ zod.string()
 })
@@ -413,6 +414,7 @@ export const FetchUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
+  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "supabase_id": /*#__PURE__*/ zod.string()
 })

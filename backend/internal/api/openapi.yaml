@@ -788,6 +788,8 @@ components:
           type: string
         name:
           type: string
+        needs_to_reset:
+          type: boolean
         pfp_key:
           type:
             - string
@@ -799,6 +801,7 @@ components:
         - name
         - supabase_id
         - pfp_key
+        - needs_to_reset
       type: object
     Video:
       additionalProperties: false
