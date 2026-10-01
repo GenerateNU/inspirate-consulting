@@ -12,6 +12,8 @@ import UploadVideo from "./video/upload-video";
 import VideoList from "./video/videos";
 import Student from "./student/student";
 import Counselor from "./counselor/counselor";
+import CreateTask from "./task/CreateTask";
+import TaskList from "./task/TaskList";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -32,6 +34,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/videos" element={<VideoList />} />
         <Route path="/student" element={<Student />} />
         <Route path="/counselor" element={<Counselor />} />
+        <Route path="/create-task" element={<CreateTask />} />
+        <Route path="/tasks" element={<TaskList />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
