@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
+	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
@@ -15,9 +15,6 @@ import (
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
-	"time"
-
-	"github.com/google/uuid"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -141,6 +138,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 		// Video:                    videoRepository.NewVideoRepository(db),
-		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
+		EssayReview: essayReviewRepository.NewEssayReviewRepository(db),
 	}
 }
