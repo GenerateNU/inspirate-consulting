@@ -8,6 +8,10 @@ import CreateCollege from './college/create-college'
 import CollegeList from './college/college-list'
 import CreateCollegeApplication from './college/create-application'
 import CollegeApplicationList from './college/colleges'
+import UploadVideo from "./video/upload-video";
+import VideoList from "./video/videos";
+import Student from "./student/student";
+import Counselor from "./counselor/counselor";
 
 
 createRoot(document.getElementById("root")!).render(
