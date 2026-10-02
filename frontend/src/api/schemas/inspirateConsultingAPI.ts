@@ -8,6 +8,156 @@
 import * as zod from 'zod/mini';
 
 /**
+ * List all college applications for the authenticated student.
+ */
+export const ListPersonalCollegeApplicationsResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+export const ListPersonalCollegeApplicationsResponse = /*#__PURE__*/ zod.array(ListPersonalCollegeApplicationsResponseItem)
+
+
+/**
+ * Create a personal college application for the authenticated student.
+ */
+export const CreatePersonalCollegeApplicationBody = /*#__PURE__*/ zod.object({
+  "application_type": /*#__PURE__*/ zod.enum(['EA', 'ED', 'RD']).check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by')),
+  "category": /*#__PURE__*/ zod.enum(['safety', 'target', 'reach']).check(/*#__PURE__*/ zod.describe('How the student categorizes this school')),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to'))
+})
+
+export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * List all global colleges.
+ */
+export const ListGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
+})
+export const ListGlobalCollegesResponse = /*#__PURE__*/ zod.array(ListGlobalCollegesResponseItem)
+
+
+/**
+ * Create a global college with a name, location, and optional EA/ED/RD deadlines.
+ */
+export const CreateGlobalCollegeBody = /*#__PURE__*/ zod.object({
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college'))
+})
+
+export const CreateGlobalCollegeResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
+})
+
+
+/**
+ * Get a global college by ID.
+ */
+export const GetGlobalCollegeParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int()
+})
+
+export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
+  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
+  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
+  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
+  "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
+})
+
+
+/**
+ * Creates an essay with the logged in student
+ */
+export const createEssayBodyLinkToContentMin = 10;
+
+export const createEssayBodyTypeMax = 100;
+
+
+
+export const CreateEssayBody = /*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Optional college this essay targets')),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('optional group this essay belongs to')),
+  "link_to_content": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(createEssayBodyLinkToContentMin)),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the essay belongs to')),
+  "type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.maxLength(createEssayBodyTypeMax))
+})
+
+export const CreateEssayResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Get the current review status of an essay, from its most recent review request.
+ */
+export const GetEssayReviewStatusParams = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the essay to look up'))
+})
+
+export const GetEssayReviewStatusResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor completed it')),
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay the review is for')),
+  "requested_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('When the review was requested')),
+  "status": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('open, completed, or refunded')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student who requested the review')),
+  "transaction_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Ledger row this status came from'))
+})
+
+
+/**
+ * updates the status of a students essay
+ */
+export const UpdateEssayStatusParams = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to update'))
+})
+
+export const UpdateEssayStatusBody = /*#__PURE__*/ zod.object({
+  "status": /*#__PURE__*/ zod.enum(['Submitted', 'Draft', 'Review', 'Archived']).check(/*#__PURE__*/ zod.describe('New status for the essay'))
+})
+
+export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.void()
+
+
+/**
  * Create a greeting for a person by name.
  */
 export const createGreetingBodyNameMax = 30;
@@ -21,4 +171,289 @@ export const CreateGreetingBody = /*#__PURE__*/ zod.object({
 export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "greeting": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Greeting message'))
+})
+
+
+/**
+ * Spend a student's review balance to open a review on an essay.
+ */
+export const requestEssayReviewBodyAmountDefault = 1;
+
+
+
+export const RequestEssayReviewBody = /*#__PURE__*/ zod.object({
+  "amount": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)), requestEssayReviewBodyAmountDefault).check(/*#__PURE__*/ zod.describe('Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.')),
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student requesting the review'))
+})
+
+export const RequestEssayReviewResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
+  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
+  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
+  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
+})
+
+
+/**
+ * Mark a review as having been completed by a counselor.
+ */
+export const CompleteEssayReviewParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the review to mark complete'))
+})
+
+export const CompleteEssayReviewResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
+  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
+  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
+  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
+})
+
+
+/**
+ * Refund a review that has not been completed, crediting the balance back to the student.
+ */
+export const RefundEssayReviewParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the charge to refund'))
+})
+
+export const RefundEssayReviewResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "refund": /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
+  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
+  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
+  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
+}).check(/*#__PURE__*/ zod.describe('The negative row that reversed the charge')),
+  "transaction": /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
+  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
+  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
+  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
+}).check(/*#__PURE__*/ zod.describe('The original charge, now marked refunded'))
+})
+
+
+/**
+ * Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
+ */
+export const SetStudentReviewBalanceParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student'))
+})
+
+export const setStudentReviewBalanceBodyReviewBalanceMin = 0;
+
+
+
+export const SetStudentReviewBalanceBody = /*#__PURE__*/ zod.object({
+  "review_balance": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(setStudentReviewBalanceBodyReviewBalanceMin)).check(/*#__PURE__*/ zod.describe('Absolute value to set the student\'s review balance to'))
+})
+
+export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.string(),
+  "gpa": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "review_balance": /*#__PURE__*/ zod.int(),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "year": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Shows all essays of a student
+ */
+export const GetEssaysFromStudentParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose essays to list'))
+})
+
+export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "essays": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "essay_group_id": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_to_content": /*#__PURE__*/ zod.string(),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string()
+})))
+})
+
+
+/**
+ * Get a student's to-do items
+ */
+export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponseItem)
+
+
+/**
+ * Create a to-do item with a description and optional deadline
+ */
+export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
+})
+
+export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Update a to-do item's completion status
+ */
+export const UpdateTodoItemCompletedParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const UpdateTodoItemCompletedBody = /*#__PURE__*/ zod.object({
+  "completed": /*#__PURE__*/ zod.boolean()
+})
+
+export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Create a user (student/counselor)
+ */
+export const createUserBodyNameMax = 200;
+
+
+
+export const CreateUserBody = /*#__PURE__*/ zod.object({
+  "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
+  "password": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('password of user for supabase signup')),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+})
+
+export const CreateUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * fetch a user (student/counselor)
+ */
+export const FetchUserParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const FetchUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * List all videos in the S3 bucket.
+ */
+export const ListVideosResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "download_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The video\'s S3 object key/path, e.g. video-bucket/common-app-tips.mp4'))
+})
+export const ListVideosResponse = /*#__PURE__*/ zod.array(ListVideosResponseItem)
+
+
+/**
+ * Upload a new video to the S3 bucket.
+ */
+export const UploadVideoBody = /*#__PURE__*/ zod.object({
+  "original_filename": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The filename of the video about to be uploaded'))
+})
+
+export const UploadVideoResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The S3 key/path to store elsewhere, e.g. in a media table')),
+  "upload_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned URL the client PUTs the raw video bytes to'))
+})
+
+
+/**
+ * Get a video by its S3 key.
+ */
+export const GetVideoQueryParams = /*#__PURE__*/ zod.object({
+  "s3_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The S3 key/path of the video to fetch'))
+})
+
+export const GetVideoResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "download_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned, time-limited URL for playback. Re-fetch this endpoint if the URL expires.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The video\'s S3 object key/path, e.g. video-bucket/common-app-tips.mp4'))
 })

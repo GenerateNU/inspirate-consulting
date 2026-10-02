@@ -5,15 +5,16 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
 
 func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error) {
 
-	const listQuery = `
-	SELECT id, created_at, updated_at, school_name, school_location, ea_deadline, ed_deadline, rd_deadline
-	FROM public.global_colleges
-	`
+	listQuery, err := schema.ReadSQLBaseScript("list_global_college.sql", SqlGlobalCollegeFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(ctx, listQuery)
 	if err != nil {
