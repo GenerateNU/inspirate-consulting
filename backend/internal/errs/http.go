@@ -46,6 +46,10 @@ func NotFound(title string, withKey string, withValue any) HTTPError {
 	return NewHTTPError(http.StatusNotFound, fmt.Errorf("%s with %s='%v' not found", title, withKey, withValue))
 }
 
+func ResetPassword(title string, withKey string, withValue any) HTTPError {
+	return NewHTTPError(http.StatusUnauthorized, fmt.Errorf("%s with %s='%v' password must be reset", title, withKey, withValue))
+}
+
 func Conflict(title string, withKey string, withValue any) HTTPError {
 	return NewHTTPError(http.StatusConflict, fmt.Errorf("conflict: %s with %s='%s' already exists", title, withKey, withValue))
 }

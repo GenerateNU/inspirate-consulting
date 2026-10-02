@@ -1,5 +1,42 @@
 components:
   schemas:
+    CreateEssayBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateEssayBody.json
+          format: uri
+          readOnly: true
+          type: string
+        college_id:
+          description: Optional college this essay targets
+          format: int64
+          type:
+            - integer
+            - "null"
+        essay_group_id:
+          description: optional group this essay belongs to
+          type: string
+        link_to_content:
+          examples:
+            - https://docs.google.com/document/d/abc123
+          minLength: 10
+          type: string
+        student_id:
+          description: Student the essay belongs to
+          type: string
+        type:
+          examples:
+            - personal-statement
+          maxLength: 100
+          type: string
+      required:
+        - student_id
+        - type
+        - link_to_content
+      type: object
     CreateGlobalCollegeRequestBody:
       additionalProperties: false
       properties:
@@ -222,6 +259,25 @@ components:
           format: uri
           type: string
       type: object
+    EssayListBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayListBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essays:
+          items:
+            $ref: "#/components/schemas/Essays"
+          type:
+            - array
+            - "null"
+      required:
+        - essays
+      type: object
     EssayReviewStatus:
       additionalProperties: false
       properties:
@@ -347,6 +403,35 @@ components:
         - entry_type
         - created_at
         - updated_at
+      type: object
+    Essays:
+      additionalProperties: false
+      properties:
+        college_id:
+          format: int64
+          type:
+            - integer
+            - "null"
+        essay_group_id:
+          type: string
+        id:
+          type: string
+        link_to_content:
+          type: string
+        status:
+          type: string
+        student_id:
+          type: string
+        type:
+          type: string
+      required:
+        - id
+        - student_id
+        - type
+        - college_id
+        - link_to_content
+        - status
+        - essay_group_id
       type: object
     GlobalCollege:
       additionalProperties: false
@@ -757,6 +842,27 @@ components:
         - completed_at
         - deadline
       type: object
+    UpdateStatusBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateStatusBody.json
+          format: uri
+          readOnly: true
+          type: string
+        status:
+          description: New status for the essay
+          enum:
+            - Submitted
+            - Draft
+            - Review
+            - Archived
+          type: string
+      required:
+        - status
+      type: object
     UpdateTodoItemCompletedAtInputBody:
       additionalProperties: false
       properties:
@@ -786,6 +892,8 @@ components:
           type: string
         name:
           type: string
+        needs_to_reset:
+          type: boolean
         pfp_key:
           type:
             - string
@@ -797,6 +905,7 @@ components:
         - name
         - supabase_id
         - pfp_key
+        - needs_to_reset
       type: object
     Video:
       additionalProperties: false
@@ -946,6 +1055,27 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /essays:
+    post:
+      description: Creates an essay with the logged in student
+      operationId: create-essay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEssayBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /essays/{essay_id}/review-status:
     get:
       description: Get the current review status of an essay, from its most recent review request.
@@ -973,6 +1103,39 @@ paths:
           description: Error
       tags:
         - Essay Reviews
+  /essays/{essay_id}/status:
+    patch:
+      description: updates the status of a students essay
+      operationId: update-essay-status
+      parameters:
+        - description: Essay to update
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: Essay to update
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+          headers:
+            Essay:
+              schema:
+                $ref: "#/components/schemas/Essays"
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /greeting:
     post:
       description: Create a greeting for a person by name.
@@ -1221,6 +1384,33 @@ paths:
       tags:
         - Media
         - Students
+  /students/{student_id}/essays:
+    get:
+      description: Shows all essays of a student
+      operationId: get-essays-from-student
+      parameters:
+        - description: Student whose essays to list
+          in: path
+          name: student_id
+          required: true
+          schema:
+            description: Student whose essays to list
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayListBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /todo-items:
     get:
       description: Get a student's to-do items
@@ -1309,6 +1499,31 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateUserInputBody"
         required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+  /user/{id}:
+    get:
+      description: fetch a user (student/counselor)
+      operationId: fetch-user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           content:

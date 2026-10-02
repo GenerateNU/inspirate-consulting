@@ -1,10 +1,9 @@
-package auth
+package supabase
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 	"io"
@@ -12,34 +11,27 @@ import (
 	"net/http"
 )
 
-func SupabaseLogin(cfg *config.Supabase, email string, password string) (models.LoginResponse, error) {
-	supabaseURL := cfg.URL
-	serviceroleKey := cfg.ServiceRoleKey
-
-	payload := models.SignUpPayload{
-		Email:    email,
-		Password: password,
-	}
+func (s *Supabase) SupabaseLogin(email string, password string, Client *http.Client) (models.LoginResponse, error) {
+	payload := models.SignUpPayload{Email: email, Password: password}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return models.LoginResponse{}, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/token?grant_type=password", supabaseURL), bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/token?grant_type=password", s.URL), bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return models.LoginResponse{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", serviceroleKey))
-	req.Header.Set("apikey", serviceroleKey)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.ServiceRoleKey))
+	req.Header.Set("apikey", s.ServiceRoleKey)
 
 	res, err := Client.Do(req)
 	if err != nil {
 		slog.Error("Failed to execute Request", "err", err)
 		return models.LoginResponse{}, errs.BadRequest("Failed to execute Request")
 	}
-
 	defer func() { _ = res.Body.Close() }()
 
 	body, err := io.ReadAll(res.Body)
@@ -59,8 +51,7 @@ func SupabaseLogin(cfg *config.Supabase, email string, password string) (models.
 	}
 
 	var signInResponse models.LoginResponse
-	err = json.Unmarshal(body, &signInResponse)
-	if err != nil {
+	if err := json.Unmarshal(body, &signInResponse); err != nil {
 		slog.Error("Failed to parse response body", "body", err)
 		return models.LoginResponse{}, errs.BadRequest("Failed to parse response body")
 	}

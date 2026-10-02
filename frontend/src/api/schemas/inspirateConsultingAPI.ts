@@ -106,6 +106,26 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Creates an essay with the logged in student
+ */
+export const createEssayBodyLinkToContentMin = 10;
+
+export const createEssayBodyTypeMax = 100;
+
+
+
+export const CreateEssayBody = /*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Optional college this essay targets')),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('optional group this essay belongs to')),
+  "link_to_content": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(createEssayBodyLinkToContentMin)),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the essay belongs to')),
+  "type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.maxLength(createEssayBodyTypeMax))
+})
+
+export const CreateEssayResponse = /*#__PURE__*/ zod.void()
+
+
+/**
  * Get the current review status of an essay, from its most recent review request.
  */
 export const GetEssayReviewStatusParams = /*#__PURE__*/ zod.object({
@@ -121,6 +141,20 @@ export const GetEssayReviewStatusResponse = /*#__PURE__*/ zod.object({
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student who requested the review')),
   "transaction_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Ledger row this status came from'))
 })
+
+
+/**
+ * updates the status of a students essay
+ */
+export const UpdateEssayStatusParams = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to update'))
+})
+
+export const UpdateEssayStatusBody = /*#__PURE__*/ zod.object({
+  "status": /*#__PURE__*/ zod.enum(['Submitted', 'Draft', 'Review', 'Archived']).check(/*#__PURE__*/ zod.describe('New status for the essay'))
+})
+
+export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.void()
 
 
 /**
@@ -361,6 +395,27 @@ export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Shows all essays of a student
+ */
+export const GetEssaysFromStudentParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose essays to list'))
+})
+
+export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "essays": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "essay_group_id": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_to_content": /*#__PURE__*/ zod.string(),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string()
+})))
+})
+
+
+/**
  * Get a student's to-do items
  */
 export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
@@ -443,6 +498,24 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
+  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * fetch a user (student/counselor)
+ */
+export const FetchUserParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const FetchUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "supabase_id": /*#__PURE__*/ zod.string()
 })
