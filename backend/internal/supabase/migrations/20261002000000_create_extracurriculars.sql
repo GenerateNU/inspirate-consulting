@@ -5,7 +5,7 @@ create table public.extracurriculars (
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     student_id uuid not null,
-    user_id uuid not null references auth.users(id) on delete cascade,
+    user_id uuid not null references public.users(id) on delete cascade,
     name text not null,
     status text not null check (status in ('doing', 'have_done')),
     type text not null check (type in ('maintenance', 'investment')),
