@@ -54,7 +54,7 @@ func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository){
 		Description: "Allow students to fetch only videos they have access to",
 		Tags:        []string{"Media Access"},
 	}, func(ctx context.Context, input *models.ListAccessibleMediaInput)(*models.ListAccessibleMediaOutput, error){
-		fetchedAccessibleMedia, err := mediaAccessHandler.ListAccessibleMedia(ctx)
+		fetchedAccessibleMedia, err := mediaAccessHandler.ListAccessibleMedia(ctx, input.Limit, input.Offset)
 		if(err!=nil){
 			return nil, err
 		}

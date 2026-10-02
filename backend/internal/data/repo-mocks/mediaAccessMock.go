@@ -45,9 +45,9 @@ func (_m *MediaAccessRepository) GrantMediaAccess(ctx context.Context, body *mod
 	return r0, r1
 }
 
-// ListAccessibleMedia provides a mock function with given fields: ctx, studentID
-func (_m *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studentID string) ([]models.Media, error) {
-	ret := _m.Called(ctx, studentID)
+// ListAccessibleMedia provides a mock function with given fields: ctx, studentID, limit, offset
+func (_m *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error) {
+	ret := _m.Called(ctx, studentID, limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListAccessibleMedia")
@@ -55,19 +55,19 @@ func (_m *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studen
 
 	var r0 []models.Media
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) ([]models.Media, error)); ok {
-		return rf(ctx, studentID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) ([]models.Media, error)); ok {
+		return rf(ctx, studentID, limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) []models.Media); ok {
-		r0 = rf(ctx, studentID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) []models.Media); ok {
+		r0 = rf(ctx, studentID, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.Media)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, studentID)
+	if rf, ok := ret.Get(1).(func(context.Context, string, int, int) error); ok {
+		r1 = rf(ctx, studentID, limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}

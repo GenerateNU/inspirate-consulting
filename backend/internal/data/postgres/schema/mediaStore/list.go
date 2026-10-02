@@ -8,13 +8,15 @@ import(
 	"inspirate-consulting/internal/models"
 )
 
-func(r *MediaRepository) ListAllMedia(ctx context.Context)([]models.Media, error){
+func(r *MediaRepository) ListAllMedia(ctx context.Context, limit int, offset int)([]models.Media, error){
 	const listQuery = `
 	SELECT id, title, description, length_in_mins, school_year, s3_key
 	FROM public.media
+	ORDER BY title, id
+	LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.Query(ctx, listQuery)
+	rows, err := r.db.Query(ctx, listQuery, limit, offset)
 
 	if(err != nil){
 		return nil, err

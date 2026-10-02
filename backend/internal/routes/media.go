@@ -53,7 +53,7 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository){
 		Description: "Fetch all videos, through counselor view",
 		Tags:        []string{"Media"},
 	}, func(ctx context.Context, input *models.ListAllMediaInput)(*models.ListAllMediaOutput, error){
-		allMedia, err := mediaHandler.ListAllMedia(ctx)
+		allMedia, err := mediaHandler.ListAllMedia(ctx, input.Limit, input.Offset)
 		if(err!=nil){
 			return nil, err
 		}

@@ -58,14 +58,14 @@ type VideoRepository interface {
 type MediaRepository interface {
 	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error)
 	GetMedia(ctx context.Context, id string) (*models.Media, error)
-	ListAllMedia(ctx context.Context) ([]models.Media, error)
+	ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error)
 	DeleteMedia(ctx context.Context, id string) error
 }
 
 type MediaAccessRepository interface {
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
 	RevokeMediaAccess(ctx context.Context, id string) error
-	ListAccessibleMedia(ctx context.Context, studentID string) ([]models.Media, error)
+	ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error)
 }
 
 // To represent the Essay Review Transaction schema
