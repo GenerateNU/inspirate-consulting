@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
@@ -16,7 +17,8 @@ func TestListGlobalColleges(t *testing.T) {
 		t.Skip("skipping integration test in short mode")
 	}
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewGlobalCollegeRepository(db)
 	ctx := context.Background()
 
 	beforeOutput, err := repo.ListGlobalColleges(ctx)
@@ -57,7 +59,6 @@ func TestListGlobalColleges(t *testing.T) {
 		if err != nil {
 			t.Fatalf("setup CreateGlobalCollege(%q) failed: %v", input.SchoolName, err)
 		}
-		cleanupCollege(t, db, output.ID)
 		created = append(created, *output)
 	}
 

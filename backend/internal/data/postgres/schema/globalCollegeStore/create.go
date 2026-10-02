@@ -3,9 +3,11 @@ package globalCollegeRepository
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgconn"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 )
@@ -13,16 +15,14 @@ import (
 func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
 	createdGlobalCollege := &models.GlobalCollege{}
 
-	const insertQuery = `
-	INSERT INTO public.global_colleges (
-		school_name, school_location, ea_deadline, ed_deadline, rd_deadline
-	) VALUES (
-		$1, $2, $3, $4, $5
-	)
-	RETURNING id, created_at, updated_at, school_name, school_location, ea_deadline, ed_deadline, rd_deadline
-	`
+	insertQuery, err := schema.ReadSQLBaseScript("create_global_college.sql", SqlGlobalCollegeFiles)
+	if err != nil {
+		fmt.Println("[db] ReadSQLBaseScript error:", err)
+		err := errs.InternalServerError("Failed to read base query: ", err.Error())
+		return nil, err
+	}
 
-	err := r.db.QueryRow(
+	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
 		inputGlobalCollege.SchoolName,
@@ -47,7 +47,7 @@ func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, input
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, errs.Conflict("global college", "school_name/school_location", inputGlobalCollege.SchoolName+" / "+inputGlobalCollege.SchoolLocation)
 		}
-		
+
 		return nil, err
 	}
 

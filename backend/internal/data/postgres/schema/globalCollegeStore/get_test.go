@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
@@ -14,7 +15,8 @@ func TestGetGlobalCollege(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, db := setupTestRepo(t)
+	db := testutils.SetupTestDB(t)
+	repo := NewGlobalCollegeRepository(db)
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeRequestBody{
@@ -26,7 +28,6 @@ func TestGetGlobalCollege(t *testing.T) {
 		t.Fatalf("setup CreateGlobalCollege failed: %v", err)
 	}
 	created := createOutput
-	cleanupCollege(t, db, created.ID)
 
 	getOutput, err := repo.GetGlobalCollege(ctx, created.ID)
 	if err != nil {
@@ -49,7 +50,7 @@ func TestGetGlobalCollege_NotFound(t *testing.T) {
 	}
 	t.Parallel()
 
-	repo, _ := setupTestRepo(t)
+	repo := NewGlobalCollegeRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
 	_, err := repo.GetGlobalCollege(ctx, -1)
