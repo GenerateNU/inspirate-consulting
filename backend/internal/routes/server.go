@@ -66,7 +66,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
-		allowedOrigins = "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:8080,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost"
+		allowedOrigins = "http://localhost:3000,http://localhost:8080,https://cdn.scalar.com,http://127.0.0.1:8080,http://10.0.2.2:8080,http://localhost:5173,http://localhost"
 	}
 	splitAllowedOrigins := strings.Split(allowedOrigins, ",")
 
@@ -97,6 +97,9 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
 	}
 
+	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
+	// setupDocsRoutes(app, "/app/api")
+
 	// Root route
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
@@ -107,11 +110,10 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		return nil, nil, err
 	}
 
-	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
-	// setupDocsRoutes(app, "/app/api")
-
 	return app, humaAPI, nil
 }
+
+
 
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
