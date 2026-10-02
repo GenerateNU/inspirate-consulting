@@ -37,13 +37,13 @@ func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository){
 		Path:        "/media-access/{id}",
 		Description: "Allow a counselor to revoke a student access to a video",
 		Tags:        []string{"Media Access"},
-	}, func(ctx context.Context, input *models.RevokeMediaAccessInput)(*models.RevokeMediaAccessOutput, error){
+	}, func(ctx context.Context, input *models.RevokeMediaAccessInput)(*struct{}, error){
 		err := mediaAccessHandler.RevokeMediaAccess(ctx, input.ID)
 		if(err!=nil){
 			return nil, err
 		}
 
-		return &models.RevokeMediaAccessOutput{}, nil
+		return nil, nil
 	})
 
 	//Register GET /media-access handler
@@ -54,7 +54,7 @@ func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository){
 		Description: "Allow students to fetch only videos they have access to",
 		Tags:        []string{"Media Access"},
 	}, func(ctx context.Context, input *models.ListAccessibleMediaInput)(*models.ListAccessibleMediaOutput, error){
-		fetchedAccessibleMedia, err := mediaAccessHandler.ListAccessibleMedia(ctx)
+		fetchedAccessibleMedia, err := mediaAccessHandler.ListAccessibleMedia(ctx, input.Limit, input.Offset)
 		if(err!=nil){
 			return nil, err
 		}

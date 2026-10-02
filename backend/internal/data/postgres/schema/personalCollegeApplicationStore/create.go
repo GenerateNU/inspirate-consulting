@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 )
@@ -18,21 +19,17 @@ const (
 
 func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 	ctx context.Context,
-	studentID string, 
+	studentID string,
 	application models.CreatePersonalCollegeApplicationRequestBody,
 ) (*models.PersonalCollegeApplication, error) {
 	createdApplication := &models.PersonalCollegeApplication{}
 
-	const insertQuery = `
-	INSERT INTO public.personal_college_applications (
-		student_id, global_college_id, application_type, category
-	) VALUES (
-		$1, $2, $3, $4
-	)
-	RETURNING id, student_id, global_college_id, application_type, category, created_at, updated_at
-	`
+	insertQuery, err := schema.ReadSQLBaseScript("create_personal_college_application.sql", SqlPersonalCollegeApplicationFiles)
+	if err != nil {
+		return nil, err
+	}
 
-	err := r.db.QueryRow(
+	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
 		studentID,
@@ -51,7 +48,7 @@ func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
-			
+
 			switch pgErr.Code {
 			case pgForeignKeyViolationCode:
 				return nil, errs.NotFound("global college", "id", application.GlobalCollegeID)

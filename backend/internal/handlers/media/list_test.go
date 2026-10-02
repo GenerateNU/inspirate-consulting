@@ -18,6 +18,7 @@ func TestHandler_ListAllMedia(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
+	limit, offset := 20, 0
 
 	expectedOutput := []models.Media{
 		{
@@ -39,11 +40,11 @@ func TestHandler_ListAllMedia(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything).Return(expectedOutput, nil)
+		mockRepo.On("ListAllMedia", mock.Anything, limit, offset).Return(expectedOutput, nil)
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx)
+		res, err := handler.ListAllMedia(ctx, limit, offset)
 
 		// Verify result
 		assert.NoError(t, err)
@@ -51,15 +52,30 @@ func TestHandler_ListAllMedia(t *testing.T) {
 		assert.Len(t, res, 2)
 	})
 
+	t.Run("passes limit and offset through to repository", func(t *testing.T) {
+		t.Parallel()
+
+		// The mock only matches the exact pagination values, so a mismatch fails the test
+		mockRepo := mocks.NewMediaRepository(t)
+		mockRepo.On("ListAllMedia", mock.Anything, 1, 1).Return(expectedOutput[1:], nil)
+
+		handler := NewHandler(mockRepo)
+		res, err := handler.ListAllMedia(ctx, 1, 1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOutput[1:], res)
+		assert.Len(t, res, 1)
+	})
+
 	t.Run("no media", func(t *testing.T) {
 		t.Parallel()
 
 		// No media uploaded yet is an empty list, not an error
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything).Return([]models.Media{}, nil)
+		mockRepo.On("ListAllMedia", mock.Anything, limit, offset).Return([]models.Media{}, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx)
+		res, err := handler.ListAllMedia(ctx, limit, offset)
 
 		assert.NoError(t, err)
 		assert.Empty(t, res)
@@ -70,11 +86,11 @@ func TestHandler_ListAllMedia(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything).Return(nil, errors.New("database error"))
+		mockRepo.On("ListAllMedia", mock.Anything, limit, offset).Return(nil, errors.New("database error"))
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx)
+		res, err := handler.ListAllMedia(ctx, limit, offset)
 
 		// Verify error propagation
 		assert.Error(t, err)

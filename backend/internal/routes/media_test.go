@@ -153,11 +153,12 @@ func TestRoute_GetMedia(t *testing.T) {
 func TestRoute_ListAllMedia(t *testing.T) {
 	t.Parallel()
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("success with default pagination", func(t *testing.T) {
 		t.Parallel()
 
+		// No query params should fall back to limit=20, offset=0
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything).Return([]models.Media{
+		mockRepo.On("ListAllMedia", mock.Anything, 20, 0).Return([]models.Media{
 			{ID: uuid.NewString(), Title: "Common App Essay Tips", LengthInMins: 15},
 			{ID: uuid.NewString(), Title: "Navigating the FAFSA", LengthInMins: 20},
 		}, nil)
@@ -174,11 +175,46 @@ func TestRoute_ListAllMedia(t *testing.T) {
 		assert.Equal(t, "Common App Essay Tips", allMedia[0].Title)
 	})
 
+	t.Run("success with limit and offset", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewMediaRepository(t)
+		mockRepo.On("ListAllMedia", mock.Anything, 1, 1).Return([]models.Media{
+			{ID: uuid.NewString(), Title: "Navigating the FAFSA", LengthInMins: 20},
+		}, nil)
+
+		app, err := setupMediaTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodGet, "/media?limit=1&offset=1", nil)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var allMedia []models.Media
+		require.NoError(t, json.Unmarshal(respBody, &allMedia))
+		require.Len(t, allMedia, 1)
+		assert.Equal(t, "Navigating the FAFSA", allMedia[0].Title)
+	})
+
+	t.Run("validation error - invalid pagination", func(t *testing.T) {
+		t.Parallel()
+
+		for _, query := range []string{"?limit=0", "?limit=101", "?offset=-1"} {
+			// Repository should not be called when pagination params are rejected
+			mockRepo := mocks.NewMediaRepository(t)
+
+			app, err := setupMediaTestApp(mockRepo)
+			require.NoError(t, err)
+
+			resp, _ := doRequest(t, app, http.MethodGet, "/media"+query, nil)
+			assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode, "query: %s", query)
+		}
+	})
+
 	t.Run("repository error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything).
+		mockRepo.On("ListAllMedia", mock.Anything, 20, 0).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupMediaTestApp(mockRepo)

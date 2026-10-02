@@ -1,5 +1,42 @@
 components:
   schemas:
+    CreateEssayBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateEssayBody.json
+          format: uri
+          readOnly: true
+          type: string
+        college_id:
+          description: Optional college this essay targets
+          format: int64
+          type:
+            - integer
+            - "null"
+        essay_group_id:
+          description: optional group this essay belongs to
+          type: string
+        link_to_content:
+          examples:
+            - https://docs.google.com/document/d/abc123
+          minLength: 10
+          type: string
+        student_id:
+          description: Student the essay belongs to
+          type: string
+        type:
+          examples:
+            - personal-statement
+          maxLength: 100
+          type: string
+      required:
+        - student_id
+        - type
+        - link_to_content
+      type: object
     CreateGlobalCollegeRequestBody:
       additionalProperties: false
       properties:
@@ -221,6 +258,180 @@ components:
             - https://example.com/errors/example
           format: uri
           type: string
+      type: object
+    EssayListBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayListBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essays:
+          items:
+            $ref: "#/components/schemas/Essays"
+          type:
+            - array
+            - "null"
+      required:
+        - essays
+      type: object
+    EssayReviewStatus:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayReviewStatus.json
+          format: uri
+          readOnly: true
+          type: string
+        completed_at:
+          description: When a counselor completed it
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        essay_id:
+          description: Essay the review is for
+          examples:
+            - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
+          type: string
+        requested_at:
+          description: When the review was requested
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        status:
+          description: open, completed, or refunded
+          examples:
+            - open
+          type: string
+        student_id:
+          description: Student who requested the review
+          examples:
+            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
+          type: string
+        transaction_id:
+          description: Ledger row this status came from
+          examples:
+            - 7a1f0c9e-0b4e-4f1a-9f2d-0c3b5a6d7e8f
+          type: string
+      required:
+        - transaction_id
+        - essay_id
+        - student_id
+        - status
+        - requested_at
+      type: object
+    EssayReviewTransaction:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayReviewTransaction.json
+          format: uri
+          readOnly: true
+          type: string
+        actor_id:
+          description: User who caused the movement. Null until auth provides the caller.
+          examples:
+            - d4e5f6a7-b8c9-4a71-bc2d-3e4f5a6b7c8d
+          type: string
+        completed_at:
+          description: When a counselor marked the review complete
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        created_at:
+          description: Timestamp when the transaction was created
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        entry_type:
+          description: "Kind of movement: spend, refund, or adjustment"
+          examples:
+            - spend
+          type: string
+        essay_id:
+          description: Essay under review. Null for an adjustment.
+          examples:
+            - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
+          type: string
+        id:
+          description: Unique identifier for the transaction
+          examples:
+            - 7a1f0c9e-0b4e-4f1a-9f2d-0c3b5a6d7e8f
+          type: string
+        refund:
+          description: The negative row that reversed this charge, if it was refunded
+          examples:
+            - c3d4e5f6-a7b8-4960-ab1c-2d3e4f5a6b7c
+          type: string
+        status:
+          description: "Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows."
+          examples:
+            - open
+          type: string
+        student_id:
+          description: Student whose balance moved
+          examples:
+            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
+          type: string
+        subtotal:
+          description: Signed change to the student's balance. Negative for a spend, positive for a refund or grant. Sums to the balance.
+          examples:
+            - -1
+          format: int64
+          type: integer
+        updated_at:
+          description: Timestamp when the transaction was last updated
+          examples:
+            - "2026-01-01T00:00:00Z"
+          format: date-time
+          type: string
+      required:
+        - id
+        - subtotal
+        - student_id
+        - entry_type
+        - created_at
+        - updated_at
+      type: object
+    Essays:
+      additionalProperties: false
+      properties:
+        college_id:
+          format: int64
+          type:
+            - integer
+            - "null"
+        essay_group_id:
+          type: string
+        id:
+          type: string
+        link_to_content:
+          type: string
+        status:
+          type: string
+        student_id:
+          type: string
+        type:
+          type: string
+      required:
+        - id
+        - student_id
+        - type
+        - college_id
+        - link_to_content
+        - status
+        - essay_group_id
       type: object
     GlobalCollege:
       additionalProperties: false
@@ -477,6 +688,116 @@ components:
         - s3_key
         - upload_url
       type: object
+    RefundEssayReviewResponseBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/RefundEssayReviewResponseBody.json
+          format: uri
+          readOnly: true
+          type: string
+        refund:
+          $ref: "#/components/schemas/EssayReviewTransaction"
+          description: The negative row that reversed the charge
+        transaction:
+          $ref: "#/components/schemas/EssayReviewTransaction"
+          description: The original charge, now marked refunded
+      required:
+        - transaction
+        - refund
+      type: object
+    RequestEssayReviewRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/RequestEssayReviewRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        amount:
+          default: 1
+          description: Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.
+          examples:
+            - 1
+          format: int64
+          minimum: 1
+          type: integer
+        essay_id:
+          description: Essay to review
+          examples:
+            - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
+          type: string
+        student_id:
+          description: Student requesting the review
+          examples:
+            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
+          type: string
+      required:
+        - student_id
+        - essay_id
+        - amount
+      type: object
+    SetStudentReviewBalanceRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/SetStudentReviewBalanceRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        review_balance:
+          description: Absolute value to set the student's review balance to
+          examples:
+            - 5
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+        - review_balance
+      type: object
+    Student:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Student.json
+          format: uri
+          readOnly: true
+          type: string
+        counselor_id:
+          type: string
+        gpa:
+          format: int64
+          type: integer
+        id:
+          type: string
+        organization:
+          type:
+            - string
+            - "null"
+        review_balance:
+          format: int64
+          type: integer
+        user_id:
+          type: string
+        year:
+          type: string
+      required:
+        - id
+        - user_id
+        - year
+        - organization
+        - gpa
+        - review_balance
+        - counselor_id
+      type: object
     TodoItem:
       additionalProperties: false
       properties:
@@ -521,6 +842,27 @@ components:
         - completed_at
         - deadline
       type: object
+    UpdateStatusBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateStatusBody.json
+          format: uri
+          readOnly: true
+          type: string
+        status:
+          description: New status for the essay
+          enum:
+            - Submitted
+            - Draft
+            - Review
+            - Archived
+          type: string
+      required:
+        - status
+      type: object
     UpdateTodoItemCompletedAtInputBody:
       additionalProperties: false
       properties:
@@ -550,6 +892,8 @@ components:
           type: string
         name:
           type: string
+        needs_to_reset:
+          type: boolean
         pfp_key:
           type:
             - string
@@ -561,6 +905,7 @@ components:
         - name
         - supabase_id
         - pfp_key
+        - needs_to_reset
       type: object
     Video:
       additionalProperties: false
@@ -710,6 +1055,87 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /essays:
+    post:
+      description: Creates an essay with the logged in student
+      operationId: create-essay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEssayBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
+  /essays/{essay_id}/review-status:
+    get:
+      description: Get the current review status of an essay, from its most recent review request.
+      operationId: get-essay-review-status
+      parameters:
+        - description: ID of the essay to look up
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: ID of the essay to look up
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayReviewStatus"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /essays/{essay_id}/status:
+    patch:
+      description: updates the status of a students essay
+      operationId: update-essay-status
+      parameters:
+        - description: Essay to update
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: Essay to update
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+          headers:
+            Essay:
+              schema:
+                $ref: "#/components/schemas/Essays"
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /greeting:
     post:
       description: Create a greeting for a person by name.
@@ -739,6 +1165,28 @@ paths:
     get:
       description: Fetch all videos, through counselor view
       operationId: list-media
+      parameters:
+        - description: Maximum number of media to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 20
+            description: Maximum number of media to return
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: Number of media to skip before returning results
+          explode: false
+          in: query
+          name: offset
+          schema:
+            default: 0
+            description: Number of media to skip before returning results
+            format: int64
+            minimum: 0
+            type: integer
       responses:
         "200":
           content:
@@ -786,6 +1234,28 @@ paths:
     get:
       description: Allow students to fetch only videos they have access to
       operationId: get-media-access
+      parameters:
+        - description: Maximum number of media to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 20
+            description: Maximum number of media to return
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: Number of media to skip before returning results
+          explode: false
+          in: query
+          name: offset
+          schema:
+            default: 0
+            description: Number of media to skip before returning results
+            format: int64
+            minimum: 0
+            type: integer
       responses:
         "200":
           content:
@@ -895,6 +1365,145 @@ paths:
           description: Error
       tags:
         - Media
+  /reviews:
+    post:
+      description: Spend a student's review balance to open a review on an essay.
+      operationId: request-essay-review
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestEssayReviewRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayReviewTransaction"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /reviews/{id}/complete:
+    post:
+      description: Mark a review as having been completed by a counselor.
+      operationId: complete-essay-review
+      parameters:
+        - description: ID of the review to mark complete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the review to mark complete
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayReviewTransaction"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /reviews/{id}/refund:
+    post:
+      description: Refund a review that has not been completed, crediting the balance back to the student.
+      operationId: refund-essay-review
+      parameters:
+        - description: ID of the charge to refund
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the charge to refund
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefundEssayReviewResponseBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Reviews
+  /students/{id}/review-balance:
+    patch:
+      description: Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
+      operationId: set-student-review-balance
+      parameters:
+        - description: ID of the student
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the student
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetStudentReviewBalanceRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
+  /students/{student_id}/essays:
+    get:
+      description: Shows all essays of a student
+      operationId: get-essays-from-student
+      parameters:
+        - description: Student whose essays to list
+          in: path
+          name: student_id
+          required: true
+          schema:
+            description: Student whose essays to list
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayListBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /todo-items:
     get:
       description: Get a student's to-do items
@@ -983,6 +1592,31 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateUserInputBody"
         required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+  /user/{id}:
+    get:
+      description: fetch a user (student/counselor)
+      operationId: fetch-user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           content:

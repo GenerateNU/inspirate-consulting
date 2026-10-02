@@ -1,4 +1,14 @@
-package config
+package supabase
+
+import (
+	"net/http"
+
+	"inspirate-consulting/internal/models"
+)
+
+type SupabaseInterface interface {
+	Signup(email string, password string, Client *http.Client) (models.SignupResponse, error)
+}
 
 // Supabase holds Supabase-related configuration
 type Supabase struct {

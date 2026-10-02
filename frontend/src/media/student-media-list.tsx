@@ -1,7 +1,7 @@
 import { useGetMediaAccess } from '../api/endpoints';
 
 export default function StudentMediaList() {
-  const { data, error, isLoading } = useGetMediaAccess();
+  const { data, error, isLoading } = useGetMediaAccess({ limit: 10, offset: 0 });
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong.</p>;

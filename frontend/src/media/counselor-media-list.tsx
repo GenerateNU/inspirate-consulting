@@ -2,7 +2,7 @@ import { useListMedia } from '../api/endpoints';
 import type { Media } from '../api/models';
 
 export default function CounselorMediaList() {
-  const { data, error, isLoading } = useListMedia();
+  const { data, error, isLoading } = useListMedia({ limit: 10, offset: 0 });
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong.</p>;

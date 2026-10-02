@@ -1,21 +1,19 @@
 package mediaRepository
+
 import (
 	"context"
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
 
-func(r *MediaRepository) CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error){
+func (r *MediaRepository) CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error) {
 	createdMedia := &models.Media{}
 
-	const insertQuery = `
-	INSERT INTO public.media (
-		title, description, length_in_mins, school_year, s3_key
-	) VALUES(
-	 	$1, $2, $3, $4, $5
-	)
-	RETURNING id, title, description, length_in_mins, school_year, s3_key
-	`
-	err := r.db.QueryRow(
+	insertQuery, err := schema.ReadSQLBaseScript("create_media.sql", SqlMediaFiles)
+	if err != nil {
+		return nil, err
+	}
+	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
 		item.Title,

@@ -19,6 +19,7 @@ import type {
 
 import type {
   ErrorModel,
+  GetMediaAccessParams,
   GrantMediaAccessRequestBody,
   Media,
   MediaAccess
@@ -82,20 +83,27 @@ export type getMediaAccessResponseError = (getMediaAccessResponseDefault) & {
 
 export type getMediaAccessResponse = (getMediaAccessResponseSuccess | getMediaAccessResponseError)
 
-export const getGetMediaAccessUrl = () => {
+export const getGetMediaAccessUrl = (params?: GetMediaAccessParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `http://127.0.0.1:8080/media-access`
+  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/media-access?${stringifiedParams}` : `http://127.0.0.1:8080/media-access`
 }
 
 /**
  * Allow students to fetch only videos they have access to
  */
-export const getMediaAccess = async ( options?: RequestInit): Promise<getMediaAccessResponse> => {
+export const getMediaAccess = async (params?: GetMediaAccessParams, options?: RequestInit): Promise<getMediaAccessResponse> => {
 
-  const res = await fetch(getGetMediaAccessUrl(),
+  const res = await fetch(getGetMediaAccessUrl(params),
   {
     ...options,
     method: 'GET'
@@ -114,18 +122,18 @@ export const getMediaAccess = async ( options?: RequestInit): Promise<getMediaAc
 
 
 
-export const getGetMediaAccessKey = () => [`http://127.0.0.1:8080/media-access`] as const;
+export const getGetMediaAccessKey = (params?: GetMediaAccessParams,) => [`http://127.0.0.1:8080/media-access`, ...(params ? [params]: [])] as const;
 
 export type GetMediaAccessQueryResult = NonNullable<Awaited<ReturnType<typeof getMediaAccess>>>
 
 export const useGetMediaAccess = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getMediaAccess>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+  params?: GetMediaAccessParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getMediaAccess>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
 ) => {
   const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetMediaAccessKey() : null);
-  const swrFn = () => getMediaAccess(fetchOptions)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetMediaAccessKey(params) : null);
+  const swrFn = () => getMediaAccess(params, fetchOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 

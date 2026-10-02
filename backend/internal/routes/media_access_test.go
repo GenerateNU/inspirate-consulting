@@ -146,11 +146,12 @@ func TestRoute_ListAccessibleMedia(t *testing.T) {
 	// The route reads the student from the request context, not the URL
 	studentID := auth.GetStudentID(context.Background())
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("success with default pagination", func(t *testing.T) {
 		t.Parallel()
 
+		// No query params should fall back to limit=20, offset=0
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID).Return([]models.Media{
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 20, 0).Return([]models.Media{
 			{ID: uuid.NewString(), Title: "Common App Essay Tips", LengthInMins: 15},
 			{ID: uuid.NewString(), Title: "Navigating the FAFSA", LengthInMins: 20},
 		}, nil)
@@ -167,11 +168,46 @@ func TestRoute_ListAccessibleMedia(t *testing.T) {
 		assert.Equal(t, "Common App Essay Tips", accessible[0].Title)
 	})
 
+	t.Run("success with limit and offset", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewMediaAccessRepository(t)
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 1, 1).Return([]models.Media{
+			{ID: uuid.NewString(), Title: "Navigating the FAFSA", LengthInMins: 20},
+		}, nil)
+
+		app, err := setupMediaAccessTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodGet, "/media-access?limit=1&offset=1", nil)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var accessible []models.Media
+		require.NoError(t, json.Unmarshal(respBody, &accessible))
+		require.Len(t, accessible, 1)
+		assert.Equal(t, "Navigating the FAFSA", accessible[0].Title)
+	})
+
+	t.Run("validation error - invalid pagination", func(t *testing.T) {
+		t.Parallel()
+
+		for _, query := range []string{"?limit=0", "?limit=101", "?offset=-1"} {
+			// Repository should not be called when pagination params are rejected
+			mockRepo := mocks.NewMediaAccessRepository(t)
+
+			app, err := setupMediaAccessTestApp(mockRepo)
+			require.NoError(t, err)
+
+			resp, _ := doRequest(t, app, http.MethodGet, "/media-access"+query, nil)
+			assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode, "query: %s", query)
+		}
+	})
+
 	t.Run("repository error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID).
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 20, 0).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupMediaAccessTestApp(mockRepo)

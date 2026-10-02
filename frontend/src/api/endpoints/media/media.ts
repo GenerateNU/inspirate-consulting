@@ -20,6 +20,7 @@ import type {
 import type {
   CreateMediaRequestBody,
   ErrorModel,
+  ListMediaParams,
   Media
 } from '../../models';
 
@@ -81,20 +82,27 @@ export type listMediaResponseError = (listMediaResponseDefault) & {
 
 export type listMediaResponse = (listMediaResponseSuccess | listMediaResponseError)
 
-export const getListMediaUrl = () => {
+export const getListMediaUrl = (params?: ListMediaParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `http://127.0.0.1:8080/media`
+  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/media?${stringifiedParams}` : `http://127.0.0.1:8080/media`
 }
 
 /**
  * Fetch all videos, through counselor view
  */
-export const listMedia = async ( options?: RequestInit): Promise<listMediaResponse> => {
+export const listMedia = async (params?: ListMediaParams, options?: RequestInit): Promise<listMediaResponse> => {
 
-  const res = await fetch(getListMediaUrl(),
+  const res = await fetch(getListMediaUrl(params),
   {
     ...options,
     method: 'GET'
@@ -113,18 +121,18 @@ export const listMedia = async ( options?: RequestInit): Promise<listMediaRespon
 
 
 
-export const getListMediaKey = () => [`http://127.0.0.1:8080/media`] as const;
+export const getListMediaKey = (params?: ListMediaParams,) => [`http://127.0.0.1:8080/media`, ...(params ? [params]: [])] as const;
 
 export type ListMediaQueryResult = NonNullable<Awaited<ReturnType<typeof listMedia>>>
 
 export const useListMedia = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listMedia>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+  params?: ListMediaParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listMedia>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
 ) => {
   const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListMediaKey() : null);
-  const swrFn = () => listMedia(fetchOptions)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListMediaKey(params) : null);
+  const swrFn = () => listMedia(params, fetchOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 
