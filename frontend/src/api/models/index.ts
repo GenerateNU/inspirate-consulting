@@ -7,6 +7,9 @@
  */
 
 export * from './createEssayBody';
+export * from './createExtracurricularRequest';
+export * from './createExtracurricularRequestStatus';
+export * from './createExtracurricularRequestType';
 export * from './createGlobalCollegeRequestBody';
 export * from './createPersonalCollegeApplicationRequestBody';
 export * from './createPersonalCollegeApplicationRequestBodyApplicationType';
@@ -19,6 +22,7 @@ export * from './essayListBody';
 export * from './essayReviewStatus';
 export * from './essayReviewTransaction';
 export * from './essays';
+export * from './extracurricular';
 export * from './getVideoParams';
 export * from './globalCollege';
 export * from './greetingMessageBody';
@@ -32,6 +36,9 @@ export * from './requestEssayReviewRequestBody';
 export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
 export * from './todoItem';
+export * from './updateExtracurricularRequest';
+export * from './updateExtracurricularRequestStatus';
+export * from './updateExtracurricularRequestType';
 export * from './updateStatusBody';
 export * from './updateStatusBodyStatus';
 export * from './updateTodoItemCompletedAtInputBody';

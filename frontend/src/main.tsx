@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App'
 import Greeting from './greeting/greeting'
+import CreateExtracurricular from './extracurricular/CreateExtracurricular'
+import Extracurriculars from './extracurricular/Extracurriculars'
 import Essay from "./essays/essays";
 import CreateCollege from './college/create-college'
 import CollegeList from './college/college-list'
@@ -25,6 +27,8 @@ createRoot(document.getElementById("root")!).render(
         <Route element={<Layout />}>
           <Route path="/" element={<App />} />
           <Route path="/greeting" element={<Greeting />} />
+          <Route path="/create-extracurricular" element={<CreateExtracurricular />} />
+          <Route path="/extracurriculars" element={<Extracurriculars />} />
           <Route path="/essay" element={<Essay />} />
           <Route path="/create-college" element={<CreateCollege />} />
           <Route path="/college-list" element={<CollegeList />} />
