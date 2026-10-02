@@ -37,6 +37,49 @@ components:
         - type
         - link_to_content
       type: object
+    CreateExtracurricularRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateExtracurricularRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date
+          type: string
+        leadership_role:
+          type: string
+        name:
+          minLength: 1
+          type: string
+        organization:
+          type: string
+        start_date:
+          format: date
+          type: string
+        status:
+          enum:
+            - doing
+            - have_done
+          type: string
+        type:
+          enum:
+            - maintenance
+            - investment
+          type: string
+      required:
+        - name
+        - status
+        - type
+        - description
+        - start_date
+        - organization
+      type: object
     CreateGlobalCollegeRequestBody:
       additionalProperties: false
       properties:
@@ -402,6 +445,60 @@ components:
         - status
         - essay_group_id
       type: object
+    Extracurricular:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Extracurricular.json
+          format: uri
+          readOnly: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date-time
+          type: string
+        id:
+          format: int64
+          type: integer
+        leadership_role:
+          type: string
+        name:
+          type: string
+        organization:
+          type: string
+        start_date:
+          format: date-time
+          type: string
+        status:
+          type: string
+        student_id:
+          type: string
+        type:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        user_id:
+          type: string
+      required:
+        - id
+        - created_at
+        - updated_at
+        - student_id
+        - user_id
+        - name
+        - status
+        - type
+        - description
+        - start_date
+        - organization
+      type: object
     GlobalCollege:
       additionalProperties: false
       properties:
@@ -738,6 +835,42 @@ components:
         - completed_at
         - deadline
       type: object
+    UpdateExtracurricularRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateExtracurricularRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date
+          type: string
+        leadership_role:
+          type: string
+        name:
+          minLength: 1
+          type: string
+        organization:
+          type: string
+        start_date:
+          format: date
+          type: string
+        status:
+          enum:
+            - doing
+            - have_done
+          type: string
+        type:
+          enum:
+            - maintenance
+            - investment
+          type: string
+      type: object
     UpdateStatusBody:
       additionalProperties: false
       properties:
@@ -1032,6 +1165,96 @@ paths:
           description: Error
       tags:
         - Essays
+  /extracurriculars:
+    get:
+      description: List extracurriculars for the authenticated student.
+      operationId: list-extracurriculars
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Extracurricular"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}:
+    patch:
+      description: Update fields on an extracurricular for the authenticated student.
+      operationId: update-extracurricular
+      parameters:
+        - description: ID of the extracurricular to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular to update
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtracurricularRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{studentID}:
+    post:
+      description: Create a new extracurricular for the given student.
+      operationId: create-extracurricular
+      parameters:
+        - description: ID of the student the extracurricular belongs to
+          in: path
+          name: studentID
+          required: true
+          schema:
+            description: ID of the student the extracurricular belongs to
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtracurricularRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
   /greeting:
     post:
       description: Create a greeting for a person by name.
