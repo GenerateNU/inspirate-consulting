@@ -5,6 +5,7 @@ import (
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws"
 	"inspirate-consulting/internal/data/postgres"
 	"inspirate-consulting/internal/errs"
 	"os"
@@ -31,6 +32,10 @@ type App struct {
 func InitApp(config config.Config) (*App, error) {
 	ctx := context.Background()
 	repo := postgres.NewRepository(ctx, config.DB)
+	awsRepo := aws.NewRepository(ctx, config.S3)
+
+	// Assign the AWS repositories to the main repository
+	repo.Video = awsRepo.Video
 
 	app, humaAPI, err := SetupApp(config, repo)
 	if err != nil {
@@ -86,10 +91,10 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	// Register public routes BEFORE auth middleware
 	// routes.SetupAuthRoutes(humaAPI, repo, config)
-	
+
 	// Apply auth middleware — only affects routes registered after this point
 	if !config.TestMode {
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, &config.Supabase))
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
 	}
 
 	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
@@ -108,10 +113,19 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	return app, humaAPI, nil
 }
 
+
+
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
+	SetUpEssayRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
+	SetUpTodoItemRoutes(api, repo)
+	SetUpPersonalCollegeApplicationRoutes(api, repo)
+	SetupUserRoutes(api, repo, &config)
+	SetUpVideoRoutes(api, repo)
+	SetUpEssayReviewRoutes(api, repo)
+	SetUpStudentRoutes(api, repo)
 	return nil
 }

@@ -1,3 +1,11 @@
+---
+name: Basic Ticket
+about: Standard ticket covering frontend, backend, and PR breakdown
+title: ''
+labels: ''
+assignees: ''
+---
+
 ## Overview
 
 <!-- Provide a basic product description -->
