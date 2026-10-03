@@ -307,6 +307,42 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Get notification preferences for the authenticated user.
+ */
+export const GetNotificationPreferencesResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "days_before_due": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of days before the due date to send notifications')),
+  "due_date_notifications_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive due date notifications')),
+  "email_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive email notifications')),
+  "notify_past_due": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive notifications for past due dates')),
+  "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the user who owns this notification preference')),
+  "weekly_summary_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive weekly summary notifications'))
+})
+
+
+/**
+ * Update notification preferences for the authenticated user.
+ */
+export const UpdateNotificationPreferencesBody = /*#__PURE__*/ zod.object({
+  "days_before_due": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of days before the due date to send notifications')),
+  "due_date_notifications_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive due date notifications')),
+  "email_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive email notifications')),
+  "notify_past_due": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive notifications for past due dates')),
+  "weekly_summary_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive weekly summary notifications'))
+})
+
+export const UpdateNotificationPreferencesResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "days_before_due": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of days before the due date to send notifications')),
+  "due_date_notifications_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive due date notifications')),
+  "email_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive email notifications')),
+  "notify_past_due": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive notifications for past due dates')),
+  "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the user who owns this notification preference')),
+  "weekly_summary_enabled": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('Whether the user wants to receive weekly summary notifications'))
+})
+
+
+/**
  * Spend a student's review balance to open a review on an essay.
  */
 export const requestEssayReviewBodyAmountDefault = 1;

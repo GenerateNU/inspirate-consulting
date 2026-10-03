@@ -14,6 +14,7 @@ import (
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
+	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
@@ -98,6 +99,11 @@ type EssayReviewRepository interface {
 	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
 
+type NotificationPreferencesRepository interface {
+	GetNotificationPreferences(ctx context.Context, userID uuid.UUID) (*models.NotificationPreferences, error)
+	UpdateNotificationPreferences(ctx context.Context, userID uuid.UUID, preferences models.UpdateNotificationPreferencesRequestBody) (*models.NotificationPreferences, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
@@ -112,6 +118,7 @@ type Repository struct {
 	User                       UserRepository
 	Video                      VideoRepository
 	EssayReview                EssayReviewRepository
+	NotificationPreferences    NotificationPreferencesRepository
 }
 
 // Close closes the database connection pool
@@ -137,7 +144,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		Media:                      mediaRepository.NewMediaRepository(db),
 		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
-		// Video:                    videoRepository.NewVideoRepository(db),
 		EssayReview: essayReviewRepository.NewEssayReviewRepository(db),
+		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 	}
 }
