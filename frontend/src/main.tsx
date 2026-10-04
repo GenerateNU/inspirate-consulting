@@ -16,7 +16,6 @@ import Counselor from "./counselor/counselor";
 import CreateTask from "./task/CreateTask";
 import TaskList from "./task/TaskList";
 import Layout from "./layout/layout";
-import CreateUser from './user/create-user'
 
 
 createRoot(document.getElementById("root")!).render(
@@ -40,7 +39,6 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/counselor" element={<Counselor />} />
           <Route path="/create-task" element={<CreateTask />} />
           <Route path="/tasks" element={<TaskList />} />
-          <Route path="/create-account" element={<CreateUser />} />
         </Route>
       </Routes>
     </BrowserRouter>
