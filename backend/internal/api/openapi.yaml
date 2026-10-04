@@ -1375,7 +1375,10 @@ paths:
                 type: string
             ResetTime:
               schema:
-                type: string
+                format: date-time
+                type:
+                  - string
+                  - "null"
             TokenType:
               schema:
                 type: string
@@ -1394,6 +1397,11 @@ paths:
     post:
       description: user logout
       operationId: logout-user
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
       responses:
         "204":
           description: No Content
