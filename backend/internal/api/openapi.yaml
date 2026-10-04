@@ -502,6 +502,24 @@ components:
       required:
         - name
       type: object
+    LoginInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/LoginInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+      type: object
     PersonalCollegeApplication:
       additionalProperties: false
       properties:
@@ -636,6 +654,21 @@ components:
         - student_id
         - essay_id
         - amount
+      type: object
+    ResetPasswordInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ResetPasswordInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        new_password:
+          type: string
+      required:
+        - new_password
       type: object
     SetStudentReviewBalanceRequestBody:
       additionalProperties: false
@@ -788,9 +821,12 @@ components:
           type: string
         name:
           type: string
-        needs_to_reset:
-          type: boolean
         pfp_key:
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
           type:
             - string
             - "null"
@@ -801,7 +837,15 @@ components:
         - name
         - supabase_id
         - pfp_key
-        - needs_to_reset
+        - reset_time
+      type: object
+    UserResponse:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+      required:
+        - id
       type: object
     Video:
       additionalProperties: false
@@ -1291,6 +1335,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
           description: OK
+          headers:
+            TempPassword:
+              schema:
+                type: string
         default:
           content:
             application/problem+json:
@@ -1299,6 +1347,90 @@ paths:
           description: Error
       tags:
         - User
+  /user/login:
+    post:
+      description: user login
+      operationId: login-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInputBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+          headers:
+            AccessToken:
+              schema:
+                type: string
+            Error:
+              schema: {}
+            ExpiresIn:
+              schema:
+                format: int64
+                type: integer
+            RefreshToken:
+              schema:
+                type: string
+            ResetTime:
+              schema:
+                type: string
+            TokenType:
+              schema:
+                type: string
+            User:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Login
+  /user/logout:
+    post:
+      description: user logout
+      operationId: logout-user
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Logout
+  /user/reset-password:
+    patch:
+      description: reset user password
+      operationId: reset-user-password
+      parameters:
+        - in: header
+          name: User-ID
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordInputBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ResetPass
   /user/{id}:
     get:
       description: fetch a user (student/counselor)
