@@ -9,6 +9,9 @@ import (
 
 func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase supabase.SupabaseInterface) (*models.LoginResponse, error) {
 	res, err := supabase.SupabaseLogin(input.Body.Email, input.Body.Password, auth.Client)
+	if err != nil {
+		return nil, err
+	}
 
 	userInput := models.FetchUserInput{}
 	userInput.ID = res.User.ID

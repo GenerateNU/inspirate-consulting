@@ -1456,6 +1456,27 @@ paths:
           description: Error
       tags:
         - User
+  /user/{id}/force-password-reset:
+    post:
+      description: Force a user to reset their password on next login
+      operationId: force-password-reset
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ResetPass
   /videos:
     get:
       description: List all videos in the S3 bucket.
