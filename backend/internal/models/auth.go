@@ -54,4 +54,22 @@ type LoginResponse struct {
 	RefreshToken string       `json:"refresh_token"`
 	User         UserResponse `json:"user"`
 	Error        interface{}  `json:"error"`
+	NeedsToReset bool         `json:"needs_to_reset"`
+}
+
+type LogoutInput struct {
+	AccessToken string      `json:"access_token"`
+	TokenType   string      `json:"token_type"`
+	ExpiresIn   int         `json:"expires_in"`
+	Error       interface{} `json:"error"`
+}
+
+type LogoutResponse struct {
+}
+
+type ResetPasswordInput struct {
+	Password string `json:"password" db:"password"`
+}
+
+type ResetPasswordResponse struct {
 }

@@ -116,5 +116,8 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config
 	SetUpVideoRoutes(api, repo)
 	SetUpEssayReviewRoutes(api, repo)
 	SetUpStudentRoutes(api, repo)
+	SetupLoginRoutes(api, repo, &config)
+	SetupLogoutRoutes(api, repo, &config)
+	SetupResetPasswordRoutes(api, repo, &config)
 	return nil
 }

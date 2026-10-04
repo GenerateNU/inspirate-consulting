@@ -8,6 +8,9 @@ import (
 
 type SupabaseInterface interface {
 	Signup(email string, password string, Client *http.Client) (models.SignupResponse, error)
+	SupabaseLogin(email string, password string, Client *http.Client) (models.LoginResponse, error)
+	SupabaseLogout(Client *http.Client, access_token string) (models.LogoutResponse, error)
+	SupabaseResetPassword(Client *http.Client, access_token string) (models.ResetPasswordResponse, error)
 }
 
 // Supabase holds Supabase-related configuration
