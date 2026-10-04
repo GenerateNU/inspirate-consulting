@@ -26,7 +26,7 @@ func (s *MockSupabase) SupabaseLogout(Client *http.Client, access_token string) 
 	return resp, nil
 }
 
-func (s *MockSupabase) SupabaseResetPassword(Client *http.Client, access_token string) (models.ResetPasswordResponse, error) {
+func (s *MockSupabase) SupabaseResetPassword(Client *http.Client, access_token string, userID string) (models.ResetPasswordResponse, error) {
 	resp := models.ResetPasswordResponse{}
 	return resp, nil
 }

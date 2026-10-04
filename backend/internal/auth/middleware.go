@@ -85,7 +85,8 @@ func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.
 			return
 		}
 
-		_, err = NewVerifier("").Verify(cookie.Value)
+		claims, err := NewVerifier("").Verify(cookie.Value)
+
 		if err != nil {
 			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Invalid/Expired Token")
 			if err != nil {
@@ -94,6 +95,7 @@ func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.
 			return
 		}
 
+		ctx.SetHeader("User-ID", claims.Sub)
 		next(ctx)
 	}
 }

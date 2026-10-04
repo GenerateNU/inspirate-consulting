@@ -68,7 +68,10 @@ type LogoutResponse struct {
 }
 
 type ResetPasswordInput struct {
-	Password string `json:"password" db:"password"`
+	UserID string `header:"User-ID"`
+	Body   struct {
+		NewPassword string `json:"new_password"`
+	}
 }
 
 type ResetPasswordResponse struct {
