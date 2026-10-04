@@ -417,6 +417,10 @@ export const LoginUserResponse = /*#__PURE__*/ zod.void()
 /**
  * user logout
  */
+export const LogoutUserHeader = /*#__PURE__*/ zod.object({
+  "Authorization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
+})
+
 export const LogoutUserResponse = /*#__PURE__*/ zod.void()
 
 
