@@ -1,0 +1,2 @@
+ALTER TABLE USERS
+ADD reset_time TEXT;
