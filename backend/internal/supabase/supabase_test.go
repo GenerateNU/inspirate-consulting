@@ -88,3 +88,29 @@ func TestSupabaseLogout_InvalidToken(t *testing.T) {
 		t.Fatal("expected an error for invalid token, got nil")
 	}
 }
+
+func TestSupabaseResetPassword_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	s := newTestSupabase(server.URL)
+	_, err := s.SupabaseResetPassword(server.Client(), "newpassword123", "test-user-id")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestSupabaseResetPassword_Unauthorized(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer server.Close()
+
+	s := newTestSupabase(server.URL)
+	_, err := s.SupabaseResetPassword(server.Client(), "newpassword123", "invalid-user-id")
+	if err == nil {
+		t.Fatal("expected an error for unauthorized request, got nil")
+	}
+}

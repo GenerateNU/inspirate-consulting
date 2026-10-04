@@ -2,6 +2,7 @@ package mocks
 
 import (
 	context "context"
+	"time"
 
 	models "inspirate-consulting/internal/models"
 
@@ -72,6 +73,21 @@ func (_m *UserRepository) FetchUser(ctx context.Context, input models.FetchUserI
 	}
 
 	return r0, r1
+}
+
+
+func (_m *UserRepository) UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error {
+	ret := _m.Called(ctx, id, resetTime)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateResetTime")
+	}
+
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *time.Time) error); ok {
+		return rf(ctx, id, resetTime)
+	}
+
+	return ret.Error(0)
 }
 
 // NewUserRepository creates a new instance of UserRepository

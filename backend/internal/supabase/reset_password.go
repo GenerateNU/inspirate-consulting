@@ -10,7 +10,7 @@ import (
 
 func (s *Supabase) SupabaseResetPassword(Client *http.Client, newPassword string, userID string) (models.ResetPasswordResponse, error) {
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/auth/v1/token?grant_type=password", s.URL), nil)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/auth/v1/admin/users/%s", s.URL, userID), nil)
 	if err != nil {
 		return models.ResetPasswordResponse{}, err
 	}

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -54,7 +56,7 @@ type LoginResponse struct {
 	RefreshToken string       `json:"refresh_token"`
 	User         UserResponse `json:"user"`
 	Error        interface{}  `json:"error"`
-	NeedsToReset bool         `json:"needs_to_reset"`
+	ResetTime    time.Time    `json:"reset_time"`
 }
 
 type LogoutInput struct {

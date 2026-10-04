@@ -15,7 +15,7 @@ func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config 
 	resetpasswordHandler := resetpassword.NewHandler(repository.User)
 	huma.Register(api, huma.Operation{
 		OperationID: "reset-user-password",
-		Method:      http.MethodPut,
+		Method:      http.MethodPatch,
 		Path:        "/user/reset-password",
 		Description: "reset user password",
 		Tags:        []string{"ResetPass"},

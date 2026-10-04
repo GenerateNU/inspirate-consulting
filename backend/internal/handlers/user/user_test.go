@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -32,6 +33,12 @@ func (m *mockUserRepository) FetchUser(ctx context.Context, input models.FetchUs
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*models.FetchUserOutput), args.Error(1)
+}
+
+
+func (m *mockUserRepository) UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error {
+	args := m.Called(ctx, id, resetTime)
+	return args.Error(0)
 }
 
 func TestHandler_CreateUser(t *testing.T) {

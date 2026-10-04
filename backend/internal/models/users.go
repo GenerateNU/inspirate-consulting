@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -15,11 +17,11 @@ const (
 )
 
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	SupabaseID   uuid.UUID `json:"supabase_id"`
-	PfpKey       *string   `json:"pfp_key"`
-	NeedsToReset bool      `json:"needs_to_reset"`
+	ID         uuid.UUID  `json:"id"`
+	Name       string     `json:"name"`
+	SupabaseID uuid.UUID  `json:"supabase_id"`
+	PfpKey     *string    `json:"pfp_key"`
+	ResetTime  *time.Time `json:"reset_time"`
 }
 
 // I represented year under the assumption that we're following the american high school timeline
@@ -49,7 +51,8 @@ type CreateUserInput struct {
 }
 
 type CreateUserOutput struct {
-	Body *User `json:"body"`
+	Body         *User  `json:"body"`
+	TempPassword string `json:"temp_password"`
 }
 
 type FetchUserInput struct {
@@ -59,3 +62,4 @@ type FetchUserInput struct {
 type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
+

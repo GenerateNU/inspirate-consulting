@@ -17,6 +17,6 @@ func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase 
 		return nil, err
 	}
 
-	res.NeedsToReset = user.Body.NeedsToReset
+	res.ResetTime = *user.Body.ResetTime
 	return &res, nil
 }
