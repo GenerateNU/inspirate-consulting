@@ -26,4 +26,14 @@ func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config 
 		}
 		return resetpasswordOutput, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "force-password-reset",
+		Method:      http.MethodPost,
+		Path:        "/user/{id}/force-password-reset",
+		Description: "Force a user to reset their password on next login",
+		Tags:        []string{"ResetPass"},
+	}, func(ctx context.Context, input *models.ForcePasswordResetInput) (*models.ForcePasswordResetOutput, error) {
+		return resetpasswordHandler.ForcePasswordReset(ctx, input)
+	})
 }

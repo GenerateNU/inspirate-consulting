@@ -59,6 +59,12 @@ type FetchUserInput struct {
 	ID uuid.UUID `path:"id" required:"true"`
 }
 
+type ForcePasswordResetInput struct {
+	ID uuid.UUID `path:"id" required:"true"`
+}
+
+type ForcePasswordResetOutput struct{}
+
 type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
