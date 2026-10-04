@@ -6,14 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface User {
+export interface ResetPasswordInputBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  id: string;
-  name: string;
-  /** @nullable */
-  pfp_key: string | null;
-  /** @nullable */
-  reset_time: string | null;
-  supabase_id: string;
+  new_password: string;
 }

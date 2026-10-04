@@ -1,2 +1,2 @@
 ALTER TABLE USERS
-ADD reset_time TEXT;
+ADD COLUMN reset_time TEXT;
