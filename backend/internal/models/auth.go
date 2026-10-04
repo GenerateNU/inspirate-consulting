@@ -56,14 +56,11 @@ type LoginResponse struct {
 	RefreshToken string       `json:"refresh_token"`
 	User         UserResponse `json:"user"`
 	Error        interface{}  `json:"error"`
-	ResetTime    time.Time    `json:"reset_time"`
+	ResetTime    *time.Time   `json:"reset_time"`
 }
 
 type LogoutInput struct {
-	AccessToken string      `json:"access_token"`
-	TokenType   string      `json:"token_type"`
-	ExpiresIn   int         `json:"expires_in"`
-	Error       interface{} `json:"error"`
+	Authorization string `header:"Authorization"`
 }
 
 type LogoutResponse struct {

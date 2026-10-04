@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     supabase_id UUID DEFAULT gen_random_uuid(),
     pfp_key TEXT,
-    reset_time TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
