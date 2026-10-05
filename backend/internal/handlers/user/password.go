@@ -6,4 +6,5 @@ import "github.com/sethvargo/go-password/password"
 // Need to replace current generation with a proper method that actually follows the constraints we have
 func generateTempPassword() (string, error) {
 	return password.Generate(16, 4, 4, false, false)
+
 }
