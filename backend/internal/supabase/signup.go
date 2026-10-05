@@ -20,7 +20,7 @@ func (s *Supabase) Signup(email string, password string, Client *http.Client, ro
 	app_metadata := make(map[string]string)
 	app_metadata["role"] = role
 
-	payload := models.SignUpPayload{Email: email, Password: password, AppMetadata: app_metadata}
+	payload := models.SignUpPayload{Email: email, Password: password, AppMetadata: app_metadata, EmailConfirm: true}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return models.SignupResponse{}, err
