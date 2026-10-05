@@ -4,6 +4,7 @@ import (
 	"context"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/routes"
+	"inspirate-consulting/internal/supabase"
 
 	"log"
 	"log/slog"
@@ -73,7 +74,14 @@ func LoadConfig() (*config.Config, error) {
 		log.Fatalln("Error processing environment variables: ", err)
 	}
 
+	var supa supabase.Supabase
+	err = envconfig.Process(context.Background(), &supa)
+	if err != nil {
+		log.Fatalln("Error processing environment variables for supabase: ", err)
+	}
+
 	cfg.TestMode = testMode == "true"
+	cfg.Supabase = &supa
 
 	return &cfg, nil
 }

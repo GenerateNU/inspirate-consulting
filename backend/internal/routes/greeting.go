@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"net/http"
 
@@ -11,13 +12,14 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpGreetingRoutes(api huma.API, repository *data.Repository) {
+func SetUpGreetingRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	greetingHandler := greeting.NewHandler(repository.Greeting)
 	// Register POST /greeting handler.
 	// The handler function takes in a struct that defines its inputs ('Body' in this case)
 	// and returns the CreateGreetingOutput model built in the models
 	huma.Register(api, huma.Operation{
 		OperationID: "create-greeting",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/greeting",
 		Description: "Create a greeting for a person by name.",

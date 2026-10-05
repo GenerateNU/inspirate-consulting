@@ -11,8 +11,9 @@ export interface User {
   readonly $schema?: string;
   id: string;
   name: string;
-  needs_to_reset: boolean;
   /** @nullable */
   pfp_key: string | null;
+  /** @nullable */
+  reset_time: string | null;
   supabase_id: string;
 }

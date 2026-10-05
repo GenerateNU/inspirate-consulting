@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"net/http"
 
@@ -11,11 +12,12 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository) {
+func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	essayReviewHandler := essayreview.NewHandler(repository.EssayReview)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "request-essay-review",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPost,
 		Path:        "/reviews",
 		Description: "Spend a student's review balance to open a review on an essay.",
@@ -30,6 +32,7 @@ func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository) {
 
 	huma.Register(api, huma.Operation{
 		OperationID: "refund-essay-review",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/reviews/{id}/refund",
 		Description: "Refund a review that has not been completed, crediting the balance back to the student.",
@@ -44,6 +47,7 @@ func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository) {
 
 	huma.Register(api, huma.Operation{
 		OperationID: "complete-essay-review",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/reviews/{id}/complete",
 		Description: "Mark a review as having been completed by a counselor.",
@@ -58,6 +62,7 @@ func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository) {
 
 	huma.Register(api, huma.Operation{
 		OperationID: "get-essay-review-status",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/essays/{essay_id}/review-status",
 		Description: "Get the current review status of an essay, from its most recent review request.",

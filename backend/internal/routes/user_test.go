@@ -44,7 +44,6 @@ func TestRoute_CreateUser(t *testing.T) {
 	key := "key"
 	email := "alengano123@gmail.com"
 	name := "Aleng123"
-	password := "2976$Rita297605"
 
 	userTest := models.User{
 		ID:         u1,
@@ -57,10 +56,9 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("CreateUser", mock.Anything, mock.MatchedBy(func(in models.CreateUserInput) bool {
-
 			return in.Body.Name == "Aleng123"
 		})).Return(&models.CreateUserOutput{
-			Body: &userTest,
+			Body: &models.CreateUserBody{User: &userTest},
 		}, nil)
 
 		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
@@ -71,8 +69,8 @@ func TestRoute_CreateUser(t *testing.T) {
 		payload := map[string]any{
 			"email":    email,
 			"name":     name,
-			"password": password,
 			"pfp_key":  &key,
+			"role":     "student",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		println(bodyBytes)
@@ -99,7 +97,7 @@ func TestRoute_CreateUser(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Log("value:", output)
-		assert.Equal(t, name, output.Body.Name)
+		assert.Equal(t, name, output.Body.User.Name)
 
 	})
 
