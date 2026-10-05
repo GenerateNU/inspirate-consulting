@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
@@ -91,7 +92,11 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	// Apply auth middleware — only affects routes registered after this point
 	if !config.TestMode {
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
+		verifier, err := auth.NewVerifier(os.Getenv("SUPABASE_URL"))
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
+		}
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, verifier))
 	}
 
 	app.Get("/", func(c fiber.Ctx) error {

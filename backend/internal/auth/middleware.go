@@ -2,11 +2,10 @@ package auth
 
 import (
 	"errors"
-	"inspirate-consulting/internal/supabase"
 	"log/slog"
 	"net/http"
-	"os"
 
+	"github.com/MicahParks/keyfunc/v3"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -30,28 +29,29 @@ type SupabaseClaims struct {
 	jwt.RegisteredClaims
 }
 
-// Verifier handles JWT verification
+// Verifier checks Supabase JWTs against the project's published public keys (JWKS)
 type Verifier struct {
-	secret []byte
+	jwks keyfunc.Keyfunc
 }
 
-// NewVerifier creates a new JWT verifier
-// If secret is empty, it reads from SUPABASE_JWT_SECRET env var
-func NewVerifier(secret string) *Verifier {
-	if secret == "" {
-		secret = os.Getenv("SUPABASE_JWT_SECRET")
+// NewVerifier loads the signing keys from {supabaseURL}/auth/v1/.well-known/jwks.json.
+// Keys are cached and refreshed in the background, so create this once at startup.
+func NewVerifier(supabaseURL string) (*Verifier, error) {
+	jwks, err := keyfunc.NewDefault([]string{supabaseURL + "/auth/v1/.well-known/jwks.json"})
+	if err != nil {
+		return nil, err
 	}
-	return &Verifier{secret: []byte(secret)}
+	return &Verifier{jwks: jwks}, nil
 }
 
 // Verify validates a JWT token and returns the claims
 func (v *Verifier) Verify(tokenString string) (*SupabaseClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &SupabaseClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrInvalidMethod
-		}
-		return v.secret, nil
-	})
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&SupabaseClaims{},
+		v.jwks.Keyfunc,
+		jwt.WithValidMethods([]string{"ES256", "RS256"}),
+	)
 
 	if err != nil {
 		return nil, errors.Join(ErrInvalidToken, err)
@@ -65,7 +65,7 @@ func (v *Verifier) Verify(tokenString string) (*SupabaseClaims, error) {
 	return claims, nil
 }
 
-func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
+func AuthMiddleware(api huma.API, verifier *Verifier) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
 		"/api/v1/health": true,
 		"/user/login":    true,
@@ -86,9 +86,10 @@ func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.
 			return
 		}
 
-		claims, err := NewVerifier("").Verify(cookie.Value)
+		claims, err := verifier.Verify(cookie.Value)
 
 		if err != nil {
+			slog.Error("jwt verify failed", "err", err)
 			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Invalid/Expired Token")
 			if err != nil {
 				slog.Error("Failed to write error", "err", err)
@@ -97,7 +98,7 @@ func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.
 		}
 
 		//ctx.SetHeader("Supabase-ID", claims.Sub)
-		huma.WithValue(ctx, "Supabase-ID", claims.Sub)
+		ctx = huma.WithValue(ctx, "Supabase-ID", claims.Sub)
 
 		// will be used for specifying the role of the user (student or counselor)
 		//	ctx.SetHeader("Role", claims.AppMetadata["Role"].(string))
