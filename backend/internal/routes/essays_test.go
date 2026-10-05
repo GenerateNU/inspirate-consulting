@@ -273,3 +273,189 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
 }
+
+func TestRoute_GetEssaysByGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		groupID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("GetEssaysByGroup", mock.Anything, groupID).Return([]models.Essays{
+			{
+				ID:            uuid.New(),
+				StudentID:     uuid.New(),
+				Type:          "personal-statement",
+				LinkToContent: "https://docs.google.com/document/d/abc123",
+				Status:        models.Draft,
+				EssayGroupID:  &groupID,
+			},
+		}, nil)
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodGet, "/essay-groups/"+groupID.String()+"/essays", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		var output models.EssayListBody
+		err = json.Unmarshal(respBody, &output)
+		require.NoError(t, err)
+		require.Len(t, output.Essays, 1)
+		require.NotNil(t, output.Essays[0].EssayGroupID)
+		assert.Equal(t, groupID, *output.Essays[0].EssayGroupID)
+	})
+
+	t.Run("validation error - group id is not a uuid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		// Mock should NOT be called when Huma validation fails
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodGet, "/essay-groups/not-a-uuid/essays", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
+
+func TestRoute_UpdateEssayGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("moves the essay into a group", func(t *testing.T) {
+		t.Parallel()
+
+		essayID := uuid.New()
+		groupID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, mock.MatchedBy(func(id *uuid.UUID) bool {
+			return id != nil && *id == groupID
+		})).Return(&models.Essays{
+			ID:           essayID,
+			EssayGroupID: &groupID,
+		}, nil)
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		payload := map[string]any{"essay_group_id": groupID.String()}
+		bodyBytes, err := json.Marshal(payload)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(
+			http.MethodPatch,
+			"/essays/"+essayID.String()+"/group",
+			bytes.NewReader(bodyBytes),
+		)
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		var output models.EssayBody
+		err = json.Unmarshal(respBody, &output)
+		require.NoError(t, err)
+		require.NotNil(t, output.Essay)
+		require.NotNil(t, output.Essay.EssayGroupID)
+		assert.Equal(t, groupID, *output.Essay.EssayGroupID)
+	})
+
+	// Omitting essay_group_id entirely is how a client removes an essay from its group.
+	t.Run("removes the essay from its group", func(t *testing.T) {
+		t.Parallel()
+
+		essayID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, (*uuid.UUID)(nil)).Return(&models.Essays{
+			ID:           essayID,
+			EssayGroupID: nil,
+		}, nil)
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(
+			http.MethodPatch,
+			"/essays/"+essayID.String()+"/group",
+			strings.NewReader(`{}`),
+		)
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		var output models.EssayBody
+		err = json.Unmarshal(respBody, &output)
+		require.NoError(t, err)
+		require.NotNil(t, output.Essay)
+		assert.Nil(t, output.Essay.EssayGroupID)
+	})
+
+	t.Run("validation error - essay group id is not a uuid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		// Mock should NOT be called when Huma validation fails
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(
+			http.MethodPatch,
+			"/essays/"+uuid.New().String()+"/group",
+			strings.NewReader(`{"essay_group_id": "not-a-uuid"}`),
+		)
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
