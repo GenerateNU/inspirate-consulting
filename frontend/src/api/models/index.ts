@@ -14,6 +14,7 @@ export * from './createPersonalCollegeApplicationRequestBodyCategory';
 export * from './createTodoItemRequestBody';
 export * from './createUserBody';
 export * from './createUserInputBody';
+export * from './createUserInputBodyRole';
 export * from './errorDetail';
 export * from './errorModel';
 export * from './essayListBody';

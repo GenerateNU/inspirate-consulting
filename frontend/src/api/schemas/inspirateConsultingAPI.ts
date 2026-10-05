@@ -389,7 +389,8 @@ export const createUserBodyNameMax = 200;
 export const CreateUserBody = /*#__PURE__*/ zod.object({
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
-  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
+  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create'))
 })
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({
