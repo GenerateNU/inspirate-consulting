@@ -46,4 +46,26 @@ func SetUpEssayRoutes(api huma.API, repository *data.Repository) {
 	}, func(ctx context.Context, input *models.UpdateStatusInput) (*models.UpdateStatusOutput, error) {
 		return essayHandler.UpdateStatus(ctx, input)
 	})
+
+	// GET route that shows all essays in a group
+	huma.Register(api, huma.Operation{
+		OperationID: "get-essays-by-group",
+		Method:      http.MethodGet,
+		Path:        "/essay-groups/{essay_group_id}/essays",
+		Description: "Shows all essays belonging to an essay group",
+		Tags:        []string{"Essays"},
+	}, func(ctx context.Context, input *models.GetEssaysByGroupInput) (*models.GetEssaysByGroupOutput, error) {
+		return essayHandler.GetEssaysByGroup(ctx, input)
+	})
+
+	// PATCH route that adds an essay to a group or moves it between groups
+	huma.Register(api, huma.Operation{
+		OperationID: "update-essay-group",
+		Method:      http.MethodPatch,
+		Path:        "/essays/{essay_id}/group",
+		Description: "Adds an essay to a group, moves it to another group, or removes it from its group",
+		Tags:        []string{"Essays"},
+	}, func(ctx context.Context, input *models.UpdateEssayGroupInput) (*models.UpdateEssayGroupOutput, error) {
+		return essayHandler.UpdateEssayGroup(ctx, input)
+	})
 }

@@ -226,8 +226,17 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 			_ = resp.Body.Close()
 		}()
 
-		// The output envelope has no Body, so Huma responds 204 No Content
-		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		// Verify the updated essay is returned in the body
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		var output models.EssayBody
+		err = json.Unmarshal(respBody, &output)
+		require.NoError(t, err)
+		require.NotNil(t, output.Essay)
+		assert.Equal(t, models.Submitted, output.Essay.Status)
 	})
 
 	t.Run("validation error - status is not one of the enum values", func(t *testing.T) {

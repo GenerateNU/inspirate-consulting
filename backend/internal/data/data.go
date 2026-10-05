@@ -5,6 +5,7 @@ import (
 	"time"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
@@ -31,8 +32,16 @@ type GreetingRepository interface {
 // Essay Repository
 type EssayRepository interface {
 	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
+	UpdateEssayGroup(ctx context.Context, essayID uuid.UUID, essayGroupID *uuid.UUID) (*models.Essays, error)
 	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, essay models.Essays) error
+}
+
+// Essay Group Repository
+type EssayGroupRepository interface {
+	CreateEssayGroup(ctx context.Context, group models.CreateEssayGroupBody) (*models.EssayGroups, error)
+	ListEssayGroups(ctx context.Context, studentID uuid.UUID) ([]models.EssayGroups, error)
 }
 
 // To represent Todo Item schema
@@ -122,6 +131,7 @@ type Repository struct {
 	// For each interface, add a field here
 	Greeting                   GreetingRepository
 	Essay                      EssayRepository
+	EssayGroup                 EssayGroupRepository
 	ChatMessage                ChatMessageRepository
 	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
@@ -151,6 +161,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		db:                         db,
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
 		Essay:                      essayRepository.NewEssayRepository(db),
+		EssayGroup:                 essayGroupRepository.NewEssayGroupRepository(db),
 		ChatMessage:                chatMessageRepository.NewChatMessageRepository(db),
 		TodoItem:                   todoItemRepository.NewTodoItemRepository(db),
 		GlobalCollege:              globalCollegeRepository.NewGlobalCollegeRepository(db),
