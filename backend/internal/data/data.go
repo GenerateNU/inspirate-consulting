@@ -11,6 +11,7 @@ import (
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
 	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	notificationLogRepository "inspirate-consulting/internal/data/postgres/schema/notificationLogStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
@@ -37,6 +38,11 @@ type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
 	GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
+}
+
+// To represent the Notification Log schema
+type NotificationLogRepository interface {
+	CreateNotificationLog(ctx context.Context, input *models.CreateNotificationLogInput) (*models.NotificationLog, error)
 }
 
 // To represent the Global College schema
@@ -112,6 +118,7 @@ type Repository struct {
 	User                       UserRepository
 	Video                      VideoRepository
 	EssayReview                EssayReviewRepository
+	NotificationLog            NotificationLogRepository
 }
 
 // Close closes the database connection pool
@@ -138,6 +145,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
 		// Video:                    videoRepository.NewVideoRepository(db),
-		EssayReview: essayReviewRepository.NewEssayReviewRepository(db),
+		EssayReview:     essayReviewRepository.NewEssayReviewRepository(db),
+		NotificationLog: notificationLogRepository.NewNotificationLogRepository(db),
 	}
 }
