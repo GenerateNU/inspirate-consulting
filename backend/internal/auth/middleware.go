@@ -123,7 +123,7 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 
 		role, ok := claims.AppMetadata["role"].(string)
 		if !ok {
-			slog.Error("Failed to parse role", "err")
+			slog.Error("Failed to parse role", "err", ok)
 			return
 		}
 

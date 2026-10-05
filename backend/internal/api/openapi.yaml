@@ -178,10 +178,17 @@ components:
           type:
             - string
             - "null"
+        role:
+          description: the type of user the counselor would like to create
+          enum:
+            - student
+            - counselor
+          type: string
       required:
         - name
         - pfp_key
         - email
+        - role
       type: object
     ErrorDetail:
       additionalProperties: false
