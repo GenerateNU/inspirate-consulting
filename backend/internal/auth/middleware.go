@@ -68,6 +68,7 @@ func (v *Verifier) Verify(tokenString string) (*SupabaseClaims, error) {
 func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
 		"/api/v1/health": true,
+		"/user/login":    true,
 	}
 
 	return func(ctx huma.Context, next func(huma.Context)) {
@@ -95,7 +96,11 @@ func AuthMiddleware(api huma.API, cfg supabase.SupabaseInterface) func(ctx huma.
 			return
 		}
 
-		ctx.SetHeader("User-ID", claims.Sub)
+		//ctx.SetHeader("Supabase-ID", claims.Sub)
+		huma.WithValue(ctx, "Supabase-ID", claims.Sub)
+
+		// will be used for specifying the role of the user (student or counselor)
+		//	ctx.SetHeader("Role", claims.AppMetadata["Role"].(string))
 		next(ctx)
 	}
 }

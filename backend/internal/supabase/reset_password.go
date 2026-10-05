@@ -1,6 +1,8 @@
 package supabase
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -9,8 +11,13 @@ import (
 )
 
 func (s *Supabase) SupabaseResetPassword(Client *http.Client, newPassword string, userID string) (models.ResetPasswordResponse, error) {
+	payload := map[string]string{"password": newPassword}
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return models.ResetPasswordResponse{}, err
+	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/auth/v1/admin/users/%s", s.URL, userID), nil)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/auth/v1/admin/users/%s", s.URL, userID), bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return models.ResetPasswordResponse{}, err
 	}
@@ -32,6 +39,5 @@ func (s *Supabase) SupabaseResetPassword(Client *http.Client, newPassword string
 		return models.ResetPasswordResponse{}, errs.NewHTTPError(res.StatusCode, supabaseError)
 	}
 
-	var resetPasswordResponse models.ResetPasswordResponse
-	return resetPasswordResponse, nil
+	return models.ResetPasswordResponse{}, nil
 }

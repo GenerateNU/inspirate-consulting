@@ -16,7 +16,8 @@ import type {
 
 import type {
   ErrorModel,
-  LoginInputBody
+  LoginInputBody,
+  LoginResponse
 } from '../../models';
 
 
@@ -58,17 +59,17 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
 
- export type loginUserResponse204 = {
-  data: void
-  status: 204
+ export type loginUserResponse200 = {
+  data: LoginResponse
+  status: 200
 }
 
 export type loginUserResponseDefault = {
   data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 204>
+  status: Exclude<HTTPStatusCodes, 200>
 }
 
-export type loginUserResponseSuccess = (loginUserResponse204) & {
+export type loginUserResponseSuccess = (loginUserResponse200) & {
   headers: Headers;
 };
 export type loginUserResponseError = (loginUserResponseDefault) & {
@@ -116,7 +117,7 @@ const res = await fetch(getLoginUserUrl(),
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  const data: loginUserResponse['data'] = body ? JSON.parse(body) : undefined
+  const data: loginUserResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as loginUserResponse
 }
 

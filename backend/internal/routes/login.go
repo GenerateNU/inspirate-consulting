@@ -20,7 +20,7 @@ func SetupLoginRoutes(api huma.API, repository *data.Repository, config *config.
 		Path:        "/user/login",
 		Description: "user login",
 		Tags:        []string{"Login"},
-	}, func(ctx context.Context, input *models.LoginInput) (*models.LoginResponse, error) {
+	}, func(ctx context.Context, input *models.LoginInput) (*models.LoginOutput, error) {
 		loginOutput, err := loginHandler.Login(ctx, input, config.Supabase)
 		if err != nil {
 			return nil, err

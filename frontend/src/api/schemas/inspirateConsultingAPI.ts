@@ -389,17 +389,20 @@ export const createUserBodyNameMax = 200;
 export const CreateUserBody = /*#__PURE__*/ zod.object({
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
-  "password": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('password of user for supabase signup')),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
 })
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "temp_password": /*#__PURE__*/ zod.string(),
+  "user": /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "supabase_id": /*#__PURE__*/ zod.string()
+})
 })
 
 
@@ -411,7 +414,18 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
   "password": /*#__PURE__*/ zod.string()
 })
 
-export const LoginUserResponse = /*#__PURE__*/ zod.void()
+export const LoginUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "access_token": /*#__PURE__*/ zod.string(),
+  "error": /*#__PURE__*/ zod.unknown(),
+  "expires_in": /*#__PURE__*/ zod.int(),
+  "refresh_token": /*#__PURE__*/ zod.string(),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "token_type": /*#__PURE__*/ zod.string(),
+  "user": /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+})
 
 
 /**
@@ -436,6 +450,23 @@ export const ResetUserPasswordBody = /*#__PURE__*/ zod.object({
 })
 
 export const ResetUserPasswordResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * fetch a user (student/counselor) by their supabase id
+ */
+export const FetchUserBySupabaseIdParams = /*#__PURE__*/ zod.object({
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+export const FetchUserBySupabaseIdResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
 
 
 /**

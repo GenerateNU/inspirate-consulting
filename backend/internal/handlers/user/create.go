@@ -8,22 +8,21 @@ import (
 )
 
 func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, supabase supabase.SupabaseInterface) (*models.CreateUserOutput, error) {
-	signup_response, err := supabase.Signup(input.Body.Email, input.Body.Password, auth.Client)
+	tempPassword, err := generateTempPassword()
 	if err != nil {
 		return nil, err
 	}
 
-	supabase_id := signup_response.User.ID
-	user, err := h.UserRepository.CreateUser(ctx, *input, supabase_id)
-	if err != nil {
-
-		return nil, err
-	}
-
-	_, err = supabase.SupabaseResetPassword(auth.Client, user.TempPassword, user.Body.ID.String())
+	signup_response, err := supabase.Signup(input.Body.Email, tempPassword, auth.Client)
 	if err != nil {
 		return nil, err
 	}
 
+	user, err := h.UserRepository.CreateUser(ctx, *input, signup_response.User.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Body.TempPassword = tempPassword
 	return user, nil
 }

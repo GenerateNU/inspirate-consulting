@@ -10,7 +10,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func TestFetchUser(t *testing.T) {
+func TestFetchUserBySupabaseID(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
@@ -20,8 +20,8 @@ func TestFetchUser(t *testing.T) {
 	key := "pfp-key"
 
 	input := models.CreateUserInput{}
-	input.Body.Name = "FetchMe"
-	input.Body.Email = "fetchme@gmail.com"
+	input.Body.Name = "FetchMeBySupabase"
+	input.Body.Email = "fetchmebysupabase@gmail.com"
 	input.Body.PfpKey = &key
 
 	db := testutils.SetupTestDB(t)
@@ -33,21 +33,20 @@ func TestFetchUser(t *testing.T) {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	fetchInput := models.FetchUserInput{ID: created.Body.User.ID}
-	output, err := repo.FetchUser(ctx, fetchInput)
+	output, err := repo.FetchUserBySupabaseID(ctx, models.FetchUserBySupabaseIDInput{SupabaseID: supabaseID})
 	if err != nil {
-		t.Fatalf("FetchUser failed: %v", err)
+		t.Fatalf("FetchUserBySupabaseID failed: %v", err)
 	}
 
-	if output.Body.Name != input.Body.Name {
-		t.Errorf("expected name %q, got %q", input.Body.Name, output.Body.Name)
+	if output.Body.ID != created.Body.User.ID {
+		t.Errorf("expected id %q, got %q", created.Body.User.ID, output.Body.ID)
 	}
 	if output.Body.SupabaseID != supabaseID {
 		t.Errorf("expected supabase_id %q, got %q", supabaseID, output.Body.SupabaseID)
 	}
 }
 
-func TestFetchUser_NotFound(t *testing.T) {
+func TestFetchUserBySupabaseID_NotFound(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
@@ -57,8 +56,7 @@ func TestFetchUser_NotFound(t *testing.T) {
 	repo := NewUserRepository(db)
 	ctx := context.Background()
 
-	fetchInput := models.FetchUserInput{ID: uuid.New()}
-	_, err := repo.FetchUser(ctx, fetchInput)
+	_, err := repo.FetchUserBySupabaseID(ctx, models.FetchUserBySupabaseIDInput{SupabaseID: uuid.New()})
 	if err == nil {
 		t.Fatal("expected error fetching non-existent user, got nil")
 	}

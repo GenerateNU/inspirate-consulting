@@ -137,6 +137,24 @@ components:
       required:
         - todo_description
       type: object
+    CreateUserBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateUserBody.json
+          format: uri
+          readOnly: true
+          type: string
+        temp_password:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - user
+        - temp_password
+      type: object
     CreateUserInputBody:
       additionalProperties: false
       properties:
@@ -155,9 +173,6 @@ components:
           maxLength: 200
           minLength: 1
           type: string
-        password:
-          description: password of user for supabase signup
-          type: string
         pfp_key:
           description: pfp key of user
           type:
@@ -167,7 +182,6 @@ components:
         - name
         - pfp_key
         - email
-        - password
       type: object
     ErrorDetail:
       additionalProperties: false
@@ -519,6 +533,42 @@ components:
       required:
         - email
         - password
+      type: object
+    LoginResponse:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/LoginResponse.json
+          format: uri
+          readOnly: true
+          type: string
+        access_token:
+          type: string
+        error: {}
+        expires_in:
+          format: int64
+          type: integer
+        refresh_token:
+          type: string
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        token_type:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserResponse"
+      required:
+        - access_token
+        - token_type
+        - expires_in
+        - refresh_token
+        - user
+        - error
+        - reset_time
       type: object
     PersonalCollegeApplication:
       additionalProperties: false
@@ -1333,12 +1383,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/CreateUserBody"
           description: OK
-          headers:
-            TempPassword:
-              schema:
-                type: string
         default:
           content:
             application/problem+json:
@@ -1358,33 +1404,16 @@ paths:
               $ref: "#/components/schemas/LoginInputBody"
         required: true
       responses:
-        "204":
-          description: No Content
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+          description: OK
           headers:
-            AccessToken:
+            Set-Cookie:
               schema:
                 type: string
-            Error:
-              schema: {}
-            ExpiresIn:
-              schema:
-                format: int64
-                type: integer
-            RefreshToken:
-              schema:
-                type: string
-            ResetTime:
-              schema:
-                format: date-time
-                type:
-                  - string
-                  - "null"
-            TokenType:
-              schema:
-                type: string
-            User:
-              schema:
-                $ref: "#/components/schemas/UserResponse"
         default:
           content:
             application/problem+json:
@@ -1439,6 +1468,31 @@ paths:
           description: Error
       tags:
         - ResetPass
+  /user/supabase/{supabase_id}:
+    get:
+      description: fetch a user (student/counselor) by their supabase id
+      operationId: fetch-user-by-supabase-id
+      parameters:
+        - in: path
+          name: supabase_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
   /user/{id}:
     get:
       description: fetch a user (student/counselor)

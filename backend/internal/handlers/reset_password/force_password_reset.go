@@ -9,7 +9,7 @@ import (
 
 func (h *Handler) ForcePasswordReset(ctx context.Context, input *models.ForcePasswordResetInput) (*models.ForcePasswordResetOutput, error) {
 	oneSecondAgo := time.Now().Add(-1 * time.Second)
-	if err := h.ResetPasswordRepository.UpdateResetTime(ctx, input.ID, &oneSecondAgo); err != nil {
+	if err := h.ResetPasswordRepository.UpdateResetTime(ctx, input.SupabaseID, &oneSecondAgo); err != nil {
 		return nil, err
 	}
 

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -63,15 +64,27 @@ type LogoutInput struct {
 	Authorization string `header:"Authorization"`
 }
 
+type LoginOutput struct {
+	SetCookie http.Cookie `header:"Set-Cookie"`
+	Body      *LoginResponse
+}
+
 type LogoutResponse struct {
 }
 
 type ResetPasswordInput struct {
-	UserID string `header:"User-ID"`
-	Body   struct {
+	Body struct {
 		NewPassword string `json:"new_password"`
 	}
 }
 
 type ResetPasswordResponse struct {
 }
+
+// supabaseID here is the student of choice's supabase id
+type ForcePasswordResetInput struct {
+	SupabaseID uuid.UUID  `path:"supabase_id" required:"true"`
+	ResetTime  *time.Time `json:"reset_time"`
+}
+
+type ForcePasswordResetOutput struct{}

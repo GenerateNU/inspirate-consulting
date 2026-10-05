@@ -43,29 +43,29 @@ type Counselor struct {
 
 type CreateUserInput struct {
 	Body struct {
-		Name     string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
-		Email    string  `json:"email" doc:"email of user for supabase signup"`
-		Password string  `json:"password" doc:"password of user for supabase signup"`
+		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email  string  `json:"email" doc:"email of user for supabase signup"`
 	}
 }
 
-type CreateUserOutput struct {
-	Body         *User  `json:"body"`
+type CreateUserBody struct {
+	User         *User  `json:"user"`
 	TempPassword string `json:"temp_password"`
+}
+
+type CreateUserOutput struct {
+	Body *CreateUserBody
 }
 
 type FetchUserInput struct {
 	ID uuid.UUID `path:"id" required:"true"`
 }
 
-type ForcePasswordResetInput struct {
-	ID uuid.UUID `path:"id" required:"true"`
+type FetchUserBySupabaseIDInput struct {
+	SupabaseID uuid.UUID `path:"supabase_id" required:"true"`
 }
-
-type ForcePasswordResetOutput struct{}
 
 type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
-

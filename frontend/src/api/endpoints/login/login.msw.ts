@@ -13,14 +13,25 @@ import type {
   RequestHandlerOptions
 } from 'msw';
 
+import type {
+  LoginResponse
+} from '../../models';
+
+import {
+  getLoginUserResponseMock
+} from './login.faker';
+
+export { getLoginUserResponseMock } from './login.faker';
 
 
-export const getLoginUserMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getLoginUserMockHandler = (overrideResponse?: LoginResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<LoginResponse> | LoginResponse), options?: RequestHandlerOptions) => {
   return http.post('*/user/login', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
-      { status: 204
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getLoginUserResponseMock(),
+      { status: 200
       })
   }, options)
 }
