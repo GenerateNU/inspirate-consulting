@@ -1426,11 +1426,6 @@ paths:
     post:
       description: user logout
       operationId: logout-user
-      parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
       responses:
         "204":
           description: No Content
@@ -1446,11 +1441,6 @@ paths:
     patch:
       description: reset user password
       operationId: reset-user-password
-      parameters:
-        - in: header
-          name: User-ID
-          schema:
-            type: string
       requestBody:
         content:
           application/json:
@@ -1468,31 +1458,6 @@ paths:
           description: Error
       tags:
         - ResetPass
-  /user/supabase/{supabase_id}:
-    get:
-      description: fetch a user (student/counselor) by their supabase id
-      operationId: fetch-user-by-supabase-id
-      parameters:
-        - in: path
-          name: supabase_id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      tags:
-        - User
   /user/{id}:
     get:
       description: fetch a user (student/counselor)
@@ -1518,13 +1483,13 @@ paths:
           description: Error
       tags:
         - User
-  /user/{id}/force-password-reset:
+  /user/{supabase_id}/force-password-reset:
     post:
       description: Force a user to reset their password on next login
       operationId: force-password-reset
       parameters:
         - in: path
-          name: id
+          name: supabase_id
           required: true
           schema:
             type: string
