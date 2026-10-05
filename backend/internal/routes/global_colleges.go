@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"net/http"
 
@@ -13,12 +14,13 @@ import (
 
 // SetUpGlobalCollegeRoutes registers the global college endpoints:
 // create, get by id, and list.
-func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository) {
+func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	globalCollegeHandler := globalcollege.NewHandler(repository.GlobalCollege)
 
 	// Register POST /colleges handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "create-global-college",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/colleges",
 		Description: "Create a global college with a name, location, and optional EA/ED/RD deadlines.",

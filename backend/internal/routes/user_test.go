@@ -70,6 +70,7 @@ func TestRoute_CreateUser(t *testing.T) {
 			"email":    email,
 			"name":     name,
 			"pfp_key":  &key,
+			"role":     "student",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		println(bodyBytes)

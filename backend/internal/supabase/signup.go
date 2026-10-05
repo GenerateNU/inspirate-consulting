@@ -12,18 +12,21 @@ import (
 	"regexp"
 )
 
-func (s *Supabase) Signup(email string, password string, Client *http.Client) (models.SignupResponse, error) {
+func (s *Supabase) Signup(email string, password string, Client *http.Client, role string) (models.SignupResponse, error) {
 	if err := validatePasswordStrength(password); err != nil {
 		return models.SignupResponse{}, err
 	}
 
-	payload := models.SignUpPayload{Email: email, Password: password}
+	app_metadata := make(map[string]string)
+	app_metadata["role"] = role
+
+	payload := models.SignUpPayload{Email: email, Password: password, AppMetadata: app_metadata}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return models.SignupResponse{}, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/signup", s.URL), bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/v1/admin/users", s.URL), bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		slog.Error("Error in Request Creation: ", "err", err)
 		return models.SignupResponse{}, err
@@ -56,8 +59,9 @@ func (s *Supabase) Signup(email string, password string, Client *http.Client) (m
 		return models.SignupResponse{}, errs.NewHTTPError(res.StatusCode, supabaseError)
 	}
 
+	// The admin endpoint returns the user object at the top level, not nested under "user"
 	var response models.SignupResponse
-	if err := json.Unmarshal(body, &response); err != nil {
+	if err := json.Unmarshal(body, &response.User); err != nil {
 		slog.Error("Error parsing response: ", "err", err)
 		return models.SignupResponse{}, err
 	}

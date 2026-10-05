@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"net/http"
 
@@ -11,12 +12,13 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
+func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	todoItemHandler := todoitem.NewHandler(repository.TodoItem)
 
 	//Register POST /todo-items handler
 	huma.Register(api, huma.Operation{
 		OperationID: "create-todo-item",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/todo-items",
 		Description: "Create a to-do item with a description and optional deadline",
@@ -34,6 +36,7 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 	//Register GET /todo-items handler
 	huma.Register(api, huma.Operation{
 		OperationID: "get-todo-items",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodGet,
 		Path:        "/todo-items",
 		Description: "Get a student's to-do items",
@@ -50,6 +53,7 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 	//Register PATCH /todo-items/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-item-completed",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method: http.MethodPatch,
 		Path: "/todo-items/{id}",
 		Description: "Update a to-do item's completion status",

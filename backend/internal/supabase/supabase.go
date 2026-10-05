@@ -7,7 +7,7 @@ import (
 )
 
 type SupabaseInterface interface {
-	Signup(email string, password string, Client *http.Client) (models.SignupResponse, error)
+	Signup(email string, password string, Client *http.Client, role string) (models.SignupResponse, error)
 	SupabaseLogin(email string, password string, Client *http.Client) (models.LoginResponse, error)
 	SupabaseLogout(Client *http.Client, access_token string) (models.LogoutResponse, error)
 	SupabaseResetPassword(Client *http.Client, newPassword string, userID string) (models.ResetPasswordResponse, error)

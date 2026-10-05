@@ -13,7 +13,7 @@ func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput,
 		return nil, err
 	}
 
-	signup_response, err := supabase.Signup(input.Body.Email, tempPassword, auth.Client)
+	signup_response, err := supabase.Signup(input.Body.Email, tempPassword, auth.Client, string(input.Body.Role))
 	if err != nil {
 		return nil, err
 	}

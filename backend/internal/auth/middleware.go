@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/supabase"
 	"log/slog"
 	"net/http"
@@ -66,6 +67,28 @@ func (v *Verifier) Verify(tokenString string) (*SupabaseClaims, error) {
 	return claims, nil
 }
 
+// RoleVerifier builds a route middleware that only lets the given roles through
+type RoleVerifier func(api huma.API, roles ...models.Role) func(ctx huma.Context, next func(huma.Context))
+
+func VerifyRole(api huma.API, roles ...models.Role) func(ctx huma.Context, next func(huma.Context)) {
+	return func(ctx huma.Context, next func(huma.Context)) {
+
+		role, _ := ctx.Context().Value("Role").(string)
+
+		for _, r := range roles {
+			if role == string(r) {
+				next(ctx)
+				return
+			}
+		}
+
+		slog.Warn("role not permitted for route", "role", role, "path", ctx.Operation().Path)
+		if err := huma.WriteErr(api, ctx, http.StatusForbidden, "Insufficient role"); err != nil {
+			slog.Error("Failed to write error", "err", err)
+		}
+	}
+}
+
 func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
 		"/api/v1/health": true,
@@ -98,6 +121,12 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 			return
 		}
 
+		role, ok := claims.AppMetadata["role"].(string)
+		if !ok {
+			slog.Error("Failed to parse role", "err")
+			return
+		}
+
 		if err := sb.SupabaseValidateSession(Client, cookie.Value); err != nil {
 			slog.Error("session validation failed", "err", err)
 			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Invalid/Expired Token")
@@ -110,6 +139,7 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 		//ctx.SetHeader("Supabase-ID", claims.Sub)
 		ctx = huma.WithValue(ctx, "Supabase-ID", claims.Sub)
 		ctx = huma.WithValue(ctx, "JWT", cookie.Value)
+		ctx = huma.WithValue(ctx, "Role", role)
 
 		next(ctx)
 	}

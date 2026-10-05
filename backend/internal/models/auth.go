@@ -9,8 +9,9 @@ import (
 
 // SignUpPayload represents the payload for Supabase signup
 type SignUpPayload struct {
-	Email    string `json:"email" db:"email"`
-	Password string `json:"password" db:"password"`
+	Email       string            `json:"email" db:"email"`
+	Password    string            `json:"password" db:"password"`
+	AppMetadata map[string]string `json:"app_metadata"`
 }
 
 // UserSignupResponse represents the user data returned from Supabase signup

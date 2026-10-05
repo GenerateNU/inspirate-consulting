@@ -9,7 +9,7 @@ import (
 
 type MockSupabase struct{}
 
-func (s *MockSupabase) Signup(email string, password string, Client *http.Client) (models.SignupResponse, error) {
+func (s *MockSupabase) Signup(email string, password string, Client *http.Client, role string) (models.SignupResponse, error) {
 	return models.SignupResponse{
 		AccessToken: "",
 		User:        models.UserSignupResponse{ID: uuid.New()},

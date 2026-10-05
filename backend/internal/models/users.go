@@ -16,6 +16,14 @@ const (
 	Senior    Year = "senior"
 )
 
+// type of role a counselor can create when making a user
+type Role string
+
+const (
+	CounselorRole Role = "counselor"
+	StudentRole   Role = "student"
+)
+
 type User struct {
 	ID         uuid.UUID  `json:"id"`
 	Name       string     `json:"name"`
@@ -46,6 +54,7 @@ type CreateUserInput struct {
 		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
 		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
 		Email  string  `json:"email" doc:"email of user for supabase signup"`
+		Role   Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
 	}
 }
 

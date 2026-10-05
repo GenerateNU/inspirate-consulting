@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"net/http"
 
@@ -11,12 +12,13 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpEssayRoutes(api huma.API, repository *data.Repository) {
+func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	essayHandler := essays.NewHandler(repository.Essay)
 
 	// GET route that shows all of a students essay
 	huma.Register(api, huma.Operation{
 		OperationID: "get-essays-from-student",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/students/{student_id}/essays",
 		Description: "Shows all essays of a student",
@@ -28,6 +30,7 @@ func SetUpEssayRoutes(api huma.API, repository *data.Repository) {
 	// POST route that inserts a row into the essays table
 	huma.Register(api, huma.Operation{
 		OperationID: "create-essay",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPost,
 		Path:        "/essays",
 		Description: "Creates an essay with the logged in student",
@@ -39,6 +42,7 @@ func SetUpEssayRoutes(api huma.API, repository *data.Repository) {
 	// PATCH route that updates a students essay status
 	huma.Register(api, huma.Operation{
 		OperationID: "update-essay-status",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/essays/{essay_id}/status",
 		Description: "updates the status of a students essay",

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
@@ -11,7 +12,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config *config.Config) {
+func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier) {
 	resetpasswordHandler := resetpassword.NewHandler(repository.User)
 	huma.Register(api, huma.Operation{
 		OperationID: "reset-user-password",
@@ -29,6 +30,7 @@ func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config 
 
 	huma.Register(api, huma.Operation{
 		OperationID: "force-password-reset",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/user/{supabase_id}/force-password-reset",
 		Description: "Force a user to reset their password on next login",

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"inspirate-consulting/internal/auth"
 	"context"
 	"net/http"
 
@@ -13,12 +14,13 @@ import (
 
 // SetUpVideoRoutes registers the video endpoints:
 // upload, get, and list.
-func SetUpVideoRoutes(api huma.API, repository *data.Repository) {
+func SetUpVideoRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	videoHandler := video.NewHandler(repository.Video)
 
 	// Register POST /videos handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "upload-video",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/videos",
 		Description: "Upload a new video to the S3 bucket.",
@@ -34,6 +36,7 @@ func SetUpVideoRoutes(api huma.API, repository *data.Repository) {
 	// Register GET /videos/lookup handler for retrieving a video by its S3 key.
 	huma.Register(api, huma.Operation{
 		OperationID: "get-video",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/videos/lookup",
 		Description: "Get a video by its S3 key.",
@@ -49,6 +52,7 @@ func SetUpVideoRoutes(api huma.API, repository *data.Repository) {
 	// Register GET /videos handler for listing all videos in the S3 bucket.
 	huma.Register(api, huma.Operation{
 		OperationID: "list-videos",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/videos",
 		Description: "List all videos in the S3 bucket.",
