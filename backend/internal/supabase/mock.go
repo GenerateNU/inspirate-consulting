@@ -30,3 +30,7 @@ func (s *MockSupabase) SupabaseResetPassword(Client *http.Client, access_token s
 	resp := models.ResetPasswordResponse{}
 	return resp, nil
 }
+
+func (s *MockSupabase) SupabaseValidateSession(Client *http.Client, access_token string) error {
+	return nil
+}

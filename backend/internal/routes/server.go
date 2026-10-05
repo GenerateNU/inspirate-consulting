@@ -96,7 +96,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
 		}
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, verifier))
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, verifier, config.Supabase))
 	}
 
 	app.Get("/", func(c fiber.Ctx) error {

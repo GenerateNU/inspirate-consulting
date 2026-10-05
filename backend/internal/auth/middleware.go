@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"inspirate-consulting/internal/supabase"
 	"log/slog"
 	"net/http"
 
@@ -65,7 +66,7 @@ func (v *Verifier) Verify(tokenString string) (*SupabaseClaims, error) {
 	return claims, nil
 }
 
-func AuthMiddleware(api huma.API, verifier *Verifier) func(ctx huma.Context, next func(huma.Context)) {
+func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
 		"/api/v1/health": true,
 		"/user/login":    true,
@@ -97,11 +98,19 @@ func AuthMiddleware(api huma.API, verifier *Verifier) func(ctx huma.Context, nex
 			return
 		}
 
+		if err := sb.SupabaseValidateSession(Client, cookie.Value); err != nil {
+			slog.Error("session validation failed", "err", err)
+			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Invalid/Expired Token")
+			if err != nil {
+				slog.Error("Failed to write error", "err", err)
+			}
+			return
+		}
+
 		//ctx.SetHeader("Supabase-ID", claims.Sub)
 		ctx = huma.WithValue(ctx, "Supabase-ID", claims.Sub)
+		ctx = huma.WithValue(ctx, "JWT", cookie.Value)
 
-		// will be used for specifying the role of the user (student or counselor)
-		//	ctx.SetHeader("Role", claims.AppMetadata["Role"].(string))
 		next(ctx)
 	}
 }

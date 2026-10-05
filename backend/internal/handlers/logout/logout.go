@@ -2,8 +2,6 @@ package logout
 
 import (
 	"context"
-	"strings"
-
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -11,8 +9,8 @@ import (
 )
 
 func (h *Handler) Logout(ctx context.Context, input *models.LogoutInput, supabase supabase.SupabaseInterface) (*models.LogoutResponse, error) {
-	token := strings.TrimPrefix(input.Authorization, "Bearer ")
-	if token == "" {
+	token, ok := ctx.Value("JWT").(string)
+	if !ok || token == "" {
 		return nil, errs.BadRequest("missing authorization token")
 	}
 

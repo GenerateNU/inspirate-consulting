@@ -60,9 +60,7 @@ type LoginResponse struct {
 	ResetTime    *time.Time   `json:"reset_time"`
 }
 
-type LogoutInput struct {
-	Authorization string `header:"Authorization"`
-}
+type LogoutInput struct{}
 
 type LoginOutput struct {
 	SetCookie http.Cookie `header:"Set-Cookie"`
