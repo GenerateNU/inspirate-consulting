@@ -431,42 +431,17 @@ export const LoginUserResponse = /*#__PURE__*/ zod.object({
 /**
  * user logout
  */
-export const LogoutUserHeader = /*#__PURE__*/ zod.object({
-  "Authorization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
-})
-
 export const LogoutUserResponse = /*#__PURE__*/ zod.void()
 
 
 /**
  * reset user password
  */
-export const ResetUserPasswordHeader = /*#__PURE__*/ zod.object({
-  "User-ID": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
-})
-
 export const ResetUserPasswordBody = /*#__PURE__*/ zod.object({
   "new_password": /*#__PURE__*/ zod.string()
 })
 
 export const ResetUserPasswordResponse = /*#__PURE__*/ zod.void()
-
-
-/**
- * fetch a user (student/counselor) by their supabase id
- */
-export const FetchUserBySupabaseIdParams = /*#__PURE__*/ zod.object({
-  "supabase_id": /*#__PURE__*/ zod.string()
-})
-
-export const FetchUserBySupabaseIdResponse = /*#__PURE__*/ zod.object({
-  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "id": /*#__PURE__*/ zod.string(),
-  "name": /*#__PURE__*/ zod.string(),
-  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
-  "supabase_id": /*#__PURE__*/ zod.string()
-})
 
 
 /**
@@ -490,7 +465,7 @@ export const FetchUserResponse = /*#__PURE__*/ zod.object({
  * Force a user to reset their password on next login
  */
 export const ForcePasswordResetParams = /*#__PURE__*/ zod.object({
-  "id": /*#__PURE__*/ zod.string()
+  "supabase_id": /*#__PURE__*/ zod.string()
 })
 
 export const ForcePasswordResetResponse = /*#__PURE__*/ zod.void()

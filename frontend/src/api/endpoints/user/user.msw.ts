@@ -20,11 +20,10 @@ import type {
 
 import {
   getCreateUserResponseMock,
-  getFetchUserBySupabaseIdResponseMock,
   getFetchUserResponseMock
 } from './user.faker';
 
-export { getCreateUserResponseMock, getFetchUserBySupabaseIdResponseMock, getFetchUserResponseMock } from './user.faker';
+export { getCreateUserResponseMock, getFetchUserResponseMock } from './user.faker';
 
 
 export const getCreateUserMockHandler = (overrideResponse?: CreateUserBody | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CreateUserBody> | CreateUserBody), options?: RequestHandlerOptions) => {
@@ -34,18 +33,6 @@ export const getCreateUserMockHandler = (overrideResponse?: CreateUserBody | ((i
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getCreateUserResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
-
-export const getFetchUserBySupabaseIdMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
-  return http.get('*/user/supabase/:supabaseId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getFetchUserBySupabaseIdResponseMock(),
       { status: 200
       })
   }, options)
@@ -64,6 +51,5 @@ export const getFetchUserMockHandler = (overrideResponse?: User | ((info: Parame
 }
 export const getUserMock = () => [
   getCreateUserMockHandler(),
-  getFetchUserBySupabaseIdMockHandler(),
   getFetchUserMockHandler()
 ]

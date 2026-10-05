@@ -168,20 +168,20 @@ export type forcePasswordResetResponseError = (forcePasswordResetResponseDefault
 
 export type forcePasswordResetResponse = (forcePasswordResetResponseSuccess | forcePasswordResetResponseError)
 
-export const getForcePasswordResetUrl = (id: string,) => {
+export const getForcePasswordResetUrl = (supabaseId: string,) => {
 
 
 
 
-  return `http://127.0.0.1:8080/user/${id}/force-password-reset`
+  return `http://127.0.0.1:8080/user/${supabaseId}/force-password-reset`
 }
 
 /**
  * Force a user to reset their password on next login
  */
-export const forcePasswordReset = async (id: string, options?: RequestInit): Promise<forcePasswordResetResponse> => {
+export const forcePasswordReset = async (supabaseId: string, options?: RequestInit): Promise<forcePasswordResetResponse> => {
 
-  const res = await fetch(getForcePasswordResetUrl(id),
+  const res = await fetch(getForcePasswordResetUrl(supabaseId),
   {
     ...options,
     method: 'POST'
@@ -200,23 +200,23 @@ export const forcePasswordReset = async (id: string, options?: RequestInit): Pro
 
 
 
-export const getForcePasswordResetMutationFetcher = (id: string, options?: RequestInit) => {
+export const getForcePasswordResetMutationFetcher = (supabaseId: string, options?: RequestInit) => {
   return (_: Key, __: { arg: Arguments }) => {
-    return forcePasswordReset(id, options);
+    return forcePasswordReset(supabaseId, options);
   }
 }
-export const getForcePasswordResetMutationKey = (id: string,) => [`http://127.0.0.1:8080/user/${id}/force-password-reset`] as const;
+export const getForcePasswordResetMutationKey = (supabaseId: string,) => [`http://127.0.0.1:8080/user/${supabaseId}/force-password-reset`] as const;
 
 export type ForcePasswordResetMutationResult = NonNullable<Awaited<ReturnType<typeof forcePasswordReset>>>
 
 export const useForcePasswordReset = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof forcePasswordReset>>, TError, Key, Arguments, Awaited<ReturnType<typeof forcePasswordReset>>> & { swrKey?: string }, fetch?: RequestInit}
+  supabaseId: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof forcePasswordReset>>, TError, Key, Arguments, Awaited<ReturnType<typeof forcePasswordReset>>> & { swrKey?: string }, fetch?: RequestInit}
 ) => {
 
   const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getForcePasswordResetMutationKey(id);
-  const swrFn = getForcePasswordResetMutationFetcher(id, fetchOptions);
+  const swrKey = swrOptions?.swrKey ?? getForcePasswordResetMutationKey(supabaseId);
+  const swrFn = getForcePasswordResetMutationFetcher(supabaseId, fetchOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
