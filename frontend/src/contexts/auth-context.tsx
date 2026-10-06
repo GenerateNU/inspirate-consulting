@@ -1,22 +1,23 @@
 import type {
     CreateUserBody,
+    CreateUserInputBodyRole,
     LoginResponse
 } from '../api/models'
 import { AuthContext } from './auth-context'
 import { useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { useLoginUser, useLogoutUser, useResetUserPassword, useCreateUser, useForcePasswordReset, forcePasswordReset} from '../api/endpoints';
+import { useLoginUser, useLogoutUser, useResetUserPassword, useCreateUser, useForcePasswordReset, forcePasswordReset, loginUserResponse, resetUserPasswordResponse, resetUserPassword, createUserResponse, createUserResponseError} from '../api/endpoints';
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
-    const [resetTime, setResetTime] = useState<string | null >('')
+    const [resetTime, setResetTime] = useState<string | null >(null)
     const [supabaseId, setSupabaseID] = useState('')
     const navigate = useNavigate();
 
     const {trigger: loginFunc} = useLoginUser();
-    const createFunc = useCreateUser();
-    const logoutFunc = useLogoutUser();
-    const passFunc = useResetUserPassword();
-    const resetFunc  = useForcePasswordReset(supabaseId);
+    const {trigger: createFunc} = useCreateUser();
+    const {trigger: logoutFunc} = useLogoutUser();
+    const {trigger: passFunc} = useResetUserPassword();
+    const {trigger: resetFunc}  = useForcePasswordReset(supabaseId);
 
     const login = (
         email: string,
@@ -25,53 +26,72 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
         loginFunc(
             {email, password},
             {
-                onSuccess: (resp: LoginResponse) => {
+                onSuccess: ()  => {
                     navigate("/")
+                },
+
+                onError: () => {
+                    console.log("did not work")
                 }
             }
         );
     }
 
     const logout = () => {
-        logoutFunc(
-            {
-                onSuccess: () => {
-                    navigate("/login")
-                }
-            }
-        );
     }
+    logoutFunc(
+        {},
+        {
+            onSuccess: () => {
+                navigate("/")
+            }
+        }
+    );
 
     const create = (
         name: string,
         email: string,
-        role: string,
+        pfp_key: string | null,
+        role: CreateUserInputBodyRole,
     ) => {
-        createFunc(
-            {data: {name, email, role}}
+        return createFunc(
+            {name, email, pfp_key, role},
+            {
+                onSuccess: (resp: createUserResponse) => {
+                    return resp
+                },
+
+            }
         );
-
     }
 
-    const force_password_reset = (
-        supabase_id: string,
+    const new_password = (
+        new_password: string
     ) => {
-        // set
-        
-
-        setResetTime("one second ago")
-    }
-
-    const reset_password = () => {
         passFunc(
-             {
+            {new_password},
+            {
                 onSuccess: () => {
-                    navigate("/login")
+                     navigate("/")
+                },
+
+                onError: () => {
+                    console.log("resetting password did not work")
                 }
             }
         );
     }
 
+    const force_password_reset = () => {
+    }
+    resetFunc(
+        {supabaseId},
+        {
+            onSuccess: () => {
+                navigate("/")
+            }
+        }
+    );
 
     return (
         <AuthContext value={{
@@ -80,7 +100,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             create: create,
             force_password_reset: force_password_reset,
             logout: logout,
-            reset_password: reset_password
+            reset_password: new_password
         }}>
         {children}
         </AuthContext>
