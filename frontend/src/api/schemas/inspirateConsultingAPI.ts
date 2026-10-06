@@ -175,7 +175,6 @@ export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
 
 
 /**
-<<<<<<< HEAD
  * Fetch all videos, through counselor view
  */
 export const listMediaQueryLimitDefault = 20;
@@ -308,8 +307,6 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
 
 
 /**
-=======
->>>>>>> 79c3af4 (notification prefs backend)
  * Get notification preferences for the authenticated user.
  */
 export const GetNotificationPreferencesResponse = /*#__PURE__*/ zod.object({

@@ -27,12 +27,9 @@ export * from './grantMediaAccessRequestBody';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
 export * from './greetingRequestBody';
-<<<<<<< HEAD
 export * from './listMediaParams';
 export * from './media';
 export * from './mediaAccess';
-=======
->>>>>>> 79c3af4 (notification prefs backend)
 export * from './notificationPreferences';
 export * from './personalCollegeApplication';
 export * from './presignUploadRequestBody';
