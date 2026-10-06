@@ -468,6 +468,9 @@ components:
           type: integer
         leadership_role:
           type: string
+        modified_at:
+          format: date-time
+          type: string
         name:
           type: string
         organization:
@@ -481,15 +484,12 @@ components:
           type: string
         type:
           type: string
-        updated_at:
-          format: date-time
-          type: string
         user_id:
           type: string
       required:
         - id
         - created_at
-        - updated_at
+        - modified_at
         - student_id
         - user_id
         - name
