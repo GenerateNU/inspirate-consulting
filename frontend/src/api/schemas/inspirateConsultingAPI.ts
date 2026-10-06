@@ -177,6 +177,19 @@ export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
 /**
  * Fetch all videos, through counselor view
  */
+export const listMediaQueryLimitDefault = 20;
+export const listMediaQueryLimitMax = 100;
+
+export const listMediaQueryOffsetDefault = 0;
+export const listMediaQueryOffsetMin = 0;
+
+
+
+export const ListMediaQueryParams = /*#__PURE__*/ zod.object({
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(listMediaQueryLimitMax)), listMediaQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of media to return')),
+  "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(listMediaQueryOffsetMin)), listMediaQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of media to skip before returning results'))
+})
+
 export const ListMediaResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "description": /*#__PURE__*/ zod.string(),
@@ -209,61 +222,24 @@ export const CreateMediaResponse = /*#__PURE__*/ zod.object({
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "title": /*#__PURE__*/ zod.string()
 })
- /** 
-  * Spend a student's review balance to open a review on an essay.
- */
-export const requestEssayReviewBodyAmountDefault = 1;
-
-
-
-export const RequestEssayReviewBody = /*#__PURE__*/ zod.object({
-  "amount": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)), requestEssayReviewBodyAmountDefault).check(/*#__PURE__*/ zod.describe('Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.')),
-  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student requesting the review'))
-})
-
-export const RequestEssayReviewResponse = /*#__PURE__*/ zod.object({
-  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
-  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
-  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
-  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
-  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
-  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
-  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
-  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
-  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
-  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
-})
-
-
-/**
- * Mark a review as having been completed by a counselor.
- */
-export const CompleteEssayReviewParams = /*#__PURE__*/ zod.object({
-  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the review to mark complete'))
-})
-
-export const CompleteEssayReviewResponse = /*#__PURE__*/ zod.object({
-  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
-  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
-  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
-  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
-  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
-  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
-  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
-  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
-  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
-  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
-})
 
 
 /**
  * Allow students to fetch only videos they have access to
  */
+export const getMediaAccessQueryLimitDefault = 20;
+export const getMediaAccessQueryLimitMax = 100;
+
+export const getMediaAccessQueryOffsetDefault = 0;
+export const getMediaAccessQueryOffsetMin = 0;
+
+
+
+export const GetMediaAccessQueryParams = /*#__PURE__*/ zod.object({
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(getMediaAccessQueryLimitMax)), getMediaAccessQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of media to return')),
+  "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(getMediaAccessQueryOffsetMin)), getMediaAccessQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of media to skip before returning results'))
+})
+
 export const GetMediaAccessResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "description": /*#__PURE__*/ zod.string(),
@@ -326,9 +302,64 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
-  "title": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string()
 })
- /** Refund a review that has not been completed, crediting the balance back to the student.
+
+
+/**
+ * Spend a student's review balance to open a review on an essay.
+ */
+export const requestEssayReviewBodyAmountDefault = 1;
+
+
+
+export const RequestEssayReviewBody = /*#__PURE__*/ zod.object({
+  "amount": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)), requestEssayReviewBodyAmountDefault).check(/*#__PURE__*/ zod.describe('Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.')),
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student requesting the review'))
+})
+
+export const RequestEssayReviewResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
+  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
+  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
+  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
+})
+
+
+/**
+ * Mark a review as having been completed by a counselor.
+ */
+export const CompleteEssayReviewParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the review to mark complete'))
+})
+
+export const CompleteEssayReviewResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "actor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('User who caused the movement. Null until auth provides the caller.')),
+  "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When a counselor marked the review complete')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was created')),
+  "entry_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Kind of movement: spend, refund, or adjustment')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay under review. Null for an adjustment.')),
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Unique identifier for the transaction')),
+  "refund": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The negative row that reversed this charge, if it was refunded')),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Lifecycle of a spend: open, completed, or refunded. Null for refund and adjustment rows.')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose balance moved')),
+  "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
+})
+
+
+/**
+ * Refund a review that has not been completed, crediting the balance back to the student.
  */
 export const RefundEssayReviewParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the charge to refund'))
