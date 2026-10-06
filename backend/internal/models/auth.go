@@ -64,9 +64,10 @@ type LoginResponse struct {
 
 type LogoutInput struct{}
 
+// removed Body to prevent access token and refresh token leak
 type LoginOutput struct {
 	SetCookie http.Cookie `header:"Set-Cookie"`
-	Body      *LoginResponse
+	ResetTime *time.Time
 }
 
 type LogoutResponse struct {

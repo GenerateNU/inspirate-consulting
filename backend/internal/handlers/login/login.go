@@ -21,7 +21,7 @@ func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase 
 		return nil, err
 	}
 
-	res.ResetTime = user.Body.ResetTime
+	//	res.ResetTime = user.Body.ResetTime
 	return &models.LoginOutput{
 		SetCookie: http.Cookie{
 			Name:     "jwt",
@@ -32,6 +32,6 @@ func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase 
 			Secure:   true,
 			SameSite: http.SameSiteLaxMode,
 		},
-		Body: &res,
+		ResetTime: user.Body.ResetTime,
 	}, nil
 }

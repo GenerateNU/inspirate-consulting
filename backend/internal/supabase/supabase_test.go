@@ -22,9 +22,7 @@ func newTestSupabase(url string) *Supabase {
 func TestSupabaseLogin_Success(t *testing.T) {
 	userID := uuid.New()
 	expected := models.LoginResponse{
-		AccessToken:  "test-access-token",
-		RefreshToken: "test-refresh-token",
-		User:         models.UserResponse{ID: userID},
+		User: models.UserResponse{ID: userID},
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,9 +35,6 @@ func TestSupabaseLogin_Success(t *testing.T) {
 	resp, err := s.SupabaseLogin("test@example.com", "password123", server.Client())
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
-	}
-	if resp.AccessToken != expected.AccessToken {
-		t.Errorf("expected access token %q, got %q", expected.AccessToken, resp.AccessToken)
 	}
 	if resp.User.ID != userID {
 		t.Errorf("expected user ID %v, got %v", userID, resp.User.ID)

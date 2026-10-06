@@ -1,9 +1,10 @@
 import { createContext } from "react";
+import type {
+    CreateUserBody,
+} from '../api/models'
 
-// login should redirect conditionally based on the user field
 export interface AuthContextType {
-    isAuthenticated: boolean
-    resetTime: Date,
+    resetTime: string | null,
     login: (
         email: string,
         password: string
@@ -11,13 +12,13 @@ export interface AuthContextType {
     create: (
         name: string,
         email: string,
-        username: string,
         role: string
-    ) => void;
+    ) => CreateUserBody;
     force_password_reset: (
         supabase_id: string
     ) => void;
     logout: () => void;
+    reset_password: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
