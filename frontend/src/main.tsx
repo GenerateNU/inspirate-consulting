@@ -11,14 +11,14 @@ import CreateCollegeApplication from './college/create-application'
 import CollegeApplicationList from './college/colleges'
 import VideoList from './video/videos'
 import UploadVideo from './video/upload-video'
-import UploadMedia from './media/upload-media'
-import StudentMediaList from './media/student-media-list'
-import CounselorMediaList from './media/counselor-media-list'
 import Student from "./student/student";
 import Counselor from "./counselor/counselor";
 import CreateTask from "./task/CreateTask";
 import TaskList from "./task/TaskList";
 import Layout from "./layout/layout";
+import UploadMedia from './media/upload-media'
+import StudentMediaList from './media/student-media-list'
+import CounselorMediaList from './media/counselor-media-list'
 
 
 createRoot(document.getElementById("root")!).render(
