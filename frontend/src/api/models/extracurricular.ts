@@ -14,12 +14,12 @@ export interface Extracurricular {
   end_date?: string;
   id: number;
   leadership_role?: string;
+  modified_at: string;
   name: string;
   organization: string;
   start_date: string;
   status: string;
   student_id: string;
   type: string;
-  updated_at: string;
   user_id: string;
 }

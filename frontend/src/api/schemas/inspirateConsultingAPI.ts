@@ -167,13 +167,13 @@ export const ListExtracurricularsResponseItem = /*#__PURE__*/ zod.object({
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.int(),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.string(),
   "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "status": /*#__PURE__*/ zod.string(),
   "student_id": /*#__PURE__*/ zod.string(),
   "type": /*#__PURE__*/ zod.string(),
-  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
 })
 export const ListExtracurricularsResponse = /*#__PURE__*/ zod.array(ListExtracurricularsResponseItem)
@@ -207,13 +207,13 @@ export const UpdateExtracurricularResponse = /*#__PURE__*/ zod.object({
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.int(),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.string(),
   "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "status": /*#__PURE__*/ zod.string(),
   "student_id": /*#__PURE__*/ zod.string(),
   "type": /*#__PURE__*/ zod.string(),
-  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
 })
 
@@ -246,13 +246,13 @@ export const CreateExtracurricularResponse = /*#__PURE__*/ zod.object({
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.int(),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.string(),
   "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "status": /*#__PURE__*/ zod.string(),
   "student_id": /*#__PURE__*/ zod.string(),
   "type": /*#__PURE__*/ zod.string(),
-  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
 })
 
