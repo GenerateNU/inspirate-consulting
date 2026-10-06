@@ -6,13 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Essays {
+export interface EssayGroups {
+  /** A URL to the JSON Schema for this object. */
+  readonly $schema?: string;
   /** @nullable */
-  college_id: number | null;
-  essay_group_id?: string;
+  description?: string | null;
   id: string;
-  link_to_content: string;
-  status: string;
+  name: string;
   student_id: string;
-  type: string;
 }

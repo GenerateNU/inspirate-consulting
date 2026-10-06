@@ -166,6 +166,49 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Creates an essay group for a student
+ */
+export const createEssayGroupBodyNameMax = 100;
+
+
+
+export const CreateEssayGroupBody = /*#__PURE__*/ zod.object({
+  "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Optional description of the group')),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createEssayGroupBodyNameMax)).check(/*#__PURE__*/ zod.describe('Unique name for the group')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the group belongs to'))
+})
+
+export const CreateEssayGroupResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Shows all essays belonging to an essay group
+ */
+export const GetEssaysByGroupParams = /*#__PURE__*/ zod.object({
+  "essay_group_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Group whose essays to list'))
+})
+
+export const GetEssaysByGroupResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "essays": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_to_content": /*#__PURE__*/ zod.string(),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string()
+})))
+})
+
+
+/**
  * Creates an essay with the logged in student
  */
 export const createEssayBodyLinkToContentMin = 10;
@@ -183,6 +226,31 @@ export const CreateEssayBody = /*#__PURE__*/ zod.object({
 })
 
 export const CreateEssayResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Adds an essay to a group, moves it to another group, or removes it from its group
+ */
+export const UpdateEssayGroupParams = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to move'))
+})
+
+export const UpdateEssayGroupBody = /*#__PURE__*/ zod.object({
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Group to move the essay into, or null to remove it from its group'))
+})
+
+export const UpdateEssayGroupResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "essay": /*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_to_content": /*#__PURE__*/ zod.string(),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string()
+})
+})
 
 
 /**
@@ -214,7 +282,18 @@ export const UpdateEssayStatusBody = /*#__PURE__*/ zod.object({
   "status": /*#__PURE__*/ zod.enum(['Submitted', 'Draft', 'Review', 'Archived']).check(/*#__PURE__*/ zod.describe('New status for the essay'))
 })
 
-export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.void()
+export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "essay": /*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_to_content": /*#__PURE__*/ zod.string(),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string()
+})
+})
 
 
 /**
@@ -594,6 +673,25 @@ export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Shows all essay groups of a student
+ */
+export const GetEssayGroupsFromStudentParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose essay groups to list'))
+})
+
+export const GetEssayGroupsFromStudentResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "essay_groups": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string()
+})))
+})
+
+
+/**
  * Shows all essays of a student
  */
 export const GetEssaysFromStudentParams = /*#__PURE__*/ zod.object({
@@ -604,7 +702,7 @@ export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "essays": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
   "college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
-  "essay_group_id": /*#__PURE__*/ zod.string(),
+  "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "id": /*#__PURE__*/ zod.string(),
   "link_to_content": /*#__PURE__*/ zod.string(),
   "status": /*#__PURE__*/ zod.string(),
