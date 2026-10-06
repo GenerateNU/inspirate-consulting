@@ -25,6 +25,7 @@ func (j *JobScheduler) Start() {
 	j.cron.Start()
 	slog.Info("cron jobs have started")
 
+	// I'll take a another look at if this is the period we want
 	_, err := j.cron.AddFunc("0 * * * *", func() {
 		log.Println("Running Task Notifications Job...")
 		j.TaskNotificationsJob()

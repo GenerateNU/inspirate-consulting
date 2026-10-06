@@ -43,6 +43,8 @@ type TodoItemRepository interface {
 // To represent the Notification Log schema
 type NotificationLogRepository interface {
 	CreateNotificationLog(ctx context.Context, input *models.CreateNotificationLogInput) (*models.NotificationLog, error)
+	GetPastDueTasks(ctx context.Context) ([]models.TaskNotification, error)
+	GetWithinDueTasks(ctx context.Context) ([]models.TaskNotification, error)
 }
 
 // To represent the Global College schema

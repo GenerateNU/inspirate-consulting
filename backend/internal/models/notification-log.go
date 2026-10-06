@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// enum type matching NOTIFICATION_TYPE in the notification_logs migration
 type NotificationType string
 
 const (
@@ -24,4 +23,11 @@ type CreateNotificationLogInput struct {
 	TaskID           string           `json:"task_id"`
 	NotificationType NotificationType `json:"notification_type"`
 	SentAt           time.Time        `json:"sent_at"`
+}
+
+type TaskNotification struct {
+	TaskID          string    `json:"task_id"`
+	Deadline        time.Time `json:"deadline"`
+	TodoDescription string    `json:"todo_description"`
+	UserID          string    `json:"user_id"`
 }
