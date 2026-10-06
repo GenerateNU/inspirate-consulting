@@ -35,7 +35,7 @@ const (
 type Extracurricular struct {
 	ID             int64                 `json:"id"                        db:"id"`
 	CreatedAt      time.Time             `json:"created_at"                db:"created_at"`
-	UpdatedAt      time.Time             `json:"updated_at"                db:"updated_at"`
+	ModifiedAt     time.Time             `json:"modified_at"                db:"modified_at"`
 	StudentID      string                `json:"student_id"                db:"student_id"`
 	UserID         string                `json:"user_id"                   db:"user_id"`
 	Name           string                `json:"name"                      db:"name"`
