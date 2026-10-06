@@ -25,6 +25,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+      <Route element ={<Layout />}>
         <Route path="/" element={<App />} />
         <Route path="/greeting" element={<Greeting />} />
         <Route path="/create-task" element={<CreateTask />} />
@@ -35,27 +36,12 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/colleges" element={<CollegeApplicationList />} />
         <Route path="/upload-video" element={<UploadVideo />} />
         <Route path="/videos" element={<VideoList />} />
+        <Route path="/student" element={<Student />} />
+        <Route path="/counselor" element={<Counselor />} />
         <Route path="/upload-media" element={<UploadMedia />}/>
         <Route path="/student-media-list" element={<StudentMediaList />}/>
         <Route path="/counselor-media-list" element={<CounselorMediaList />}/>
-        <Route element={<Layout />}>
-          <Route path="/" element={<App />} />
-          <Route path="/greeting" element={<Greeting />} />
-          <Route path="/essay" element={<Essay />} />
-          <Route path="/create-college" element={<CreateCollege />} />
-          <Route path="/college-list" element={<CollegeList />} />
-          <Route
-            path="/create-application"
-            element={<CreateCollegeApplication />}
-          />
-          <Route path="/colleges" element={<CollegeApplicationList />} />
-          <Route path="/upload-video" element={<UploadVideo />} />
-          <Route path="/videos" element={<VideoList />} />
-          <Route path="/student" element={<Student />} />
-          <Route path="/counselor" element={<Counselor />} />
-          <Route path="/create-task" element={<CreateTask />} />
-          <Route path="/tasks" element={<TaskList />} />
-        </Route>
+      </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>,
