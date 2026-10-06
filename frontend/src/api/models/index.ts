@@ -8,6 +8,7 @@
 
 export * from './createEssayBody';
 export * from './createGlobalCollegeRequestBody';
+export * from './createMediaRequestBody';
 export * from './createPersonalCollegeApplicationRequestBody';
 export * from './createPersonalCollegeApplicationRequestBodyApplicationType';
 export * from './createPersonalCollegeApplicationRequestBodyCategory';
@@ -19,11 +20,16 @@ export * from './essayListBody';
 export * from './essayReviewStatus';
 export * from './essayReviewTransaction';
 export * from './essays';
+export * from './getMediaAccessParams';
 export * from './getVideoParams';
 export * from './globalCollege';
+export * from './grantMediaAccessRequestBody';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
 export * from './greetingRequestBody';
+export * from './listMediaParams';
+export * from './media';
+export * from './mediaAccess';
 export * from './personalCollegeApplication';
 export * from './presignUploadRequestBody';
 export * from './presignUploadResponse';

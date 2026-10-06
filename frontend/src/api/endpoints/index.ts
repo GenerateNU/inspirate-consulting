@@ -8,6 +8,8 @@ export * from './essay-reviews/essay-reviews';
 export * from './essays/essays';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
+export * from './media/media';
+export * from './media-access/media-access';
 export * from './personal-college-applications/personal-college-applications';
 export * from './students/students';
 export * from './todo-items/todo-items';
