@@ -606,6 +606,43 @@ components:
         - student_id
         - media_id
       type: object
+    NotificationPreferences:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/NotificationPreferences.json
+          format: uri
+          readOnly: true
+          type: string
+        days_before_due:
+          description: Number of days before the due date to send notifications
+          format: int64
+          type: integer
+        due_date_notifications_enabled:
+          description: Whether the user wants to receive due date notifications
+          type: boolean
+        email_enabled:
+          description: Whether the user wants to receive email notifications
+          type: boolean
+        notify_past_due:
+          description: Whether the user wants to receive notifications for past due dates
+          type: boolean
+        user_id:
+          description: ID of the user who owns this notification preference
+          type: string
+        weekly_summary_enabled:
+          description: Whether the user wants to receive weekly summary notifications
+          type: boolean
+      required:
+        - user_id
+        - email_enabled
+        - weekly_summary_enabled
+        - due_date_notifications_enabled
+        - days_before_due
+        - notify_past_due
+      type: object
     PersonalCollegeApplication:
       additionalProperties: false
       properties:
@@ -841,6 +878,39 @@ components:
         - todo_description
         - completed_at
         - deadline
+      type: object
+    UpdateNotificationPreferencesRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateNotificationPreferencesRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        days_before_due:
+          description: Number of days before the due date to send notifications
+          format: int64
+          type: integer
+        due_date_notifications_enabled:
+          description: Whether the user wants to receive due date notifications
+          type: boolean
+        email_enabled:
+          description: Whether the user wants to receive email notifications
+          type: boolean
+        notify_past_due:
+          description: Whether the user wants to receive notifications for past due dates
+          type: boolean
+        weekly_summary_enabled:
+          description: Whether the user wants to receive weekly summary notifications
+          type: boolean
+      required:
+        - email_enabled
+        - weekly_summary_enabled
+        - due_date_notifications_enabled
+        - days_before_due
+        - notify_past_due
       type: object
     UpdateStatusBody:
       additionalProperties: false
@@ -1365,6 +1435,49 @@ paths:
           description: Error
       tags:
         - Media
+  /notification-preferences:
+    get:
+      description: Get notification preferences for the authenticated user.
+      operationId: get-notification-preferences
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User Notification Preferences
+    put:
+      description: Update notification preferences for the authenticated user.
+      operationId: update-notification-preferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNotificationPreferencesRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User Notification Preferences
   /reviews:
     post:
       description: Spend a student's review balance to open a review on an essay.

@@ -14,4 +14,5 @@ export * from './personal-college-applications/personal-college-applications';
 export * from './students/students';
 export * from './todo-items/todo-items';
 export * from './user/user';
+export * from './user-notification-preferences/user-notification-preferences';
 export * from './videos/videos';
