@@ -19,6 +19,7 @@ import Layout from "./layout/layout";
 import UploadMedia from './media/upload-media'
 import StudentMediaList from './media/student-media-list'
 import CounselorMediaList from './media/counselor-media-list'
+import UpdateNotificationPreferences from './notifications/update-notification-preferences'
 
 
 createRoot(document.getElementById("root")!).render(
@@ -45,6 +46,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/upload-media" element={<UploadMedia />}/>
           <Route path="/student-media-list" element={<StudentMediaList />}/>
           <Route path="/counselor-media-list" element={<CounselorMediaList />}/>
+           <Route path="/update-notification-preferences" element={<UpdateNotificationPreferences />}/>
         </Route>
       </Routes>
     </BrowserRouter>
