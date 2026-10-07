@@ -45,6 +45,66 @@ export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object
 
 
 /**
+ * List the current user's conversations with their latest message and unread count, most recent first.
+ */
+export const ListChatsResponseItem = /*#__PURE__*/ zod.object({
+  "last_message": /*#__PURE__*/ zod.string(),
+  "last_message_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "last_message_id": /*#__PURE__*/ zod.string(),
+  "last_message_read_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "last_sender_id": /*#__PURE__*/ zod.string(),
+  "other_user_id": /*#__PURE__*/ zod.string(),
+  "other_user_name": /*#__PURE__*/ zod.string(),
+  "other_user_pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "unread_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Messages from the other user the current user has not read'))
+})
+export const ListChatsResponse = /*#__PURE__*/ zod.array(ListChatsResponseItem)
+
+
+/**
+ * Get a page of messages between the current user and another user, newest first.
+ */
+export const ListChatMessagesParams = /*#__PURE__*/ zod.object({
+  "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The other user in the conversation'))
+})
+
+export const listChatMessagesQueryLimitDefault = 50;
+export const listChatMessagesQueryLimitMax = 100;
+
+
+
+export const ListChatMessagesQueryParams = /*#__PURE__*/ zod.object({
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page; omit to get the newest messages')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(listChatMessagesQueryLimitMax)), listChatMessagesQueryLimitDefault)
+})
+
+export const ListChatMessagesResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "messages": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "edited_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the message was never edited')),
+  "id": /*#__PURE__*/ zod.string(),
+  "message": /*#__PURE__*/ zod.string(),
+  "read_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the recipient has not read the message')),
+  "recipient_id": /*#__PURE__*/ zod.string(),
+  "sender_id": /*#__PURE__*/ zod.string()
+}))).check(/*#__PURE__*/ zod.describe('Newest first')),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get older messages; null when there are none'))
+})
+
+
+/**
+ * Mark every message the other user sent to the current user as read.
+ */
+export const MarkChatReadParams = /*#__PURE__*/ zod.object({
+  "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The other user in the conversation'))
+})
+
+export const MarkChatReadResponse = /*#__PURE__*/ zod.void()
+
+
+/**
  * List all global colleges.
  */
 export const ListGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
@@ -303,6 +363,78 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
   "s3_key": /*#__PURE__*/ zod.string(),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "title": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Send a message from the current user to another user.
+ */
+
+
+
+export const CreateChatMessageBody = /*#__PURE__*/ zod.object({
+  "message": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.describe('Message text')),
+  "recipient_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('User ID of the message recipient'))
+})
+
+export const CreateChatMessageResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "edited_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the message was never edited')),
+  "id": /*#__PURE__*/ zod.string(),
+  "message": /*#__PURE__*/ zod.string(),
+  "read_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the recipient has not read the message')),
+  "recipient_id": /*#__PURE__*/ zod.string(),
+  "sender_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Edit the text of a message the current user sent.
+ */
+export const EditChatMessageParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+
+
+
+export const EditChatMessageBody = /*#__PURE__*/ zod.object({
+  "message": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.describe('New message text'))
+})
+
+export const EditChatMessageResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "edited_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the message was never edited')),
+  "id": /*#__PURE__*/ zod.string(),
+  "message": /*#__PURE__*/ zod.string(),
+  "read_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the recipient has not read the message')),
+  "recipient_id": /*#__PURE__*/ zod.string(),
+  "sender_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Mark a message the current user received as read or unread.
+ */
+export const UpdateChatMessageReadParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const UpdateChatMessageReadBody = /*#__PURE__*/ zod.object({
+  "read": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('False marks the message as unread'))
+})
+
+export const UpdateChatMessageReadResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "edited_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the message was never edited')),
+  "id": /*#__PURE__*/ zod.string(),
+  "message": /*#__PURE__*/ zod.string(),
+  "read_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Null if the recipient has not read the message')),
+  "recipient_id": /*#__PURE__*/ zod.string(),
+  "sender_id": /*#__PURE__*/ zod.string()
 })
 
 

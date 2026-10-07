@@ -6,6 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './chatMessage';
+export * from './chatMessagePage';
+export * from './chatSummary';
+export * from './createChatMessageRequestBody';
 export * from './createEssayBody';
 export * from './createGlobalCollegeRequestBody';
 export * from './createMediaRequestBody';
@@ -14,6 +18,7 @@ export * from './createPersonalCollegeApplicationRequestBodyApplicationType';
 export * from './createPersonalCollegeApplicationRequestBodyCategory';
 export * from './createTodoItemRequestBody';
 export * from './createUserInputBody';
+export * from './editChatMessageRequestBody';
 export * from './errorDetail';
 export * from './errorModel';
 export * from './essayListBody';
@@ -27,6 +32,7 @@ export * from './grantMediaAccessRequestBody';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
 export * from './greetingRequestBody';
+export * from './listChatMessagesParams';
 export * from './listMediaParams';
 export * from './media';
 export * from './mediaAccess';
@@ -39,6 +45,7 @@ export * from './requestEssayReviewRequestBody';
 export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
 export * from './todoItem';
+export * from './updateChatMessageReadInputBody';
 export * from './updateNotificationPreferencesRequestBody';
 export * from './updateStatusBody';
 export * from './updateStatusBodyStatus';
