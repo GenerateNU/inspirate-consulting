@@ -120,6 +120,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpEssayRoutes(api, repo)
+	SetUpEssayGroupRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpTodoItemRoutes(api, repo)
 	SetUpPersonalCollegeApplicationRoutes(api, repo)

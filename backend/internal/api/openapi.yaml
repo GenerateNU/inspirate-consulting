@@ -166,6 +166,35 @@ components:
         - type
         - link_to_content
       type: object
+    CreateEssayGroupBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateEssayGroupBody.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          description: Optional description of the group
+          type:
+            - string
+            - "null"
+        name:
+          description: Unique name for the group
+          examples:
+            - Common App
+          maxLength: 100
+          minLength: 1
+          type: string
+        student_id:
+          description: Student the group belongs to
+          type: string
+      required:
+        - name
+        - student_id
+      type: object
     CreateGlobalCollegeRequestBody:
       additionalProperties: false
       properties:
@@ -405,6 +434,65 @@ components:
           format: uri
           type: string
       type: object
+    EssayBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay:
+          $ref: "#/components/schemas/Essays"
+      required:
+        - essay
+      type: object
+    EssayGroupListBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayGroupListBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay_groups:
+          items:
+            $ref: "#/components/schemas/EssayGroups"
+          type:
+            - array
+            - "null"
+      required:
+        - essay_groups
+      type: object
+    EssayGroups:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayGroups.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        student_id:
+          type: string
+      required:
+        - id
+        - name
+        - student_id
+      type: object
     EssayListBody:
       additionalProperties: false
       properties:
@@ -577,7 +665,6 @@ components:
         - college_id
         - link_to_content
         - status
-        - essay_group_id
       type: object
     GlobalCollege:
       additionalProperties: false
@@ -1041,6 +1128,20 @@ components:
       required:
         - read
       type: object
+    UpdateEssayGroupBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateEssayGroupBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay_group_id:
+          description: Group to move the essay into, or null to remove it from its group
+          type: string
+      type: object
     UpdateNotificationPreferencesRequestBody:
       additionalProperties: false
       properties:
@@ -1376,6 +1477,58 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /essay-groups:
+    post:
+      description: Creates an essay group for a student
+      operationId: create-essay-group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEssayGroupBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayGroups"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Groups
+  /essay-groups/{essay_group_id}/essays:
+    get:
+      description: Shows all essays belonging to an essay group
+      operationId: get-essays-by-group
+      parameters:
+        - description: Group whose essays to list
+          in: path
+          name: essay_group_id
+          required: true
+          schema:
+            description: Group whose essays to list
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayListBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /essays:
     post:
       description: Creates an essay with the logged in student
@@ -1389,6 +1542,39 @@ paths:
       responses:
         "204":
           description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
+  /essays/{essay_id}/group:
+    patch:
+      description: Adds an essay to a group, moves it to another group, or removes it from its group
+      operationId: update-essay-group
+      parameters:
+        - description: Essay to move
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: Essay to move
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEssayGroupBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayBody"
+          description: OK
         default:
           content:
             application/problem+json:
@@ -1443,12 +1629,12 @@ paths:
               $ref: "#/components/schemas/UpdateStatusBody"
         required: true
       responses:
-        "204":
-          description: No Content
-          headers:
-            Essay:
+        "200":
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/Essays"
+                $ref: "#/components/schemas/EssayBody"
+          description: OK
         default:
           content:
             application/problem+json:
@@ -1928,6 +2114,33 @@ paths:
           description: Error
       tags:
         - Students
+  /students/{student_id}/essay-groups:
+    get:
+      description: Shows all essay groups of a student
+      operationId: get-essay-groups-from-student
+      parameters:
+        - description: Student whose essay groups to list
+          in: path
+          name: student_id
+          required: true
+          schema:
+            description: Student whose essay groups to list
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayGroupListBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Groups
   /students/{student_id}/essays:
     get:
       description: Shows all essays of a student

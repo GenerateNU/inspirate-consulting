@@ -6,13 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Essays {
-  /** @nullable */
-  college_id: number | null;
+export interface UpdateEssayGroupBody {
+  /** A URL to the JSON Schema for this object. */
+  readonly $schema?: string;
+  /** Group to move the essay into, or null to remove it from its group */
   essay_group_id?: string;
-  id: string;
-  link_to_content: string;
-  status: string;
-  student_id: string;
-  type: string;
 }
