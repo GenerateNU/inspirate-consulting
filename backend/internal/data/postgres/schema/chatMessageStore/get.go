@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/pagination"
 
@@ -13,15 +14,10 @@ import (
 
 // ListChatMessages returns a page of the conversation between two users, newest first.
 func (r *ChatMessageRepository) ListChatMessages(ctx context.Context, userID uuid.UUID, otherUserID uuid.UUID, before *pagination.TimeIDKey, limit int) ([]models.ChatMessage, error) {
-	const selectQuery = `
-	SELECT ` + chatMessageColumns + `
-	FROM public.chat_messages
-	WHERE user_low = least($1::uuid, $2::uuid)
-		AND user_high = greatest($1::uuid, $2::uuid)
-		AND ($3::timestamptz IS NULL OR (created_at, id) < ($3::timestamptz, $4::uuid))
-	ORDER BY created_at DESC, id DESC
-	LIMIT $5
-	`
+	selectQuery, err := schema.ReadSQLBaseScript("list_chat_messages.sql", SqlChatMessageFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	var beforeAt *time.Time
 	var beforeID *uuid.UUID

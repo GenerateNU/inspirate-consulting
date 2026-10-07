@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
@@ -13,11 +14,10 @@ import (
 )
 
 func (r *ChatMessageRepository) EditChatMessage(ctx context.Context, id uuid.UUID, senderID uuid.UUID, message string) (*models.ChatMessage, error) {
-	const updateQuery = `
-	UPDATE public.chat_messages
-	SET message = $1, edited_at = now()
-	WHERE id = $2 AND sender_id = $3
-	RETURNING ` + chatMessageColumns
+	updateQuery, err := schema.ReadSQLBaseScript("edit_chat_message.sql", SqlChatMessageFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(ctx, updateQuery, message, id, senderID)
 	if err != nil {
@@ -36,11 +36,10 @@ func (r *ChatMessageRepository) EditChatMessage(ctx context.Context, id uuid.UUI
 }
 
 func (r *ChatMessageRepository) UpdateChatMessageReadAt(ctx context.Context, id uuid.UUID, recipientID uuid.UUID, readAt *time.Time) (*models.ChatMessage, error) {
-	const updateQuery = `
-	UPDATE public.chat_messages
-	SET read_at = CASE WHEN $1::timestamptz IS NULL THEN NULL ELSE coalesce(read_at, $1::timestamptz) END
-	WHERE id = $2 AND recipient_id = $3
-	RETURNING ` + chatMessageColumns
+	updateQuery, err := schema.ReadSQLBaseScript("update_chat_message_read_at.sql", SqlChatMessageFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(ctx, updateQuery, readAt, id, recipientID)
 	if err != nil {
@@ -60,12 +59,11 @@ func (r *ChatMessageRepository) UpdateChatMessageReadAt(ctx context.Context, id 
 
 // MarkChatRead marks every unread message the other user sent to this user as read.
 func (r *ChatMessageRepository) MarkChatRead(ctx context.Context, userID uuid.UUID, otherUserID uuid.UUID) error {
-	const updateQuery = `
-	UPDATE public.chat_messages
-	SET read_at = now()
-	WHERE recipient_id = $1 AND sender_id = $2 AND read_at IS NULL
-	`
+	updateQuery, err := schema.ReadSQLBaseScript("mark_chat_read.sql", SqlChatMessageFiles)
+	if err != nil {
+		return err
+	}
 
-	_, err := r.db.Exec(ctx, updateQuery, userID, otherUserID)
+	_, err = r.db.Exec(ctx, updateQuery, userID, otherUserID)
 	return err
 }

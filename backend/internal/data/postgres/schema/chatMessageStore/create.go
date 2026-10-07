@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
@@ -18,10 +19,10 @@ const (
 )
 
 func (r *ChatMessageRepository) CreateChatMessage(ctx context.Context, senderID uuid.UUID, body models.CreateChatMessageRequestBody) (*models.ChatMessage, error) {
-	const insertQuery = `
-	INSERT INTO public.chat_messages (sender_id, recipient_id, message)
-	VALUES ($1, $2, $3)
-	RETURNING ` + chatMessageColumns
+	insertQuery, err := schema.ReadSQLBaseScript("create_chat_message.sql", SqlChatMessageFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(ctx, insertQuery, senderID, body.RecipientID, body.Message)
 	if err != nil {
