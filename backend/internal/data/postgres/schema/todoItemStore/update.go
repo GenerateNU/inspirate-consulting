@@ -30,6 +30,9 @@ func (r *TodoItemRepository) UpdateTodoItemCompletedAt(ctx context.Context, id s
 		&updatedItem.TodoDescription,
 		&updatedItem.CompletedAt,
 		&updatedItem.Deadline,
+		&updatedItem.EssayID,
+		&updatedItem.MediaID,
+		&updatedItem.GlobalCollegeID,
 	)
 	if err != nil {
 		return nil, err
