@@ -93,9 +93,9 @@ func (_m *MediaRepository) GetMedia(ctx context.Context, id string) (*models.Med
 	return r0, r1
 }
 
-// ListAllMedia provides a mock function with given fields: ctx
-func (_m *MediaRepository) ListAllMedia(ctx context.Context) ([]models.Media, error) {
-	ret := _m.Called(ctx)
+// ListAllMedia provides a mock function with given fields: ctx, limit, offset
+func (_m *MediaRepository) ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error) {
+	ret := _m.Called(ctx, limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListAllMedia")
@@ -103,19 +103,19 @@ func (_m *MediaRepository) ListAllMedia(ctx context.Context) ([]models.Media, er
 
 	var r0 []models.Media
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]models.Media, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) ([]models.Media, error)); ok {
+		return rf(ctx, limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []models.Media); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) []models.Media); ok {
+		r0 = rf(ctx, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.Media)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(ctx, limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}

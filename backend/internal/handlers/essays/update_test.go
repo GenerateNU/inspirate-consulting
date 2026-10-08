@@ -48,7 +48,7 @@ func TestHandler_UpdateStatus(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, &models.UpdateStatusOutput{
-			Essay: updatedEssay,
+			Body: models.EssayBody{Essay: updatedEssay},
 		}, res)
 	})
 

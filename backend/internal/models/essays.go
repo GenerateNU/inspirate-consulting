@@ -18,9 +18,8 @@ type Essays struct {
 	CollegeID *int64 `json:"college_id"`
 	LinkToContent string `json:"link_to_content"`
 	/* I added this to help the studetns keep track of their progress*/
-	Status Status `json:"status"`
-	EssayGroupID *uuid.UUID `json:"essay_group_id"`
-
+	Status       Status     `json:"status"`
+	EssayGroupID *uuid.UUID `json:"essay_group_id" required:"false"`
 }
 
 type GetEssaysFromStudentInput struct {
@@ -35,13 +34,21 @@ type GetEssaysFromStudentOutput struct {
 	Body EssayListBody
 }
 
+type GetEssaysByGroupInput struct {
+	EssayGroupID uuid.UUID `path:"essay_group_id" doc:"Group whose essays to list"`
+}
+
+type GetEssaysByGroupOutput struct {
+	Body EssayListBody
+}
+
 type CreateEssayBody struct {
 	StudentID uuid.UUID `json:"student_id" doc:"Student the essay belongs to"`
 	Type      string    `json:"type" maxLength:"100" example:"personal-statement"`
 	CollegeID *int64    `json:"college_id" required:"false" doc:"Optional college this essay targets"`
 	// Might integrate eiditing the essay on the website might change
-	LinkToContent string `json:"link_to_content" minLength:"10" example:"https://docs.google.com/document/d/abc123"`
-	EssayGroupID *uuid.UUID  `json:"essay_group_id" doc:"optional group this essay belongs to" required:"false" ` 
+	LinkToContent string     `json:"link_to_content" minLength:"10" example:"https://docs.google.com/document/d/abc123"`
+	EssayGroupID  *uuid.UUID `json:"essay_group_id" doc:"optional group this essay belongs to" required:"false"`
 }
 
 type CreateEssayInput struct {
@@ -59,6 +66,24 @@ type UpdateStatusInput struct {
 	Body    UpdateStatusBody
 }
 
-type UpdateStatusOutput struct{
+type EssayBody struct {
 	Essay *Essays `json:"essay"`
+}
+
+type UpdateStatusOutput struct {
+	Body EssayBody
+}
+
+type UpdateEssayGroupBody struct {
+	/* A null essay_group_id removes the essay from whatever group it is in */
+	EssayGroupID *uuid.UUID `json:"essay_group_id" required:"false" doc:"Group to move the essay into, or null to remove it from its group"`
+}
+
+type UpdateEssayGroupInput struct {
+	EssayID uuid.UUID `path:"essay_id" doc:"Essay to move"`
+	Body    UpdateEssayGroupBody
+}
+
+type UpdateEssayGroupOutput struct {
+	Body EssayBody
 }

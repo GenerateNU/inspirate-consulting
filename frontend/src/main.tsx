@@ -18,6 +18,10 @@ import Counselor from "./counselor/counselor";
 import CreateTask from "./task/CreateTask";
 import TaskList from "./task/TaskList";
 import Layout from "./layout/layout";
+import UploadMedia from './media/upload-media'
+import StudentMediaList from './media/student-media-list'
+import CounselorMediaList from './media/counselor-media-list'
+import UpdateNotificationPreferences from './notifications/update-notification-preferences'
 
 
 createRoot(document.getElementById("root")!).render(
@@ -43,6 +47,10 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/counselor" element={<Counselor />} />
           <Route path="/create-task" element={<CreateTask />} />
           <Route path="/tasks" element={<TaskList />} />
+          <Route path="/upload-media" element={<UploadMedia />}/>
+          <Route path="/student-media-list" element={<StudentMediaList />}/>
+          <Route path="/counselor-media-list" element={<CounselorMediaList />}/>
+           <Route path="/update-notification-preferences" element={<UpdateNotificationPreferences />}/>
         </Route>
       </Routes>
     </BrowserRouter>
