@@ -8,6 +8,7 @@ export * from './chat/chat';
 export * from './essay-groups/essay-groups';
 export * from './essay-reviews/essay-reviews';
 export * from './essays/essays';
+export * from './extracurriculars/extracurriculars';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
 export * from './media/media';
