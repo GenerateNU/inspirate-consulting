@@ -297,6 +297,106 @@ export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * List extracurriculars for the authenticated student.
+ */
+export const ListExtracurricularsResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "description": /*#__PURE__*/ zod.string(),
+  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.int(),
+  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "name": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.string(),
+  "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+export const ListExtracurricularsResponse = /*#__PURE__*/ zod.array(ListExtracurricularsResponseItem)
+
+
+/**
+ * Update fields on an extracurricular for the authenticated student.
+ */
+export const UpdateExtracurricularParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular to update'))
+})
+
+
+
+
+export const UpdateExtracurricularBody = /*#__PURE__*/ zod.object({
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
+  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))),
+  "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "start_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
+  "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['doing', 'have_done'])),
+  "type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['maintenance', 'investment']))
+})
+
+export const UpdateExtracurricularResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "description": /*#__PURE__*/ zod.string(),
+  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.int(),
+  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "name": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.string(),
+  "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Create a new extracurricular for the given student.
+ */
+export const CreateExtracurricularParams = /*#__PURE__*/ zod.object({
+  "studentID": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student the extracurricular belongs to'))
+})
+
+
+
+
+export const CreateExtracurricularBody = /*#__PURE__*/ zod.object({
+  "description": /*#__PURE__*/ zod.string(),
+  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
+  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)),
+  "organization": /*#__PURE__*/ zod.string(),
+  "start_date": /*#__PURE__*/ zod.iso.date(),
+  "status": /*#__PURE__*/ zod.enum(['doing', 'have_done']),
+  "type": /*#__PURE__*/ zod.enum(['maintenance', 'investment'])
+})
+
+export const CreateExtracurricularResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "description": /*#__PURE__*/ zod.string(),
+  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.int(),
+  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "name": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.string(),
+  "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Create a greeting for a person by name.
  */
 export const createGreetingBodyNameMax = 30;
