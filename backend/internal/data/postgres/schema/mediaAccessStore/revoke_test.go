@@ -36,7 +36,7 @@ func TestRevokeMediaAccess(t *testing.T) {
 	}
 
 	// The student should no longer have access to the media.
-	results, err := repo.ListAccessibleMedia(ctx, studentID)
+	results, err := repo.ListAccessibleMedia(ctx, studentID, 10, 0)
 	if err != nil {
 		t.Fatalf("ListAccessibleMedia failed: %v", err)
 	}

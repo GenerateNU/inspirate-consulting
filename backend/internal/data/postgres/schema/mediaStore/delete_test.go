@@ -34,7 +34,7 @@ func TestDeleteMedia(t *testing.T) {
 	}
 
 	// The deleted media should no longer be listed.
-	results, err := repo.ListAllMedia(ctx)
+	results, err := repo.ListAllMedia(ctx, 10, 0)
 	if err != nil {
 		t.Fatalf("ListAllMedia failed: %v", err)
 	}

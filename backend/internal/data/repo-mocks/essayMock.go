@@ -35,6 +35,36 @@ func (_m *EssayRepository) CreateEssay(ctx context.Context, essay models.Essays)
 	return r0
 }
 
+// GetEssaysByGroup provides a mock function with given fields: ctx, essayGroupID
+func (_m *EssayRepository) GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error) {
+	ret := _m.Called(ctx, essayGroupID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEssaysByGroup")
+	}
+
+	var r0 []models.Essays
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) ([]models.Essays, error)); ok {
+		return rf(ctx, essayGroupID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) []models.Essays); ok {
+		r0 = rf(ctx, essayGroupID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Essays)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, essayGroupID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetEssaysFromStudent provides a mock function with given fields: ctx, studentID
 func (_m *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error) {
 	ret := _m.Called(ctx, studentID)
@@ -58,6 +88,36 @@ func (_m *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID u
 
 	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
 		r1 = rf(ctx, studentID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateEssayGroup provides a mock function with given fields: ctx, essayID, essayGroupID
+func (_m *EssayRepository) UpdateEssayGroup(ctx context.Context, essayID uuid.UUID, essayGroupID *uuid.UUID) (*models.Essays, error) {
+	ret := _m.Called(ctx, essayID, essayGroupID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateEssayGroup")
+	}
+
+	var r0 *models.Essays
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *uuid.UUID) (*models.Essays, error)); ok {
+		return rf(ctx, essayID, essayGroupID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *uuid.UUID) *models.Essays); ok {
+		r0 = rf(ctx, essayID, essayGroupID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Essays)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, *uuid.UUID) error); ok {
+		r1 = rf(ctx, essayID, essayGroupID)
 	} else {
 		r1 = ret.Error(1)
 	}
