@@ -73,7 +73,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     splitAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-User-ID"},
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
@@ -93,7 +93,9 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	// routes.SetupAuthRoutes(humaAPI, repo, config)
 
 	// Apply auth middleware — only affects routes registered after this point
-	if !config.TestMode {
+	if config.TestMode {
+		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI, config.TestMode))
+	} else {
 		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
 	}
 
@@ -113,20 +115,23 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	return app, humaAPI, nil
 }
 
-
-
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpExtracurricularRoutes(api, repo)
 	SetUpEssayRoutes(api, repo)
+	SetUpEssayGroupRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpTodoItemRoutes(api, repo)
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
 	SetupUserRoutes(api, repo, &config)
 	SetUpVideoRoutes(api, repo)
+	SetUpMediaRoutes(api, repo)
+	SetUpMediaAccessRoutes(api, repo)
 	SetUpEssayReviewRoutes(api, repo)
 	SetUpStudentRoutes(api, repo)
+	SetUpChatMessageRoutes(api, repo)
+	SetUpNotificationPreferencesRoutes(api, repo)
 	return nil
 }

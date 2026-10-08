@@ -14,15 +14,31 @@ import type {
 } from 'msw';
 
 import type {
+  EssayBody,
   EssayListBody
 } from '../../models';
 
 import {
-  getGetEssaysFromStudentResponseMock
+  getGetEssaysByGroupResponseMock,
+  getGetEssaysFromStudentResponseMock,
+  getUpdateEssayGroupResponseMock,
+  getUpdateEssayStatusResponseMock
 } from './essays.faker';
 
-export { getGetEssaysFromStudentResponseMock } from './essays.faker';
+export { getGetEssaysByGroupResponseMock, getUpdateEssayGroupResponseMock, getUpdateEssayStatusResponseMock, getGetEssaysFromStudentResponseMock } from './essays.faker';
 
+
+export const getGetEssaysByGroupMockHandler = (overrideResponse?: EssayListBody | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<EssayListBody> | EssayListBody), options?: RequestHandlerOptions) => {
+  return http.get('*/essay-groups/:essayGroupId/essays', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetEssaysByGroupResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getCreateEssayMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.post('*/essays', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
@@ -34,12 +50,26 @@ export const getCreateEssayMockHandler = (overrideResponse?: void | ((info: Para
   }, options)
 }
 
-export const getUpdateEssayStatusMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.patch('*/essays/:essayId/status', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+export const getUpdateEssayGroupMockHandler = (overrideResponse?: EssayBody | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<EssayBody> | EssayBody), options?: RequestHandlerOptions) => {
+  return http.patch('*/essays/:essayId/group', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
-    return new HttpResponse(null,
-      { status: 204
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateEssayGroupResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUpdateEssayStatusMockHandler = (overrideResponse?: EssayBody | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<EssayBody> | EssayBody), options?: RequestHandlerOptions) => {
+  return http.patch('*/essays/:essayId/status', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateEssayStatusResponseMock(),
+      { status: 200
       })
   }, options)
 }
@@ -56,7 +86,9 @@ export const getGetEssaysFromStudentMockHandler = (overrideResponse?: EssayListB
   }, options)
 }
 export const getEssaysMock = () => [
+  getGetEssaysByGroupMockHandler(),
   getCreateEssayMockHandler(),
+  getUpdateEssayGroupMockHandler(),
   getUpdateEssayStatusMockHandler(),
   getGetEssaysFromStudentMockHandler()
 ]

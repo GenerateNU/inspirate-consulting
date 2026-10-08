@@ -13,6 +13,6 @@ func (h *Handler) UpdateStatus(ctx context.Context, input *models.UpdateStatusIn
 	}
 
 	return &models.UpdateStatusOutput{
-		Essay: updatedEssay,
+		Body: models.EssayBody{Essay: updatedEssay},
 	}, nil
 }
