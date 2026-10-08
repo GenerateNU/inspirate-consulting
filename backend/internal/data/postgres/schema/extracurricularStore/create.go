@@ -6,26 +6,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
-
-// extracurricularColumns is the column list shared by every query that returns
-// a full extracurricular row. Order doesn't matter for RowToStructByName, but
-// every column must match a db tag on models.Extracurricular.
-const extracurricularColumns = `
-		id,
-		created_at,
-		modified_at,
-		student_id,
-		user_id,
-		name,
-		status,
-		type,
-		description,
-		leadership_role,
-		start_date,
-		end_date,
-		organization`
 
 // CreateExtracurricular inserts a new extracurricular row into the
 // public.extracurriculars table and returns the created record back to the caller.
@@ -46,22 +29,10 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, u
 		endDate = &parsed
 	}
 
-	const insertQuery = `
-	INSERT INTO public.extracurriculars (
-		student_id,
-		user_id,
-		name,
-		status,
-		type,
-		description,
-		leadership_role,
-		start_date,
-		end_date,
-		organization
-	) VALUES (
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10
-	)
-	RETURNING` + extracurricularColumns
+	insertQuery, err := schema.ReadSQLBaseScript("create_extracurricular.sql", SqlExtracurricularFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(
 		ctx,
@@ -91,12 +62,10 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, u
 
 // ListExtracurriculars retrieves extracurriculars for a student
 func (r *ExtracurricularRepository) ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error) {
-	const selectQuery = `
-	SELECT` + extracurricularColumns + `
-	FROM public.extracurriculars
-	WHERE student_id = $1
-	ORDER BY start_date DESC
-	`
+	selectQuery, err := schema.ReadSQLBaseScript("list_extracurriculars.sql", SqlExtracurricularFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(ctx, selectQuery, studentID)
 	if err != nil {
@@ -133,19 +102,10 @@ func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, i
 		endDate = &parsed
 	}
 
-	const updateQuery = `
-	UPDATE public.extracurriculars SET
-		name            = COALESCE($1, name),
-		status          = COALESCE($2, status),
-		type            = COALESCE($3, type),
-		description     = COALESCE($4, description),
-		leadership_role = COALESCE($5, leadership_role),
-		start_date      = COALESCE($6, start_date),
-		end_date        = COALESCE($7, end_date),
-		organization    = COALESCE($8, organization),
-		modified_at      = now()
-	WHERE id = $9
-	RETURNING` + extracurricularColumns
+	updateQuery, err := schema.ReadSQLBaseScript("update_extracurricular.sql", SqlExtracurricularFiles)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(
 		ctx,
