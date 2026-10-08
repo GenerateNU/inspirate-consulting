@@ -9,6 +9,7 @@ import (
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
+	extracurricularRepository "inspirate-consulting/internal/data/postgres/schema/extracurricularStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
@@ -27,6 +28,12 @@ import (
 // For each schema, their interfaces are to be defined here
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
+}
+
+type ExtracurricularRepository interface {
+	CreateExtracurricular(ctx context.Context, userID string, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
+	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
+	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
 }
 
 // Essay Repository
@@ -130,6 +137,7 @@ type Repository struct {
 
 	// For each interface, add a field here
 	Greeting                   GreetingRepository
+	Extracurricular            ExtracurricularRepository
 	Essay                      EssayRepository
 	EssayGroup                 EssayGroupRepository
 	ChatMessage                ChatMessageRepository
@@ -160,6 +168,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db:                         db,
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
+		Extracurricular:            extracurricularRepository.NewExtracurricularRepository(db),
 		Essay:                      essayRepository.NewEssayRepository(db),
 		EssayGroup:                 essayGroupRepository.NewEssayGroupRepository(db),
 		ChatMessage:                chatMessageRepository.NewChatMessageRepository(db),
