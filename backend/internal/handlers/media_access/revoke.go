@@ -1,12 +1,12 @@
 package mediaaccess
 
-import(
+import (
 	"context"
 )
 
-func (h *Handler) RevokeMediaAccess(ctx context.Context, id string)error{
+func (h *Handler) RevokeMediaAccess(ctx context.Context, id string) error {
 	err := h.MediaAccessRepository.RevokeMediaAccess(ctx, id)
-	if(err != nil){
+	if err != nil {
 		return err
 	}
 

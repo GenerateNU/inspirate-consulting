@@ -12,13 +12,12 @@ import (
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
-	"github.com/google/uuid"
 	"github.com/gofiber/fiber/v3"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
 
 func setupTestAppWithNotificationPreferences(mockRepo data.NotificationPreferencesRepository) (*fiber.App, error) {
 	cfg := config.Config{
@@ -39,12 +38,12 @@ func TestRoute_GetNotificationPreferences(t *testing.T) {
 
 		mockRepo := mocks.NewNotificationPreferencesRepository(t)
 		mockRepo.On("GetNotificationPreferences", mock.Anything, mock.Anything).Return(&models.NotificationPreferences{
-			UserID: uuid.New(),
-			EmailEnabled: true,
-			WeeklySummaryEnabled: true,
+			UserID:                      uuid.New(),
+			EmailEnabled:                true,
+			WeeklySummaryEnabled:        true,
 			DueDateNotificationsEnabled: true,
-			DaysBeforeDue: 1,
-			NotifyPastDue: true,
+			DaysBeforeDue:               1,
+			NotifyPastDue:               true,
 		}, nil)
 
 		app, err := setupTestAppWithNotificationPreferences(mockRepo)
@@ -80,23 +79,23 @@ func TestRoute_UpdateNotificationPreferences(t *testing.T) {
 		mockRepo.On("UpdateNotificationPreferences", mock.Anything, mock.Anything, mock.MatchedBy(func(in models.UpdateNotificationPreferencesRequestBody) bool {
 			return in.DaysBeforeDue == 5 && in.EmailEnabled == false
 		})).Return(&models.NotificationPreferences{
-			UserID: uuid.New(),
-			EmailEnabled: false,
-			WeeklySummaryEnabled: false,
+			UserID:                      uuid.New(),
+			EmailEnabled:                false,
+			WeeklySummaryEnabled:        false,
 			DueDateNotificationsEnabled: true,
-			DaysBeforeDue: 5,
-			NotifyPastDue: false,
+			DaysBeforeDue:               5,
+			NotifyPastDue:               false,
 		}, nil)
 
 		app, err := setupTestAppWithNotificationPreferences(mockRepo)
 		require.NoError(t, err)
 
 		payload := map[string]any{
-			"email_enabled": false,
-			"weekly_summary_enabled": false,
+			"email_enabled":                  false,
+			"weekly_summary_enabled":         false,
 			"due_date_notifications_enabled": true,
-			"days_before_due": 5,
-			"notify_past_due": false,
+			"days_before_due":                5,
+			"notify_past_due":                false,
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)

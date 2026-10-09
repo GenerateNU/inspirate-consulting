@@ -22,11 +22,11 @@ func TestUpdateNotificationPreferences(t *testing.T) {
 	}
 
 	update := models.UpdateNotificationPreferencesRequestBody{
-		EmailEnabled: false,
-		WeeklySummaryEnabled: false,
+		EmailEnabled:                false,
+		WeeklySummaryEnabled:        false,
 		DueDateNotificationsEnabled: true,
-		DaysBeforeDue: 3,
-		NotifyPastDue: false,
+		DaysBeforeDue:               3,
+		NotifyPastDue:               false,
 	}
 
 	updated, err := repo.UpdateNotificationPreferences(ctx, userID, update)

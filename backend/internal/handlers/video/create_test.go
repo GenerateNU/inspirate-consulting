@@ -23,7 +23,7 @@ func TestHandler_UploadVideo(t *testing.T) {
 		t.Parallel()
 
 		expected := &models.PresignUploadResponse{
-			S3Key: "videos/uuid-common-app-tips.mp4",
+			S3Key:     "videos/uuid-common-app-tips.mp4",
 			UploadURL: "https://bucket.s3.amazonaws.com/videos/uuid-common-app-tips.mp4?X-Amz-...",
 		}
 

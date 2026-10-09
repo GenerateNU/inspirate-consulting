@@ -22,12 +22,12 @@ func TestHandler_GetNotificationPreferences(t *testing.T) {
 		t.Parallel()
 
 		expected := &models.NotificationPreferences{
-			UserID: uuid.New(),
-			EmailEnabled: true,
-			WeeklySummaryEnabled: true,
+			UserID:                      uuid.New(),
+			EmailEnabled:                true,
+			WeeklySummaryEnabled:        true,
 			DueDateNotificationsEnabled: true,
-			DaysBeforeDue: 1,
-			NotifyPastDue: true,
+			DaysBeforeDue:               1,
+			NotifyPastDue:               true,
 		}
 
 		mockRepo := mocks.NewNotificationPreferencesRepository(t)

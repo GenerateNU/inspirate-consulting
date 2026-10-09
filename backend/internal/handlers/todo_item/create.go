@@ -2,8 +2,8 @@ package todoitem
 
 import (
 	"context"
-	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/auth"
+	"inspirate-consulting/internal/models"
 )
 
 func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {

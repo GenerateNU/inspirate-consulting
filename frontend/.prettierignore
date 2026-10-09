@@ -1,0 +1,6 @@
+# Orval-generated output (checked against regeneration in CI)
+src/api/endpoints
+src/api/models
+src/api/schemas
+
+bun.lock

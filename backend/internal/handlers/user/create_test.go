@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 	"errors"
-	"inspirate-consulting/internal/supabase"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/supabase"
 	"testing"
 
 	"github.com/google/uuid"

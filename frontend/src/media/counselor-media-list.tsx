@@ -1,5 +1,5 @@
-import { useListMedia } from '../api/endpoints';
-import type { Media } from '../api/models';
+import { useListMedia } from "../api/endpoints";
+import type { Media } from "../api/models";
 
 export default function CounselorMediaList() {
   const { data, error, isLoading } = useListMedia();

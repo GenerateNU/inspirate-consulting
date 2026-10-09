@@ -20,7 +20,7 @@ func TestGetGlobalCollege(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeRequestBody{
-		SchoolName: "Findable University",
+		SchoolName:     "Findable University",
 		SchoolLocation: "Search City, SC",
 	}
 	createOutput, err := repo.CreateGlobalCollege(ctx, input)

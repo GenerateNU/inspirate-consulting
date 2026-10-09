@@ -1,8 +1,8 @@
 package videoRepository
- 
+
 import (
 	"context"
- 
+
 	"inspirate-consulting/internal/models"
 )
 
@@ -13,7 +13,7 @@ func (r *VideoRepository) GetVideo(ctx context.Context, s3Key string) (*models.V
 	}
 
 	return &models.Video{
-		S3Key: s3Key,
-		DownloadURL:   url,
+		S3Key:       s3Key,
+		DownloadURL: url,
 	}, nil
 }

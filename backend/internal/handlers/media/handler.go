@@ -4,11 +4,11 @@ import (
 	storage "inspirate-consulting/internal/data"
 )
 
-type Handler struct{
+type Handler struct {
 	MediaRepository storage.MediaRepository
 }
 
-func NewHandler(mediaRepository storage.MediaRepository) *Handler{
+func NewHandler(mediaRepository storage.MediaRepository) *Handler {
 	return &Handler{
 		MediaRepository: mediaRepository,
 	}
