@@ -9,7 +9,7 @@ export default function CreateCollege() {
   const [rdDeadline, setRdDeadline] = useState("");
   const [status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateGlobalCollege();
+  const { trigger, isMutating, error } = useCreateGlobalCollege<Error>();
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,7 +88,7 @@ export default function CreateCollege() {
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {String(error)}</p>}
+      {error && <p>Error: {error.message}</p>}
     </div>
   );
 }

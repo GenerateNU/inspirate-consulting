@@ -5,7 +5,7 @@ export default function CreateTask() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateTodoItem();
+  const { trigger, isMutating, error } = useCreateTodoItem<Error>();
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,7 +45,7 @@ export default function CreateTask() {
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {String(error)}</p>}
+      {error && <p>Error: {error.message}</p>}
     </div>
   );
 }

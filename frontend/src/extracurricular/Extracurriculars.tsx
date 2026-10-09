@@ -16,7 +16,7 @@ const toDateInput = (value?: string | null) =>
   value ? value.slice(0, 10) : "";
 
 export default function Extracurriculars() {
-  const { data, error, isLoading, mutate } = useListExtracurriculars();
+  const { data, error, isLoading, mutate } = useListExtracurriculars<Error>();
   const [editing, setEditing] = useState<number | null>(null);
   const [form, setForm] = useState<UpdateExtracurricularRequest>({});
   const [msg, setMsg] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function Extracurriculars() {
 
   const list: Extracurricular[] = data?.status === 200 ? (data.data ?? []) : [];
   const listError = error
-    ? String(error)
+    ? error.message
     : data && data.status !== 200
       ? JSON.stringify(data.data)
       : null;

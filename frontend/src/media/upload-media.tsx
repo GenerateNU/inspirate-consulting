@@ -6,7 +6,7 @@ export default function CreateMedia() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateMedia();
+  const { trigger, isMutating, error } = useCreateMedia<Error>();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -59,7 +59,7 @@ export default function CreateMedia() {
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {String(error)}</p>}
+      {error && <p>Error: {error.message}</p>}
     </div>
   );
 }

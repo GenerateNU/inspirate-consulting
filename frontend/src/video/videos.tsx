@@ -35,10 +35,10 @@ export default function VideoList() {
               src={video.download_url}
               controls
               style={{ maxWidth: "400px" }}
-              onError={() => {
+              onError={async () => {
                 // The presigned URL likely expired —> refetch to get a fresh one.
                 // just calling the same list endpoint again gives a new URL
-                mutate();
+                await mutate();
               }}
             />
           </li>
