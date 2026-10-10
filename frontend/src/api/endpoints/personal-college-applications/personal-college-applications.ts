@@ -7,6 +7,7 @@
  */
 import useSwr from 'swr';
 import type {
+  Arguments,
   Key,
   SWRConfiguration
 } from 'swr';
@@ -19,7 +20,9 @@ import type {
 import type {
   CreatePersonalCollegeApplicationRequestBody,
   ErrorModel,
-  PersonalCollegeApplication
+  PersonalCollegeApplication,
+  UpdatePersonalCollegeApplicationRankRequestBody,
+  UpdatePersonalCollegeApplicationRequestBody
 } from '../../models';
 
 
@@ -214,6 +217,264 @@ export const useCreatePersonalCollegeApplication = <TError = Promise<ErrorModel>
 
   const swrKey = swrOptions?.swrKey ?? getCreatePersonalCollegeApplicationMutationKey();
   const swrFn = getCreatePersonalCollegeApplicationMutationFetcher(fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type deletePersonalCollegeApplicationResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deletePersonalCollegeApplicationResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 204>
+}
+
+export type deletePersonalCollegeApplicationResponseSuccess = (deletePersonalCollegeApplicationResponse204) & {
+  headers: Headers;
+};
+export type deletePersonalCollegeApplicationResponseError = (deletePersonalCollegeApplicationResponseDefault) & {
+  headers: Headers;
+};
+
+export type deletePersonalCollegeApplicationResponse = (deletePersonalCollegeApplicationResponseSuccess | deletePersonalCollegeApplicationResponseError)
+
+export const getDeletePersonalCollegeApplicationUrl = (id: number,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/applications/${id}`
+}
+
+/**
+ * Delete a personal college application for the authenticated student.
+ */
+export const deletePersonalCollegeApplication = async (id: number, options?: RequestInit): Promise<deletePersonalCollegeApplicationResponse> => {
+
+  const res = await fetch(getDeletePersonalCollegeApplicationUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deletePersonalCollegeApplicationResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as deletePersonalCollegeApplicationResponse
+}
+
+
+
+
+export const getDeletePersonalCollegeApplicationMutationFetcher = (id: number, options?: RequestInit) => {
+  return (_: Key, __: { arg: Arguments }) => {
+    return deletePersonalCollegeApplication(id, options);
+  }
+}
+export const getDeletePersonalCollegeApplicationMutationKey = (id: number,) => [`http://127.0.0.1:8080/applications/${id}`] as const;
+
+export type DeletePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>>
+
+export const useDeletePersonalCollegeApplication = <TError = Promise<ErrorModel>>(
+  id: number, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>, TError, Key, Arguments, Awaited<ReturnType<typeof deletePersonalCollegeApplication>>> & { swrKey?: string }, fetch?: RequestInit}
+) => {
+
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getDeletePersonalCollegeApplicationMutationKey(id);
+  const swrFn = getDeletePersonalCollegeApplicationMutationFetcher(id, fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type updatePersonalCollegeApplicationResponse200 = {
+  data: PersonalCollegeApplication
+  status: 200
+}
+
+export type updatePersonalCollegeApplicationResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type updatePersonalCollegeApplicationResponseSuccess = (updatePersonalCollegeApplicationResponse200) & {
+  headers: Headers;
+};
+export type updatePersonalCollegeApplicationResponseError = (updatePersonalCollegeApplicationResponseDefault) & {
+  headers: Headers;
+};
+
+export type updatePersonalCollegeApplicationResponse = (updatePersonalCollegeApplicationResponseSuccess | updatePersonalCollegeApplicationResponseError)
+
+export const getUpdatePersonalCollegeApplicationUrl = (id: number,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/applications/${id}`
+}
+
+/**
+ * Update a personal college application for the authenticated student.
+ */
+export const updatePersonalCollegeApplication = async (id: number,
+    updatePersonalCollegeApplicationRequestBody: NonReadonly<UpdatePersonalCollegeApplicationRequestBody>, options?: RequestInit): Promise<updatePersonalCollegeApplicationResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdatePersonalCollegeApplicationUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updatePersonalCollegeApplicationRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: updatePersonalCollegeApplicationResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as updatePersonalCollegeApplicationResponse
+}
+
+
+
+
+export const getUpdatePersonalCollegeApplicationMutationFetcher = (id: number, options?: RequestInit) => {
+  return (_: Key, { arg }: { arg: NonReadonly<UpdatePersonalCollegeApplicationRequestBody> }) => {
+    return updatePersonalCollegeApplication(id, arg, options);
+  }
+}
+export const getUpdatePersonalCollegeApplicationMutationKey = (id: number,) => [`http://127.0.0.1:8080/applications/${id}`] as const;
+
+export type UpdatePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>>
+
+export const useUpdatePersonalCollegeApplication = <TError = Promise<ErrorModel>>(
+  id: number, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>, TError, Key, NonReadonly<UpdatePersonalCollegeApplicationRequestBody>, Awaited<ReturnType<typeof updatePersonalCollegeApplication>>> & { swrKey?: string }, fetch?: RequestInit}
+) => {
+
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getUpdatePersonalCollegeApplicationMutationKey(id);
+  const swrFn = getUpdatePersonalCollegeApplicationMutationFetcher(id, fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type updatePersonalCollegeApplicationRankResponse200 = {
+  data: PersonalCollegeApplication[] | null
+  status: 200
+}
+
+export type updatePersonalCollegeApplicationRankResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type updatePersonalCollegeApplicationRankResponseSuccess = (updatePersonalCollegeApplicationRankResponse200) & {
+  headers: Headers;
+};
+export type updatePersonalCollegeApplicationRankResponseError = (updatePersonalCollegeApplicationRankResponseDefault) & {
+  headers: Headers;
+};
+
+export type updatePersonalCollegeApplicationRankResponse = (updatePersonalCollegeApplicationRankResponseSuccess | updatePersonalCollegeApplicationRankResponseError)
+
+export const getUpdatePersonalCollegeApplicationRankUrl = (id: number,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/applications/${id}/rank`
+}
+
+/**
+ * Update the rank of a personal college application for the authenticated student.
+ */
+export const updatePersonalCollegeApplicationRank = async (id: number,
+    updatePersonalCollegeApplicationRankRequestBody: NonReadonly<UpdatePersonalCollegeApplicationRankRequestBody>, options?: RequestInit): Promise<updatePersonalCollegeApplicationRankResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdatePersonalCollegeApplicationRankUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updatePersonalCollegeApplicationRankRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: updatePersonalCollegeApplicationRankResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as updatePersonalCollegeApplicationRankResponse
+}
+
+
+
+
+export const getUpdatePersonalCollegeApplicationRankMutationFetcher = (id: number, options?: RequestInit) => {
+  return (_: Key, { arg }: { arg: NonReadonly<UpdatePersonalCollegeApplicationRankRequestBody> }) => {
+    return updatePersonalCollegeApplicationRank(id, arg, options);
+  }
+}
+export const getUpdatePersonalCollegeApplicationRankMutationKey = (id: number,) => [`http://127.0.0.1:8080/applications/${id}/rank`] as const;
+
+export type UpdatePersonalCollegeApplicationRankMutationResult = NonNullable<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>>
+
+export const useUpdatePersonalCollegeApplicationRank = <TError = Promise<ErrorModel>>(
+  id: number, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>, TError, Key, NonReadonly<UpdatePersonalCollegeApplicationRankRequestBody>, Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>> & { swrKey?: string }, fetch?: RequestInit}
+) => {
+
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getUpdatePersonalCollegeApplicationRankMutationKey(id);
+  const swrFn = getUpdatePersonalCollegeApplicationRankMutationFetcher(id, fetchOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
 

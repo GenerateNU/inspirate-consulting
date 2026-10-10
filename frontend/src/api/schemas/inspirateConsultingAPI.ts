@@ -17,6 +17,7 @@ export const ListPersonalCollegeApplicationsResponseItem = /*#__PURE__*/ zod.obj
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
 })
@@ -39,9 +40,71 @@ export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
 })
+
+
+/**
+ * Delete a personal college application for the authenticated student.
+ */
+export const DeletePersonalCollegeApplicationParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to delete'))
+})
+
+export const DeletePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Update a personal college application for the authenticated student.
+ */
+export const UpdatePersonalCollegeApplicationParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to update'))
+})
+
+export const UpdatePersonalCollegeApplicationBody = /*#__PURE__*/ zod.object({
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to'))
+})
+
+export const UpdatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Update the rank of a personal college application for the authenticated student.
+ */
+export const UpdatePersonalCollegeApplicationRankParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to re-rank'))
+})
+
+export const UpdatePersonalCollegeApplicationRankBody = /*#__PURE__*/ zod.object({
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('The new 1-based rank, or null to un-rank this application'))
+})
+
+export const UpdatePersonalCollegeApplicationRankResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+export const UpdatePersonalCollegeApplicationRankResponse = /*#__PURE__*/ zod.array(UpdatePersonalCollegeApplicationRankResponseItem)
 
 
 /**

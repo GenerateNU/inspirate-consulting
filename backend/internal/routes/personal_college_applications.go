@@ -12,7 +12,7 @@ import (
 )
 
 // SetUpPersonalCollegeApplicationRoutes registers the personal college application endpoints:
-// create and list by student ID
+// create and list by student ID, delete, update rank, and update application details
 func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository) {
 	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege)
 
@@ -44,6 +44,51 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 			return nil, err
 		}
 		return &models.ListPersonalCollegeApplicationsOutput{Body: applications}, nil
+	})
+
+	// Register DELETE /applications/{id} handler.
+	huma.Register(api, huma.Operation{
+		OperationID: "delete-personal-college-application",
+		Method:      http.MethodDelete,
+		Path:        "/applications/{id}",
+		Description: "Delete a personal college application for the authenticated student.",
+		Tags:        []string{"Personal College Applications"},
+	}, func(ctx context.Context, input *models.DeletePersonalCollegeApplicationInput) (*models.DeletePersonalCollegeApplicationOutput, error) {
+		err := personalCollegeApplicationHandler.DeletePersonalCollegeApplication(ctx, input.ID)
+		if err != nil {
+			return nil, err
+		}
+		return &models.DeletePersonalCollegeApplicationOutput{}, nil
+	})
+
+	// Register PUT /applications/{id}/rank handler.
+	huma.Register(api, huma.Operation{
+		OperationID: "update-personal-college-application-rank",
+		Method:      http.MethodPut,
+		Path:        "/applications/{id}/rank",
+		Description: "Update the rank of a personal college application for the authenticated student.",
+		Tags:        []string{"Personal College Applications"},
+	}, func(ctx context.Context, input *models.UpdatePersonalCollegeApplicationRankInput) (*models.UpdatePersonalCollegeApplicationRankOutput, error) {
+		updated, err := personalCollegeApplicationHandler.UpdatePersonalCollegeApplicationRank(ctx, input.ID, input.Body)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdatePersonalCollegeApplicationRankOutput{Body: updated}, nil
+	})
+
+	// Register PUT /applications/{id} handler.
+	huma.Register(api, huma.Operation{
+		OperationID: "update-personal-college-application",
+		Method:      http.MethodPut,
+		Path:        "/applications/{id}",
+		Description: "Update a personal college application for the authenticated student.",
+		Tags:        []string{"Personal College Applications"},
+	}, func(ctx context.Context, input *models.UpdatePersonalCollegeApplicationInput) (*models.UpdatePersonalCollegeApplicationOutput, error) {
+		updated, err := personalCollegeApplicationHandler.UpdatePersonalCollegeApplication(ctx, input.ID, input.Body)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdatePersonalCollegeApplicationOutput{Body: *updated}, nil
 	})
 
 }

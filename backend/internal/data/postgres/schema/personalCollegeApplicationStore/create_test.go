@@ -55,6 +55,10 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	if created.UpdatedAt.IsZero() {
 		t.Error("expected UpdatedAt to be set")
 	}
+
+	if created.Rank != nil {
+		t.Error("expected Rank to be null")
+	}
 }
 
 // to test application creation with an invalid application_type

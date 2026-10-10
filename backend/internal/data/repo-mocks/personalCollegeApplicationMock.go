@@ -45,6 +45,24 @@ func (_m *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication
 	return r0, r1
 }
 
+// DeletePersonalCollegeApplication provides a mock function with given fields: ctx, studentID, applicationID
+func (_m *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID string, applicationID int64) error {
+	ret := _m.Called(ctx, studentID, applicationID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePersonalCollegeApplication")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64) error); ok {
+		r0 = rf(ctx, studentID, applicationID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ListPersonalCollegeApplicationsByStudentID provides a mock function with given fields: ctx, studentID
 func (_m *PersonalCollegeApplicationRepository) ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error) {
 	ret := _m.Called(ctx, studentID)
@@ -68,6 +86,66 @@ func (_m *PersonalCollegeApplicationRepository) ListPersonalCollegeApplicationsB
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
 		r1 = rf(ctx, studentID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateApplicationRank provides a mock function with given fields: ctx, studentID, applicationID, newRank
+func (_m *PersonalCollegeApplicationRepository) UpdateApplicationRank(ctx context.Context, studentID string, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error) {
+	ret := _m.Called(ctx, studentID, applicationID, newRank)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateApplicationRank")
+	}
+
+	var r0 []models.PersonalCollegeApplication
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, *int) ([]models.PersonalCollegeApplication, error)); ok {
+		return rf(ctx, studentID, applicationID, newRank)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, *int) []models.PersonalCollegeApplication); ok {
+		r0 = rf(ctx, studentID, applicationID, newRank)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.PersonalCollegeApplication)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64, *int) error); ok {
+		r1 = rf(ctx, studentID, applicationID, newRank)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdatePersonalCollegeApplication provides a mock function with given fields: ctx, studentID, applicationID, input
+func (_m *PersonalCollegeApplicationRepository) UpdatePersonalCollegeApplication(ctx context.Context, studentID string, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error) {
+	ret := _m.Called(ctx, studentID, applicationID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePersonalCollegeApplication")
+	}
+
+	var r0 *models.PersonalCollegeApplication
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)); ok {
+		return rf(ctx, studentID, applicationID, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, models.UpdatePersonalCollegeApplicationRequestBody) *models.PersonalCollegeApplication); ok {
+		r0 = rf(ctx, studentID, applicationID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.PersonalCollegeApplication)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64, models.UpdatePersonalCollegeApplicationRequestBody) error); ok {
+		r1 = rf(ctx, studentID, applicationID, input)
 	} else {
 		r1 = ret.Error(1)
 	}
