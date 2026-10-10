@@ -42,16 +42,17 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("GetTodoItemsByStudent", mock.Anything, studentID).Return(expectedOutput, nil)
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return(expectedOutput, nil)
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx)
+		res, err := handler.GetTodoItemsByStudent(ctx, &models.GetTodoItemsByStudentInput{})
 
 		// Verify result
 		assert.NoError(t, err)
-		assert.Equal(t, expectedOutput, res)
-		assert.Len(t, res, 2)
+		assert.Equal(t, expectedOutput, res.Items)
+		assert.Len(t, res.Items, 2)
+		assert.Nil(t, res.NextCursor)
 	})
 
 	t.Run("student with no todo items", func(t *testing.T) {
@@ -59,13 +60,13 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// A student with no tasks is an empty list, not an error
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("GetTodoItemsByStudent", mock.Anything, studentID).Return([]models.TodoItem{}, nil)
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return([]models.TodoItem{}, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx)
+		res, err := handler.GetTodoItemsByStudent(ctx, &models.GetTodoItemsByStudentInput{})
 
 		assert.NoError(t, err)
-		assert.Empty(t, res)
+		assert.Empty(t, res.Items)
 	})
 
 	t.Run("repository error", func(t *testing.T) {
@@ -73,11 +74,11 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("GetTodoItemsByStudent", mock.Anything, studentID).Return(nil, errors.New("database error"))
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return(nil, errors.New("database error"))
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx)
+		res, err := handler.GetTodoItemsByStudent(ctx, &models.GetTodoItemsByStudentInput{})
 
 		// Verify error propagation
 		assert.Error(t, err)

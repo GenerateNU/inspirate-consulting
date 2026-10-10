@@ -54,9 +54,9 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 		created = append(created, *output)
 	}
 
-	items, err := repo.GetTodoItemsByStudent(ctx, studentID)
+	items, err := repo.ListTodoItems(ctx, models.TodoItemQuery{StudentID: studentID})
 	if err != nil {
-		t.Fatalf("GetTodoItemsByStudent failed: %v", err)
+		t.Fatalf("ListTodoItems failed: %v", err)
 	}
 
 	if len(items) != 2 {
@@ -79,7 +79,7 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 	for _, want := range created[:2] {
 		got, ok := byID[want.ID]
 		if !ok {
-			t.Errorf("expected todo item %q (id=%s) to appear in GetTodoItemsByStudent result", want.TodoDescription, want.ID)
+			t.Errorf("expected todo item %q (id=%s) to appear in ListTodoItems result", want.TodoDescription, want.ID)
 			continue
 		}
 		if got.TodoDescription != want.TodoDescription {
@@ -114,7 +114,7 @@ func TestGetTodoItemsByStudent_NoItems(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	items, err := repo.GetTodoItemsByStudent(ctx, uuid.NewString())
+	items, err := repo.ListTodoItems(ctx, models.TodoItemQuery{StudentID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected no error for a student with no todo items, got: %v", err)
 	}
@@ -133,7 +133,7 @@ func TestGetTodoItemsByStudent_InvalidID(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	_, err := repo.GetTodoItemsByStudent(ctx, "not-a-uuid")
+	_, err := repo.ListTodoItems(ctx, models.TodoItemQuery{StudentID: "not-a-uuid"})
 	if err == nil {
 		t.Fatal("expected an error for a non-uuid student id, got nil")
 	}

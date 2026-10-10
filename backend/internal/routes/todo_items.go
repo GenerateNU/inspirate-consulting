@@ -36,15 +36,31 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 		OperationID: "get-todo-items",
 		Method:      http.MethodGet,
 		Path:        "/todo-items",
-		Description: "Get a student's to-do items",
+		Description: "Get a student's to-do items, with optional filters, sorting, and cursor pagination",
 		Tags:        []string{"Todo Items"},
 	}, func(ctx context.Context, input *models.GetTodoItemsByStudentInput) (*models.GetTodoItemsByStudentOutput, error) {
-		items, err := todoItemHandler.GetTodoItemsByStudent(ctx)
+		page, err := todoItemHandler.GetTodoItemsByStudent(ctx, input)
 		if err != nil {
 			return nil, err
 		}
 
-		return &models.GetTodoItemsByStudentOutput{Body: items}, nil
+		return &models.GetTodoItemsByStudentOutput{Body: *page}, nil
+	})
+
+	//Register GET /todo-items/search handler
+	huma.Register(api, huma.Operation{
+		OperationID: "search-todo-items",
+		Method:      http.MethodGet,
+		Path:        "/todo-items/search",
+		Description: "Search a student's to-do items by description, with the same filters as listing",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.SearchTodoItemsInput) (*models.SearchTodoItemsOutput, error) {
+		page, err := todoItemHandler.SearchTodoItems(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.SearchTodoItemsOutput{Body: *page}, nil
 	})
 
 	//Register PATCH /todo-items/{id} handler
