@@ -74,7 +74,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     splitAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-User-ID"},
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
@@ -91,7 +91,9 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	humaAPI := humafiber.New(app, humaConfig)
 
 	// Apply auth middleware — only affects routes registered after this point
-	if !config.TestMode {
+	if config.TestMode {
+		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI, config.TestMode))
+	} else {
 		verifier, err := auth.NewVerifier(os.Getenv("SUPABASE_URL"))
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
@@ -113,14 +115,20 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
 	SetUpGreetingRoutes(api, repo)
+	SetUpExtracurricularRoutes(api, repo)
 	SetUpEssayRoutes(api, repo)
+	SetUpEssayGroupRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo)
 	SetUpTodoItemRoutes(api, repo)
 	SetUpPersonalCollegeApplicationRoutes(api, repo)
 	SetupUserRoutes(api, repo, &config)
 	SetUpVideoRoutes(api, repo)
+	SetUpMediaRoutes(api, repo)
+	SetUpMediaAccessRoutes(api, repo)
 	SetUpEssayReviewRoutes(api, repo)
 	SetUpStudentRoutes(api, repo)
+	SetUpChatMessageRoutes(api, repo)
+	SetUpNotificationPreferencesRoutes(api, repo)
 	SetupLoginRoutes(api, repo, &config)
 	SetupLogoutRoutes(api, repo, &config)
 	SetupResetPasswordRoutes(api, repo, &config)
