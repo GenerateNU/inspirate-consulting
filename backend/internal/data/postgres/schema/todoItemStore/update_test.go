@@ -70,9 +70,9 @@ func TestUpdateTodoItemCompletedAt(t *testing.T) {
 	}
 
 	// The change should be visible on a subsequent read.
-	items, err := repo.GetTodoItemsByStudent(ctx, created.StudentID)
+	items, err := repo.ListTodoItems(ctx, models.TodoItemQuery{StudentID: created.StudentID})
 	if err != nil {
-		t.Fatalf("GetTodoItemsByStudent failed: %v", err)
+		t.Fatalf("ListTodoItems failed: %v", err)
 	}
 	if len(items) != 1 {
 		t.Fatalf("expected 1 todo item for student %s, got %d", created.StudentID, len(items))

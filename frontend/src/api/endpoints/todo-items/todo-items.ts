@@ -19,7 +19,10 @@ import type {
 import type {
   CreateTodoItemRequestBody,
   ErrorModel,
+  GetTodoItemsParams,
+  SearchTodoItemsParams,
   TodoItem,
+  TodoItemPage,
   UpdateTodoItemCompletedAtInputBody
 } from '../../models';
 
@@ -63,7 +66,7 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
  export type getTodoItemsResponse200 = {
-  data: TodoItem[] | null
+  data: TodoItemPage
   status: 200
 }
 
@@ -81,20 +84,27 @@ export type getTodoItemsResponseError = (getTodoItemsResponseDefault) & {
 
 export type getTodoItemsResponse = (getTodoItemsResponseSuccess | getTodoItemsResponseError)
 
-export const getGetTodoItemsUrl = () => {
+export const getGetTodoItemsUrl = (params?: GetTodoItemsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `http://127.0.0.1:8080/todo-items`
+  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/todo-items?${stringifiedParams}` : `http://127.0.0.1:8080/todo-items`
 }
 
 /**
- * Get a student's to-do items
+ * Get a student's to-do items, with optional filters, sorting, and cursor pagination
  */
-export const getTodoItems = async ( options?: RequestInit): Promise<getTodoItemsResponse> => {
+export const getTodoItems = async (params?: GetTodoItemsParams, options?: RequestInit): Promise<getTodoItemsResponse> => {
 
-  const res = await fetch(getGetTodoItemsUrl(),
+  const res = await fetch(getGetTodoItemsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -113,18 +123,18 @@ export const getTodoItems = async ( options?: RequestInit): Promise<getTodoItems
 
 
 
-export const getGetTodoItemsKey = () => [`http://127.0.0.1:8080/todo-items`] as const;
+export const getGetTodoItemsKey = (params?: GetTodoItemsParams,) => [`http://127.0.0.1:8080/todo-items`, ...(params ? [params]: [])] as const;
 
 export type GetTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof getTodoItems>>>
 
 export const useGetTodoItems = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getTodoItems>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+  params?: GetTodoItemsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getTodoItems>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
 ) => {
   const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetTodoItemsKey() : null);
-  const swrFn = () => getTodoItems(fetchOptions)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetTodoItemsKey(params) : null);
+  const swrFn = () => getTodoItems(params, fetchOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 
@@ -217,6 +227,84 @@ export const useCreateTodoItem = <TError = Promise<ErrorModel>>(
   const swrFn = getCreateTodoItemMutationFetcher(fetchOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type searchTodoItemsResponse200 = {
+  data: TodoItemPage
+  status: 200
+}
+
+export type searchTodoItemsResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type searchTodoItemsResponseSuccess = (searchTodoItemsResponse200) & {
+  headers: Headers;
+};
+export type searchTodoItemsResponseError = (searchTodoItemsResponseDefault) & {
+  headers: Headers;
+};
+
+export type searchTodoItemsResponse = (searchTodoItemsResponseSuccess | searchTodoItemsResponseError)
+
+export const getSearchTodoItemsUrl = (params: SearchTodoItemsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/todo-items/search?${stringifiedParams}` : `http://127.0.0.1:8080/todo-items/search`
+}
+
+/**
+ * Search a student's to-do items by description, with the same filters as listing
+ */
+export const searchTodoItems = async (params: SearchTodoItemsParams, options?: RequestInit): Promise<searchTodoItemsResponse> => {
+
+  const res = await fetch(getSearchTodoItemsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: searchTodoItemsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as searchTodoItemsResponse
+}
+
+
+
+
+export const getSearchTodoItemsKey = (params: SearchTodoItemsParams,) => [`http://127.0.0.1:8080/todo-items/search`, ...(params ? [params]: [])] as const;
+
+export type SearchTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof searchTodoItems>>>
+
+export const useSearchTodoItems = <TError = Promise<ErrorModel>>(
+  params: SearchTodoItemsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof searchTodoItems>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+) => {
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getSearchTodoItemsKey(params) : null);
+  const swrFn = () => searchTodoItems(params, fetchOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 
   return {
     swrKey,

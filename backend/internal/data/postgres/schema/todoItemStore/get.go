@@ -2,34 +2,59 @@ package todoItemRepository
 
 import (
 	"context"
-	"errors"
+	"strings"
+	"time"
 
 	"inspirate-consulting/internal/data/postgres/schema"
-	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *TodoItemRepository) GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error) {
-	selectQuery, err := schema.ReadSQLBaseScript("list_todo_items_by_student.sql", SqlTodoItemFiles)
+var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+
+func (r *TodoItemRepository) ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error) {
+	selectQuery, err := schema.ReadSQLBaseScript("list_todo_items.sql", SqlTodoItemFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.Query(ctx, selectQuery, studentID)
+	query.ApplyDefaults()
+
+	// Escape LIKE wildcards so the search term matches literally
+	var search *string
+	if query.Search != nil {
+		escaped := likeEscaper.Replace(*query.Search)
+		search = &escaped
+	}
+
+	var afterValue *time.Time
+	var afterID *string
+	if query.After != nil {
+		afterValue, afterID = &query.After.SortValue, &query.After.ID
+	}
+
+	rows, err := r.db.Query(
+		ctx,
+		selectQuery,
+		query.StudentID,
+		query.Status,
+		query.EssayID,
+		query.MediaID,
+		query.GlobalCollegeID,
+		query.LinkedTo,
+		search,
+		query.SortBy,
+		query.SortOrder,
+		query.NullSortValue(),
+		afterValue,
+		afterID,
+		query.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	items, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.TodoItem])
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errs.NotFound("todo_item", "student_id", studentID)
-		}
-		return nil, err
-	}
-
-	return items, nil
+	return pgx.CollectRows(rows, pgx.RowToStructByPos[models.TodoItem])
 }

@@ -360,6 +360,18 @@ components:
         deadline:
           format: date-time
           type: string
+        essay_id:
+          description: Essay this task is for; at most one of essay_id, media_id, global_college_id
+          format: uuid
+          type: string
+        global_college_id:
+          description: College this task is for; at most one of essay_id, media_id, global_college_id
+          format: int64
+          type: integer
+        media_id:
+          description: Media this task is for; at most one of essay_id, media_id, global_college_id
+          format: uuid
+          type: string
         student_id:
           type: string
         todo_description:
@@ -1188,8 +1200,21 @@ components:
           type:
             - string
             - "null"
+        essay_id:
+          type:
+            - string
+            - "null"
+        global_college_id:
+          format: int64
+          type:
+            - integer
+            - "null"
         id:
           type: string
+        media_id:
+          type:
+            - string
+            - "null"
         student_id:
           type: string
         todo_description:
@@ -1208,6 +1233,34 @@ components:
         - todo_description
         - completed_at
         - deadline
+        - essay_id
+        - media_id
+        - global_college_id
+      type: object
+    TodoItemPage:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/TodoItemPage.json
+          format: uri
+          readOnly: true
+          type: string
+        items:
+          items:
+            $ref: "#/components/schemas/TodoItem"
+          type:
+            - array
+            - "null"
+        next_cursor:
+          description: Pass as cursor to get the next page; null when there are none
+          type:
+            - string
+            - "null"
+      required:
+        - items
+        - next_cursor
       type: object
     UpdateChatMessageReadInputBody:
       additionalProperties: false
@@ -2393,18 +2446,112 @@ paths:
         - Essays
   /todo-items:
     get:
-      description: Get a student's to-do items
+      description: Get a student's to-do items, with optional filters, sorting, and cursor pagination
       operationId: get-todo-items
+      parameters:
+        - description: Student whose to-do items to return; defaults to the authenticated student
+          explode: false
+          in: query
+          name: student_id
+          schema:
+            description: Student whose to-do items to return; defaults to the authenticated student
+            format: uuid
+            type: string
+        - description: Filter by completion status
+          explode: false
+          in: query
+          name: status
+          schema:
+            default: all
+            description: Filter by completion status
+            enum:
+              - all
+              - completed
+              - incomplete
+            type: string
+        - description: Only return items linked to this essay
+          explode: false
+          in: query
+          name: essay_id
+          schema:
+            description: Only return items linked to this essay
+            format: uuid
+            type: string
+        - description: Only return items linked to this media
+          explode: false
+          in: query
+          name: media_id
+          schema:
+            description: Only return items linked to this media
+            format: uuid
+            type: string
+        - description: Only return items linked to this college
+          explode: false
+          in: query
+          name: global_college_id
+          schema:
+            description: Only return items linked to this college
+            format: int64
+            type: integer
+        - description: Only return items linked to any item of this type
+          explode: false
+          in: query
+          name: linked_to
+          schema:
+            description: Only return items linked to any item of this type
+            enum:
+              - essay
+              - media
+              - college
+            type: string
+        - description: Field to sort by
+          explode: false
+          in: query
+          name: sort_by
+          schema:
+            default: created_at
+            description: Field to sort by
+            enum:
+              - created_at
+              - deadline
+              - completed_at
+              - updated_at
+            type: string
+        - description: Sort direction
+          explode: false
+          in: query
+          name: sort_order
+          schema:
+            default: desc
+            description: Sort direction
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: next_cursor from the previous page; omit to get the first page
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: next_cursor from the previous page; omit to get the first page
+            type: string
+        - description: Maximum number of to-do items to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 20
+            description: Maximum number of to-do items to return
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
       responses:
         "200":
           content:
             application/json:
               schema:
-                items:
-                  $ref: "#/components/schemas/TodoItem"
-                type:
-                  - array
-                  - "null"
+                $ref: "#/components/schemas/TodoItemPage"
           description: OK
         default:
           content:
@@ -2429,6 +2576,133 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/search:
+    get:
+      description: Search a student's to-do items by description, with the same filters as listing
+      operationId: search-todo-items
+      parameters:
+        - description: Student whose to-do items to return; defaults to the authenticated student
+          explode: false
+          in: query
+          name: student_id
+          schema:
+            description: Student whose to-do items to return; defaults to the authenticated student
+            format: uuid
+            type: string
+        - description: Filter by completion status
+          explode: false
+          in: query
+          name: status
+          schema:
+            default: all
+            description: Filter by completion status
+            enum:
+              - all
+              - completed
+              - incomplete
+            type: string
+        - description: Only return items linked to this essay
+          explode: false
+          in: query
+          name: essay_id
+          schema:
+            description: Only return items linked to this essay
+            format: uuid
+            type: string
+        - description: Only return items linked to this media
+          explode: false
+          in: query
+          name: media_id
+          schema:
+            description: Only return items linked to this media
+            format: uuid
+            type: string
+        - description: Only return items linked to this college
+          explode: false
+          in: query
+          name: global_college_id
+          schema:
+            description: Only return items linked to this college
+            format: int64
+            type: integer
+        - description: Only return items linked to any item of this type
+          explode: false
+          in: query
+          name: linked_to
+          schema:
+            description: Only return items linked to any item of this type
+            enum:
+              - essay
+              - media
+              - college
+            type: string
+        - description: Field to sort by
+          explode: false
+          in: query
+          name: sort_by
+          schema:
+            default: created_at
+            description: Field to sort by
+            enum:
+              - created_at
+              - deadline
+              - completed_at
+              - updated_at
+            type: string
+        - description: Sort direction
+          explode: false
+          in: query
+          name: sort_order
+          schema:
+            default: desc
+            description: Sort direction
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Text to search for in to-do descriptions
+          explode: false
+          in: query
+          name: q
+          required: true
+          schema:
+            description: Text to search for in to-do descriptions
+            maxLength: 200
+            minLength: 1
+            type: string
+        - description: next_cursor from the previous page; omit to get the first page
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: next_cursor from the previous page; omit to get the first page
+            type: string
+        - description: Maximum number of to-do items to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 10
+            description: Maximum number of to-do items to return
+            format: int64
+            maximum: 50
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItemPage"
           description: OK
         default:
           content:
