@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-
 func createTestUser(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 	t.Helper()
 

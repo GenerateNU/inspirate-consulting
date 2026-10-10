@@ -21,19 +21,19 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 	edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	input := models.CreateGlobalCollegeRequestBody{
-		SchoolName: "Northeastern University",
+		SchoolName:     "Northeastern University",
 		SchoolLocation: "Boston, MA",
-		EDDeadline: &edDeadline,
+		EDDeadline:     &edDeadline,
 	}
 
 	createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	expectedEntity := &models.GlobalCollege{
-		ID: 1,
-		CreatedAt: createdAt,
-		UpdatedAt: createdAt,
-		SchoolName: "Northeastern University",
+		ID:             1,
+		CreatedAt:      createdAt,
+		UpdatedAt:      createdAt,
+		SchoolName:     "Northeastern University",
 		SchoolLocation: "Boston, MA",
-		EDDeadline: &edDeadline,
+		EDDeadline:     &edDeadline,
 	}
 
 	t.Run("success", func(t *testing.T) {

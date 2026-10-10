@@ -25,10 +25,10 @@ func TestHandler_GetGlobalCollege(t *testing.T) {
 
 		createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 		expectedEntity := &models.GlobalCollege{
-			ID: 1,
-			CreatedAt: createdAt,
-			UpdatedAt: createdAt,
-			SchoolName: "Northeastern University",
+			ID:             1,
+			CreatedAt:      createdAt,
+			UpdatedAt:      createdAt,
+			SchoolName:     "Northeastern University",
 			SchoolLocation: "Boston, MA",
 		}
 

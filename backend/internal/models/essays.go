@@ -12,11 +12,11 @@ const (
 )
 
 type Essays struct {
-	ID uuid.UUID `json:"id"`
-	StudentID uuid.UUID `json:"student_id"`
-	Type string `json:"type"`
-	CollegeID *int64 `json:"college_id"`
-	LinkToContent string `json:"link_to_content"`
+	ID            uuid.UUID `json:"id"`
+	StudentID     uuid.UUID `json:"student_id"`
+	Type          string    `json:"type"`
+	CollegeID     *int64    `json:"college_id"`
+	LinkToContent string    `json:"link_to_content"`
 	/* I added this to help the studetns keep track of their progress*/
 	Status       Status     `json:"status"`
 	EssayGroupID *uuid.UUID `json:"essay_group_id" required:"false"`

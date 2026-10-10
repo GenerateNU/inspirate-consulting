@@ -33,22 +33,22 @@ func TestListGlobalColleges(t *testing.T) {
 
 	inputs := []models.CreateGlobalCollegeRequestBody{
 		{
-			SchoolName: "Alpha University",
+			SchoolName:     "Alpha University",
 			SchoolLocation: "Alpha City, AA",
-			EADeadline: &eaDeadline,
+			EADeadline:     &eaDeadline,
 		},
 		{
-			SchoolName: "Beta College",
+			SchoolName:     "Beta College",
 			SchoolLocation: "Beta Town, BB",
-			EDDeadline: &edDeadline,
+			EDDeadline:     &edDeadline,
 		},
 		{
-			SchoolName: "Gamma Institute",
+			SchoolName:     "Gamma Institute",
 			SchoolLocation: "Gamma Village, CC",
-			RDDeadline: &rdDeadline,
+			RDDeadline:     &rdDeadline,
 		},
 		{
-			SchoolName: "Delta State",
+			SchoolName:     "Delta State",
 			SchoolLocation: "Delta City, DD",
 		},
 	}

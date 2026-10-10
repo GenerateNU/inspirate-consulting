@@ -22,7 +22,7 @@ func TestHandler_GetVideo(t *testing.T) {
 		t.Parallel()
 
 		expected := &models.Video{
-			S3Key: s3Key,
+			S3Key:       s3Key,
 			DownloadURL: "https://bucket.s3.amazonaws.com/videos/uuid-common-app-tips.mp4?X-Amz-...",
 		}
 
