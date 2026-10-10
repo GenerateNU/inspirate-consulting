@@ -17,8 +17,6 @@ export interface CreateUserInputBody {
      * @maxLength 200
      */
   name: string;
-  /** password of user for supabase signup */
-  password: string;
   /**
      * pfp key of user
      * @nullable

@@ -369,6 +369,24 @@ components:
       required:
         - todo_description
       type: object
+    CreateUserBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateUserBody.json
+          format: uri
+          readOnly: true
+          type: string
+        temp_password:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - user
+        - temp_password
+      type: object
     CreateUserInputBody:
       additionalProperties: false
       properties:
@@ -387,9 +405,6 @@ components:
           maxLength: 200
           minLength: 1
           type: string
-        password:
-          description: password of user for supabase signup
-          type: string
         pfp_key:
           description: pfp key of user
           type:
@@ -399,7 +414,6 @@ components:
         - name
         - pfp_key
         - email
-        - password
       type: object
     EditChatMessageRequestBody:
       additionalProperties: false
@@ -881,6 +895,60 @@ components:
       required:
         - name
       type: object
+    LoginInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/LoginInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+      type: object
+    LoginResponse:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/LoginResponse.json
+          format: uri
+          readOnly: true
+          type: string
+        access_token:
+          type: string
+        error: {}
+        expires_in:
+          format: int64
+          type: integer
+        refresh_token:
+          type: string
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        token_type:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserResponse"
+      required:
+        - access_token
+        - token_type
+        - expires_in
+        - refresh_token
+        - user
+        - error
+        - reset_time
+      type: object
     Media:
       additionalProperties: false
       properties:
@@ -1107,6 +1175,21 @@ components:
         - student_id
         - essay_id
         - amount
+      type: object
+    ResetPasswordInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ResetPasswordInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        new_password:
+          type: string
+      required:
+        - new_password
       type: object
     SetStudentReviewBalanceRequestBody:
       additionalProperties: false
@@ -1358,9 +1441,12 @@ components:
           type: string
         name:
           type: string
-        needs_to_reset:
-          type: boolean
         pfp_key:
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
           type:
             - string
             - "null"
@@ -1371,7 +1457,15 @@ components:
         - name
         - supabase_id
         - pfp_key
-        - needs_to_reset
+        - reset_time
+      type: object
+    UserResponse:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+      required:
+        - id
       type: object
     Video:
       additionalProperties: false
@@ -2484,7 +2578,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/CreateUserBody"
           description: OK
         default:
           content:
@@ -2494,6 +2588,71 @@ paths:
           description: Error
       tags:
         - User
+  /user/login:
+    post:
+      description: user login
+      operationId: login-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Login
+  /user/logout:
+    post:
+      description: user logout
+      operationId: logout-user
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Logout
+  /user/reset-password:
+    patch:
+      description: reset user password
+      operationId: reset-user-password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordInputBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ResetPass
   /user/{id}:
     get:
       description: fetch a user (student/counselor)
@@ -2519,6 +2678,27 @@ paths:
           description: Error
       tags:
         - User
+  /user/{supabase_id}/force-password-reset:
+    post:
+      description: Force a user to reset their password on next login
+      operationId: force-password-reset
+      parameters:
+        - in: path
+          name: supabase_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ResetPass
   /videos:
     get:
       description: List all videos in the S3 bucket.

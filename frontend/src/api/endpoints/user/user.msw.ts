@@ -14,6 +14,7 @@ import type {
 } from 'msw';
 
 import type {
+  CreateUserBody,
   User
 } from '../../models';
 
@@ -25,7 +26,7 @@ import {
 export { getCreateUserResponseMock, getFetchUserResponseMock } from './user.faker';
 
 
-export const getCreateUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
+export const getCreateUserMockHandler = (overrideResponse?: CreateUserBody | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CreateUserBody> | CreateUserBody), options?: RequestHandlerOptions) => {
   return http.post('*/user', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 

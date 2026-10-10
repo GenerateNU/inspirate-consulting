@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
@@ -77,7 +78,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
-	// Create Huma API with OpenAPI configuration
+
 	humaConfig := huma.DefaultConfig("Inspirate Consulting API", "1.0.0")
 	humaConfig.Info.Description = "API for the Inspirate Consulting application"
 	humaConfig.Info.Contact = &huma.Contact{
@@ -89,25 +90,21 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 	humaAPI := humafiber.New(app, humaConfig)
 
-	// Register public routes BEFORE auth middleware
-	// routes.SetupAuthRoutes(humaAPI, repo, config)
-
 	// Apply auth middleware — only affects routes registered after this point
 	if config.TestMode {
 		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI, config.TestMode))
 	} else {
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
+		verifier, err := auth.NewVerifier(os.Getenv("SUPABASE_URL"))
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
+		}
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, verifier, config.Supabase))
 	}
 
-	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
-	// setupDocsRoutes(app, "/app/api")
-
-	// Root route
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
-	// Register protected Huma endpoints
 	if err := setupProtectedHumaRoutes(humaAPI, repo, config); err != nil {
 		return nil, nil, err
 	}
@@ -117,7 +114,6 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
-	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo)
 	SetUpExtracurricularRoutes(api, repo)
 	SetUpEssayRoutes(api, repo)
@@ -133,5 +129,8 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config
 	SetUpStudentRoutes(api, repo)
 	SetUpChatMessageRoutes(api, repo)
 	SetUpNotificationPreferencesRoutes(api, repo)
+	SetupLoginRoutes(api, repo, &config)
+	SetupLogoutRoutes(api, repo, &config)
+	SetupResetPasswordRoutes(api, repo, &config)
 	return nil
 }
