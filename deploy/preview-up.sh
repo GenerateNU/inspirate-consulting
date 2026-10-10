@@ -64,4 +64,17 @@ docker run -d \
   --label "caddy.reverse_proxy={{upstreams 8080}}" \
   "$BACKEND_IMAGE" >/dev/null
 
+# `docker run -d` succeeds as soon as the container is created, so without this
+# a backend that exits on a missing env var would report a healthy preview.
+echo "    waiting for the container to stay up"
+for _ in $(seq 1 15); do
+  sleep 2
+  if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER" 2>/dev/null)" = "true" ]; then
+    continue
+  fi
+  echo "::error::${CONTAINER} exited instead of starting. Last lines:" >&2
+  docker logs --tail 30 "$CONTAINER" >&2 2>&1 || true
+  exit 1
+done
+
 echo "==> https://${HOST}"
