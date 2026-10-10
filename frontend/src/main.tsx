@@ -22,6 +22,7 @@ import UploadMedia from './media/upload-media'
 import StudentMediaList from './media/student-media-list'
 import CounselorMediaList from './media/counselor-media-list'
 import UpdateNotificationPreferences from './notifications/update-notification-preferences'
+import CreateUser from "./user/create-user";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -51,6 +52,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/student-media-list" element={<StudentMediaList />}/>
           <Route path="/counselor-media-list" element={<CounselorMediaList />}/>
            <Route path="/update-notification-preferences" element={<UpdateNotificationPreferences />}/>
+          <Route path="/create-account" element={<CreateUser />} />
         </Route>
       </Routes>
     </BrowserRouter>
