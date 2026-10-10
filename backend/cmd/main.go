@@ -4,6 +4,7 @@ import (
 	"context"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/routes"
+	"inspirate-consulting/internal/supabase"
 
 	"log"
 	"log/slog"
@@ -70,7 +71,7 @@ func LoadConfig() (*config.Config, error) {
 	type envConf struct {
 		Application config.Application
 		DB          config.DB
-		Supabase    config.Supabase
+		Supabase    supabase.Supabase
 		S3          config.S3
 	}
 	var env envConf

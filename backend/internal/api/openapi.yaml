@@ -1,5 +1,134 @@
 components:
   schemas:
+    ChatMessage:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ChatMessage.json
+          format: uri
+          readOnly: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        edited_at:
+          description: Null if the message was never edited
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        message:
+          type: string
+        read_at:
+          description: Null if the recipient has not read the message
+          format: date-time
+          type:
+            - string
+            - "null"
+        recipient_id:
+          type: string
+        sender_id:
+          type: string
+      required:
+        - id
+        - sender_id
+        - recipient_id
+        - message
+        - created_at
+        - edited_at
+        - read_at
+      type: object
+    ChatMessagePage:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ChatMessagePage.json
+          format: uri
+          readOnly: true
+          type: string
+        messages:
+          description: Newest first
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+          type:
+            - array
+            - "null"
+        next_cursor:
+          description: Pass as cursor to get older messages; null when there are none
+          type:
+            - string
+            - "null"
+      required:
+        - messages
+        - next_cursor
+      type: object
+    ChatSummary:
+      additionalProperties: false
+      properties:
+        last_message:
+          type: string
+        last_message_at:
+          format: date-time
+          type: string
+        last_message_id:
+          type: string
+        last_message_read_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        last_sender_id:
+          type: string
+        other_user_id:
+          type: string
+        other_user_name:
+          type: string
+        other_user_pfp_key:
+          type:
+            - string
+            - "null"
+        unread_count:
+          description: Messages from the other user the current user has not read
+          format: int64
+          type: integer
+      required:
+        - other_user_id
+        - other_user_name
+        - other_user_pfp_key
+        - last_message_id
+        - last_message
+        - last_sender_id
+        - last_message_at
+        - last_message_read_at
+        - unread_count
+      type: object
+    CreateChatMessageRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateChatMessageRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        message:
+          description: Message text
+          minLength: 1
+          type: string
+        recipient_id:
+          description: User ID of the message recipient
+          type: string
+      required:
+        - recipient_id
+        - message
+      type: object
     CreateEssayBody:
       additionalProperties: false
       properties:
@@ -36,6 +165,78 @@ components:
         - student_id
         - type
         - link_to_content
+      type: object
+    CreateEssayGroupBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateEssayGroupBody.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          description: Optional description of the group
+          type:
+            - string
+            - "null"
+        name:
+          description: Unique name for the group
+          examples:
+            - Common App
+          maxLength: 100
+          minLength: 1
+          type: string
+        student_id:
+          description: Student the group belongs to
+          type: string
+      required:
+        - name
+        - student_id
+      type: object
+    CreateExtracurricularRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateExtracurricularRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date
+          type: string
+        leadership_role:
+          type: string
+        name:
+          minLength: 1
+          type: string
+        organization:
+          type: string
+        start_date:
+          format: date
+          type: string
+        status:
+          enum:
+            - doing
+            - have_done
+          type: string
+        type:
+          enum:
+            - maintenance
+            - investment
+          type: string
+      required:
+        - name
+        - status
+        - type
+        - description
+        - start_date
+        - organization
       type: object
     CreateGlobalCollegeRequestBody:
       additionalProperties: false
@@ -78,6 +279,37 @@ components:
       required:
         - school_name
         - school_location
+      type: object
+    CreateMediaRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateMediaRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        length_in_mins:
+          format: int64
+          type: integer
+        s3_key:
+          type: string
+        school_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        title:
+          type: string
+      required:
+        - title
+        - description
+        - length_in_mins
+        - school_year
+        - s3_key
       type: object
     CreatePersonalCollegeApplicationRequestBody:
       additionalProperties: false
@@ -169,6 +401,23 @@ components:
         - email
         - password
       type: object
+    EditChatMessageRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EditChatMessageRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        message:
+          description: New message text
+          minLength: 1
+          type: string
+      required:
+        - message
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -227,6 +476,65 @@ components:
             - https://example.com/errors/example
           format: uri
           type: string
+      type: object
+    EssayBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay:
+          $ref: "#/components/schemas/Essays"
+      required:
+        - essay
+      type: object
+    EssayGroupListBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayGroupListBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay_groups:
+          items:
+            $ref: "#/components/schemas/EssayGroups"
+          type:
+            - array
+            - "null"
+      required:
+        - essay_groups
+      type: object
+    EssayGroups:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/EssayGroups.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        student_id:
+          type: string
+      required:
+        - id
+        - name
+        - student_id
       type: object
     EssayListBody:
       additionalProperties: false
@@ -400,7 +708,60 @@ components:
         - college_id
         - link_to_content
         - status
-        - essay_group_id
+      type: object
+    Extracurricular:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Extracurricular.json
+          format: uri
+          readOnly: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date-time
+          type: string
+        id:
+          format: int64
+          type: integer
+        leadership_role:
+          type: string
+        modified_at:
+          format: date-time
+          type: string
+        name:
+          type: string
+        organization:
+          type: string
+        start_date:
+          format: date-time
+          type: string
+        status:
+          type: string
+        student_id:
+          type: string
+        type:
+          type: string
+        user_id:
+          type: string
+      required:
+        - id
+        - created_at
+        - modified_at
+        - student_id
+        - user_id
+        - name
+        - status
+        - type
+        - description
+        - start_date
+        - organization
       type: object
     GlobalCollege:
       additionalProperties: false
@@ -465,6 +826,24 @@ components:
         - school_name
         - school_location
       type: object
+    GrantMediaAccessRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/GrantMediaAccessRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        media_id:
+          type: string
+        student_id:
+          type: string
+      required:
+        - student_id
+        - media_id
+      type: object
     GreetingMessageBody:
       additionalProperties: false
       properties:
@@ -501,6 +880,98 @@ components:
           type: string
       required:
         - name
+      type: object
+    Media:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Media.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        length_in_mins:
+          format: int64
+          type: integer
+        s3_key:
+          type: string
+        school_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - length_in_mins
+        - school_year
+        - s3_key
+      type: object
+    MediaAccess:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/MediaAccess.json
+          format: uri
+          readOnly: true
+          type: string
+        id:
+          type: string
+        media_id:
+          type: string
+        student_id:
+          type: string
+      required:
+        - id
+        - student_id
+        - media_id
+      type: object
+    NotificationPreferences:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/NotificationPreferences.json
+          format: uri
+          readOnly: true
+          type: string
+        days_before_due:
+          description: Number of days before the due date to send notifications
+          format: int64
+          type: integer
+        due_date_notifications_enabled:
+          description: Whether the user wants to receive due date notifications
+          type: boolean
+        email_enabled:
+          description: Whether the user wants to receive email notifications
+          type: boolean
+        notify_past_due:
+          description: Whether the user wants to receive notifications for past due dates
+          type: boolean
+        user_id:
+          description: ID of the user who owns this notification preference
+          type: string
+        weekly_summary_enabled:
+          description: Whether the user wants to receive weekly summary notifications
+          type: boolean
+      required:
+        - user_id
+        - email_enabled
+        - weekly_summary_enabled
+        - due_date_notifications_enabled
+        - days_before_due
+        - notify_past_due
       type: object
     PersonalCollegeApplication:
       additionalProperties: false
@@ -738,6 +1209,105 @@ components:
         - completed_at
         - deadline
       type: object
+    UpdateChatMessageReadInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateChatMessageReadInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        read:
+          description: False marks the message as unread
+          type: boolean
+      required:
+        - read
+      type: object
+    UpdateEssayGroupBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateEssayGroupBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay_group_id:
+          description: Group to move the essay into, or null to remove it from its group
+          type: string
+      type: object
+    UpdateExtracurricularRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateExtracurricularRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date
+          type: string
+        leadership_role:
+          type: string
+        name:
+          minLength: 1
+          type: string
+        organization:
+          type: string
+        start_date:
+          format: date
+          type: string
+        status:
+          enum:
+            - doing
+            - have_done
+          type: string
+        type:
+          enum:
+            - maintenance
+            - investment
+          type: string
+      type: object
+    UpdateNotificationPreferencesRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateNotificationPreferencesRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        days_before_due:
+          description: Number of days before the due date to send notifications
+          format: int64
+          type: integer
+        due_date_notifications_enabled:
+          description: Whether the user wants to receive due date notifications
+          type: boolean
+        email_enabled:
+          description: Whether the user wants to receive email notifications
+          type: boolean
+        notify_past_due:
+          description: Whether the user wants to receive notifications for past due dates
+          type: boolean
+        weekly_summary_enabled:
+          description: Whether the user wants to receive weekly summary notifications
+          type: boolean
+      required:
+        - email_enabled
+        - weekly_summary_enabled
+        - due_date_notifications_enabled
+        - days_before_due
+        - notify_past_due
+      type: object
     UpdateStatusBody:
       additionalProperties: false
       properties:
@@ -788,6 +1358,8 @@ components:
           type: string
         name:
           type: string
+        needs_to_reset:
+          type: boolean
         pfp_key:
           type:
             - string
@@ -799,6 +1371,7 @@ components:
         - name
         - supabase_id
         - pfp_key
+        - needs_to_reset
       type: object
     Video:
       additionalProperties: false
@@ -875,6 +1448,95 @@ paths:
           description: Error
       tags:
         - Personal College Applications
+  /chats:
+    get:
+      description: List the current user's conversations with their latest message and unread count, most recent first.
+      operationId: list-chats
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ChatSummary"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /chats/{user_id}/messages:
+    get:
+      description: Get a page of messages between the current user and another user, newest first.
+      operationId: list-chat-messages
+      parameters:
+        - description: The other user in the conversation
+          in: path
+          name: user_id
+          required: true
+          schema:
+            description: The other user in the conversation
+            type: string
+        - description: next_cursor from the previous page; omit to get the newest messages
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: next_cursor from the previous page; omit to get the newest messages
+            type: string
+        - explode: false
+          in: query
+          name: limit
+          schema:
+            default: 50
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagePage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /chats/{user_id}/read:
+    post:
+      description: Mark every message the other user sent to the current user as read.
+      operationId: mark-chat-read
+      parameters:
+        - description: The other user in the conversation
+          in: path
+          name: user_id
+          required: true
+          schema:
+            description: The other user in the conversation
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
   /colleges:
     get:
       description: List all global colleges.
@@ -948,6 +1610,58 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /essay-groups:
+    post:
+      description: Creates an essay group for a student
+      operationId: create-essay-group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEssayGroupBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayGroups"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Groups
+  /essay-groups/{essay_group_id}/essays:
+    get:
+      description: Shows all essays belonging to an essay group
+      operationId: get-essays-by-group
+      parameters:
+        - description: Group whose essays to list
+          in: path
+          name: essay_group_id
+          required: true
+          schema:
+            description: Group whose essays to list
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayListBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /essays:
     post:
       description: Creates an essay with the logged in student
@@ -961,6 +1675,39 @@ paths:
       responses:
         "204":
           description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
+  /essays/{essay_id}/group:
+    patch:
+      description: Adds an essay to a group, moves it to another group, or removes it from its group
+      operationId: update-essay-group
+      parameters:
+        - description: Essay to move
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: Essay to move
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEssayGroupBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayBody"
+          description: OK
         default:
           content:
             application/problem+json:
@@ -1015,12 +1762,12 @@ paths:
               $ref: "#/components/schemas/UpdateStatusBody"
         required: true
       responses:
-        "204":
-          description: No Content
-          headers:
-            Essay:
+        "200":
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/Essays"
+                $ref: "#/components/schemas/EssayBody"
+          description: OK
         default:
           content:
             application/problem+json:
@@ -1029,6 +1776,96 @@ paths:
           description: Error
       tags:
         - Essays
+  /extracurriculars:
+    get:
+      description: List extracurriculars for the authenticated student.
+      operationId: list-extracurriculars
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Extracurricular"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}:
+    patch:
+      description: Update fields on an extracurricular for the authenticated student.
+      operationId: update-extracurricular
+      parameters:
+        - description: ID of the extracurricular to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular to update
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtracurricularRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{studentID}:
+    post:
+      description: Create a new extracurricular for the given student.
+      operationId: create-extracurricular
+      parameters:
+        - description: ID of the student the extracurricular belongs to
+          in: path
+          name: studentID
+          required: true
+          schema:
+            description: ID of the student the extracurricular belongs to
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtracurricularRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
   /greeting:
     post:
       description: Create a greeting for a person by name.
@@ -1054,6 +1891,340 @@ paths:
           description: Error
       tags:
         - Greetings
+  /media:
+    get:
+      description: Fetch all videos, through counselor view
+      operationId: list-media
+      parameters:
+        - description: Maximum number of media to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 20
+            description: Maximum number of media to return
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: Number of media to skip before returning results
+          explode: false
+          in: query
+          name: offset
+          schema:
+            default: 0
+            description: Number of media to skip before returning results
+            format: int64
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Media"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+    post:
+      description: Create a media/video
+      operationId: create-media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMediaRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+  /media-access:
+    get:
+      description: Allow students to fetch only videos they have access to
+      operationId: get-media-access
+      parameters:
+        - description: Maximum number of media to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 20
+            description: Maximum number of media to return
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: Number of media to skip before returning results
+          explode: false
+          in: query
+          name: offset
+          schema:
+            default: 0
+            description: Number of media to skip before returning results
+            format: int64
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Media"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
+    post:
+      description: Allow a counselor to give a student access to a video
+      operationId: create-media-access
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrantMediaAccessRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAccess"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
+  /media-access/{id}:
+    delete:
+      description: Allow a counselor to revoke a student access to a video
+      operationId: delete-media-access
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
+  /media/{id}:
+    delete:
+      description: Delete a video, through counselor view
+      operationId: delete-media
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+    get:
+      description: Get a media/video
+      operationId: get-media
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+  /messages:
+    post:
+      description: Send a message from the current user to another user.
+      operationId: create-chat-message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatMessageRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /messages/{id}:
+    patch:
+      description: Edit the text of a message the current user sent.
+      operationId: edit-chat-message
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditChatMessageRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /messages/{id}/read:
+    patch:
+      description: Mark a message the current user received as read or unread.
+      operationId: update-chat-message-read
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChatMessageReadInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Chat
+  /notification-preferences:
+    get:
+      description: Get notification preferences for the authenticated user.
+      operationId: get-notification-preferences
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User Notification Preferences
+    put:
+      description: Update notification preferences for the authenticated user.
+      operationId: update-notification-preferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNotificationPreferencesRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User Notification Preferences
   /reviews:
     post:
       description: Spend a student's review balance to open a review on an essay.
@@ -1166,6 +2337,33 @@ paths:
           description: Error
       tags:
         - Students
+  /students/{student_id}/essay-groups:
+    get:
+      description: Shows all essay groups of a student
+      operationId: get-essay-groups-from-student
+      parameters:
+        - description: Student whose essay groups to list
+          in: path
+          name: student_id
+          required: true
+          schema:
+            description: Student whose essay groups to list
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayGroupListBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essay Groups
   /students/{student_id}/essays:
     get:
       description: Shows all essays of a student

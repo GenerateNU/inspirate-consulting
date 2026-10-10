@@ -15,10 +15,11 @@ const (
 )
 
 type User struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	SupabaseID uuid.UUID `json:"supabase_id"`
-	PfpKey     *string   `json:"pfp_key"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	SupabaseID   uuid.UUID `json:"supabase_id"`
+	PfpKey       *string   `json:"pfp_key"`
+	NeedsToReset bool      `json:"needs_to_reset"`
 }
 
 // I represented year under the assumption that we're following the american high school timeline

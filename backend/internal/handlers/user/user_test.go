@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"inspirate-consulting/internal/config"
+	"inspirate-consulting/internal/supabase"
 	"inspirate-consulting/internal/models"
 )
 
@@ -50,7 +50,7 @@ func TestHandler_CreateUser(t *testing.T) {
 			Return(nil, errors.New("database error"))
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.CreateUser(context.Background(), input, &config.MockSupabase{})
+		res, err := handler.CreateUser(context.Background(), input, &supabase.MockSupabase{})
 
 		assert.Error(t, err)
 		assert.Nil(t, res)

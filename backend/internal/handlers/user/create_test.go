@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"errors"
-	"inspirate-consulting/internal/config"
+	"inspirate-consulting/internal/supabase"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 	"testing"
@@ -45,7 +45,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		mockRepo.On("CreateUser", mock.Anything, input).Return(&expectedOutput, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.CreateUser(ctx, &input, &config.MockSupabase{})
+		res, err := handler.CreateUser(ctx, &input, &supabase.MockSupabase{})
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedUser, *res.Body)
@@ -59,7 +59,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 			Return(nil, errors.New("user already exists"))
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.CreateUser(ctx, &input, &config.MockSupabase{})
+		res, err := handler.CreateUser(ctx, &input, &supabase.MockSupabase{})
 
 		assert.Error(t, err)
 		assert.Nil(t, res)

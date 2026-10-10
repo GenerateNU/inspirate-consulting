@@ -7,6 +7,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/supabase"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 	"io"
@@ -21,7 +22,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func setupTestAppWithUser(mockUser data.UserRepository, supabase config.SupabaseInterface) (*fiber.App, error) {
+func setupTestAppWithUser(mockUser data.UserRepository, supabase supabase.SupabaseInterface) (*fiber.App, error) {
 	cfg := config.Config{
 		TestMode: true,
 		Supabase: supabase,
@@ -62,7 +63,7 @@ func TestRoute_CreateUser(t *testing.T) {
 			Body: &userTest,
 		}, nil)
 
-		app, err := setupTestAppWithUser(mockRepo, &config.MockSupabase{})
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
 		println(app)
 		require.NoError(t, err)
 
@@ -107,7 +108,7 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		mockRepo := mocks.NewUserRepository(t)
 
-		app, err := setupTestAppWithUser(mockRepo, &config.MockSupabase{})
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
 		require.NoError(t, err)
 
 		payload := map[string]any{
@@ -150,7 +151,7 @@ func TestRoute_FetchUser(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		input := models.FetchUserInput{ID: test_uuid}
 		mockRepo.On("FetchUser", mock.Anything, input).Return(&models.FetchUserOutput{Body: &userTest}, nil)
-		app, err := setupTestAppWithUser(mockRepo, &config.MockSupabase{})
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
 		require.NoError(t, err)
 
 		req, err := http.NewRequest(http.MethodGet, "/user/"+test_uuid.String(), nil)
@@ -181,7 +182,7 @@ func TestRoute_FetchUser(t *testing.T) {
 		mockRepo.On("FetchUser", mock.Anything, input).
 			Return(nil, errs.NotFound("user", "user id", test_uuid.String()))
 
-		app, err := setupTestAppWithUser(mockRepo, &config.MockSupabase{})
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
 		println(app)
 		require.NoError(t, err)
 
