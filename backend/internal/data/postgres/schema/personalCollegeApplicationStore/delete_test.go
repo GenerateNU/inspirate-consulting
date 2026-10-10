@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"inspirate-consulting/internal/models"
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
+	"inspirate-consulting/internal/models"
 )
 
 func TestDeletePersonalCollegeApplication(t *testing.T) {
@@ -21,7 +21,7 @@ func TestDeletePersonalCollegeApplication(t *testing.T) {
 	created, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
@@ -70,7 +70,7 @@ func TestDeletePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	created, err := repo.CreatePersonalCollegeApplication(ctx, ownerStudentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)

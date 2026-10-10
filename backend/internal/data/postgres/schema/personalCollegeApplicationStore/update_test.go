@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"inspirate-consulting/internal/models"
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
+	"inspirate-consulting/internal/models"
 )
 
 func TestUpdatePersonalCollegeApplication(t *testing.T) {
@@ -22,7 +22,7 @@ func TestUpdatePersonalCollegeApplication(t *testing.T) {
 	created, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeA,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
@@ -31,7 +31,7 @@ func TestUpdatePersonalCollegeApplication(t *testing.T) {
 	update := models.UpdatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeB,
 		ApplicationType: "RD",
-		Category: "safety",
+		Category:        "safety",
 	}
 
 	updated, err := repo.UpdatePersonalCollegeApplication(ctx, studentID, created.ID, update)
@@ -73,7 +73,7 @@ func TestUpdatePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	created, err := repo.CreatePersonalCollegeApplication(ctx, ownerStudentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
@@ -82,7 +82,7 @@ func TestUpdatePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	_, err = repo.UpdatePersonalCollegeApplication(ctx, otherStudentID, created.ID, models.UpdatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
 		ApplicationType: "RD",
-		Category: "safety",
+		Category:        "safety",
 	})
 	if err == nil {
 		t.Fatal("expected an error updating another student's application, got nil")

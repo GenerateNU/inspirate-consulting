@@ -21,7 +21,7 @@ type rankUpdate struct {
 }
 
 // sets or clears an application's rank
-// shifts the ranks of other applications as needed to maintain a consecutive sequence of ranks (no gaps, no duplicates) 
+// shifts the ranks of other applications as needed to maintain a consecutive sequence of ranks (no gaps, no duplicates)
 // and preserve the relative order of all other applications
 func (r *PersonalCollegeApplicationRepository) UpdateApplicationRank(
 	ctx context.Context,
@@ -89,7 +89,7 @@ func (r *PersonalCollegeApplicationRepository) UpdateApplicationRank(
 // and the overall sequence without gaps or duplicates
 func computeRankShift(applications []appRank, applicationID int64, oldRank *int, newRank *int) []rankUpdate {
 
-	// case 1: ranked -> unranked 
+	// case 1: ranked -> unranked
 	// every application ranked below the its old position shifts up by one to close the gap
 	if newRank == nil {
 		var updates []rankUpdate
@@ -108,10 +108,10 @@ func computeRankShift(applications []appRank, applicationID int64, oldRank *int,
 		updates = append(updates, rankUpdate{ID: applicationID, Rank: nil})
 		return updates
 	}
- 
+
 	target := *newRank
 	var updates []rankUpdate
- 
+
 	// case 2: unranked -> ranked
 	// ranks at or below shift down by one to make room for the new rank
 	if oldRank == nil {
@@ -127,9 +127,9 @@ func computeRankShift(applications []appRank, applicationID int64, oldRank *int,
 		updates = append(updates, rankUpdate{ID: applicationID, Rank: &target})
 		return updates
 	}
- 
+
 	old := *oldRank
- 
+
 	// case 3: higher rank -> lower rank (moving up)
 	// everything between the new position and the old one shifts down by one
 	if target < old {
@@ -143,7 +143,7 @@ func computeRankShift(applications []appRank, applicationID int64, oldRank *int,
 			}
 		}
 	}
- 
+
 	// case 4: lower rank -> higher rank (moving down)
 	// everything between the old position and the new one shifts up by one
 	if target > old {
@@ -157,7 +157,7 @@ func computeRankShift(applications []appRank, applicationID int64, oldRank *int,
 			}
 		}
 	}
- 
+
 	updates = append(updates, rankUpdate{ID: applicationID, Rank: &target})
 	return updates
 }

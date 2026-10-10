@@ -6,7 +6,7 @@ import (
 )
 
 func ValidateApplicationDeadline(college *models.GlobalCollege, deadline string) error {
-	
+
 	// validate requested deadline exists
 	switch deadline {
 	case "ED":

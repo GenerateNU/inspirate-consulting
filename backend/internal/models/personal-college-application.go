@@ -11,8 +11,7 @@ type PersonalCollegeApplication struct {
 	Category        string    `json:"category" example:"reach" doc:"How the student categorizes this school: safety, target, or reach"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
-	Rank *int `json:"rank" doc:"Student's ranking of this application relative to others, or null if unranked"`
-
+	Rank            *int      `json:"rank" doc:"Student's ranking of this application relative to others, or null if unranked"`
 }
 
 // to represent input needed to create a new personal college application (student id intenitonally omitted, derived from session)
@@ -29,9 +28,9 @@ type UpdatePersonalCollegeApplicationRankRequestBody struct {
 
 // to represent input needed to make a general update
 type UpdatePersonalCollegeApplicationRequestBody struct {
-	GlobalCollegeID int64 `json:"global_college_id" doc:"ID of the global college being applied to"`
+	GlobalCollegeID int64  `json:"global_college_id" doc:"ID of the global college being applied to"`
 	ApplicationType string `json:"application_type" example:"ED" doc:"Which deadline the student is applying by: EA, ED, or RD"`
-	Category string `json:"category" example:"reach" doc:"How the student categorizes this school: safety, target, or reach"`
+	Category        string `json:"category" example:"reach" doc:"How the student categorizes this school: safety, target, or reach"`
 }
 
 // Huma readable input and output models for the create and list operations
@@ -51,20 +50,20 @@ type ListPersonalCollegeApplicationsOutput struct {
 }
 
 type UpdatePersonalCollegeApplicationRankInput struct {
-	ID int64 `path:"id" doc:"ID of the application to re-rank"`
+	ID   int64 `path:"id" doc:"ID of the application to re-rank"`
 	Body UpdatePersonalCollegeApplicationRankRequestBody
 }
- 
+
 // returns all applications with updated ranks
 type UpdatePersonalCollegeApplicationRankOutput struct {
 	Body []PersonalCollegeApplication
 }
 
 type UpdatePersonalCollegeApplicationInput struct {
-	ID int64 `path:"id" doc:"ID of the application to update"`
+	ID   int64 `path:"id" doc:"ID of the application to update"`
 	Body UpdatePersonalCollegeApplicationRequestBody
 }
- 
+
 type UpdatePersonalCollegeApplicationOutput struct {
 	Body PersonalCollegeApplication
 }
@@ -75,5 +74,3 @@ type DeletePersonalCollegeApplicationInput struct {
 
 type DeletePersonalCollegeApplicationOutput struct {
 }
-
-
