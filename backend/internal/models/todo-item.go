@@ -113,7 +113,7 @@ func (q TodoItemQuery) SortValue(item TodoItem) time.Time {
 	return *value
 }
 
-type GetTodoItemsByStudentInput struct {
+type ListTodoItemsInput struct {
 	TodoItemFilters
 	Cursor string `query:"cursor" required:"false" doc:"next_cursor from the previous page; omit to get the first page"`
 	Limit  int    `query:"limit" default:"20" minimum:"1" maximum:"100" doc:"Maximum number of to-do items to return"`
@@ -124,7 +124,7 @@ type TodoItemPage struct {
 	NextCursor *string    `json:"next_cursor" doc:"Pass as cursor to get the next page; null when there are none"`
 }
 
-type GetTodoItemsByStudentOutput struct {
+type ListTodoItemsOutput struct {
 	Body TodoItemPage
 }
 

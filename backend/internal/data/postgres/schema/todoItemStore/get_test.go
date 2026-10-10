@@ -10,7 +10,7 @@ import (
 )
 
 // test retrieval returns every todo item belonging to a student, and only that student's items
-func TestGetTodoItemsByStudent(t *testing.T) {
+func TestListTodoItems(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
@@ -105,7 +105,7 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 }
 
 // test retrieval for a student with no todo items returns an empty result, not an error
-func TestGetTodoItemsByStudent_NoItems(t *testing.T) {
+func TestListTodoItems_NoItems(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
@@ -124,7 +124,7 @@ func TestGetTodoItemsByStudent_NoItems(t *testing.T) {
 }
 
 // test retrieval with a non-uuid student id returns an error, since the column is typed uuid
-func TestGetTodoItemsByStudent_InvalidID(t *testing.T) {
+func TestListTodoItems_InvalidID(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}

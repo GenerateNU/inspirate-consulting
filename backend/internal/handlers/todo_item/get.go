@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) GetTodoItemsByStudent(ctx context.Context, input *models.GetTodoItemsByStudentInput) (*models.TodoItemPage, error) {
+func (h *Handler) ListTodoItems(ctx context.Context, input *models.ListTodoItemsInput) (*models.TodoItemPage, error) {
 	query, err := buildTodoItemQuery(ctx, input.TodoItemFilters, input.Cursor, input.Limit)
 	if err != nil {
 		return nil, err

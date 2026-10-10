@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Unit tests for the GetTodoItemsByStudent handler logic without HTTP or database dependencies.
-func TestHandler_GetTodoItemsByStudent(t *testing.T) {
+// Unit tests for the ListTodoItems handler logic without HTTP or database dependencies.
+func TestHandler_ListTodoItems(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -46,7 +46,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx, &models.GetTodoItemsByStudentInput{})
+		res, err := handler.ListTodoItems(ctx, &models.ListTodoItemsInput{})
 
 		// Verify result
 		assert.NoError(t, err)
@@ -63,7 +63,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return([]models.TodoItem{}, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx, &models.GetTodoItemsByStudentInput{})
+		res, err := handler.ListTodoItems(ctx, &models.ListTodoItemsInput{})
 
 		assert.NoError(t, err)
 		assert.Empty(t, res.Items)
@@ -78,7 +78,7 @@ func TestHandler_GetTodoItemsByStudent(t *testing.T) {
 
 		// Execute handler
 		handler := NewHandler(mockRepo)
-		res, err := handler.GetTodoItemsByStudent(ctx, &models.GetTodoItemsByStudentInput{})
+		res, err := handler.ListTodoItems(ctx, &models.ListTodoItemsInput{})
 
 		// Verify error propagation
 		assert.Error(t, err)

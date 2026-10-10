@@ -11,6 +11,12 @@ export interface CreateTodoItemRequestBody {
   readonly $schema?: string;
   completed_at?: string;
   deadline?: string;
+  /** Essay this task is for; at most one of essay_id, media_id, global_college_id */
+  essay_id?: string;
+  /** College this task is for; at most one of essay_id, media_id, global_college_id */
+  global_college_id?: number;
+  /** Media this task is for; at most one of essay_id, media_id, global_college_id */
+  media_id?: string;
   student_id?: string;
   todo_description: string;
   user_id?: string;

@@ -140,7 +140,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 }
 
 // Route tests for GET /todo-items.
-func TestRoute_GetTodoItemsByStudent(t *testing.T) {
+func TestRoute_ListTodoItems(t *testing.T) {
 	t.Parallel()
 
 	// The route reads the student from the request context, not the URL

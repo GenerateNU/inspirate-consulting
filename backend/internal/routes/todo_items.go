@@ -38,13 +38,13 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 		Path:        "/todo-items",
 		Description: "Get a student's to-do items, with optional filters, sorting, and cursor pagination",
 		Tags:        []string{"Todo Items"},
-	}, func(ctx context.Context, input *models.GetTodoItemsByStudentInput) (*models.GetTodoItemsByStudentOutput, error) {
-		page, err := todoItemHandler.GetTodoItemsByStudent(ctx, input)
+	}, func(ctx context.Context, input *models.ListTodoItemsInput) (*models.ListTodoItemsOutput, error) {
+		page, err := todoItemHandler.ListTodoItems(ctx, input)
 		if err != nil {
 			return nil, err
 		}
 
-		return &models.GetTodoItemsByStudentOutput{Body: *page}, nil
+		return &models.ListTodoItemsOutput{Body: *page}, nil
 	})
 
 	//Register GET /todo-items/search handler
