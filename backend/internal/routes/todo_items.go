@@ -38,9 +38,9 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 		Path:        "/todo-items",
 		Description: "Get a student's to-do items",
 		Tags:        []string{"Todo Items"},
-	}, func(ctx context.Context, input *models.GetTodoItemsByStudentInput)(*models.GetTodoItemsByStudentOutput, error){
+	}, func(ctx context.Context, input *models.GetTodoItemsByStudentInput) (*models.GetTodoItemsByStudentOutput, error) {
 		items, err := todoItemHandler.GetTodoItemsByStudent(ctx)
-		if(err != nil){
+		if err != nil {
 			return nil, err
 		}
 
@@ -50,13 +50,13 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 	//Register PATCH /todo-items/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-item-completed",
-		Method: http.MethodPatch,
-		Path: "/todo-items/{id}",
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}",
 		Description: "Update a to-do item's completion status",
-		Tags: []string{"Todo Items"},
+		Tags:        []string{"Todo Items"},
 	}, func(ctx context.Context, input *models.UpdateTodoItemCompletedAtInput) (*models.UpdateTodoItemCompletedAtOutput, error) {
 		updated, err := todoItemHandler.UpdateTodoItemCompletedAt(ctx, input.ID, input.Body.Completed)
-		if(err != nil){
+		if err != nil {
 			return nil, err
 		}
 

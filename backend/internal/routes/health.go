@@ -14,8 +14,8 @@ type HealthOutput struct {
 	}
 }
 
-// SetUpHealthRoutes registers the unauthenticated health check that App
-// Platform polls to decide whether a deployment is live. The path must stay in
+// SetUpHealthRoutes registers the unauthenticated health check the deploy
+// workflow polls to decide whether a release is live. The path must stay in
 // sync with the skipPaths whitelist in auth.AuthMiddleware.
 func SetUpHealthRoutes(api huma.API) {
 	huma.Register(api, huma.Operation{
