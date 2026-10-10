@@ -40,6 +40,7 @@ export * from './grantMediaAccessRequestBody';
 export * from './greetingMessageBody';
 export * from './greetingOutputBody';
 export * from './greetingRequestBody';
+export * from './healthOutputBody';
 export * from './listChatMessagesParams';
 export * from './listMediaParams';
 export * from './media';
