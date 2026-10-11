@@ -34,7 +34,9 @@ func (r *PersonalCollegeApplicationRepository) UpdateApplicationRank(
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	// fetch applications for this student, ordered by rank, and lock them for update
 	selectForRankUpdateQuery, err := schema.ReadSQLBaseScript("select_personal_college_application_for_rank_update.sql", SqlPersonalCollegeApplicationFiles)
