@@ -248,6 +248,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        confirm_duplicate:
+          description: Set true to create despite a detected near-duplicate warning
+          type: boolean
         ea_deadline:
           description: Early admission deadline
           examples:
@@ -1301,6 +1304,51 @@ components:
             - investment
           type: string
       type: object
+    UpdateGlobalCollegeRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateGlobalCollegeRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        confirm_duplicate:
+          description: Set true to create despite a detected near-duplicate warning
+          type: boolean
+        ea_deadline:
+          description: Early admission deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        ed_deadline:
+          description: Early decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        rd_deadline:
+          description: Regular decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        school_location:
+          description: Location of the college
+          examples:
+            - Cambridge, MA
+          type: string
+        school_name:
+          description: Name of the college
+          examples:
+            - Harvard University
+          type: string
+      required:
+        - school_name
+        - school_location
+      type: object
     UpdateNotificationPreferencesRequestBody:
       additionalProperties: false
       properties:
@@ -1563,6 +1611,37 @@ paths:
           description: Error
       tags:
         - Chat
+  /college-search:
+    get:
+      description: Search global colleges by name or location.
+      operationId: search-global-colleges
+      parameters:
+        - description: Search text to match against college names
+          explode: false
+          in: query
+          name: q
+          schema:
+            description: Search text to match against college names
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/GlobalCollege"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
   /colleges:
     get:
       description: List all global colleges.
@@ -1611,6 +1690,29 @@ paths:
       tags:
         - Global Colleges
   /colleges/{id}:
+    delete:
+      description: Delete a global college.
+      operationId: delete-global-college
+      parameters:
+        - description: ID of the college to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the college to delete
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
     get:
       description: Get a global college by ID.
       operationId: get-global-college
@@ -1621,6 +1723,39 @@ paths:
           schema:
             format: int64
             type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalCollege"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
+    put:
+      description: Update a global college's details.
+      operationId: update-global-college
+      parameters:
+        - description: ID of the college to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the college to update
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGlobalCollegeRequestBody"
+        required: true
       responses:
         "200":
           content:

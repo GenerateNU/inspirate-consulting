@@ -7,6 +7,7 @@
  */
 import useSwr from 'swr';
 import type {
+  Arguments,
   Key,
   SWRConfiguration
 } from 'swr';
@@ -19,7 +20,9 @@ import type {
 import type {
   CreateGlobalCollegeRequestBody,
   ErrorModel,
-  GlobalCollege
+  GlobalCollege,
+  SearchGlobalCollegesParams,
+  UpdateGlobalCollegeRequestBody
 } from '../../models';
 
 
@@ -61,7 +64,85 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
 
- export type listGlobalCollegesResponse200 = {
+ export type searchGlobalCollegesResponse200 = {
+  data: GlobalCollege[] | null
+  status: 200
+}
+
+export type searchGlobalCollegesResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type searchGlobalCollegesResponseSuccess = (searchGlobalCollegesResponse200) & {
+  headers: Headers;
+};
+export type searchGlobalCollegesResponseError = (searchGlobalCollegesResponseDefault) & {
+  headers: Headers;
+};
+
+export type searchGlobalCollegesResponse = (searchGlobalCollegesResponseSuccess | searchGlobalCollegesResponseError)
+
+export const getSearchGlobalCollegesUrl = (params?: SearchGlobalCollegesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/college-search?${stringifiedParams}` : `http://127.0.0.1:8080/college-search`
+}
+
+/**
+ * Search global colleges by name or location.
+ */
+export const searchGlobalColleges = async (params?: SearchGlobalCollegesParams, options?: RequestInit): Promise<searchGlobalCollegesResponse> => {
+
+  const res = await fetch(getSearchGlobalCollegesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: searchGlobalCollegesResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as searchGlobalCollegesResponse
+}
+
+
+
+
+export const getSearchGlobalCollegesKey = (params?: SearchGlobalCollegesParams,) => [`http://127.0.0.1:8080/college-search`, ...(params ? [params]: [])] as const;
+
+export type SearchGlobalCollegesQueryResult = NonNullable<Awaited<ReturnType<typeof searchGlobalColleges>>>
+
+export const useSearchGlobalColleges = <TError = Promise<ErrorModel>>(
+  params?: SearchGlobalCollegesParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof searchGlobalColleges>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+) => {
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getSearchGlobalCollegesKey(params) : null);
+  const swrFn = () => searchGlobalColleges(params, fetchOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type listGlobalCollegesResponse200 = {
   data: GlobalCollege[] | null
   status: 200
 }
@@ -222,6 +303,82 @@ export const useCreateGlobalCollege = <TError = Promise<ErrorModel>>(
     ...query
   }
 }
+export type deleteGlobalCollegeResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteGlobalCollegeResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 204>
+}
+
+export type deleteGlobalCollegeResponseSuccess = (deleteGlobalCollegeResponse204) & {
+  headers: Headers;
+};
+export type deleteGlobalCollegeResponseError = (deleteGlobalCollegeResponseDefault) & {
+  headers: Headers;
+};
+
+export type deleteGlobalCollegeResponse = (deleteGlobalCollegeResponseSuccess | deleteGlobalCollegeResponseError)
+
+export const getDeleteGlobalCollegeUrl = (id: number,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/colleges/${id}`
+}
+
+/**
+ * Delete a global college.
+ */
+export const deleteGlobalCollege = async (id: number, options?: RequestInit): Promise<deleteGlobalCollegeResponse> => {
+
+  const res = await fetch(getDeleteGlobalCollegeUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deleteGlobalCollegeResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as deleteGlobalCollegeResponse
+}
+
+
+
+
+export const getDeleteGlobalCollegeMutationFetcher = (id: number, options?: RequestInit) => {
+  return (_: Key, __: { arg: Arguments }) => {
+    return deleteGlobalCollege(id, options);
+  }
+}
+export const getDeleteGlobalCollegeMutationKey = (id: number,) => [`http://127.0.0.1:8080/colleges/${id}`] as const;
+
+export type DeleteGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteGlobalCollege>>>
+
+export const useDeleteGlobalCollege = <TError = Promise<ErrorModel>>(
+  id: number, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof deleteGlobalCollege>>, TError, Key, Arguments, Awaited<ReturnType<typeof deleteGlobalCollege>>> & { swrKey?: string }, fetch?: RequestInit}
+) => {
+
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getDeleteGlobalCollegeMutationKey(id);
+  const swrFn = getDeleteGlobalCollegeMutationFetcher(id, fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
 export type getGlobalCollegeResponse200 = {
   data: GlobalCollege
   status: 200
@@ -287,6 +444,97 @@ export const useGetGlobalCollege = <TError = Promise<ErrorModel>>(
   const swrFn = () => getGlobalCollege(id, fetchOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type updateGlobalCollegeResponse200 = {
+  data: GlobalCollege
+  status: 200
+}
+
+export type updateGlobalCollegeResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type updateGlobalCollegeResponseSuccess = (updateGlobalCollegeResponse200) & {
+  headers: Headers;
+};
+export type updateGlobalCollegeResponseError = (updateGlobalCollegeResponseDefault) & {
+  headers: Headers;
+};
+
+export type updateGlobalCollegeResponse = (updateGlobalCollegeResponseSuccess | updateGlobalCollegeResponseError)
+
+export const getUpdateGlobalCollegeUrl = (id: number,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/colleges/${id}`
+}
+
+/**
+ * Update a global college's details.
+ */
+export const updateGlobalCollege = async (id: number,
+    updateGlobalCollegeRequestBody: NonReadonly<UpdateGlobalCollegeRequestBody>, options?: RequestInit): Promise<updateGlobalCollegeResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateGlobalCollegeUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateGlobalCollegeRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: updateGlobalCollegeResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as updateGlobalCollegeResponse
+}
+
+
+
+
+export const getUpdateGlobalCollegeMutationFetcher = (id: number, options?: RequestInit) => {
+  return (_: Key, { arg }: { arg: NonReadonly<UpdateGlobalCollegeRequestBody> }) => {
+    return updateGlobalCollege(id, arg, options);
+  }
+}
+export const getUpdateGlobalCollegeMutationKey = (id: number,) => [`http://127.0.0.1:8080/colleges/${id}`] as const;
+
+export type UpdateGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof updateGlobalCollege>>>
+
+export const useUpdateGlobalCollege = <TError = Promise<ErrorModel>>(
+  id: number, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updateGlobalCollege>>, TError, Key, NonReadonly<UpdateGlobalCollegeRequestBody>, Awaited<ReturnType<typeof updateGlobalCollege>>> & { swrKey?: string }, fetch?: RequestInit}
+) => {
+
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getUpdateGlobalCollegeMutationKey(id);
+  const swrFn = getUpdateGlobalCollegeMutationFetcher(id, fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
   return {
     swrKey,
