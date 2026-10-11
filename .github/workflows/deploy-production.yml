@@ -45,6 +45,11 @@ jobs:
       - name: Resolve the deployed commit
         run: echo "DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
+      # GHCR repository names must be lowercase, but github.repository keeps the
+      # org's capitalisation (GenerateNU), which buildx rejects outright.
+      - name: Compute the image repository
+        run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -65,7 +70,7 @@ jobs:
           context: backend
           file: backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/backend:${{ env.DEPLOY_SHA }}
+          tags: ${{ env.IMAGE_REPO }}/backend:${{ env.DEPLOY_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -83,7 +88,7 @@ jobs:
       - name: Deploy the backend
         env:
           DROPLET: ${{ vars.DROPLET_USER }}@${{ vars.DROPLET_HOST }}
-          IMAGE: ghcr.io/${{ github.repository }}/backend:${{ env.DEPLOY_SHA }}
+          IMAGE: ${{ env.IMAGE_REPO }}/backend:${{ env.DEPLOY_SHA }}
           API_DOMAIN: ${{ vars.API_DOMAIN }}
         run: |
           set -euo pipefail
