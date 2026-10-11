@@ -117,7 +117,7 @@ export const MarkChatReadResponse = /*#__PURE__*/ zod.void()
  * Search global colleges by name or location.
  */
 export const SearchGlobalCollegesQueryParams = /*#__PURE__*/ zod.object({
-  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Search text to match against college names'))
+  "query": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Search text to match against college names'))
 })
 
 export const SearchGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
