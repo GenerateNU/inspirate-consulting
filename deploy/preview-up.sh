@@ -60,6 +60,7 @@ docker run -d \
   --restart unless-stopped \
   --env-file "$ENV_FILE" \
   -e DB_NAME="$DB_NAME" \
+  -e PUBLIC_API_URL="https://${HOST}" \
   --label "caddy=${HOST}" \
   --label "caddy.reverse_proxy={{upstreams 8080}}" \
   "$BACKEND_IMAGE" >/dev/null

@@ -83,8 +83,19 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	humaConfig.Info.Contact = &huma.Contact{
 		Name: "Inspirate Consulting Team",
 	}
+	// The docs UI sends requests to the first server entry, so a deployment has
+	// to advertise its own URL or the "Send API Request" button always targets
+	// the reader's own machine. PUBLIC_API_URL is deliberately unset during spec
+	// generation (see cmd/apispec) so the committed openapi.yaml stays
+	// deterministic and CI's up-to-date check cannot drift.
 	humaConfig.Servers = []*huma.Server{
 		{URL: "http://localhost:8080", Description: "Local development server"},
+	}
+	if publicURL := strings.TrimRight(os.Getenv("PUBLIC_API_URL"), "/"); publicURL != "" {
+		humaConfig.Servers = append(
+			[]*huma.Server{{URL: publicURL, Description: "This deployment"}},
+			humaConfig.Servers...,
+		)
 	}
 
 	humaAPI := humafiber.New(app, humaConfig)
