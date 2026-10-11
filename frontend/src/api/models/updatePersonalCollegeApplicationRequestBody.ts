@@ -6,24 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface PersonalCollegeApplication {
+export interface UpdatePersonalCollegeApplicationRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   /** Which deadline the student is applying by: EA, ED, or RD */
   application_type: string;
   /** How the student categorizes this school: safety, target, or reach */
   category: string;
-  created_at: string;
   /** ID of the global college being applied to */
   global_college_id: number;
-  /** Unique identifier for the application */
-  id: number;
-  /**
-     * Student's ranking of this application relative to others, or null if unranked
-     * @nullable
-     */
-  rank: number | null;
-  /** ID of the student who owns this application */
-  student_id: string;
-  updated_at: string;
 }

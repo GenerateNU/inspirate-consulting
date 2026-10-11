@@ -1004,6 +1004,12 @@ components:
           description: Unique identifier for the application
           format: int64
           type: integer
+        rank:
+          description: Student's ranking of this application relative to others, or null if unranked
+          format: int64
+          type:
+            - integer
+            - "null"
         student_id:
           description: ID of the student who owns this application
           type: string
@@ -1018,6 +1024,7 @@ components:
         - category
         - created_at
         - updated_at
+        - rank
       type: object
     PresignUploadRequestBody:
       additionalProperties: false
@@ -1308,6 +1315,54 @@ components:
         - days_before_due
         - notify_past_due
       type: object
+    UpdatePersonalCollegeApplicationRankRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdatePersonalCollegeApplicationRankRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        rank:
+          description: The new 1-based rank, or null to un-rank this application
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - rank
+      type: object
+    UpdatePersonalCollegeApplicationRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdatePersonalCollegeApplicationRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        application_type:
+          description: "Which deadline the student is applying by: EA, ED, or RD"
+          examples:
+            - ED
+          type: string
+        category:
+          description: "How the student categorizes this school: safety, target, or reach"
+          examples:
+            - reach
+          type: string
+        global_college_id:
+          description: ID of the global college being applied to
+          format: int64
+          type: integer
+      required:
+        - global_college_id
+        - application_type
+        - category
+      type: object
     UpdateStatusBody:
       additionalProperties: false
       properties:
@@ -1439,6 +1494,101 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PersonalCollegeApplication"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Personal College Applications
+  /applications/{id}:
+    delete:
+      description: Delete a personal college application for the authenticated student.
+      operationId: delete-personal-college-application
+      parameters:
+        - description: ID of the application to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the application to delete
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Personal College Applications
+    put:
+      description: Update a personal college application for the authenticated student.
+      operationId: update-personal-college-application
+      parameters:
+        - description: ID of the application to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the application to update
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePersonalCollegeApplicationRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalCollegeApplication"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Personal College Applications
+  /applications/{id}/rank:
+    put:
+      description: Update the rank of a personal college application for the authenticated student.
+      operationId: update-personal-college-application-rank
+      parameters:
+        - description: ID of the application to re-rank
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the application to re-rank
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePersonalCollegeApplicationRankRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/PersonalCollegeApplication"
+                type:
+                  - array
+                  - "null"
           description: OK
         default:
           content:

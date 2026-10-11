@@ -44,6 +44,7 @@ func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 		&createdApplication.Category,
 		&createdApplication.CreatedAt,
 		&createdApplication.UpdatedAt,
+		&createdApplication.Rank,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
