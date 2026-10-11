@@ -9,6 +9,8 @@
 export interface CreateGlobalCollegeRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /** Set true to create despite a detected near-duplicate warning */
+  confirm_duplicate?: boolean;
   /** Early admission deadline */
   ea_deadline?: string;
   /** Early decision deadline */
