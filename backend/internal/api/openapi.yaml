@@ -2002,7 +2002,7 @@ paths:
         - description: Search text to match against college names
           explode: false
           in: query
-          name: q
+          name: query
           schema:
             description: Search text to match against college names
             type: string

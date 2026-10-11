@@ -10,5 +10,5 @@ export type SearchGlobalCollegesParams = {
 /**
  * Search text to match against college names
  */
-q?: string;
+query?: string;
 };
