@@ -3,6 +3,7 @@ package main
 import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	"inspirate-consulting/internal/routes"
 	"log"
 	"os"
@@ -22,7 +23,7 @@ func main() {
 		TestMode: true,
 	}
 
-	_, humaAPI, err := routes.SetupApp(cfg, &data.Repository{})
+	_, humaAPI, err := routes.SetupApp(cfg, &data.Repository{}, &sqsclient.SQSClient{})
 	if err != nil {
 		log.Fatalf("failed to set up app: %v", err)
 	}

@@ -21,7 +21,7 @@ import (
 func setupTestAppWithStudent(mockRepo data.EssayReviewRepository) (*fiber.App, error) {
 	cfg := config.Config{TestMode: true}
 	repo := &data.Repository{EssayReview: mockRepo}
-	app, _, err := SetupApp(cfg, repo)
+	app, _, err := SetupApp(cfg, repo, nil)
 	return app, err
 }
 

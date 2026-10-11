@@ -30,7 +30,7 @@ func setupTestAppWithUser(mockUser data.UserRepository, supabase supabase.Supaba
 	repo := &data.Repository{
 		User: mockUser,
 	}
-	app, _, err := SetupApp(cfg, repo)
+	app, _, err := SetupApp(cfg, repo, nil)
 	return app, err
 }
 

@@ -8,6 +8,7 @@ type Config struct {
 	DB          DB
 	Supabase    supabase.SupabaseInterface
 	S3          S3
+	SQS         SQS
 	// TestMode=true will skip the auth middleware
 	TestMode bool
 }

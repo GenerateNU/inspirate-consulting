@@ -26,7 +26,7 @@ func setupMediaTestApp(mockMedia data.MediaRepository) (*fiber.App, error) {
 	repo := &data.Repository{
 		Media: mockMedia,
 	}
-	app, _, err := SetupApp(cfg, repo)
+	app, _, err := SetupApp(cfg, repo, nil)
 	return app, err
 }
 
