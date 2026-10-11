@@ -40,7 +40,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		mockRepo.On("CreateGlobalCollege", mock.Anything, input).Return(expectedEntity, nil)
+		mockRepo.On("CreateGlobalCollege", mock.Anything, input, mock.Anything).Return(expectedEntity, nil)
 
 		handler := NewHandler(mockRepo)
 		res, err := handler.CreateGlobalCollege(ctx, input)
@@ -53,7 +53,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		mockRepo.On("CreateGlobalCollege", mock.Anything, input).
+		mockRepo.On("CreateGlobalCollege", mock.Anything, input, mock.Anything).
 			Return(nil, errors.New("global college with school_name/school_location='Northeastern University / Boston, MA' already exists"))
 
 		handler := NewHandler(mockRepo)
