@@ -85,7 +85,7 @@ export const getListGlobalCollegesUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/colleges`
+  return `/api/colleges`
 }
 
 /**
@@ -112,7 +112,7 @@ export const listGlobalColleges = async ( options?: RequestInit): Promise<listGl
 
 
 
-export const getListGlobalCollegesKey = () => [`http://127.0.0.1:8080/colleges`] as const;
+export const getListGlobalCollegesKey = () => [`/api/colleges`] as const;
 
 export type ListGlobalCollegesQueryResult = NonNullable<Awaited<ReturnType<typeof listGlobalColleges>>>
 
@@ -156,7 +156,7 @@ export const getCreateGlobalCollegeUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/colleges`
+  return `/api/colleges`
 }
 
 /**
@@ -202,7 +202,7 @@ export const getCreateGlobalCollegeMutationFetcher = ( options?: RequestInit) =>
     return createGlobalCollege(arg, options);
   }
 }
-export const getCreateGlobalCollegeMutationKey = () => [`http://127.0.0.1:8080/colleges`] as const;
+export const getCreateGlobalCollegeMutationKey = () => [`/api/colleges`] as const;
 
 export type CreateGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof createGlobalCollege>>>
 
@@ -246,7 +246,7 @@ export const getGetGlobalCollegeUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/colleges/${id}`
+  return `/api/colleges/${id}`
 }
 
 /**
@@ -273,7 +273,7 @@ export const getGlobalCollege = async (id: number, options?: RequestInit): Promi
 
 
 
-export const getGetGlobalCollegeKey = (id: number,) => [`http://127.0.0.1:8080/colleges/${id}`] as const;
+export const getGetGlobalCollegeKey = (id: number,) => [`/api/colleges/${id}`] as const;
 
 export type GetGlobalCollegeQueryResult = NonNullable<Awaited<ReturnType<typeof getGlobalCollege>>>
 

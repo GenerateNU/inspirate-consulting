@@ -86,7 +86,7 @@ export const getCreateEssayGroupUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/essay-groups`
+  return `/api/essay-groups`
 }
 
 /**
@@ -132,7 +132,7 @@ export const getCreateEssayGroupMutationFetcher = ( options?: RequestInit) => {
     return createEssayGroup(arg, options);
   }
 }
-export const getCreateEssayGroupMutationKey = () => [`http://127.0.0.1:8080/essay-groups`] as const;
+export const getCreateEssayGroupMutationKey = () => [`/api/essay-groups`] as const;
 
 export type CreateEssayGroupMutationResult = NonNullable<Awaited<ReturnType<typeof createEssayGroup>>>
 
@@ -176,7 +176,7 @@ export const getGetEssayGroupsFromStudentUrl = (studentId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/students/${studentId}/essay-groups`
+  return `/api/students/${studentId}/essay-groups`
 }
 
 /**
@@ -203,7 +203,7 @@ export const getEssayGroupsFromStudent = async (studentId: string, options?: Req
 
 
 
-export const getGetEssayGroupsFromStudentKey = (studentId: string,) => [`http://127.0.0.1:8080/students/${studentId}/essay-groups`] as const;
+export const getGetEssayGroupsFromStudentKey = (studentId: string,) => [`/api/students/${studentId}/essay-groups`] as const;
 
 export type GetEssayGroupsFromStudentQueryResult = NonNullable<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>>
 

@@ -94,7 +94,7 @@ export const getListMediaUrl = (params?: ListMediaParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/media?${stringifiedParams}` : `http://127.0.0.1:8080/media`
+  return stringifiedParams.length > 0 ? `/api/media?${stringifiedParams}` : `/api/media`
 }
 
 /**
@@ -121,7 +121,7 @@ export const listMedia = async (params?: ListMediaParams, options?: RequestInit)
 
 
 
-export const getListMediaKey = (params?: ListMediaParams,) => [`http://127.0.0.1:8080/media`, ...(params ? [params]: [])] as const;
+export const getListMediaKey = (params?: ListMediaParams,) => [`/api/media`, ...(params ? [params]: [])] as const;
 
 export type ListMediaQueryResult = NonNullable<Awaited<ReturnType<typeof listMedia>>>
 
@@ -165,7 +165,7 @@ export const getCreateMediaUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/media`
+  return `/api/media`
 }
 
 /**
@@ -211,7 +211,7 @@ export const getCreateMediaMutationFetcher = ( options?: RequestInit) => {
     return createMedia(arg, options);
   }
 }
-export const getCreateMediaMutationKey = () => [`http://127.0.0.1:8080/media`] as const;
+export const getCreateMediaMutationKey = () => [`/api/media`] as const;
 
 export type CreateMediaMutationResult = NonNullable<Awaited<ReturnType<typeof createMedia>>>
 
@@ -255,7 +255,7 @@ export const getDeleteMediaUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/media/${id}`
+  return `/api/media/${id}`
 }
 
 /**
@@ -287,7 +287,7 @@ export const getDeleteMediaMutationFetcher = (id: string, options?: RequestInit)
     return deleteMedia(id, options);
   }
 }
-export const getDeleteMediaMutationKey = (id: string,) => [`http://127.0.0.1:8080/media/${id}`] as const;
+export const getDeleteMediaMutationKey = (id: string,) => [`/api/media/${id}`] as const;
 
 export type DeleteMediaMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMedia>>>
 
@@ -331,7 +331,7 @@ export const getGetMediaUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/media/${id}`
+  return `/api/media/${id}`
 }
 
 /**
@@ -358,7 +358,7 @@ export const getMedia = async (id: string, options?: RequestInit): Promise<getMe
 
 
 
-export const getGetMediaKey = (id: string,) => [`http://127.0.0.1:8080/media/${id}`] as const;
+export const getGetMediaKey = (id: string,) => [`/api/media/${id}`] as const;
 
 export type GetMediaQueryResult = NonNullable<Awaited<ReturnType<typeof getMedia>>>
 

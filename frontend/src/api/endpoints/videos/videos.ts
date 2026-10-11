@@ -87,7 +87,7 @@ export const getListVideosUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/videos`
+  return `/api/videos`
 }
 
 /**
@@ -114,7 +114,7 @@ export const listVideos = async ( options?: RequestInit): Promise<listVideosResp
 
 
 
-export const getListVideosKey = () => [`http://127.0.0.1:8080/videos`] as const;
+export const getListVideosKey = () => [`/api/videos`] as const;
 
 export type ListVideosQueryResult = NonNullable<Awaited<ReturnType<typeof listVideos>>>
 
@@ -158,7 +158,7 @@ export const getUploadVideoUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/videos`
+  return `/api/videos`
 }
 
 /**
@@ -204,7 +204,7 @@ export const getUploadVideoMutationFetcher = ( options?: RequestInit) => {
     return uploadVideo(arg, options);
   }
 }
-export const getUploadVideoMutationKey = () => [`http://127.0.0.1:8080/videos`] as const;
+export const getUploadVideoMutationKey = () => [`/api/videos`] as const;
 
 export type UploadVideoMutationResult = NonNullable<Awaited<ReturnType<typeof uploadVideo>>>
 
@@ -255,7 +255,7 @@ export const getGetVideoUrl = (params?: GetVideoParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/videos/lookup?${stringifiedParams}` : `http://127.0.0.1:8080/videos/lookup`
+  return stringifiedParams.length > 0 ? `/api/videos/lookup?${stringifiedParams}` : `/api/videos/lookup`
 }
 
 /**
@@ -282,7 +282,7 @@ export const getVideo = async (params?: GetVideoParams, options?: RequestInit): 
 
 
 
-export const getGetVideoKey = (params?: GetVideoParams,) => [`http://127.0.0.1:8080/videos/lookup`, ...(params ? [params]: [])] as const;
+export const getGetVideoKey = (params?: GetVideoParams,) => [`/api/videos/lookup`, ...(params ? [params]: [])] as const;
 
 export type GetVideoQueryResult = NonNullable<Awaited<ReturnType<typeof getVideo>>>
 

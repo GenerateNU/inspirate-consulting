@@ -83,7 +83,7 @@ export const getSetStudentReviewBalanceUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/students/${id}/review-balance`
+  return `/api/students/${id}/review-balance`
 }
 
 /**
@@ -130,7 +130,7 @@ export const getSetStudentReviewBalanceMutationFetcher = (id: string, options?: 
     return setStudentReviewBalance(id, arg, options);
   }
 }
-export const getSetStudentReviewBalanceMutationKey = (id: string,) => [`http://127.0.0.1:8080/students/${id}/review-balance`] as const;
+export const getSetStudentReviewBalanceMutationKey = (id: string,) => [`/api/students/${id}/review-balance`] as const;
 
 export type SetStudentReviewBalanceMutationResult = NonNullable<Awaited<ReturnType<typeof setStudentReviewBalance>>>
 

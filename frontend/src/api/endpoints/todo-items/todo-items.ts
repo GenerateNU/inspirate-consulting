@@ -86,7 +86,7 @@ export const getGetTodoItemsUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/todo-items`
+  return `/api/todo-items`
 }
 
 /**
@@ -113,7 +113,7 @@ export const getTodoItems = async ( options?: RequestInit): Promise<getTodoItems
 
 
 
-export const getGetTodoItemsKey = () => [`http://127.0.0.1:8080/todo-items`] as const;
+export const getGetTodoItemsKey = () => [`/api/todo-items`] as const;
 
 export type GetTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof getTodoItems>>>
 
@@ -157,7 +157,7 @@ export const getCreateTodoItemUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/todo-items`
+  return `/api/todo-items`
 }
 
 /**
@@ -203,7 +203,7 @@ export const getCreateTodoItemMutationFetcher = ( options?: RequestInit) => {
     return createTodoItem(arg, options);
   }
 }
-export const getCreateTodoItemMutationKey = () => [`http://127.0.0.1:8080/todo-items`] as const;
+export const getCreateTodoItemMutationKey = () => [`/api/todo-items`] as const;
 
 export type CreateTodoItemMutationResult = NonNullable<Awaited<ReturnType<typeof createTodoItem>>>
 
@@ -247,7 +247,7 @@ export const getUpdateTodoItemCompletedUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/todo-items/${id}`
+  return `/api/todo-items/${id}`
 }
 
 /**
@@ -294,7 +294,7 @@ export const getUpdateTodoItemCompletedMutationFetcher = (id: string, options?: 
     return updateTodoItemCompleted(id, arg, options);
   }
 }
-export const getUpdateTodoItemCompletedMutationKey = (id: string,) => [`http://127.0.0.1:8080/todo-items/${id}`] as const;
+export const getUpdateTodoItemCompletedMutationKey = (id: string,) => [`/api/todo-items/${id}`] as const;
 
 export type UpdateTodoItemCompletedMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemCompleted>>>
 

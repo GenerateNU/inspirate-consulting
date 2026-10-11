@@ -85,7 +85,7 @@ export const getGetNotificationPreferencesUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/notification-preferences`
+  return `/api/notification-preferences`
 }
 
 /**
@@ -112,7 +112,7 @@ export const getNotificationPreferences = async ( options?: RequestInit): Promis
 
 
 
-export const getGetNotificationPreferencesKey = () => [`http://127.0.0.1:8080/notification-preferences`] as const;
+export const getGetNotificationPreferencesKey = () => [`/api/notification-preferences`] as const;
 
 export type GetNotificationPreferencesQueryResult = NonNullable<Awaited<ReturnType<typeof getNotificationPreferences>>>
 
@@ -156,7 +156,7 @@ export const getUpdateNotificationPreferencesUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/notification-preferences`
+  return `/api/notification-preferences`
 }
 
 /**
@@ -202,7 +202,7 @@ export const getUpdateNotificationPreferencesMutationFetcher = ( options?: Reque
     return updateNotificationPreferences(arg, options);
   }
 }
-export const getUpdateNotificationPreferencesMutationKey = () => [`http://127.0.0.1:8080/notification-preferences`] as const;
+export const getUpdateNotificationPreferencesMutationKey = () => [`/api/notification-preferences`] as const;
 
 export type UpdateNotificationPreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof updateNotificationPreferences>>>
 

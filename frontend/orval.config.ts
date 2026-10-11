@@ -12,7 +12,10 @@ export default defineConfig({
       target: "src/api/endpoints",
       schemas: "src/api/models",
       mock: true,
-      baseUrl: "http://127.0.0.1:8080",
+      // Relative so the same bundle works on localhost, previews and prod.
+      // The '/api' prefix is stripped by the Vite dev proxy in development and
+      // by the Netlify proxy in production, before the backend sees it.
+      baseUrl: "/api",
     },
   },
   zodSchemas: {

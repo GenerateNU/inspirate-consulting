@@ -88,7 +88,7 @@ export const getGetEssaysByGroupUrl = (essayGroupId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/essay-groups/${essayGroupId}/essays`
+  return `/api/essay-groups/${essayGroupId}/essays`
 }
 
 /**
@@ -115,7 +115,7 @@ export const getEssaysByGroup = async (essayGroupId: string, options?: RequestIn
 
 
 
-export const getGetEssaysByGroupKey = (essayGroupId: string,) => [`http://127.0.0.1:8080/essay-groups/${essayGroupId}/essays`] as const;
+export const getGetEssaysByGroupKey = (essayGroupId: string,) => [`/api/essay-groups/${essayGroupId}/essays`] as const;
 
 export type GetEssaysByGroupQueryResult = NonNullable<Awaited<ReturnType<typeof getEssaysByGroup>>>
 
@@ -159,7 +159,7 @@ export const getCreateEssayUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/essays`
+  return `/api/essays`
 }
 
 /**
@@ -205,7 +205,7 @@ export const getCreateEssayMutationFetcher = ( options?: RequestInit) => {
     return createEssay(arg, options);
   }
 }
-export const getCreateEssayMutationKey = () => [`http://127.0.0.1:8080/essays`] as const;
+export const getCreateEssayMutationKey = () => [`/api/essays`] as const;
 
 export type CreateEssayMutationResult = NonNullable<Awaited<ReturnType<typeof createEssay>>>
 
@@ -249,7 +249,7 @@ export const getUpdateEssayGroupUrl = (essayId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/essays/${essayId}/group`
+  return `/api/essays/${essayId}/group`
 }
 
 /**
@@ -296,7 +296,7 @@ export const getUpdateEssayGroupMutationFetcher = (essayId: string, options?: Re
     return updateEssayGroup(essayId, arg, options);
   }
 }
-export const getUpdateEssayGroupMutationKey = (essayId: string,) => [`http://127.0.0.1:8080/essays/${essayId}/group`] as const;
+export const getUpdateEssayGroupMutationKey = (essayId: string,) => [`/api/essays/${essayId}/group`] as const;
 
 export type UpdateEssayGroupMutationResult = NonNullable<Awaited<ReturnType<typeof updateEssayGroup>>>
 
@@ -340,7 +340,7 @@ export const getUpdateEssayStatusUrl = (essayId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/essays/${essayId}/status`
+  return `/api/essays/${essayId}/status`
 }
 
 /**
@@ -387,7 +387,7 @@ export const getUpdateEssayStatusMutationFetcher = (essayId: string, options?: R
     return updateEssayStatus(essayId, arg, options);
   }
 }
-export const getUpdateEssayStatusMutationKey = (essayId: string,) => [`http://127.0.0.1:8080/essays/${essayId}/status`] as const;
+export const getUpdateEssayStatusMutationKey = (essayId: string,) => [`/api/essays/${essayId}/status`] as const;
 
 export type UpdateEssayStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateEssayStatus>>>
 
@@ -431,7 +431,7 @@ export const getGetEssaysFromStudentUrl = (studentId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/students/${studentId}/essays`
+  return `/api/students/${studentId}/essays`
 }
 
 /**
@@ -458,7 +458,7 @@ export const getEssaysFromStudent = async (studentId: string, options?: RequestI
 
 
 
-export const getGetEssaysFromStudentKey = (studentId: string,) => [`http://127.0.0.1:8080/students/${studentId}/essays`] as const;
+export const getGetEssaysFromStudentKey = (studentId: string,) => [`/api/students/${studentId}/essays`] as const;
 
 export type GetEssaysFromStudentQueryResult = NonNullable<Awaited<ReturnType<typeof getEssaysFromStudent>>>
 

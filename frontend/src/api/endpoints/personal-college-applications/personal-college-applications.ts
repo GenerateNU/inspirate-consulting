@@ -85,7 +85,7 @@ export const getListPersonalCollegeApplicationsUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/applications`
+  return `/api/applications`
 }
 
 /**
@@ -112,7 +112,7 @@ export const listPersonalCollegeApplications = async ( options?: RequestInit): P
 
 
 
-export const getListPersonalCollegeApplicationsKey = () => [`http://127.0.0.1:8080/applications`] as const;
+export const getListPersonalCollegeApplicationsKey = () => [`/api/applications`] as const;
 
 export type ListPersonalCollegeApplicationsQueryResult = NonNullable<Awaited<ReturnType<typeof listPersonalCollegeApplications>>>
 
@@ -156,7 +156,7 @@ export const getCreatePersonalCollegeApplicationUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/applications`
+  return `/api/applications`
 }
 
 /**
@@ -202,7 +202,7 @@ export const getCreatePersonalCollegeApplicationMutationFetcher = ( options?: Re
     return createPersonalCollegeApplication(arg, options);
   }
 }
-export const getCreatePersonalCollegeApplicationMutationKey = () => [`http://127.0.0.1:8080/applications`] as const;
+export const getCreatePersonalCollegeApplicationMutationKey = () => [`/api/applications`] as const;
 
 export type CreatePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof createPersonalCollegeApplication>>>
 
