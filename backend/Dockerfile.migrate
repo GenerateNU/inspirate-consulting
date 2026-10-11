@@ -4,17 +4,30 @@
 # database. Run as a one-off container before the backend starts, so a failed
 # migration fails the preview rather than leaving the app on an old schema.
 #
-# Production migrations are applied from the release workflow against Supabase.
-FROM alpine:3.22
+# Production migrations are applied by hand against Supabase (make db-push).
+#
+# Debian rather than Alpine on purpose: the Supabase CLI is dynamically linked
+# against glibc, so on musl it fails with a bare "supabase: not found" that
+# looks like the binary is missing rather than unrunnable.
+FROM debian:bookworm-slim
 
 # Pinned so a preview cannot start failing because upstream cut a release.
 ARG SUPABASE_CLI_VERSION=2.117.0
 
-RUN apk add --no-cache ca-certificates \
- && wget -qO /tmp/supabase.tar.gz \
-      "https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_${SUPABASE_CLI_VERSION}_linux_amd64.tar.gz" \
+# Set by BuildKit (amd64 on CI and the droplet, arm64 on an Apple Silicon Mac).
+# Hardcoding amd64 builds an image half the team cannot run locally.
+ARG TARGETARCH
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl \
+ && curl -fsSL -o /tmp/supabase.tar.gz \
+      "https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_${SUPABASE_CLI_VERSION}_linux_${TARGETARCH}.tar.gz" \
  && tar -xzf /tmp/supabase.tar.gz -C /usr/local/bin supabase \
- && rm /tmp/supabase.tar.gz
+ && rm /tmp/supabase.tar.gz \
+ && apt-get purge -y curl \
+ && apt-get autoremove -y \
+ && rm -rf /var/lib/apt/lists/* \
+ && supabase --version
 
 WORKDIR /app
 
