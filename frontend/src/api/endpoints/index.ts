@@ -16,6 +16,7 @@ export * from './login/login';
 export * from './logout/logout';
 export * from './media/media';
 export * from './media-access/media-access';
+export * from './notifications/notifications';
 export * from './personal-college-applications/personal-college-applications';
 export * from './reset-pass/reset-pass';
 export * from './students/students';

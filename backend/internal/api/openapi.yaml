@@ -1160,6 +1160,48 @@ components:
         - s3_key
         - upload_url
       type: object
+    QueueEmailNotificationRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/QueueEmailNotificationRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        due_date:
+          format: date-time
+          type: string
+        is_overdue:
+          type: boolean
+        task_name:
+          type: string
+        user_email:
+          type: string
+      required:
+        - user_email
+        - task_name
+        - due_date
+        - is_overdue
+      type: object
+    QueueEmailNotificationResponseBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/QueueEmailNotificationResponseBody.json
+          format: uri
+          readOnly: true
+          type: string
+        message_id:
+          type:
+            - string
+            - "null"
+      required:
+        - message_id
+      type: object
     RefundEssayReviewResponseBody:
       additionalProperties: false
       properties:
@@ -2416,6 +2458,31 @@ paths:
           description: Error
       tags:
         - User Notification Preferences
+  /queue/email-notification:
+    post:
+      description: Queue a single email notification to SQS
+      operationId: queue-notification-email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueueEmailNotificationRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueEmailNotificationResponseBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Notifications
   /reviews:
     post:
       description: Spend a student's review balance to open a review on an essay.
