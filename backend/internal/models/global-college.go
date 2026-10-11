@@ -73,7 +73,7 @@ type DeleteGlobalCollegeInput struct {
 type DeleteGlobalCollegeOutput struct{}
 
 type SearchGlobalCollegesInput struct {
-	Query string `query:"q" doc:"Search text to match against college names"`
+	Query string `query:"query" doc:"Search text to match against college names"`
 }
 
 type SearchGlobalCollegesOutput struct {
