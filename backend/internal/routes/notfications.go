@@ -3,7 +3,7 @@ package routes
 import (
 	"context"
 	"inspirate-consulting/internal/data/aws/sqsclient"
-	"inspirate-consulting/internal/handlers/notification.go"
+	notification "inspirate-consulting/internal/handlers/notifications"
 	"inspirate-consulting/internal/models"
 	"net/http"
 
@@ -20,7 +20,7 @@ func SetUpNotificationRoutes(api huma.API, sqsClient *sqsclient.SQSClient) {
 		Tags:        []string{"Notifications"},
 	}, func(ctx context.Context, input *models.QueueEmailNotificationInput) (*models.QueueEmailNotificationOutput, error) {
 		messageID, err := notificationHandler.QueueEmailNotification(ctx, &input.Body)
-		if(err != nil){
+		if err != nil {
 			return nil, err
 		}
 

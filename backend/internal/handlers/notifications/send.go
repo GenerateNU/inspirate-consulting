@@ -5,9 +5,9 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (h *Handler) QueueEmailNotification(ctx context.Context, body *models.QueueEmailNotificationRequestBody)(*string, error){
+func (h *Handler) QueueEmailNotification(ctx context.Context, body *models.QueueEmailNotificationRequestBody) (*string, error) {
 	messageId, err := h.SQSClient.SendEmailNotification(ctx, body)
-	if(err != nil){
+	if err != nil {
 		return nil, err
 	}
 
