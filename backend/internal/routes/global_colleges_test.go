@@ -45,7 +45,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
 			return in.SchoolName == "Northeastern University" && in.SchoolLocation == "Boston, MA"
-		})).Return(&models.GlobalCollege{
+		}), mock.Anything).Return(&models.GlobalCollege{
 			ID:             1,
 			CreatedAt:      createdAt,
 			UpdatedAt:      createdAt,
@@ -91,7 +91,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
 			return in.SchoolName == "Duplicate University"
-		})).Return(nil, errs.Conflict("global college", "school_name/school_location", "Duplicate University / Dupe City, DC"))
+		}), mock.Anything).Return(nil, errs.Conflict("global college", "school_name/school_location", "Duplicate University / Dupe City, DC"))
 
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
