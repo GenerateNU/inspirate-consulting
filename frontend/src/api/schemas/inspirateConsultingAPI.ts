@@ -815,12 +815,39 @@ export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
 /**
  * Get a student's to-do items
  */
+export const getTodoItemsQueryStatusDefault = `all`;
+export const getTodoItemsQuerySortByDefault = `created_at`;
+export const getTodoItemsQuerySortOrderDefault = `desc`;
+export const getTodoItemsQueryLimitDefault = 20;
+export const getTodoItemsQueryLimitMax = 100;
+
+export const getTodoItemsQueryOffsetDefault = 0;
+export const getTodoItemsQueryOffsetMin = 0;
+
+
+
+export const GetTodoItemsQueryParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Student whose to-do items to return; defaults to the authenticated student')),
+  "status": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['all', 'completed', 'incomplete']), getTodoItemsQueryStatusDefault).check(/*#__PURE__*/ zod.describe('Filter by completion status')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return items linked to this essay')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return items linked to this media')),
+  "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Only return items linked to this college')),
+  "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['essay', 'media', 'college'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
+  "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['created_at', 'deadline', 'completed_at', 'updated_at']), getTodoItemsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
+  "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), getTodoItemsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(getTodoItemsQueryLimitMax)), getTodoItemsQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of to-do items to return')),
+  "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(getTodoItemsQueryOffsetMin)), getTodoItemsQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of to-do items to skip before returning results'))
+})
+
 export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
@@ -835,6 +862,9 @@ export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponse
 export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay this task is for; at most one of essay_id, media_id, global_college_id')),
+  "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College this task is for; at most one of essay_id, media_id, global_college_id')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Media this task is for; at most one of essay_id, media_id, global_college_id')),
   "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "todo_description": /*#__PURE__*/ zod.string(),
   "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
@@ -845,7 +875,10 @@ export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
@@ -869,7 +902,10 @@ export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
