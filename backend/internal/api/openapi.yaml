@@ -360,6 +360,16 @@ components:
         deadline:
           format: date-time
           type: string
+        essay_id:
+          description: Essay this task is for; at most one of essay_id, media_id, global_college_id
+          type: string
+        global_college_id:
+          description: College this task is for; at most one of essay_id, media_id, global_college_id
+          format: int64
+          type: integer
+        media_id:
+          description: Media this task is for; at most one of essay_id, media_id, global_college_id
+          type: string
         student_id:
           type: string
         todo_description:
@@ -1206,8 +1216,21 @@ components:
           type:
             - string
             - "null"
+        essay_id:
+          type:
+            - string
+            - "null"
+        global_college_id:
+          format: int64
+          type:
+            - integer
+            - "null"
         id:
           type: string
+        media_id:
+          type:
+            - string
+            - "null"
         student_id:
           type: string
         todo_description:
@@ -1226,6 +1249,9 @@ components:
         - todo_description
         - completed_at
         - deadline
+        - essay_id
+        - media_id
+        - global_college_id
       type: object
     UpdateChatMessageReadInputBody:
       additionalProperties: false
@@ -2432,6 +2458,104 @@ paths:
     get:
       description: Get a student's to-do items
       operationId: get-todo-items
+      parameters:
+        - description: Student whose to-do items to return; defaults to the authenticated student
+          explode: false
+          in: query
+          name: student_id
+          schema:
+            description: Student whose to-do items to return; defaults to the authenticated student
+            type: string
+        - description: Filter by completion status
+          explode: false
+          in: query
+          name: status
+          schema:
+            default: all
+            description: Filter by completion status
+            enum:
+              - all
+              - completed
+              - incomplete
+            type: string
+        - description: Only return items linked to this essay
+          explode: false
+          in: query
+          name: essay_id
+          schema:
+            description: Only return items linked to this essay
+            type: string
+        - description: Only return items linked to this media
+          explode: false
+          in: query
+          name: media_id
+          schema:
+            description: Only return items linked to this media
+            type: string
+        - description: Only return items linked to this college
+          explode: false
+          in: query
+          name: global_college_id
+          schema:
+            description: Only return items linked to this college
+            format: int64
+            type: integer
+        - description: Only return items linked to any item of this type
+          explode: false
+          in: query
+          name: linked_to
+          schema:
+            description: Only return items linked to any item of this type
+            enum:
+              - essay
+              - media
+              - college
+            type: string
+        - description: Field to sort by
+          explode: false
+          in: query
+          name: sort_by
+          schema:
+            default: created_at
+            description: Field to sort by
+            enum:
+              - created_at
+              - deadline
+              - completed_at
+              - updated_at
+            type: string
+        - description: Sort direction
+          explode: false
+          in: query
+          name: sort_order
+          schema:
+            default: desc
+            description: Sort direction
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Maximum number of to-do items to return
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 20
+            description: Maximum number of to-do items to return
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: Number of to-do items to skip before returning results
+          explode: false
+          in: query
+          name: offset
+          schema:
+            default: 0
+            description: Number of to-do items to skip before returning results
+            format: int64
+            minimum: 0
+            type: integer
       responses:
         "200":
           content:

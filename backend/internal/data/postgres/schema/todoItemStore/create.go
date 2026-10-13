@@ -21,6 +21,9 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.Cr
 		item.UserID,
 		item.TodoDescription,
 		item.Deadline,
+		item.EssayID,
+		item.MediaID,
+		item.GlobalCollegeID,
 	).Scan(
 		&createdItem.ID,
 		&createdItem.CreatedAt,
@@ -30,6 +33,9 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.Cr
 		&createdItem.TodoDescription,
 		&createdItem.CompletedAt,
 		&createdItem.Deadline,
+		&createdItem.EssayID,
+		&createdItem.MediaID,
+		&createdItem.GlobalCollegeID,
 	)
 	if err != nil {
 		return nil, err
