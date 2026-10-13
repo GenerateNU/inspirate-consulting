@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS preferences;
 CREATE TEMPORARY TABLE preferences AS
 SELECT n.email_enabled, n.user_id, n.notify_past_due
 FROM notification_preferences AS n
