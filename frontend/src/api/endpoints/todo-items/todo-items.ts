@@ -96,7 +96,7 @@ export const getGetTodoItemsUrl = (params?: GetTodoItemsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/todo-items?${stringifiedParams}` : `http://127.0.0.1:8080/todo-items`
+  return stringifiedParams.length > 0 ? `/api/todo-items?${stringifiedParams}` : `/api/todo-items`
 }
 
 /**
@@ -123,7 +123,7 @@ export const getTodoItems = async (params?: GetTodoItemsParams, options?: Reques
 
 
 
-export const getGetTodoItemsKey = (params?: GetTodoItemsParams,) => [`http://127.0.0.1:8080/todo-items`, ...(params ? [params]: [])] as const;
+export const getGetTodoItemsKey = (params?: GetTodoItemsParams,) => [`/api/todo-items`, ...(params ? [params]: [])] as const;
 
 export type GetTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof getTodoItems>>>
 
@@ -167,7 +167,7 @@ export const getCreateTodoItemUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/todo-items`
+  return `/api/todo-items`
 }
 
 /**
@@ -213,7 +213,7 @@ export const getCreateTodoItemMutationFetcher = ( options?: RequestInit) => {
     return createTodoItem(arg, options);
   }
 }
-export const getCreateTodoItemMutationKey = () => [`http://127.0.0.1:8080/todo-items`] as const;
+export const getCreateTodoItemMutationKey = () => [`/api/todo-items`] as const;
 
 export type CreateTodoItemMutationResult = NonNullable<Awaited<ReturnType<typeof createTodoItem>>>
 
@@ -264,7 +264,7 @@ export const getSearchTodoItemsUrl = (params: SearchTodoItemsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/todo-items/search?${stringifiedParams}` : `http://127.0.0.1:8080/todo-items/search`
+  return stringifiedParams.length > 0 ? `/api/todo-items/search?${stringifiedParams}` : `/api/todo-items/search`
 }
 
 /**
@@ -291,7 +291,7 @@ export const searchTodoItems = async (params: SearchTodoItemsParams, options?: R
 
 
 
-export const getSearchTodoItemsKey = (params: SearchTodoItemsParams,) => [`http://127.0.0.1:8080/todo-items/search`, ...(params ? [params]: [])] as const;
+export const getSearchTodoItemsKey = (params: SearchTodoItemsParams,) => [`/api/todo-items/search`, ...(params ? [params]: [])] as const;
 
 export type SearchTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof searchTodoItems>>>
 
@@ -335,7 +335,7 @@ export const getUpdateTodoItemCompletedUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/todo-items/${id}`
+  return `/api/todo-items/${id}`
 }
 
 /**
@@ -382,7 +382,7 @@ export const getUpdateTodoItemCompletedMutationFetcher = (id: string, options?: 
     return updateTodoItemCompleted(id, arg, options);
   }
 }
-export const getUpdateTodoItemCompletedMutationKey = (id: string,) => [`http://127.0.0.1:8080/todo-items/${id}`] as const;
+export const getUpdateTodoItemCompletedMutationKey = (id: string,) => [`/api/todo-items/${id}`] as const;
 
 export type UpdateTodoItemCompletedMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemCompleted>>>
 

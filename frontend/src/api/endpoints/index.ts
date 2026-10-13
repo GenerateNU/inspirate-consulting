@@ -11,6 +11,7 @@ export * from './essays/essays';
 export * from './extracurriculars/extracurriculars';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
+export * from './health/health';
 export * from './login/login';
 export * from './logout/logout';
 export * from './media/media';

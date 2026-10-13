@@ -95,7 +95,7 @@ export const getGetMediaAccessUrl = (params?: GetMediaAccessParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/media-access?${stringifiedParams}` : `http://127.0.0.1:8080/media-access`
+  return stringifiedParams.length > 0 ? `/api/media-access?${stringifiedParams}` : `/api/media-access`
 }
 
 /**
@@ -122,7 +122,7 @@ export const getMediaAccess = async (params?: GetMediaAccessParams, options?: Re
 
 
 
-export const getGetMediaAccessKey = (params?: GetMediaAccessParams,) => [`http://127.0.0.1:8080/media-access`, ...(params ? [params]: [])] as const;
+export const getGetMediaAccessKey = (params?: GetMediaAccessParams,) => [`/api/media-access`, ...(params ? [params]: [])] as const;
 
 export type GetMediaAccessQueryResult = NonNullable<Awaited<ReturnType<typeof getMediaAccess>>>
 
@@ -166,7 +166,7 @@ export const getCreateMediaAccessUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/media-access`
+  return `/api/media-access`
 }
 
 /**
@@ -212,7 +212,7 @@ export const getCreateMediaAccessMutationFetcher = ( options?: RequestInit) => {
     return createMediaAccess(arg, options);
   }
 }
-export const getCreateMediaAccessMutationKey = () => [`http://127.0.0.1:8080/media-access`] as const;
+export const getCreateMediaAccessMutationKey = () => [`/api/media-access`] as const;
 
 export type CreateMediaAccessMutationResult = NonNullable<Awaited<ReturnType<typeof createMediaAccess>>>
 
@@ -256,7 +256,7 @@ export const getDeleteMediaAccessUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/media-access/${id}`
+  return `/api/media-access/${id}`
 }
 
 /**
@@ -288,7 +288,7 @@ export const getDeleteMediaAccessMutationFetcher = (id: string, options?: Reques
     return deleteMediaAccess(id, options);
   }
 }
-export const getDeleteMediaAccessMutationKey = (id: string,) => [`http://127.0.0.1:8080/media-access/${id}`] as const;
+export const getDeleteMediaAccessMutationKey = (id: string,) => [`/api/media-access/${id}`] as const;
 
 export type DeleteMediaAccessMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMediaAccess>>>
 

@@ -55,7 +55,7 @@ export const getLogoutUserUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/user/logout`
+  return `/api/user/logout`
 }
 
 /**
@@ -87,7 +87,7 @@ export const getLogoutUserMutationFetcher = ( options?: RequestInit) => {
     return logoutUser(options);
   }
 }
-export const getLogoutUserMutationKey = () => [`http://127.0.0.1:8080/user/logout`] as const;
+export const getLogoutUserMutationKey = () => [`/api/user/logout`] as const;
 
 export type LogoutUserMutationResult = NonNullable<Awaited<ReturnType<typeof logoutUser>>>
 

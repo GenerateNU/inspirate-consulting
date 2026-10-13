@@ -1,0 +1,30 @@
+# Production backend for this project, running on the shared droplet.
+#
+# One of these per project, each in its own directory under /opt. Projects are
+# isolated as separate compose projects but share the `edge` network, Caddy,
+# and the preview database from deploy/shared.
+#
+# Production DATA is not here -- DB_* in backend.env points at Supabase.
+name: inspirate-consulting
+
+services:
+  backend:
+    # Set by the deploy workflow to an immutable GHCR tag, so a rollback is
+    # just re-running the deploy with an older tag.
+    image: ${BACKEND_IMAGE:?set BACKEND_IMAGE}
+    container_name: inspirate-consulting-backend
+    restart: unless-stopped
+    env_file:
+      - backend.env
+    networks:
+      - edge
+    labels:
+      # Caddy picks these up from the Docker socket and provisions TLS for the
+      # hostname automatically, as long as DNS already points here.
+      caddy: ${API_DOMAIN:?set API_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+
+networks:
+  edge:
+    name: edge
+    external: true

@@ -1,0 +1,165 @@
+# Production deploy: backend to the droplet, frontend to Netlify.
+#
+# Publishing a GitHub Release ships both halves together. The image is built
+# from the exact commit the tag points at, so what ships is always what was
+# tagged.
+#
+# Migrations are NOT run here. Schema changes go to Supabase by hand
+# (`make db-push` from backend/) so a TL reviews them before a release.
+name: Deploy production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag, branch or SHA to deploy (use an older tag to roll back)
+        required: true
+        default: main
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy backend and frontend
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      # The frontend is what users actually visit.
+      url: ${{ vars.PUBLIC_FRONTEND_URL }}
+    steps:
+      - name: Check out the ref being deployed
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      # github.sha points at the workflow's own ref, not the one checked out,
+      # so a manual deploy of an older tag would otherwise be mislabelled.
+      - name: Resolve the deployed commit
+        run: echo "DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      # GHCR repository names must be lowercase, but github.repository keeps the
+      # org's capitalisation (GenerateNU), which buildx rejects outright.
+      - name: Compute the image repository
+        run: echo "IMAGE_REPO=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The default builder uses the `docker` driver, which cannot export the
+      # GHA build cache below. Buildx switches to `docker-container`, which can.
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Tagged by commit rather than `latest`, so the running version is always
+      # identifiable and a rollback is just re-running this with an older ref.
+      - name: Build and push the backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_REPO }}/backend:${{ env.DEPLOY_SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pinning the host key stops a machine impersonating the droplet from
+          # harvesting the deploy key; StrictHostKeyChecking=no would accept any.
+          echo "${{ secrets.DROPLET_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy the backend
+        env:
+          DROPLET: ${{ vars.DROPLET_USER }}@${{ vars.DROPLET_HOST }}
+          IMAGE: ${{ env.IMAGE_REPO }}/backend:${{ env.DEPLOY_SHA }}
+          API_DOMAIN: ${{ vars.API_DOMAIN }}
+        run: |
+          set -euo pipefail
+          ssh "$DROPLET" "mkdir -p /opt/inspirate-consulting"
+
+          # Fail with something actionable rather than a compose error about a
+          # missing env file. backend.env is placed by hand during setup and is
+          # deliberately not in the repo.
+          ssh "$DROPLET" 'test -r /opt/inspirate-consulting/backend.env' || {
+            echo "::error::/opt/inspirate-consulting/backend.env is missing on the droplet. See deploy/README.md, 'Set the project up'."
+            exit 1
+          }
+
+          # Ship the compose file too, so the droplet runs what this commit
+          # describes rather than drifting from a hand-edited copy.
+          scp deploy/app/docker-compose.yml "$DROPLET:/opt/inspirate-consulting/docker-compose.yml"
+          ssh "$DROPLET" \
+            "cd /opt/inspirate-consulting \
+             && BACKEND_IMAGE='$IMAGE' API_DOMAIN='$API_DOMAIN' docker compose up -d --pull always \
+             && docker image prune -f"
+
+      # Gate the frontend on a healthy API: it should never go live against a
+      # backend that failed to start.
+      - name: Wait for the backend to be healthy
+        env:
+          API_DOMAIN: ${{ vars.API_DOMAIN }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            if curl -fsS "https://${API_DOMAIN}/api/v1/health" >/dev/null; then
+              echo "healthy after ${attempt} attempt(s)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Backend never became healthy at https://${API_DOMAIN}/api/v1/health"
+          exit 1
+
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.5"
+
+      - name: Build the frontend
+        working-directory: frontend
+        env:
+          API_PROXY_TARGET: ${{ vars.API_PROXY_TARGET }}
+        run: |
+          set -euo pipefail
+          bun install --frozen-lockfile
+          bun run build
+          sh scripts/netlify-redirects.sh
+
+      - name: Deploy the frontend to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+        run: |
+          set -euo pipefail
+          npx --yes netlify-cli@latest deploy \
+            --prod \
+            --no-build \
+            --dir frontend/dist \
+            --message "release ${{ github.event.release.tag_name || inputs.ref }}"
+
+      - name: Summarize
+        run: |
+          {
+            echo "### Deployed to production"
+            echo ""
+            echo "- Ref: \`${{ github.event.release.tag_name || inputs.ref }}\` (\`${DEPLOY_SHA:0:7}\`)"
+            echo "- API: https://${{ vars.API_DOMAIN }}"
+            echo "- Frontend: ${{ vars.PUBLIC_FRONTEND_URL }}"
+          } >> "$GITHUB_STEP_SUMMARY"

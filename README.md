@@ -13,6 +13,10 @@ if one wishes to develop vs to deploy).
 
 Once completed, please reach out to a _Technical Chief_ if you wish to have some aid deploying.
 
+This repo deploys the backend to a shared DigitalOcean droplet and the frontend to Netlify. Publishing a GitHub
+Release ships production; every pull request gets its own preview backend, preview database, and frontend preview.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for day-to-day usage and [deploy/](deploy/) for the droplet itself.
+
 ## Documentation
 Documentation, style-guides, and best practices should be kept in a repo level folder `docs/`. It is crucial to have
 your team reference these docs extensively to provide a consistent styling of code across the repo.

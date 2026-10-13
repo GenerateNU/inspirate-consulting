@@ -86,7 +86,7 @@ export const getListExtracurricularsUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/extracurriculars`
+  return `/api/extracurriculars`
 }
 
 /**
@@ -113,7 +113,7 @@ export const listExtracurriculars = async ( options?: RequestInit): Promise<list
 
 
 
-export const getListExtracurricularsKey = () => [`http://127.0.0.1:8080/extracurriculars`] as const;
+export const getListExtracurricularsKey = () => [`/api/extracurriculars`] as const;
 
 export type ListExtracurricularsQueryResult = NonNullable<Awaited<ReturnType<typeof listExtracurriculars>>>
 
@@ -157,7 +157,7 @@ export const getUpdateExtracurricularUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/extracurriculars/${id}`
+  return `/api/extracurriculars/${id}`
 }
 
 /**
@@ -204,7 +204,7 @@ export const getUpdateExtracurricularMutationFetcher = (id: number, options?: Re
     return updateExtracurricular(id, arg, options);
   }
 }
-export const getUpdateExtracurricularMutationKey = (id: number,) => [`http://127.0.0.1:8080/extracurriculars/${id}`] as const;
+export const getUpdateExtracurricularMutationKey = (id: number,) => [`/api/extracurriculars/${id}`] as const;
 
 export type UpdateExtracurricularMutationResult = NonNullable<Awaited<ReturnType<typeof updateExtracurricular>>>
 
@@ -248,7 +248,7 @@ export const getCreateExtracurricularUrl = (studentID: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/extracurriculars/${studentID}`
+  return `/api/extracurriculars/${studentID}`
 }
 
 /**
@@ -295,7 +295,7 @@ export const getCreateExtracurricularMutationFetcher = (studentID: string, optio
     return createExtracurricular(studentID, arg, options);
   }
 }
-export const getCreateExtracurricularMutationKey = (studentID: string,) => [`http://127.0.0.1:8080/extracurriculars/${studentID}`] as const;
+export const getCreateExtracurricularMutationKey = (studentID: string,) => [`/api/extracurriculars/${studentID}`] as const;
 
 export type CreateExtracurricularMutationResult = NonNullable<Awaited<ReturnType<typeof createExtracurricular>>>
 

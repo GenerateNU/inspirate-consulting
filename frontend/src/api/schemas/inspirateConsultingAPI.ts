@@ -8,6 +8,15 @@
 import * as zod from 'zod/mini';
 
 /**
+ * Report whether the API is running.
+ */
+export const HealthCheckResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "status": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Liveness status of the API'))
+})
+
+
+/**
  * List all college applications for the authenticated student.
  */
 export const ListPersonalCollegeApplicationsResponseItem = /*#__PURE__*/ zod.object({

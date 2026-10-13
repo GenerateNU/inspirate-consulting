@@ -83,7 +83,7 @@ export const getResetUserPasswordUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/user/reset-password`
+  return `/api/user/reset-password`
 }
 
 /**
@@ -129,7 +129,7 @@ export const getResetUserPasswordMutationFetcher = ( options?: RequestInit) => {
     return resetUserPassword(arg, options);
   }
 }
-export const getResetUserPasswordMutationKey = () => [`http://127.0.0.1:8080/user/reset-password`] as const;
+export const getResetUserPasswordMutationKey = () => [`/api/user/reset-password`] as const;
 
 export type ResetUserPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof resetUserPassword>>>
 
@@ -173,7 +173,7 @@ export const getForcePasswordResetUrl = (supabaseId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/user/${supabaseId}/force-password-reset`
+  return `/api/user/${supabaseId}/force-password-reset`
 }
 
 /**
@@ -205,7 +205,7 @@ export const getForcePasswordResetMutationFetcher = (supabaseId: string, options
     return forcePasswordReset(supabaseId, options);
   }
 }
-export const getForcePasswordResetMutationKey = (supabaseId: string,) => [`http://127.0.0.1:8080/user/${supabaseId}/force-password-reset`] as const;
+export const getForcePasswordResetMutationKey = (supabaseId: string,) => [`/api/user/${supabaseId}/force-password-reset`] as const;
 
 export type ForcePasswordResetMutationResult = NonNullable<Awaited<ReturnType<typeof forcePasswordReset>>>
 

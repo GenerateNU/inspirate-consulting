@@ -91,7 +91,7 @@ export const getListChatsUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/chats`
+  return `/api/chats`
 }
 
 /**
@@ -118,7 +118,7 @@ export const listChats = async ( options?: RequestInit): Promise<listChatsRespon
 
 
 
-export const getListChatsKey = () => [`http://127.0.0.1:8080/chats`] as const;
+export const getListChatsKey = () => [`/api/chats`] as const;
 
 export type ListChatsQueryResult = NonNullable<Awaited<ReturnType<typeof listChats>>>
 
@@ -170,7 +170,7 @@ export const getListChatMessagesUrl = (userId: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/chats/${userId}/messages?${stringifiedParams}` : `http://127.0.0.1:8080/chats/${userId}/messages`
+  return stringifiedParams.length > 0 ? `/api/chats/${userId}/messages?${stringifiedParams}` : `/api/chats/${userId}/messages`
 }
 
 /**
@@ -199,7 +199,7 @@ export const listChatMessages = async (userId: string,
 
 
 export const getListChatMessagesKey = (userId: string,
-    params?: ListChatMessagesParams,) => [`http://127.0.0.1:8080/chats/${userId}/messages`, ...(params ? [params]: [])] as const;
+    params?: ListChatMessagesParams,) => [`/api/chats/${userId}/messages`, ...(params ? [params]: [])] as const;
 
 export type ListChatMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listChatMessages>>>
 
@@ -244,7 +244,7 @@ export const getMarkChatReadUrl = (userId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/chats/${userId}/read`
+  return `/api/chats/${userId}/read`
 }
 
 /**
@@ -276,7 +276,7 @@ export const getMarkChatReadMutationFetcher = (userId: string, options?: Request
     return markChatRead(userId, options);
   }
 }
-export const getMarkChatReadMutationKey = (userId: string,) => [`http://127.0.0.1:8080/chats/${userId}/read`] as const;
+export const getMarkChatReadMutationKey = (userId: string,) => [`/api/chats/${userId}/read`] as const;
 
 export type MarkChatReadMutationResult = NonNullable<Awaited<ReturnType<typeof markChatRead>>>
 
@@ -320,7 +320,7 @@ export const getCreateChatMessageUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/messages`
+  return `/api/messages`
 }
 
 /**
@@ -366,7 +366,7 @@ export const getCreateChatMessageMutationFetcher = ( options?: RequestInit) => {
     return createChatMessage(arg, options);
   }
 }
-export const getCreateChatMessageMutationKey = () => [`http://127.0.0.1:8080/messages`] as const;
+export const getCreateChatMessageMutationKey = () => [`/api/messages`] as const;
 
 export type CreateChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof createChatMessage>>>
 
@@ -410,7 +410,7 @@ export const getEditChatMessageUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/messages/${id}`
+  return `/api/messages/${id}`
 }
 
 /**
@@ -457,7 +457,7 @@ export const getEditChatMessageMutationFetcher = (id: string, options?: RequestI
     return editChatMessage(id, arg, options);
   }
 }
-export const getEditChatMessageMutationKey = (id: string,) => [`http://127.0.0.1:8080/messages/${id}`] as const;
+export const getEditChatMessageMutationKey = (id: string,) => [`/api/messages/${id}`] as const;
 
 export type EditChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof editChatMessage>>>
 
@@ -501,7 +501,7 @@ export const getUpdateChatMessageReadUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/messages/${id}/read`
+  return `/api/messages/${id}/read`
 }
 
 /**
@@ -548,7 +548,7 @@ export const getUpdateChatMessageReadMutationFetcher = (id: string, options?: Re
     return updateChatMessageRead(id, arg, options);
   }
 }
-export const getUpdateChatMessageReadMutationKey = (id: string,) => [`http://127.0.0.1:8080/messages/${id}/read`] as const;
+export const getUpdateChatMessageReadMutationKey = (id: string,) => [`/api/messages/${id}/read`] as const;
 
 export type UpdateChatMessageReadMutationResult = NonNullable<Awaited<ReturnType<typeof updateChatMessageRead>>>
 

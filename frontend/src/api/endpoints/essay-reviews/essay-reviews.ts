@@ -88,7 +88,7 @@ export const getGetEssayReviewStatusUrl = (essayId: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/essays/${essayId}/review-status`
+  return `/api/essays/${essayId}/review-status`
 }
 
 /**
@@ -115,7 +115,7 @@ export const getEssayReviewStatus = async (essayId: string, options?: RequestIni
 
 
 
-export const getGetEssayReviewStatusKey = (essayId: string,) => [`http://127.0.0.1:8080/essays/${essayId}/review-status`] as const;
+export const getGetEssayReviewStatusKey = (essayId: string,) => [`/api/essays/${essayId}/review-status`] as const;
 
 export type GetEssayReviewStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getEssayReviewStatus>>>
 
@@ -159,7 +159,7 @@ export const getRequestEssayReviewUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/reviews`
+  return `/api/reviews`
 }
 
 /**
@@ -205,7 +205,7 @@ export const getRequestEssayReviewMutationFetcher = ( options?: RequestInit) => 
     return requestEssayReview(arg, options);
   }
 }
-export const getRequestEssayReviewMutationKey = () => [`http://127.0.0.1:8080/reviews`] as const;
+export const getRequestEssayReviewMutationKey = () => [`/api/reviews`] as const;
 
 export type RequestEssayReviewMutationResult = NonNullable<Awaited<ReturnType<typeof requestEssayReview>>>
 
@@ -249,7 +249,7 @@ export const getCompleteEssayReviewUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/reviews/${id}/complete`
+  return `/api/reviews/${id}/complete`
 }
 
 /**
@@ -281,7 +281,7 @@ export const getCompleteEssayReviewMutationFetcher = (id: string, options?: Requ
     return completeEssayReview(id, options);
   }
 }
-export const getCompleteEssayReviewMutationKey = (id: string,) => [`http://127.0.0.1:8080/reviews/${id}/complete`] as const;
+export const getCompleteEssayReviewMutationKey = (id: string,) => [`/api/reviews/${id}/complete`] as const;
 
 export type CompleteEssayReviewMutationResult = NonNullable<Awaited<ReturnType<typeof completeEssayReview>>>
 
@@ -325,7 +325,7 @@ export const getRefundEssayReviewUrl = (id: string,) => {
 
 
 
-  return `http://127.0.0.1:8080/reviews/${id}/refund`
+  return `/api/reviews/${id}/refund`
 }
 
 /**
@@ -357,7 +357,7 @@ export const getRefundEssayReviewMutationFetcher = (id: string, options?: Reques
     return refundEssayReview(id, options);
   }
 }
-export const getRefundEssayReviewMutationKey = (id: string,) => [`http://127.0.0.1:8080/reviews/${id}/refund`] as const;
+export const getRefundEssayReviewMutationKey = (id: string,) => [`/api/reviews/${id}/refund`] as const;
 
 export type RefundEssayReviewMutationResult = NonNullable<Awaited<ReturnType<typeof refundEssayReview>>>
 

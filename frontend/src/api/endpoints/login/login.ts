@@ -83,7 +83,7 @@ export const getLoginUserUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/user/login`
+  return `/api/user/login`
 }
 
 /**
@@ -129,7 +129,7 @@ export const getLoginUserMutationFetcher = ( options?: RequestInit) => {
     return loginUser(arg, options);
   }
 }
-export const getLoginUserMutationKey = () => [`http://127.0.0.1:8080/user/login`] as const;
+export const getLoginUserMutationKey = () => [`/api/user/login`] as const;
 
 export type LoginUserMutationResult = NonNullable<Awaited<ReturnType<typeof loginUser>>>
 

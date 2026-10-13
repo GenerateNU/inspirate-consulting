@@ -1,0 +1,44 @@
+# Removes a PR's preview container and drops its database.
+#
+# Previews cost no money, but they do cost RAM and disk on a shared droplet,
+# so leaking them would eventually starve the other projects.
+name: Delete preview backend
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: droplet-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Delete preview backend
+    runs-on: ubuntu-latest
+    # Forked PRs cannot read secrets, so a deploy there would fail with a
+    # misleading auth error.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.DROPLET_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Tear the preview down
+        env:
+          DROPLET: ${{ vars.DROPLET_USER }}@${{ vars.DROPLET_HOST }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          ssh "$DROPLET" bash -s -- "$PR" < deploy/preview-down.sh

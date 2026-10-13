@@ -1,0 +1,22 @@
+# Netlify hosts the frontend: production, and an automatic deploy preview for
+# every pull request. The backend runs on the shared DigitalOcean droplet and
+# is reached through the /api proxy defined in frontend/scripts/netlify-redirects.sh.
+#
+# Deploy previews currently proxy to the PRODUCTION backend, because there are
+# no per-PR backends yet. See DEPLOYMENT.md before relying on previews for
+# anything destructive.
+
+[build]
+  base = "frontend/"
+  publish = "dist/"
+  command = "bun run build && sh scripts/netlify-redirects.sh"
+
+  # Production ships only when a GitHub Release is published, the same gate the
+  # backend uses -- so Git pushes to main must not auto-publish the frontend.
+  # `ignore` cannot be scoped per context, so it branches on $CONTEXT itself:
+  # exit 0 skips the build. Deploy previews return non-zero and build normally.
+  ignore = "[ \"$CONTEXT\" = \"production\" ]"
+
+[build.environment]
+  # Matches the bun that wrote frontend/bun.lock (lockfileVersion 1).
+  BUN_VERSION = "1.3.5"
