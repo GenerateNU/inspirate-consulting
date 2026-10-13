@@ -122,8 +122,12 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 		}
 
 		role, ok := claims.AppMetadata["role"].(string)
-		if !ok {
-			slog.Error("Failed to parse role", "err", ok)
+		if !ok || role == "" {
+			slog.Error("Failed to parse role", "sub", claims.Sub)
+			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Token Missing Role")
+			if err != nil {
+				slog.Error("Failed to write error", "err", err)
+			}
 			return
 		}
 
