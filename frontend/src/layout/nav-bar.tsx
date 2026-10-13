@@ -1,7 +1,10 @@
 import { NavLink } from "react-router-dom";
 
 const links = [
+  { to: "/greeting", label: "Greeting" },
   { to: "/essay", label: "Essays" },
+  { to: "/extracurriculars", label: "Extracurriculars" },
+  { to: "/create-extracurricular", label: "New Extracurricular" },
   { to: "/college-list", label: "Colleges" },
   { to: "/create-college", label: "Add College" },
   { to: "/colleges", label: "Applications" },
@@ -10,8 +13,12 @@ const links = [
   { to: "/create-task", label: "New Task" },
   { to: "/videos", label: "Videos" },
   { to: "/upload-video", label: "Upload Video" },
+  { to: "/student-media-list", label: "Student Media" },
+  { to: "/counselor-media-list", label: "Counselor Media" },
+  { to: "/upload-media", label: "Upload Media" },
   { to: "/student", label: "Student" },
   { to: "/counselor", label: "Counselor" },
+  { to: "/update-notification-preferences", label: "Notifications" },
   { to: "/login", label: "Log In" },
   { to: "/create-account", label: "Create Account" },
 ];
