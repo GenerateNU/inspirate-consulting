@@ -64,9 +64,10 @@ type LoginResponse struct {
 
 type LogoutInput struct{}
 
+// tokens stay in the cookie only, body returns the logged in user
 type LoginOutput struct {
 	SetCookie http.Cookie `header:"Set-Cookie"`
-	Body      *LoginResponse
+	Body      *User
 }
 
 type LogoutResponse struct {
