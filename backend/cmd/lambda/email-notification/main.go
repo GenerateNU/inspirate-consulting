@@ -32,7 +32,6 @@ func Handler(ctx context.Context, event events.SQSEvent) error {
 		}
 		subject, body := formatEmail(notification)
 
-		
 		if err := sendEmail(ctx, notification.UserEmail, subject, body); err != nil {
 			log.Printf("failed to send message %s: %v", record.MessageId, err)
 			return err
