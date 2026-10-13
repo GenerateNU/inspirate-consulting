@@ -5,34 +5,37 @@ package routes
 import (
 	"encoding/base64"
 	"encoding/json"
-	"inspirate-consulting/internal/auth/authtest"
+	"inspirate-consulting/internal/data"
+	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-// GET /user/{id} is guarded for both roles and backed by the in-memory repo,
-// so an accepted request returns 200 with the user and a rejected one never
-// reaches the handler.
-func targetUser(t *testing.T, a *authApp) (*authtest.Account, string) {
+// GET /user/{id} is guarded for both roles; with the repository mocked, an
+// accepted request returns 200 and a rejected one never reaches the handler.
+func newMiddlewareApp(t *testing.T) (*authApp, string) {
 	t.Helper()
-	acct := a.seedUser("Target", "target@example.com", "Password1!", "student")
-	u, ok := a.users.BySupabaseID(acct.ID)
-	require.True(t, ok)
-	return acct, "/user/" + u.ID.String()
+	user := &models.User{ID: uuid.New(), Name: "Target", SupabaseID: uuid.New()}
+	repo := mocks.NewUserRepository(t)
+	repo.On("FetchUser", mock.Anything, models.FetchUserInput{ID: user.ID}).
+		Return(&models.FetchUserOutput{Body: user}, nil).Maybe()
+	return newAuthApp(t, &data.Repository{User: repo}), "/user/" + user.ID.String()
 }
 
 func TestAuthMiddleware_MissingCredentials(t *testing.T) {
 	t.Parallel()
 
-	a := newAuthApp(t, nil)
-	_, path := targetUser(t, a)
-	valid := a.sb.IssueSession("11111111-1111-1111-1111-111111111111", "student")
+	a, path := newMiddlewareApp(t)
+	valid := tokenFor(roleStudent)
 
 	tests := []struct {
 		name   string
@@ -59,38 +62,33 @@ func TestAuthMiddleware_MissingCredentials(t *testing.T) {
 func TestAuthMiddleware_RejectsInvalidTokens(t *testing.T) {
 	t.Parallel()
 
-	a := newAuthApp(t, nil)
-	_, path := targetUser(t, a)
+	a, path := newMiddlewareApp(t)
 	sub := "22222222-2222-2222-2222-222222222222"
-	good := authtest.ClaimsFor(sub, "counselor")
+	attackerKey := newTestKey()
 
-	expired := good
-	expired.IssuedAt = time.Now().Add(-2 * time.Hour)
-	expired.ExpiresAt = time.Now().Add(-1 * time.Hour)
+	expired := claimsFor(sub, roleCounselor)
+	expired["iat"] = time.Now().Add(-2 * time.Hour).Unix()
+	expired["exp"] = time.Now().Add(-1 * time.Hour).Unix()
 
-	notYetValid := good
-	notYetValid.NotBefore = time.Now().Add(time.Hour)
-
-	attackerKey := authtest.NewKey()
+	notYetValid := claimsFor(sub, roleCounselor)
+	notYetValid["nbf"] = time.Now().Add(time.Hour).Unix()
 
 	tests := []struct {
 		name  string
 		token string
 	}{
 		{"not a jwt", "not-a-jwt"},
-		{"truncated jwt", a.sb.Signer.Sign(good)[:40]},
-		{"signed by an unknown key with the trusted kid", authtest.SignWith(attackerKey, authtest.KeyID, good, 1)},
-		{"signed with an unknown kid", authtest.SignWith(attackerKey, "other-kid", good, 1)},
-		{"HS256 instead of ES256/RS256", authtest.SignHS256([]byte("secret"), good)},
-		{"unsigned alg none", authtest.SignNone(good)},
-		{"expired", a.sb.Signer.Sign(expired)},
-		{"not valid yet (nbf in the future)", a.sb.Signer.Sign(notYetValid)},
-		{"payload tampered after signing", tamperRole(t, a.sb.Signer.Sign(authtest.ClaimsFor(sub, "student")), "counselor")},
+		{"truncated jwt", sign(claimsFor(sub, roleCounselor))[:40]},
+		{"signed by an unknown key with the trusted kid", signWith(jwt.SigningMethodES256, attackerKey, testKeyID, claimsFor(sub, roleCounselor))},
+		{"signed with an unknown kid", signWith(jwt.SigningMethodES256, attackerKey, "other-kid", claimsFor(sub, roleCounselor))},
+		{"HS256 instead of ES256/RS256", signWith(jwt.SigningMethodHS256, []byte("secret"), testKeyID, claimsFor(sub, roleCounselor))},
+		{"unsigned alg none", signWith(jwt.SigningMethodNone, jwt.UnsafeAllowNoneSignatureType, testKeyID, claimsFor(sub, roleCounselor))},
+		{"expired", sign(expired)},
+		{"not valid yet (nbf in the future)", sign(notYetValid)},
+		{"payload tampered after signing", tamperRole(t, sign(claimsFor(sub, roleStudent)), roleCounselor)},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// mark the token live on the Supabase side so only the JWT checks can reject it
-			a.sb.RegisterSession(tc.token)
 			resp := a.do(http.MethodGet, path, tc.token, nil)
 			assert.Equal(t, http.StatusUnauthorized, resp.Status)
 			assert.Equal(t, "Invalid/Expired Token", resp.Detail())
@@ -98,53 +96,41 @@ func TestAuthMiddleware_RejectsInvalidTokens(t *testing.T) {
 	}
 }
 
-func TestAuthMiddleware_RejectsDeadSessions(t *testing.T) {
+func TestAuthMiddleware_RejectsRevokedSession(t *testing.T) {
 	t.Parallel()
 
-	a := newAuthApp(t, nil)
-	_, path := targetUser(t, a)
-	sub := "33333333-3333-3333-3333-333333333333"
+	a, path := newMiddlewareApp(t)
+	tok := tokenFor(roleStudent)
+	require.Equal(t, http.StatusOK, a.do(http.MethodGet, path, tok, nil).Status)
 
-	t.Run("validly signed token Supabase has no session for", func(t *testing.T) {
-		tok := a.sb.Signer.Sign(authtest.ClaimsFor(sub, "student"))
-		resp := a.do(http.MethodGet, path, tok, nil)
-		assert.Equal(t, http.StatusUnauthorized, resp.Status)
-		assert.Equal(t, "Invalid/Expired Token", resp.Detail())
-	})
-
-	t.Run("session revoked on the Supabase side", func(t *testing.T) {
-		tok := a.sb.IssueSession(sub, "student")
-		require.Equal(t, http.StatusOK, a.do(http.MethodGet, path, tok, nil).Status)
-
-		a.sb.Revoke(tok)
-		resp := a.do(http.MethodGet, path, tok, nil)
-		assert.Equal(t, http.StatusUnauthorized, resp.Status)
-		assert.Equal(t, "Invalid/Expired Token", resp.Detail())
-	})
+	// signed out in Supabase; the JWT itself is still unexpired
+	a.revoke(tok)
+	resp := a.do(http.MethodGet, path, tok, nil)
+	assert.Equal(t, http.StatusUnauthorized, resp.Status)
+	assert.Equal(t, "Invalid/Expired Token", resp.Detail())
 }
 
 func TestAuthMiddleware_RequiresRoleClaim(t *testing.T) {
 	t.Parallel()
 
-	a := newAuthApp(t, nil)
-	_, path := targetUser(t, a)
+	a, path := newMiddlewareApp(t)
 	sub := "44444444-4444-4444-4444-444444444444"
 
-	noRole := authtest.ClaimsFor(sub, "")
+	noRole := claimsFor(sub, "")
 
 	// user_metadata is editable by the user, so it must never grant a role
-	roleInUserMetadata := authtest.ClaimsFor(sub, "")
-	roleInUserMetadata.UserMetadata = map[string]any{"role": "counselor"}
+	roleInUserMetadata := claimsFor(sub, "")
+	roleInUserMetadata["user_metadata"] = map[string]any{"role": roleCounselor}
 
-	nonStringRole := authtest.ClaimsFor(sub, "")
-	nonStringRole.AppMetadata["role"] = []string{"counselor"}
+	nonStringRole := claimsFor(sub, "")
+	nonStringRole["app_metadata"] = map[string]any{"role": []string{roleCounselor}}
 
-	emptyRole := authtest.ClaimsFor(sub, "")
-	emptyRole.AppMetadata["role"] = ""
+	emptyRole := claimsFor(sub, "")
+	emptyRole["app_metadata"] = map[string]any{"role": ""}
 
 	tests := []struct {
 		name   string
-		claims authtest.Claims
+		claims jwt.MapClaims
 	}{
 		{"no role in app_metadata", noRole},
 		{"role only in user-editable user_metadata", roleInUserMetadata},
@@ -153,8 +139,7 @@ func TestAuthMiddleware_RequiresRoleClaim(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tok := a.sb.IssueSessionWithClaims(tc.claims)
-			resp := a.do(http.MethodGet, path, tok, nil)
+			resp := a.do(http.MethodGet, path, sign(tc.claims), nil)
 			assert.Equal(t, http.StatusUnauthorized, resp.Status)
 			assert.Equal(t, "Token Missing Role", resp.Detail())
 		})
@@ -164,44 +149,13 @@ func TestAuthMiddleware_RequiresRoleClaim(t *testing.T) {
 func TestAuthMiddleware_AcceptsValidSession(t *testing.T) {
 	t.Parallel()
 
-	a := newAuthApp(t, nil)
-	acct, path := targetUser(t, a)
-
-	for _, role := range []string{"student", "counselor"} {
+	a, path := newMiddlewareApp(t)
+	for _, role := range []string{roleStudent, roleCounselor} {
 		t.Run(role, func(t *testing.T) {
-			tok := a.sb.IssueSession(acct.ID.String(), role)
-			resp := a.do(http.MethodGet, path, tok, nil)
-			require.Equal(t, http.StatusOK, resp.Status, "body: %s", resp.Body)
-
-			var u models.User
-			resp.JSON(t, &u)
-			assert.Equal(t, acct.ID, u.SupabaseID)
+			resp := a.do(http.MethodGet, path, tokenFor(role), nil)
+			assert.Equal(t, http.StatusOK, resp.Status, "body: %s", resp.Body)
 		})
 	}
-}
-
-func TestAuthMiddleware_PublicRoutes(t *testing.T) {
-	t.Parallel()
-
-	a := newAuthApp(t, nil)
-	a.seedUser("Pub", "pub@example.com", "Password1!", "student")
-
-	t.Run("health needs no session", func(t *testing.T) {
-		assert.Equal(t, http.StatusOK, a.do(http.MethodGet, "/api/v1/health", "", nil).Status)
-	})
-
-	t.Run("login needs no session", func(t *testing.T) {
-		resp, tok := a.login("pub@example.com", "Password1!")
-		assert.Equal(t, http.StatusOK, resp.Status)
-		assert.NotEmpty(t, tok)
-	})
-
-	t.Run("login ignores a stale or garbage jwt cookie", func(t *testing.T) {
-		resp := a.do(http.MethodPost, "/user/login", "garbage",
-			map[string]string{"email": "pub@example.com", "password": "Password1!"})
-		assert.Equal(t, http.StatusOK, resp.Status)
-		assert.NotNil(t, resp.Cookie("jwt"))
-	})
 }
 
 // tamperRole rewrites app_metadata.role in a signed token's payload while

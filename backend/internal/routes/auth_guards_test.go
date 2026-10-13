@@ -4,9 +4,9 @@ package routes
 
 import (
 	"fmt"
-	"inspirate-consulting/internal/auth/authtest"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/supabase"
 	"net/http"
 	"regexp"
 	"slices"
@@ -145,8 +145,8 @@ func deniedByGuard(resp apiResponse) bool {
 func TestRouteTable_CoversEveryRegisteredRoute(t *testing.T) {
 	t.Parallel()
 
-	authtest.SharedSigner()
-	_, api, err := SetupApp(config.Config{Supabase: authtest.NewFakeSupabase(authtest.SharedSigner())}, &data.Repository{})
+	signingKey()
+	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{})
 	require.NoError(t, err)
 
 	var registered []string
@@ -187,12 +187,27 @@ func TestGuards_ProtectedRoutesRequireLogin(t *testing.T) {
 	}
 }
 
+func TestGuards_PublicRoutesNeedNoSession(t *testing.T) {
+	t.Parallel()
+
+	a := newAuthApp(t, nil)
+	for _, r := range routeTable {
+		if r.access != public {
+			continue
+		}
+		t.Run(r.String(), func(t *testing.T) {
+			resp := a.do(r.method, r.concrete(), "", map[string]any{})
+			assert.False(t, deniedByGuard(resp), "got %d: %s", resp.Status, resp.Body)
+		})
+	}
+}
+
 func TestGuards_ProtectedRoutesRejectLoggedOutSession(t *testing.T) {
 	t.Parallel()
 
 	a := newAuthApp(t, nil)
-	tok := a.sb.IssueSession("55555555-5555-5555-5555-555555555555", roleCounselor)
-	a.sb.Revoke(tok)
+	tok := tokenFor(roleCounselor)
+	a.revoke(tok)
 
 	for _, r := range routeTable {
 		if r.access == public {
@@ -220,7 +235,7 @@ func TestGuards_RoleMatrix(t *testing.T) {
 		for _, role := range []string{roleStudent, roleCounselor, "admin"} {
 			t.Run(r.String()+" as "+role, func(t *testing.T) {
 				// fresh session per request: allowed calls like logout really end the session
-				tok := a.sb.IssueSession(subs[role], role)
+				tok := sign(claimsFor(subs[role], role))
 				resp := a.do(r.method, r.concrete(), tok, map[string]any{})
 				if r.allows(role) {
 					assert.False(t, deniedByGuard(resp),
