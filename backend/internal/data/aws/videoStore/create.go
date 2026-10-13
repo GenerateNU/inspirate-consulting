@@ -1,8 +1,8 @@
 package videoRepository
- 
+
 import (
 	"context"
- 
+
 	"inspirate-consulting/internal/data/aws/s3client"
 	"inspirate-consulting/internal/models"
 )

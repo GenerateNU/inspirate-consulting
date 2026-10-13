@@ -1,8 +1,8 @@
 package videoRepository
- 
+
 import (
 	"context"
- 
+
 	"inspirate-consulting/internal/models"
 )
 

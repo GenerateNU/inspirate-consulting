@@ -75,7 +75,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     splitAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-User-ID"},
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
@@ -92,7 +92,9 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	humaAPI := humafiber.New(app, humaConfig)
 
 	// Apply auth middleware — only affects routes registered after this point
-	if !config.TestMode {
+	if config.TestMode {
+		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI, config.TestMode))
+	} else {
 		verifier, err := auth.NewVerifier(os.Getenv("SUPABASE_URL"))
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
@@ -121,14 +123,20 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config, verifyRole auth.RoleVerifier) error {
 	SetUpGreetingRoutes(api, repo, verifyRole)
+	SetUpExtracurricularRoutes(api, repo)
 	SetUpEssayRoutes(api, repo, verifyRole)
+	SetUpEssayGroupRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo, verifyRole)
 	SetUpTodoItemRoutes(api, repo, verifyRole)
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole)
 	SetupUserRoutes(api, repo, &config, verifyRole)
 	SetUpVideoRoutes(api, repo, verifyRole)
+	SetUpMediaRoutes(api, repo)
+	SetUpMediaAccessRoutes(api, repo)
 	SetUpEssayReviewRoutes(api, repo, verifyRole)
 	SetUpStudentRoutes(api, repo, verifyRole)
+	SetUpChatMessageRoutes(api, repo)
+	SetUpNotificationPreferencesRoutes(api, repo)
 	SetupLoginRoutes(api, repo, &config)
 	SetupLogoutRoutes(api, repo, &config)
 	SetupResetPasswordRoutes(api, repo, &config, verifyRole)

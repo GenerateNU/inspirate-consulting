@@ -19,7 +19,9 @@ import type {
 import type {
   CreateEssayBody,
   ErrorModel,
+  EssayBody,
   EssayListBody,
+  UpdateEssayGroupBody,
   UpdateStatusBody
 } from '../../models';
 
@@ -62,7 +64,78 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
 
- export type createEssayResponse204 = {
+ export type getEssaysByGroupResponse200 = {
+  data: EssayListBody
+  status: 200
+}
+
+export type getEssaysByGroupResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type getEssaysByGroupResponseSuccess = (getEssaysByGroupResponse200) & {
+  headers: Headers;
+};
+export type getEssaysByGroupResponseError = (getEssaysByGroupResponseDefault) & {
+  headers: Headers;
+};
+
+export type getEssaysByGroupResponse = (getEssaysByGroupResponseSuccess | getEssaysByGroupResponseError)
+
+export const getGetEssaysByGroupUrl = (essayGroupId: string,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/essay-groups/${essayGroupId}/essays`
+}
+
+/**
+ * Shows all essays belonging to an essay group
+ */
+export const getEssaysByGroup = async (essayGroupId: string, options?: RequestInit): Promise<getEssaysByGroupResponse> => {
+
+  const res = await fetch(getGetEssaysByGroupUrl(essayGroupId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getEssaysByGroupResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getEssaysByGroupResponse
+}
+
+
+
+
+export const getGetEssaysByGroupKey = (essayGroupId: string,) => [`http://127.0.0.1:8080/essay-groups/${essayGroupId}/essays`] as const;
+
+export type GetEssaysByGroupQueryResult = NonNullable<Awaited<ReturnType<typeof getEssaysByGroup>>>
+
+export const useGetEssaysByGroup = <TError = Promise<ErrorModel>>(
+  essayGroupId: string, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getEssaysByGroup>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+) => {
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false && essayGroupId !== null && essayGroupId !== undefined
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetEssaysByGroupKey(essayGroupId) : null);
+  const swrFn = () => getEssaysByGroup(essayGroupId, fetchOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type createEssayResponse204 = {
   data: void
   status: 204
 }
@@ -152,17 +225,108 @@ export const useCreateEssay = <TError = Promise<ErrorModel>>(
     ...query
   }
 }
-export type updateEssayStatusResponse204 = {
-  data: void
-  status: 204
+export type updateEssayGroupResponse200 = {
+  data: EssayBody
+  status: 200
+}
+
+export type updateEssayGroupResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type updateEssayGroupResponseSuccess = (updateEssayGroupResponse200) & {
+  headers: Headers;
+};
+export type updateEssayGroupResponseError = (updateEssayGroupResponseDefault) & {
+  headers: Headers;
+};
+
+export type updateEssayGroupResponse = (updateEssayGroupResponseSuccess | updateEssayGroupResponseError)
+
+export const getUpdateEssayGroupUrl = (essayId: string,) => {
+
+
+
+
+  return `http://127.0.0.1:8080/essays/${essayId}/group`
+}
+
+/**
+ * Adds an essay to a group, moves it to another group, or removes it from its group
+ */
+export const updateEssayGroup = async (essayId: string,
+    updateEssayGroupBody: NonReadonly<UpdateEssayGroupBody>, options?: RequestInit): Promise<updateEssayGroupResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateEssayGroupUrl(essayId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateEssayGroupBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: updateEssayGroupResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as updateEssayGroupResponse
+}
+
+
+
+
+export const getUpdateEssayGroupMutationFetcher = (essayId: string, options?: RequestInit) => {
+  return (_: Key, { arg }: { arg: NonReadonly<UpdateEssayGroupBody> }) => {
+    return updateEssayGroup(essayId, arg, options);
+  }
+}
+export const getUpdateEssayGroupMutationKey = (essayId: string,) => [`http://127.0.0.1:8080/essays/${essayId}/group`] as const;
+
+export type UpdateEssayGroupMutationResult = NonNullable<Awaited<ReturnType<typeof updateEssayGroup>>>
+
+export const useUpdateEssayGroup = <TError = Promise<ErrorModel>>(
+  essayId: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updateEssayGroup>>, TError, Key, NonReadonly<UpdateEssayGroupBody>, Awaited<ReturnType<typeof updateEssayGroup>>> & { swrKey?: string }, fetch?: RequestInit}
+) => {
+
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getUpdateEssayGroupMutationKey(essayId);
+  const swrFn = getUpdateEssayGroupMutationFetcher(essayId, fetchOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type updateEssayStatusResponse200 = {
+  data: EssayBody
+  status: 200
 }
 
 export type updateEssayStatusResponseDefault = {
   data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 204>
+  status: Exclude<HTTPStatusCodes, 200>
 }
 
-export type updateEssayStatusResponseSuccess = (updateEssayStatusResponse204) & {
+export type updateEssayStatusResponseSuccess = (updateEssayStatusResponse200) & {
   headers: Headers;
 };
 export type updateEssayStatusResponseError = (updateEssayStatusResponseDefault) & {
@@ -211,7 +375,7 @@ const res = await fetch(getUpdateEssayStatusUrl(essayId),
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  const data: updateEssayStatusResponse['data'] = body ? JSON.parse(body) : undefined
+  const data: updateEssayStatusResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as updateEssayStatusResponse
 }
 

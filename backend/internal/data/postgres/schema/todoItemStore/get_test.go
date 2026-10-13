@@ -50,7 +50,7 @@ func TestGetTodoItemsByStudent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("setup CreateTodoItem(%q) failed: %v", input.TodoDescription, err)
 		}
-		
+
 		created = append(created, *output)
 	}
 

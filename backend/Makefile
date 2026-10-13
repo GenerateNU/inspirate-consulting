@@ -175,7 +175,7 @@ test-clean:
 # ------------------------
 mocks:
 	@echo "$(BOLD)Generating repository mocks with Mockery...$(NC)"
-	@mockery --name=GreetingRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=greetingMock.go
+	@go run github.com/vektra/mockery/v2@v2.53.7 --name=GreetingRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=greetingMock.go
 	@echo "$(GREEN)Mocks generated in internal/data/repo-mocks/$(NC)"
 
 # ------------------------

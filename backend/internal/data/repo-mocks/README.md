@@ -20,15 +20,15 @@ When writing unit tests for handlers, you do not need a running Supabase/Postgre
 
 ### Installing Mockery
 
-Install mockery via Go or Homebrew:
+Install the pinned Mockery v2 release using the project's Go toolchain:
 
 ```bash
-# Via Go
-go install github.com/vektra/mockery/v2@latest
-
-# Or via Homebrew (macOS)
-brew install mockery
+go install github.com/vektra/mockery/v2@v2.53.7
 ```
+
+Ensure `$(go env GOPATH)/bin` (or `GOBIN`, if configured) precedes `/usr/bin`
+in `PATH`. Older system binaries can fail with `package "context" without types`
+on newer Go versions. The commands below use `go run` to avoid that ambiguity.
 
 ### Generating Repository Mocks
 
@@ -37,7 +37,10 @@ Whenever you add or update an interface in `internal/data/data.go`, regenerate t
 ```bash
 # Generate a specific repository mock
 cd backend
-mockery --name=GreetingRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=greetingMock.go
+go run github.com/vektra/mockery/v2@v2.53.7 --name=GreetingRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=greetingMock.go
+
+# Media access: use the interface name, not the implementation directory name.
+go run github.com/vektra/mockery/v2@v2.53.7 --name=MediaAccessRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=mediaAccessMock.go
 ```
 
 The generated mocks will be placed in `internal/data/repo-mocks/` and can be injected directly into your handler tests without requiring Docker or Supabase.

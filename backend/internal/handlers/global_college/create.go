@@ -13,6 +13,6 @@ func (h *Handler) CreateGlobalCollege(ctx context.Context, input models.CreateGl
 	if err != nil {
 		return nil, err
 	}
- 
+
 	return createdGlobalCollege, nil
 }

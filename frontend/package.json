@@ -9,7 +9,9 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "generate:api": "orval --config orval.config.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -34,6 +36,7 @@
     "orval": "^8.36.0",
     "oxlint": "^1.85.0",
     "oxlint-tsgolint": "^7.0.2002",
+    "prettier": "^3.9.9",
     "swr": "^2.5.1",
     "typescript": "^7.0.2",
     "typescript-eslint": "^8.70.1",
