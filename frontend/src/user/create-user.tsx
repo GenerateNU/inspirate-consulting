@@ -24,7 +24,7 @@ export default function CreateUser() {
         setStatus("Something went wrong.");
       }
     } catch (err) {
-      setStatus("Something went wrong.");
+      setStatus("Something went wrong." + err);
     }
   };
 
