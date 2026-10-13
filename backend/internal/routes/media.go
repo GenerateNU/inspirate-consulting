@@ -11,7 +11,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpMediaRoutes(api huma.API, repository *data.Repository){
+func SetUpMediaRoutes(api huma.API, repository *data.Repository) {
 	mediaHandler := media.NewHandler(repository.Media)
 
 	//Register POST /media handler
@@ -21,9 +21,9 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository){
 		Path:        "/media",
 		Description: "Create a media/video",
 		Tags:        []string{"Media"},
-	}, func(ctx context.Context, input *models.CreateMediaInput)(*models.CreateMediaOutput, error){
+	}, func(ctx context.Context, input *models.CreateMediaInput) (*models.CreateMediaOutput, error) {
 		created, err := mediaHandler.CreateMedia(ctx, &input.Body)
-		if(err != nil){
+		if err != nil {
 			return nil, err
 		}
 
@@ -37,9 +37,9 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository){
 		Path:        "/media/{id}",
 		Description: "Get a media/video",
 		Tags:        []string{"Media"},
-	}, func(ctx context.Context, input *models.GetMediaInput)(*models.GetMediaOutput, error){
+	}, func(ctx context.Context, input *models.GetMediaInput) (*models.GetMediaOutput, error) {
 		fetchedMedia, err := mediaHandler.GetMedia(ctx, input.ID)
-		if(err!=nil){
+		if err != nil {
 			return nil, err
 		}
 		return &models.GetMediaOutput{Body: *fetchedMedia}, nil
@@ -52,9 +52,9 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository){
 		Path:        "/media",
 		Description: "Fetch all videos, through counselor view",
 		Tags:        []string{"Media"},
-	}, func(ctx context.Context, input *models.ListAllMediaInput)(*models.ListAllMediaOutput, error){
+	}, func(ctx context.Context, input *models.ListAllMediaInput) (*models.ListAllMediaOutput, error) {
 		allMedia, err := mediaHandler.ListAllMedia(ctx, input.Limit, input.Offset)
-		if(err!=nil){
+		if err != nil {
 			return nil, err
 		}
 		return &models.ListAllMediaOutput{Body: allMedia}, nil
@@ -66,9 +66,9 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository){
 		Path:        "/media/{id}",
 		Description: "Delete a video, through counselor view",
 		Tags:        []string{"Media"},
-	}, func(ctx context.Context, input *models.DeleteMediaInput)(*struct{}, error){
+	}, func(ctx context.Context, input *models.DeleteMediaInput) (*struct{}, error) {
 		err := mediaHandler.DeleteMedia(ctx, input.ID)
-		if(err !=nil){
+		if err != nil {
 			return nil, err
 		}
 		return nil, nil

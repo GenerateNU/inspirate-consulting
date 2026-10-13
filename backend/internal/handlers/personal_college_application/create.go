@@ -10,7 +10,7 @@ import (
 
 // CreatePersonalCollegeApplication creates a new personal college application entry in the database
 func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error) {
-	
+
 	// validate requested deadline exists
 	college, err := h.GlobalCollegeRepository.GetGlobalCollege(ctx, input.GlobalCollegeID)
 	if err != nil {
@@ -39,6 +39,6 @@ func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input mo
 	if err != nil {
 		return nil, err
 	}
- 
+
 	return createdPersonalCollegeApplication, nil
 }

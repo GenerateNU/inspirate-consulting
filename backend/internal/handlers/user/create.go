@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"inspirate-consulting/internal/auth"
-	"inspirate-consulting/internal/supabase"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/supabase"
 )
 
 func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, supabase supabase.SupabaseInterface) (*models.CreateUserOutput, error) {

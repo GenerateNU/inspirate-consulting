@@ -53,8 +53,8 @@ func doRequest(t *testing.T, app *fiber.App, method, path string, body any) (*ht
 	resp, err := app.Test(req)
 	require.NoError(t, err)
 	defer func() {
-	_ = resp.Body.Close()
-	}()	
+		_ = resp.Body.Close()
+	}()
 
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
@@ -116,7 +116,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, _ := doRequest(t, app, http.MethodPost, "/todo-items", map[string]any{
-			"deadline" : nil,
+			"deadline": nil,
 		})
 
 		// Huma returns 422 Unprocessable Entity for schema validation failures

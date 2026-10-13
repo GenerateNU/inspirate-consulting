@@ -1,4 +1,4 @@
-import { useGetMediaAccess } from '../api/endpoints';
+import { useGetMediaAccess } from "../api/endpoints";
 
 export default function StudentMediaList() {
   const { data, error, isLoading } = useGetMediaAccess();

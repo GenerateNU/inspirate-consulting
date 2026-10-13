@@ -28,7 +28,7 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	appA, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeA,
 		ApplicationType: "EA",
-		Category: "target",
+		Category:        "target",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
@@ -37,7 +37,7 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	appB, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeB,
 		ApplicationType: "RD",
-		Category: "safety",
+		Category:        "safety",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
@@ -47,7 +47,7 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	otherApp, err := repo.CreatePersonalCollegeApplication(ctx, otherStudentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeA,
 		ApplicationType: "ED",
-		Category: "reach",
+		Category:        "reach",
 	})
 	if err != nil {
 		t.Fatalf("setup CreatePersonalCollegeApplication (other student) failed: %v", err)

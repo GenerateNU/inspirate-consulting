@@ -18,23 +18,23 @@ func TestHandler_UpdateNotificationPreferences(t *testing.T) {
 
 	ctx := context.Background()
 	input := models.UpdateNotificationPreferencesRequestBody{
-		EmailEnabled: false,
-		WeeklySummaryEnabled: false,
+		EmailEnabled:                false,
+		WeeklySummaryEnabled:        false,
 		DueDateNotificationsEnabled: true,
-		DaysBeforeDue: 5,
-		NotifyPastDue: false,
+		DaysBeforeDue:               5,
+		NotifyPastDue:               false,
 	}
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
 		expected := &models.NotificationPreferences{
-			UserID: uuid.New(),
-			EmailEnabled: false,
-			WeeklySummaryEnabled:false,
+			UserID:                      uuid.New(),
+			EmailEnabled:                false,
+			WeeklySummaryEnabled:        false,
 			DueDateNotificationsEnabled: true,
-			DaysBeforeDue: 5,
-			NotifyPastDue: false,
+			DaysBeforeDue:               5,
+			NotifyPastDue:               false,
 		}
 
 		mockRepo := mocks.NewNotificationPreferencesRepository(t)

@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func(r *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int)([]models.Media, error){
+func (r *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error) {
 	listQuery, err := schema.ReadSQLBaseScript("list_accessible_media.sql", SqlMediaAccessFiles)
 	if err != nil {
 		return nil, err

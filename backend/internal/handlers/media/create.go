@@ -1,13 +1,13 @@
 package media
 
-import(
+import (
 	"context"
 	"inspirate-consulting/internal/models"
 )
 
-func (h *Handler) CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody)(*models.Media, error){
+func (h *Handler) CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error) {
 	createdMedia, err := h.MediaRepository.CreateMedia(ctx, item)
-	
+
 	if err != nil {
 		return nil, err
 	}

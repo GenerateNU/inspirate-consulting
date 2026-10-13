@@ -5,10 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/data/postgres/schema"
+	"inspirate-consulting/internal/models"
 )
-
 
 func (r *NotificationPreferencesRepository) CreateDefaultNotificationPreferences(ctx context.Context, userID uuid.UUID) (*models.NotificationPreferences, error) {
 	createdPreferences := &models.NotificationPreferences{}

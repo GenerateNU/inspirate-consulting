@@ -5,7 +5,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func(h *Handler) GetMedia(ctx context.Context, id string)(*models.Media, error){
+func (h *Handler) GetMedia(ctx context.Context, id string) (*models.Media, error) {
 
 	fetchedMedia, err := h.MediaRepository.GetMedia(ctx, id)
 	if err != nil {

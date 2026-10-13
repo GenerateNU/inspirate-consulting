@@ -27,18 +27,18 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		input := models.CreatePersonalCollegeApplicationRequestBody{
 			GlobalCollegeID: 1,
 			ApplicationType: "ED",
-			Category: "reach",
+			Category:        "reach",
 		}
 		college := &models.GlobalCollege{
-			ID: 1,
+			ID:         1,
 			SchoolName: "Northeastern University",
 			EDDeadline: &edDeadline,
 		}
 		expectedApplication := &models.PersonalCollegeApplication{
-			ID: 1,
+			ID:              1,
 			GlobalCollegeID: 1,
 			ApplicationType: "ED",
-			Category: "reach",
+			Category:        "reach",
 		}
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
@@ -61,11 +61,11 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		input := models.CreatePersonalCollegeApplicationRequestBody{
 			GlobalCollegeID: 1,
 			ApplicationType: "EA",
-			Category: "target",
+			Category:        "target",
 		}
 		// College only offers ED; EADeadline is nil.
 		college := &models.GlobalCollege{
-			ID: 1,
+			ID:         1,
 			SchoolName: "Northeastern University",
 			EDDeadline: &edDeadline,
 		}
@@ -89,7 +89,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		input := models.CreatePersonalCollegeApplicationRequestBody{
 			GlobalCollegeID: 1,
 			ApplicationType: "NOT_REAL",
-			Category: "reach",
+			Category:        "reach",
 		}
 		college := &models.GlobalCollege{ID: 1, SchoolName: "Northeastern University"}
 
@@ -111,7 +111,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		input := models.CreatePersonalCollegeApplicationRequestBody{
 			GlobalCollegeID: 999,
 			ApplicationType: "ED",
-			Category: "reach",
+			Category:        "reach",
 		}
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
@@ -134,7 +134,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		input := models.CreatePersonalCollegeApplicationRequestBody{
 			GlobalCollegeID: 1,
 			ApplicationType: "ED",
-			Category: "reach",
+			Category:        "reach",
 		}
 		college := &models.GlobalCollege{ID: 1, EDDeadline: &edDeadline}
 

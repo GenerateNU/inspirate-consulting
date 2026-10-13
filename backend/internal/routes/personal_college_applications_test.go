@@ -32,7 +32,7 @@ func setupTestAppWithPersonalCollegeApplication(
 	}
 	repo := &data.Repository{
 		PersonalCollegeApplication: mockPersonalRepo,
-		GlobalCollege:      mockGlobalCollegeRepo,
+		GlobalCollege:              mockGlobalCollegeRepo,
 	}
 	app, _, err := SetupApp(cfg, repo)
 	return app, err
@@ -47,10 +47,10 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 		edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
 		college := &models.GlobalCollege{ID: 1, SchoolName: "Northeastern University", EDDeadline: &edDeadline}
 		expectedApplication := &models.PersonalCollegeApplication{
-			ID: 1,
+			ID:              1,
 			GlobalCollegeID: 1,
 			ApplicationType: "ED",
-			Category: "reach",
+			Category:        "reach",
 		}
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
@@ -66,8 +66,8 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		payload := map[string]any{
 			"global_college_id": 1,
-			"application_type": "ED",
-			"category": "reach",
+			"application_type":  "ED",
+			"category":          "reach",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
@@ -110,8 +110,8 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		payload := map[string]any{
 			"global_college_id": 1,
-			"application_type": "EA",
-			"category": "target",
+			"application_type":  "EA",
+			"category":          "target",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
@@ -141,8 +141,8 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		payload := map[string]any{
 			"global_college_id": 999,
-			"application_type": "ED",
-			"category": "reach",
+			"application_type":  "ED",
+			"category":          "reach",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
@@ -170,8 +170,8 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		payload := map[string]any{
 			"global_college_id": 1,
-			"application_type": "NOT_REAL",
-			"category": "reach",
+			"application_type":  "NOT_REAL",
+			"category":          "reach",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)

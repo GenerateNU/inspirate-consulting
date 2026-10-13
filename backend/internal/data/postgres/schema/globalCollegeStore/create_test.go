@@ -23,11 +23,11 @@ func TestCreateGlobalCollege(t *testing.T) {
 	edDeadline := time.Now().Add(30 * 24 * time.Hour).UTC().Truncate(time.Second)
 
 	input := models.CreateGlobalCollegeRequestBody{
-		SchoolName: "Test University",
+		SchoolName:     "Test University",
 		SchoolLocation: "Test City, TS",
-		EADeadline: nil,
-		EDDeadline: &edDeadline,
-		RDDeadline: nil,
+		EADeadline:     nil,
+		EDDeadline:     &edDeadline,
+		RDDeadline:     nil,
 	}
 
 	output, err := repo.CreateGlobalCollege(ctx, input)
@@ -76,7 +76,7 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeRequestBody{
-		SchoolName: "No Deadlines University",
+		SchoolName:     "No Deadlines University",
 		SchoolLocation: "Nowhere, NA",
 	}
 
@@ -104,7 +104,7 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateGlobalCollegeRequestBody{
-		SchoolName: "Duplicate University",
+		SchoolName:     "Duplicate University",
 		SchoolLocation: "Dupe City, DC",
 	}
 
@@ -115,7 +115,7 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 
 	// Same name/location, different casing, should still collide.
 	dupInput := models.CreateGlobalCollegeRequestBody{
-		SchoolName: "duplicate university",
+		SchoolName:     "duplicate university",
 		SchoolLocation: "DUPE CITY, DC",
 	}
 	_, err = repo.CreateGlobalCollege(ctx, dupInput)

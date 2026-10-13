@@ -5,19 +5,19 @@ import (
 	"time"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
-	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
 	extracurricularRepository "inspirate-consulting/internal/data/postgres/schema/extracurricularStore"
 	globalCollegeRepository "inspirate-consulting/internal/data/postgres/schema/globalCollegeStore"
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
 	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
-	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/pagination"
 
@@ -178,7 +178,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		Media:                      mediaRepository.NewMediaRepository(db),
 		MediaAccess:                mediaAccessRepository.NewMediaAccessRepository(db),
 		User:                       userRepository.NewUserRepository(db),
-		EssayReview: essayReviewRepository.NewEssayReviewRepository(db),
+		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 	}
 }

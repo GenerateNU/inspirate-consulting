@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"inspirate-consulting/internal/supabase"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/supabase"
 )
 
 // mockUserRepository is a minimal mock for UserRepository.

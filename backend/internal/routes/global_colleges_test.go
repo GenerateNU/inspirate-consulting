@@ -46,21 +46,21 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
 			return in.SchoolName == "Northeastern University" && in.SchoolLocation == "Boston, MA"
 		})).Return(&models.GlobalCollege{
-			ID: 1,
-			CreatedAt: createdAt,
-			UpdatedAt: createdAt,
-			SchoolName: "Northeastern University",
+			ID:             1,
+			CreatedAt:      createdAt,
+			UpdatedAt:      createdAt,
+			SchoolName:     "Northeastern University",
 			SchoolLocation: "Boston, MA",
-			EDDeadline: &edDeadline,
+			EDDeadline:     &edDeadline,
 		}, nil)
 
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
 
 		payload := map[string]any{
-			"school_name": "Northeastern University",
+			"school_name":     "Northeastern University",
 			"school_location": "Boston, MA",
-			"ed_deadline": edDeadline,
+			"ed_deadline":     edDeadline,
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
@@ -97,7 +97,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		require.NoError(t, err)
 
 		payload := map[string]any{
-			"school_name": "Duplicate University",
+			"school_name":     "Duplicate University",
 			"school_location": "Dupe City, DC",
 		}
 		bodyBytes, err := json.Marshal(payload)
@@ -215,10 +215,10 @@ func TestRoute_GetGlobalCollege(t *testing.T) {
 		createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
 		mockRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(&models.GlobalCollege{
-			ID: 1,
-			CreatedAt: createdAt,
-			UpdatedAt: createdAt,
-			SchoolName: "Northeastern University",
+			ID:             1,
+			CreatedAt:      createdAt,
+			UpdatedAt:      createdAt,
+			SchoolName:     "Northeastern University",
 			SchoolLocation: "Boston, MA",
 		}, nil)
 

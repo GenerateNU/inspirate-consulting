@@ -14,7 +14,13 @@ export interface TodoItem {
   created_at: string;
   /** @nullable */
   deadline: string | null;
+  /** @nullable */
+  essay_id: string | null;
+  /** @nullable */
+  global_college_id: number | null;
   id: string;
+  /** @nullable */
+  media_id: string | null;
   student_id: string;
   todo_description: string;
   updated_at: string;

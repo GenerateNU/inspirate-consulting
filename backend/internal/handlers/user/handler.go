@@ -3,6 +3,7 @@ package user
 import (
 	storage "inspirate-consulting/internal/data"
 )
+
 type Handler struct {
 	UserRepository storage.UserRepository
 }
