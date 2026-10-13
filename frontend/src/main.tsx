@@ -23,10 +23,14 @@ import StudentMediaList from "./media/student-media-list";
 import CounselorMediaList from "./media/counselor-media-list";
 import UpdateNotificationPreferences from "./notifications/update-notification-preferences";
 import CreateUser from "./user/create-user";
+import LogOut from "./logout/logout";
+import LogIn from "./login/login";
+import { AuthProvider } from "./contexts/auth-context.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
+    <AuthProvider>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<App />} />
@@ -61,8 +65,11 @@ createRoot(document.getElementById("root")!).render(
             element={<UpdateNotificationPreferences />}
           />
           <Route path="/create-account" element={<CreateUser />} />
+          <Route path="/login" element={<LogIn />} />
+          <Route path="/logout" element={<LogOut />} />
         </Route>
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 );

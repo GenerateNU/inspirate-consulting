@@ -950,42 +950,6 @@ components:
         - email
         - password
       type: object
-    LoginResponse:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - http://localhost:8080/schemas/LoginResponse.json
-          format: uri
-          readOnly: true
-          type: string
-        access_token:
-          type: string
-        error: {}
-        expires_in:
-          format: int64
-          type: integer
-        refresh_token:
-          type: string
-        reset_time:
-          format: date-time
-          type:
-            - string
-            - "null"
-        token_type:
-          type: string
-        user:
-          $ref: "#/components/schemas/UserResponse"
-      required:
-        - access_token
-        - token_type
-        - expires_in
-        - refresh_token
-        - user
-        - error
-        - reset_time
-      type: object
     Media:
       additionalProperties: false
       properties:
@@ -1536,14 +1500,6 @@ components:
         - supabase_id
         - pfp_key
         - reset_time
-      type: object
-    UserResponse:
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-      required:
-        - id
       type: object
     Video:
       additionalProperties: false
@@ -2921,7 +2877,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: "#/components/schemas/User"
           description: OK
           headers:
             Set-Cookie:
@@ -2942,6 +2898,10 @@ paths:
       responses:
         "204":
           description: No Content
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
         default:
           content:
             application/problem+json:
