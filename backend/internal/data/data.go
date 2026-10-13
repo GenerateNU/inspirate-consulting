@@ -54,7 +54,7 @@ type EssayGroupRepository interface {
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
-	GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error)
+	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
 }
 

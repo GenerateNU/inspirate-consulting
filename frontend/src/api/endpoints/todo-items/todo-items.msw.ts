@@ -14,19 +14,21 @@ import type {
 } from 'msw';
 
 import type {
-  TodoItem
+  TodoItem,
+  TodoItemPage
 } from '../../models';
 
 import {
   getCreateTodoItemResponseMock,
   getGetTodoItemsResponseMock,
+  getSearchTodoItemsResponseMock,
   getUpdateTodoItemCompletedResponseMock
 } from './todo-items.faker';
 
-export { getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getUpdateTodoItemCompletedResponseMock } from './todo-items.faker';
+export { getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getSearchTodoItemsResponseMock, getUpdateTodoItemCompletedResponseMock } from './todo-items.faker';
 
 
-export const getGetTodoItemsMockHandler = (overrideResponse?: TodoItem[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TodoItem[] | null> | TodoItem[] | null), options?: RequestHandlerOptions) => {
+export const getGetTodoItemsMockHandler = (overrideResponse?: TodoItemPage | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TodoItemPage> | TodoItemPage), options?: RequestHandlerOptions) => {
   return http.get('*/todo-items', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
@@ -50,6 +52,18 @@ export const getCreateTodoItemMockHandler = (overrideResponse?: TodoItem | ((inf
   }, options)
 }
 
+export const getSearchTodoItemsMockHandler = (overrideResponse?: TodoItemPage | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TodoItemPage> | TodoItemPage), options?: RequestHandlerOptions) => {
+  return http.get('*/todo-items/search', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getSearchTodoItemsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getUpdateTodoItemCompletedMockHandler = (overrideResponse?: TodoItem | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem> | TodoItem), options?: RequestHandlerOptions) => {
   return http.patch('*/todo-items/:id', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
@@ -64,5 +78,6 @@ export const getUpdateTodoItemCompletedMockHandler = (overrideResponse?: TodoIte
 export const getTodoItemsMock = () => [
   getGetTodoItemsMockHandler(),
   getCreateTodoItemMockHandler(),
+  getSearchTodoItemsMockHandler(),
   getUpdateTodoItemCompletedMockHandler()
 ]
