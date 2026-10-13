@@ -7,7 +7,7 @@ export default function CreateUser() {
   const [Password, setPassword] = useState("");
   const [Status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateUser();
+  const { trigger, isMutating, error } = useCreateUser<Error>();
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
@@ -24,7 +24,6 @@ export default function CreateUser() {
         setStatus("Something went wrong.");
       }
     } catch (err) {
-      console.error(err);
       setStatus("Something went wrong.");
     }
   };
