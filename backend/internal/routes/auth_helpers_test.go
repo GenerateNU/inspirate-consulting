@@ -2,55 +2,181 @@ package routes
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
-	"inspirate-consulting/internal/auth/authtest"
+	"errors"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/supabase"
 	"io"
+	"math/big"
 	"net/http"
+	"net/http/httptest"
+	"os"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
 )
 
-// authApp is the real app (TestMode off) wired to fake Supabase auth, so the
-// production AuthMiddleware and VerifyRole guards run on every request.
-type authApp struct {
-	t     *testing.T
-	app   *fiber.App
-	sb    *authtest.FakeSupabase
-	users *authtest.MemUserRepo
+// The guard tests run the real app with TestMode off, so the production
+// AuthMiddleware and VerifyRole handle every request. auth.NewVerifier loads
+// signing keys from $SUPABASE_URL/auth/v1/.well-known/jwks.json, so we serve a
+// test key there and sign tokens with it.
+
+const testKeyID = "test-key"
+
+var (
+	testKeyOnce sync.Once
+	testKey     *ecdsa.PrivateKey
+	tokenSeq    atomic.Int64
+)
+
+// signingKey returns the process-wide test key, starting the JWKS server and
+// pointing SUPABASE_URL at it on first use (once, so parallel tests agree).
+func signingKey() *ecdsa.PrivateKey {
+	testKeyOnce.Do(func() {
+		testKey = newTestKey()
+		jwks := jwksFor(&testKey.PublicKey, testKeyID)
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/auth/v1/.well-known/jwks.json" {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write(jwks)
+		}))
+		if err := os.Setenv("SUPABASE_URL", srv.URL); err != nil {
+			panic(err)
+		}
+	})
+	return testKey
 }
 
-// newAuthApp builds the real app with auth enabled. repo may be nil; its User
-// repository is always the in-memory one so login/create/reset work end to end.
+func newTestKey() *ecdsa.PrivateKey {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	return key
+}
+
+func jwksFor(pub *ecdsa.PublicKey, kid string) []byte {
+	b64 := func(n *big.Int) string {
+		buf := make([]byte, 32)
+		n.FillBytes(buf)
+		return base64.RawURLEncoding.EncodeToString(buf)
+	}
+	out, err := json.Marshal(map[string]any{"keys": []map[string]string{{
+		"kty": "EC", "crv": "P-256", "x": b64(pub.X), "y": b64(pub.Y),
+		"kid": kid, "alg": "ES256", "use": "sig",
+	}}})
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
+// claimsFor returns Supabase-shaped claims for a user with the given
+// app_metadata role (no role key when role is "").
+func claimsFor(sub, role string) jwt.MapClaims {
+	app := map[string]any{"provider": "email"}
+	if role != "" {
+		app["role"] = role
+	}
+	now := time.Now()
+	return jwt.MapClaims{
+		"sub":          sub,
+		"aud":          "authenticated",
+		"role":         "authenticated",
+		"app_metadata": app,
+		"iat":          now.Unix(),
+		"exp":          now.Add(time.Hour).Unix(),
+		// distinct per token so revoking one doesn't affect another
+		"session_id": tokenSeq.Add(1),
+	}
+}
+
+func signWith(method jwt.SigningMethod, key any, kid string, claims jwt.MapClaims) string {
+	tok := jwt.NewWithClaims(method, claims)
+	tok.Header["kid"] = kid
+	signed, err := tok.SignedString(key)
+	if err != nil {
+		panic(err)
+	}
+	return signed
+}
+
+// sign returns a token the verifier accepts (subject to the claims).
+func sign(claims jwt.MapClaims) string {
+	return signWith(jwt.SigningMethodES256, signingKey(), testKeyID, claims)
+}
+
+// tokenFor returns a valid session token for the given role.
+func tokenFor(role string) string {
+	return sign(claimsFor("00000000-0000-0000-0000-00000000000"+roleDigit(role), role))
+}
+
+func roleDigit(role string) string {
+	switch role {
+	case roleStudent:
+		return "1"
+	case roleCounselor:
+		return "2"
+	default:
+		return "3"
+	}
+}
+
+// authApp is the real app with auth enabled. Every signed token counts as a
+// live Supabase session unless it was revoked.
+type authApp struct {
+	t       *testing.T
+	app     *fiber.App
+	mu      sync.Mutex
+	revoked map[string]bool
+}
+
 func newAuthApp(t *testing.T, repo *data.Repository) *authApp {
 	t.Helper()
-	signer := authtest.SharedSigner() // also points SUPABASE_URL at the fake JWKS
-	sb := authtest.NewFakeSupabase(signer)
-	users := authtest.NewMemUserRepo()
+	signingKey()
+	a := &authApp{t: t, revoked: map[string]bool{}}
+	sb := &supabase.MockSupabase{
+		ValidateSessionFunc: func(tok string) error {
+			a.mu.Lock()
+			defer a.mu.Unlock()
+			if a.revoked[tok] {
+				return errors.New("session validation failed: status 403")
+			}
+			return nil
+		},
+	}
 	if repo == nil {
 		repo = &data.Repository{}
 	}
-	repo.User = users
-
 	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo)
 	require.NoError(t, err)
-	return &authApp{t: t, app: app, sb: sb, users: users}
+	a.app = app
+	return a
+}
+
+// revoke ends a session on the Supabase side, as sign-out or an admin would.
+func (a *authApp) revoke(tok string) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.revoked[tok] = true
 }
 
 type apiResponse struct {
-	Status  int
-	Body    []byte
-	Cookies []*http.Cookie
-	Header  http.Header
-}
-
-func (r apiResponse) JSON(t *testing.T, v any) {
-	t.Helper()
-	require.NoError(t, json.Unmarshal(r.Body, v), "body: %s", r.Body)
+	Status int
+	Body   []byte
 }
 
 // Detail is the huma error message ("detail") of an error response.
@@ -60,15 +186,6 @@ func (r apiResponse) Detail() string {
 	}
 	_ = json.Unmarshal(r.Body, &e)
 	return e.Detail
-}
-
-func (r apiResponse) Cookie(name string) *http.Cookie {
-	for _, c := range r.Cookies {
-		if c.Name == name {
-			return c
-		}
-	}
-	return nil
 }
 
 // do sends a request with the jwt cookie set to token (no cookie if token is "").
@@ -102,33 +219,5 @@ func (a *authApp) doReq(method, path string, body any, mutate func(*http.Request
 	defer func() { _ = resp.Body.Close() }()
 	b, err := io.ReadAll(resp.Body)
 	require.NoError(a.t, err)
-	return apiResponse{Status: resp.StatusCode, Body: b, Cookies: resp.Cookies(), Header: resp.Header}
-}
-
-// login posts credentials and returns the response plus the session token from
-// the jwt cookie ("" when login failed).
-func (a *authApp) login(email, password string) (apiResponse, string) {
-	a.t.Helper()
-	resp := a.do(http.MethodPost, "/user/login", "", map[string]string{"email": email, "password": password})
-	if c := resp.Cookie("jwt"); c != nil {
-		return resp, c.Value
-	}
-	return resp, ""
-}
-
-// mustLogin logs in and fails the test unless it succeeded.
-func (a *authApp) mustLogin(email, password string) string {
-	a.t.Helper()
-	resp, tok := a.login(email, password)
-	require.Equal(a.t, http.StatusOK, resp.Status, "login %s: %s", email, resp.Body)
-	require.NotEmpty(a.t, tok, "login %s set no jwt cookie", email)
-	return tok
-}
-
-// seedUser creates a Supabase account plus its users row (no pending reset).
-func (a *authApp) seedUser(name, email, password, role string) *authtest.Account {
-	a.t.Helper()
-	acct := a.sb.AddAccount(email, password, role)
-	a.users.Seed(name, acct.ID)
-	return acct
+	return apiResponse{Status: resp.StatusCode, Body: b}
 }

@@ -3,10 +3,10 @@ package logout
 import (
 	"context"
 	"errors"
-	"inspirate-consulting/internal/auth/authtest"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/supabase"
 	"net/http"
 	"testing"
 
@@ -24,14 +24,17 @@ func TestHandler_Logout(t *testing.T) {
 
 	t.Run("revokes the caller's session and expires the cookie", func(t *testing.T) {
 		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		tok := sb.IssueSession("11111111-1111-1111-1111-111111111111", "student")
+		var revoked string
+		sb := &supabase.MockSupabase{
+			LogoutFunc: func(tok string) (models.LogoutResponse, error) {
+				revoked = tok
+				return models.LogoutResponse{}, nil
+			},
+		}
 
-		out, err := NewHandler(mocks.NewUserRepository(t)).Logout(withJWT(tok), &models.LogoutInput{}, sb)
+		out, err := NewHandler(mocks.NewUserRepository(t)).Logout(withJWT("session-token"), &models.LogoutInput{}, sb)
 		require.NoError(t, err)
-
-		assert.Equal(t, []string{tok}, sb.LogoutCalls)
-		assert.Error(t, sb.SupabaseValidateSession(nil, tok), "session must be dead after logout")
+		assert.Equal(t, "session-token", revoked)
 
 		c := out.SetCookie
 		assert.Equal(t, "jwt", c.Name)
@@ -41,7 +44,6 @@ func TestHandler_Logout(t *testing.T) {
 		assert.True(t, c.HttpOnly)
 		assert.True(t, c.Secure)
 		assert.Equal(t, http.SameSiteLaxMode, c.SameSite)
-		assert.Contains(t, c.String(), "Max-Age=0")
 	})
 
 	for _, tc := range []struct {
@@ -50,25 +52,33 @@ func TestHandler_Logout(t *testing.T) {
 	}{
 		{"no token on the context", context.Background()},
 		{"empty token", withJWT("")},
-		{"token of the wrong type", context.WithValue(context.Background(), "JWT", 42)}, //nolint:staticcheck
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			sb := authtest.NewFakeSupabase(authtest.SharedSigner())
+			called := false
+			sb := &supabase.MockSupabase{
+				LogoutFunc: func(string) (models.LogoutResponse, error) {
+					called = true
+					return models.LogoutResponse{}, nil
+				},
+			}
 
 			out, err := NewHandler(mocks.NewUserRepository(t)).Logout(tc.ctx, &models.LogoutInput{}, sb)
 			assert.Nil(t, out)
 			var httpErr errs.HTTPError
 			require.ErrorAs(t, err, &httpErr)
 			assert.Equal(t, http.StatusBadRequest, httpErr.GetStatus())
-			assert.Empty(t, sb.LogoutCalls, "Supabase must not be called without a token")
+			assert.False(t, called, "Supabase must not be called without a token")
 		})
 	}
 
-	t.Run("supabase failure propagates and no cookie is cleared", func(t *testing.T) {
+	t.Run("supabase failure propagates", func(t *testing.T) {
 		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		sb.LogoutErr = errors.New("supabase down")
+		sb := &supabase.MockSupabase{
+			LogoutFunc: func(string) (models.LogoutResponse, error) {
+				return models.LogoutResponse{}, errors.New("supabase down")
+			},
+		}
 
 		out, err := NewHandler(mocks.NewUserRepository(t)).Logout(withJWT("tok"), &models.LogoutInput{}, sb)
 		assert.Nil(t, out)

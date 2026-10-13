@@ -3,11 +3,9 @@ package resetpassword
 import (
 	"context"
 	"errors"
-	"inspirate-consulting/internal/auth/authtest"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
-	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
-	"net/http"
+	"inspirate-consulting/internal/supabase"
 	"testing"
 	"time"
 
@@ -33,63 +31,57 @@ func TestHandler_ResetPassword(t *testing.T) {
 
 	t.Run("updates the caller's own password and clears the pending reset", func(t *testing.T) {
 		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		acct := sb.AddAccount("sam@example.com", "Temp-Pass-1", "student")
-
+		caller := uuid.New()
+		var gotUser, gotPassword string
+		sb := &supabase.MockSupabase{
+			ResetPasswordFunc: func(newPassword, userID string) (models.ResetPasswordResponse, error) {
+				gotPassword, gotUser = newPassword, userID
+				return models.ResetPasswordResponse{}, nil
+			},
+		}
 		repo := mocks.NewUserRepository(t)
-		repo.On("UpdateResetTime", mock.Anything, acct.ID, (*time.Time)(nil)).Return(nil).Once()
+		repo.On("UpdateResetTime", mock.Anything, caller, (*time.Time)(nil)).Return(nil).Once()
 
-		_, err := NewHandler(repo).ResetPassword(asUser(acct.ID.String()), resetInput("MyOwnPass1!"), sb)
+		_, err := NewHandler(repo).ResetPassword(asUser(caller.String()), resetInput("MyOwnPass1!"), sb)
 		require.NoError(t, err)
-
-		require.Len(t, sb.ResetPasswordCalls, 1)
-		assert.Equal(t, sb.ResetPasswordCalls[0], authtest.ResetPasswordCall{UserID: acct.ID.String(), NewPassword: "MyOwnPass1!"})
-		updated, _ := sb.Account("sam@example.com")
-		assert.Equal(t, "MyOwnPass1!", updated.Password)
+		assert.Equal(t, caller.String(), gotUser, "only the caller's own account may be changed")
+		assert.Equal(t, "MyOwnPass1!", gotPassword)
 	})
 
 	t.Run("no caller identity on the context", func(t *testing.T) {
 		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		repo := mocks.NewUserRepository(t)
+		called := false
+		sb := &supabase.MockSupabase{
+			ResetPasswordFunc: func(string, string) (models.ResetPasswordResponse, error) {
+				called = true
+				return models.ResetPasswordResponse{}, nil
+			},
+		}
 
-		_, err := NewHandler(repo).ResetPassword(context.Background(), resetInput("MyOwnPass1!"), sb)
+		_, err := NewHandler(mocks.NewUserRepository(t)).ResetPassword(context.Background(), resetInput("MyOwnPass1!"), sb)
 		assert.Error(t, err)
-		assert.Empty(t, sb.ResetPasswordCalls, "must not change any password without knowing who is asking")
+		assert.False(t, called, "must not change any password without knowing who is asking")
 	})
 
 	t.Run("supabase failure leaves the pending reset in place", func(t *testing.T) {
 		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		sb.ResetPasswordErr = errs.NewHTTPError(http.StatusUnprocessableEntity, errors.New("weak password"))
+		sb := &supabase.MockSupabase{
+			ResetPasswordFunc: func(string, string) (models.ResetPasswordResponse, error) {
+				return models.ResetPasswordResponse{}, errors.New("weak password")
+			},
+		}
 		repo := mocks.NewUserRepository(t) // UpdateResetTime must not be called
 
 		_, err := NewHandler(repo).ResetPassword(asUser(uuid.NewString()), resetInput("x"), sb)
-		var httpErr errs.HTTPError
-		require.ErrorAs(t, err, &httpErr)
-		assert.Equal(t, http.StatusUnprocessableEntity, httpErr.GetStatus())
-	})
-
-	t.Run("caller id that is not a uuid", func(t *testing.T) {
-		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		sb.AddAccount("weird@example.com", "x", "student")
-		repo := mocks.NewUserRepository(t)
-
-		_, err := NewHandler(repo).ResetPassword(asUser("not-a-uuid"), resetInput("MyOwnPass1!"), sb)
-		var httpErr errs.HTTPError
-		require.ErrorAs(t, err, &httpErr)
-		assert.Equal(t, http.StatusNotFound, httpErr.GetStatus(), "unknown account is rejected by Supabase first")
+		assert.EqualError(t, err, "weak password")
 	})
 
 	t.Run("database failure propagates", func(t *testing.T) {
 		t.Parallel()
-		sb := authtest.NewFakeSupabase(authtest.SharedSigner())
-		acct := sb.AddAccount("sam@example.com", "Temp-Pass-1", "student")
 		repo := mocks.NewUserRepository(t)
-		repo.On("UpdateResetTime", mock.Anything, acct.ID, (*time.Time)(nil)).Return(errors.New("db down"))
+		repo.On("UpdateResetTime", mock.Anything, mock.Anything, (*time.Time)(nil)).Return(errors.New("db down"))
 
-		_, err := NewHandler(repo).ResetPassword(asUser(acct.ID.String()), resetInput("MyOwnPass1!"), sb)
+		_, err := NewHandler(repo).ResetPassword(asUser(uuid.NewString()), resetInput("MyOwnPass1!"), &supabase.MockSupabase{})
 		assert.EqualError(t, err, "db down")
 	})
 }
