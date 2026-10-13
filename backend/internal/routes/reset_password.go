@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"inspirate-consulting/internal/auth"
 	"context"
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	resetpassword "inspirate-consulting/internal/handlers/reset_password"

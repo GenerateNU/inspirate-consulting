@@ -22,7 +22,7 @@ export default function CreateTask() {
         setStatus("Something went wrong");
       }
     } catch (err) {
-      setStatus("Something went wrong.");
+      setStatus("Something went wrong." + err.message);
     }
   };
 

@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"inspirate-consulting/internal/auth"
 	"context"
+	"inspirate-consulting/internal/auth"
 	"net/http"
 
 	"inspirate-consulting/internal/data"
