@@ -33,22 +33,22 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "Aleng123"
 	input.Body.Email = "tt@gmail.com"
-	input.Body.Password = "2976$$Alen$$"
 	input.Body.PfpKey = &key
-
-	expectedOutput := models.CreateUserOutput{Body: &expectedUser}
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
+		repoOutput := models.CreateUserOutput{Body: &models.CreateUserBody{User: &expectedUser}}
+
 		mockRepo := mocks.NewUserRepository(t)
-		mockRepo.On("CreateUser", mock.Anything, input).Return(&expectedOutput, nil)
+		mockRepo.On("CreateUser", mock.Anything, input).Return(&repoOutput, nil)
 
 		handler := NewHandler(mockRepo)
 		res, err := handler.CreateUser(ctx, &input, &supabase.MockSupabase{})
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedUser, *res.Body)
+		assert.Equal(t, expectedUser, *res.Body.User)
+		assert.NotEmpty(t, res.Body.TempPassword)
 	})
 
 	t.Run("repository error propagates (e.g. duplicate conflict from the DB)", func(t *testing.T) {

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"inspirate-consulting/internal/auth"
 	"net/http"
 
 	"inspirate-consulting/internal/data"
@@ -11,11 +12,12 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpStudentRoutes(api huma.API, repository *data.Repository) {
+func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	studentHandler := student.NewHandler(repository.EssayReview)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "set-student-review-balance",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/students/{id}/review-balance",
 		Description: "Overwrite a student's review balance with an absolute value, recording the change in the review ledger.",

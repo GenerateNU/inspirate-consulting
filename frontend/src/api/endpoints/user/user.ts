@@ -17,6 +17,7 @@ import type {
 } from 'swr/mutation';
 
 import type {
+  CreateUserBody,
   CreateUserInputBody,
   ErrorModel,
   User
@@ -62,7 +63,7 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
  export type createUserResponse200 = {
-  data: User
+  data: CreateUserBody
   status: 200
 }
 

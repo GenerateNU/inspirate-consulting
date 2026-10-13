@@ -822,7 +822,7 @@ export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * Get a student's to-do items
+ * Get a student's to-do items, with optional filters, sorting, and cursor pagination
  */
 export const getTodoItemsQueryStatusDefault = `all`;
 export const getTodoItemsQuerySortByDefault = `created_at`;
@@ -830,25 +830,24 @@ export const getTodoItemsQuerySortOrderDefault = `desc`;
 export const getTodoItemsQueryLimitDefault = 20;
 export const getTodoItemsQueryLimitMax = 100;
 
-export const getTodoItemsQueryOffsetDefault = 0;
-export const getTodoItemsQueryOffsetMin = 0;
-
 
 
 export const GetTodoItemsQueryParams = /*#__PURE__*/ zod.object({
-  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Student whose to-do items to return; defaults to the authenticated student')),
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose to-do items to return; defaults to the authenticated student')),
   "status": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['all', 'completed', 'incomplete']), getTodoItemsQueryStatusDefault).check(/*#__PURE__*/ zod.describe('Filter by completion status')),
-  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return items linked to this essay')),
-  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return items linked to this media')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this essay')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this media')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Only return items linked to this college')),
   "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['essay', 'media', 'college'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
   "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['created_at', 'deadline', 'completed_at', 'updated_at']), getTodoItemsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
   "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), getTodoItemsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction')),
-  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(getTodoItemsQueryLimitMax)), getTodoItemsQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of to-do items to return')),
-  "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(getTodoItemsQueryOffsetMin)), getTodoItemsQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of to-do items to skip before returning results'))
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page; omit to get the first page')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(getTodoItemsQueryLimitMax)), getTodoItemsQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of to-do items to return'))
 })
 
-export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
+export const GetTodoItemsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "items": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
@@ -861,8 +860,9 @@ export const GetTodoItemsResponseItem = /*#__PURE__*/ zod.object({
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
+}))),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get the next page; null when there are none'))
 })
-export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponseItem)
 
 
 /**
@@ -871,9 +871,9 @@ export const GetTodoItemsResponse = /*#__PURE__*/ zod.array(GetTodoItemsResponse
 export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
-  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Essay this task is for; at most one of essay_id, media_id, global_college_id')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Essay this task is for; at most one of essay_id, media_id, global_college_id')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College this task is for; at most one of essay_id, media_id, global_college_id')),
-  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Media this task is for; at most one of essay_id, media_id, global_college_id')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Media this task is for; at most one of essay_id, media_id, global_college_id')),
   "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "todo_description": /*#__PURE__*/ zod.string(),
   "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
@@ -892,6 +892,53 @@ export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Search a student's to-do items by description, with the same filters as listing
+ */
+export const searchTodoItemsQueryStatusDefault = `all`;
+export const searchTodoItemsQuerySortByDefault = `created_at`;
+export const searchTodoItemsQuerySortOrderDefault = `desc`;
+export const searchTodoItemsQueryQMax = 200;
+
+export const searchTodoItemsQueryLimitDefault = 10;
+export const searchTodoItemsQueryLimitMax = 50;
+
+
+
+export const SearchTodoItemsQueryParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose to-do items to return; defaults to the authenticated student')),
+  "status": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['all', 'completed', 'incomplete']), searchTodoItemsQueryStatusDefault).check(/*#__PURE__*/ zod.describe('Filter by completion status')),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this essay')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this media')),
+  "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Only return items linked to this college')),
+  "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['essay', 'media', 'college'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
+  "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['created_at', 'deadline', 'completed_at', 'updated_at']), searchTodoItemsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
+  "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), searchTodoItemsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction')),
+  "q": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(searchTodoItemsQueryQMax)).check(/*#__PURE__*/ zod.describe('Text to search for in to-do descriptions')),
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page; omit to get the first page')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(searchTodoItemsQueryLimitMax)), searchTodoItemsQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of to-do items to return'))
+})
+
+export const SearchTodoItemsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "items": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+}))),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get the next page; null when there are none'))
 })
 
 
@@ -932,18 +979,60 @@ export const createUserBodyNameMax = 200;
 export const CreateUserBody = /*#__PURE__*/ zod.object({
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
-  "password": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('password of user for supabase signup')),
-  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
+  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create'))
 })
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "temp_password": /*#__PURE__*/ zod.string(),
+  "user": /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
-  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "supabase_id": /*#__PURE__*/ zod.string()
 })
+})
+
+
+/**
+ * user login
+ */
+export const LoginUserBody = /*#__PURE__*/ zod.object({
+  "email": /*#__PURE__*/ zod.string(),
+  "password": /*#__PURE__*/ zod.string()
+})
+
+export const LoginUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "access_token": /*#__PURE__*/ zod.string(),
+  "error": /*#__PURE__*/ zod.unknown(),
+  "expires_in": /*#__PURE__*/ zod.int(),
+  "refresh_token": /*#__PURE__*/ zod.string(),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "token_type": /*#__PURE__*/ zod.string(),
+  "user": /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+})
+
+
+/**
+ * user logout
+ */
+export const LogoutUserResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * reset user password
+ */
+export const ResetUserPasswordBody = /*#__PURE__*/ zod.object({
+  "new_password": /*#__PURE__*/ zod.string()
+})
+
+export const ResetUserPasswordResponse = /*#__PURE__*/ zod.void()
 
 
 /**
@@ -957,10 +1046,20 @@ export const FetchUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
-  "needs_to_reset": /*#__PURE__*/ zod.boolean(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "supabase_id": /*#__PURE__*/ zod.string()
 })
+
+
+/**
+ * Force a user to reset their password on next login
+ */
+export const ForcePasswordResetParams = /*#__PURE__*/ zod.object({
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+export const ForcePasswordResetResponse = /*#__PURE__*/ zod.void()
 
 
 /**

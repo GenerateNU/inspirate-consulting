@@ -54,7 +54,7 @@ type EssayGroupRepository interface {
 // To represent Todo Item schema
 type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
-	GetTodoItemsByStudent(ctx context.Context, studentID string) ([]models.TodoItem, error)
+	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
 }
 
@@ -74,6 +74,8 @@ type PersonalCollegeApplicationRepository interface {
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
+	FetchUserBySupabaseID(ctx context.Context, input models.FetchUserBySupabaseIDInput) (*models.FetchUserOutput, error)
+	UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error
 }
 
 // To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos

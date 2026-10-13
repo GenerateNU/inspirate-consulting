@@ -44,14 +44,13 @@ sort_by?: GetTodoItemsSortBy;
  */
 sort_order?: GetTodoItemsSortOrder;
 /**
+ * next_cursor from the previous page; omit to get the first page
+ */
+cursor?: string;
+/**
  * Maximum number of to-do items to return
  * @minimum 1
  * @maximum 100
  */
 limit?: number;
-/**
- * Number of to-do items to skip before returning results
- * @minimum 0
- */
-offset?: number;
 };

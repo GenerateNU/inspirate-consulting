@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"inspirate-consulting/internal/auth"
 	"net/http"
 
 	"inspirate-consulting/internal/data"
@@ -11,12 +12,13 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
+func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	todoItemHandler := todoitem.NewHandler(repository.TodoItem)
 
 	//Register POST /todo-items handler
 	huma.Register(api, huma.Operation{
 		OperationID: "create-todo-item",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/todo-items",
 		Description: "Create a to-do item with a description and optional deadline",
@@ -34,22 +36,41 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository) {
 	//Register GET /todo-items handler
 	huma.Register(api, huma.Operation{
 		OperationID: "get-todo-items",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodGet,
 		Path:        "/todo-items",
-		Description: "Get a student's to-do items",
+		Description: "Get a student's to-do items, with optional filters, sorting, and cursor pagination",
 		Tags:        []string{"Todo Items"},
-	}, func(ctx context.Context, input *models.GetTodoItemsByStudentInput) (*models.GetTodoItemsByStudentOutput, error) {
-		items, err := todoItemHandler.GetTodoItemsByStudent(ctx)
+	}, func(ctx context.Context, input *models.ListTodoItemsInput) (*models.ListTodoItemsOutput, error) {
+		page, err := todoItemHandler.ListTodoItems(ctx, input)
 		if err != nil {
 			return nil, err
 		}
 
-		return &models.GetTodoItemsByStudentOutput{Body: items}, nil
+		return &models.ListTodoItemsOutput{Body: *page}, nil
+	})
+
+	//Register GET /todo-items/search handler
+	huma.Register(api, huma.Operation{
+		OperationID: "search-todo-items",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
+		Method:      http.MethodGet,
+		Path:        "/todo-items/search",
+		Description: "Search a student's to-do items by description, with the same filters as listing",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.SearchTodoItemsInput) (*models.SearchTodoItemsOutput, error) {
+		page, err := todoItemHandler.SearchTodoItems(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.SearchTodoItemsOutput{Body: *page}, nil
 	})
 
 	//Register PATCH /todo-items/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-item-completed",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPatch,
 		Path:        "/todo-items/{id}",
 		Description: "Update a to-do item's completion status",

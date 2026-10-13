@@ -140,7 +140,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 }
 
 // Route tests for GET /todo-items.
-func TestRoute_GetTodoItemsByStudent(t *testing.T) {
+func TestRoute_ListTodoItems(t *testing.T) {
 	t.Parallel()
 
 	// The route reads the student from the request context, not the URL
@@ -150,7 +150,7 @@ func TestRoute_GetTodoItemsByStudent(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("GetTodoItemsByStudent", mock.Anything, studentID).Return([]models.TodoItem{
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return([]models.TodoItem{
 			{ID: uuid.NewString(), StudentID: studentID, TodoDescription: "Request transcripts"},
 			{ID: uuid.NewString(), StudentID: studentID, TodoDescription: "Draft personal statement"},
 		}, nil)
@@ -161,17 +161,17 @@ func TestRoute_GetTodoItemsByStudent(t *testing.T) {
 		resp, respBody := doRequest(t, app, http.MethodGet, "/todo-items", nil)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-		var items []models.TodoItem
-		require.NoError(t, json.Unmarshal(respBody, &items))
-		require.Len(t, items, 2)
-		assert.Equal(t, "Request transcripts", items[0].TodoDescription)
+		var page models.TodoItemPage
+		require.NoError(t, json.Unmarshal(respBody, &page))
+		require.Len(t, page.Items, 2)
+		assert.Equal(t, "Request transcripts", page.Items[0].TodoDescription)
 	})
 
 	t.Run("repository error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("GetTodoItemsByStudent", mock.Anything, studentID).
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupTodoItemTestApp(mockRepo)

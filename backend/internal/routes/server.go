@@ -2,12 +2,14 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/aws"
 	"inspirate-consulting/internal/data/postgres"
 	"inspirate-consulting/internal/errs"
+	"inspirate-consulting/internal/models"
 	"os"
 	"strings"
 
@@ -77,7 +79,7 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		AllowCredentials: true,
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 	}))
-	// Create Huma API with OpenAPI configuration
+
 	humaConfig := huma.DefaultConfig("Inspirate Consulting API", "1.0.0")
 	humaConfig.Info.Description = "API for the Inspirate Consulting application"
 	humaConfig.Info.Contact = &huma.Contact{
@@ -101,26 +103,31 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 	humaAPI := humafiber.New(app, humaConfig)
 
 	// Register public routes BEFORE auth middleware
-	// routes.SetupAuthRoutes(humaAPI, repo, config)
 	SetUpHealthRoutes(humaAPI)
 
 	// Apply auth middleware — only affects routes registered after this point
 	if config.TestMode {
 		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI, config.TestMode))
 	} else {
-		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, config.Supabase))
+		verifier, err := auth.NewVerifier(os.Getenv("SUPABASE_URL"))
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
+		}
+		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, verifier, config.Supabase))
 	}
 
-	// Documentation routes (Huma provides built-in docs at /docs and /openapi.json)
-	// setupDocsRoutes(app, "/app/api")
+	verifyRole := auth.RoleVerifier(auth.VerifyRole)
+	if config.TestMode {
+		verifyRole = func(api huma.API, roles ...models.Role) func(huma.Context, func(huma.Context)) {
+			return func(ctx huma.Context, next func(huma.Context)) { next(ctx) }
+		}
+	}
 
-	// Root route
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
-	// Register protected Huma endpoints
-	if err := setupProtectedHumaRoutes(humaAPI, repo, config); err != nil {
+	if err := setupProtectedHumaRoutes(humaAPI, repo, config, verifyRole); err != nil {
 		return nil, nil, err
 	}
 
@@ -128,22 +135,24 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 }
 
 // Setup protected Huma routes (behind auth middleware)
-func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config) error {
-	// Attach each of the routes to the API here
-	SetUpGreetingRoutes(api, repo)
+func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config, verifyRole auth.RoleVerifier) error {
+	SetUpGreetingRoutes(api, repo, verifyRole)
 	SetUpExtracurricularRoutes(api, repo)
-	SetUpEssayRoutes(api, repo)
+	SetUpEssayRoutes(api, repo, verifyRole)
 	SetUpEssayGroupRoutes(api, repo)
-	SetUpGlobalCollegeRoutes(api, repo)
-	SetUpTodoItemRoutes(api, repo)
-	SetUpPersonalCollegeApplicationRoutes(api, repo)
-	SetupUserRoutes(api, repo, &config)
-	SetUpVideoRoutes(api, repo)
+	SetUpGlobalCollegeRoutes(api, repo, verifyRole)
+	SetUpTodoItemRoutes(api, repo, verifyRole)
+	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole)
+	SetupUserRoutes(api, repo, &config, verifyRole)
+	SetUpVideoRoutes(api, repo, verifyRole)
 	SetUpMediaRoutes(api, repo)
 	SetUpMediaAccessRoutes(api, repo)
-	SetUpEssayReviewRoutes(api, repo)
-	SetUpStudentRoutes(api, repo)
+	SetUpEssayReviewRoutes(api, repo, verifyRole)
+	SetUpStudentRoutes(api, repo, verifyRole)
 	SetUpChatMessageRoutes(api, repo)
 	SetUpNotificationPreferencesRoutes(api, repo)
+	SetupLoginRoutes(api, repo, &config)
+	SetupLogoutRoutes(api, repo, &config)
+	SetupResetPasswordRoutes(api, repo, &config, verifyRole)
 	return nil
 }

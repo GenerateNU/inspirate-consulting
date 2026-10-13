@@ -4,6 +4,7 @@ import (
 	"context"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/routes"
+	"inspirate-consulting/internal/supabase"
 
 	"log"
 	"log/slog"
@@ -66,14 +67,24 @@ func main() {
 func LoadConfig() (*config.Config, error) {
 	testMode := os.Getenv("TEST_MODE")
 
-	var cfg config.Config
-	// Load configuration from environment variables for production
-	err := envconfig.Process(context.Background(), &cfg)
+	// Use a concrete struct for envconfig since SupabaseInterface can't be loaded from env vars
+	type envConf struct {
+		Application config.Application
+		DB          config.DB
+		Supabase    supabase.Supabase
+		S3          config.S3
+	}
+	var env envConf
+	err := envconfig.Process(context.Background(), &env)
 	if err != nil {
 		log.Fatalln("Error processing environment variables: ", err)
 	}
 
-	cfg.TestMode = testMode == "true"
-
-	return &cfg, nil
+	return &config.Config{
+		Application: env.Application,
+		DB:          env.DB,
+		Supabase:    &env.Supabase,
+		S3:          env.S3,
+		TestMode:    testMode == "true",
+	}, nil
 }
