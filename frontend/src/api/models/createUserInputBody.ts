@@ -5,6 +5,7 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { CreateUserInputBodyRole } from './createUserInputBodyRole';
 
 export interface CreateUserInputBody {
   /** A URL to the JSON Schema for this object. */
@@ -17,11 +18,11 @@ export interface CreateUserInputBody {
      * @maxLength 200
      */
   name: string;
-  /** password of user for supabase signup */
-  password: string;
   /**
      * pfp key of user
      * @nullable
      */
   pfp_key: string | null;
+  /** the type of user the counselor would like to create */
+  role: CreateUserInputBodyRole;
 }

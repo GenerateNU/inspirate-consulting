@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"inspirate-consulting/internal/auth"
 	"net/http"
 
 	"inspirate-consulting/internal/data"
@@ -13,12 +14,13 @@ import (
 
 // SetUpPersonalCollegeApplicationRoutes registers the personal college application endpoints:
 // create and list by student ID
-func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository) {
+func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege)
 
 	// Register POST /applications handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "create-personal-college-application",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPost,
 		Path:        "/applications",
 		Description: "Create a personal college application for the authenticated student.",
@@ -34,6 +36,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 	// Register GET /applications handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "list-personal-college-applications",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodGet,
 		Path:        "/applications",
 		Description: "List all college applications for the authenticated student.",

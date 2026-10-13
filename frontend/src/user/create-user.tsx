@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useCreateUser } from "../api/endpoints";
+import { CreateUserInputBodyRole } from "../api/models";
 
 export default function CreateUser() {
   const [Name, setName] = useState("");
   const [Email, setEmail] = useState("");
-  const [Password, setPassword] = useState("");
+  const [Role, setRole] = useState<CreateUserInputBodyRole>(
+    CreateUserInputBodyRole.student,
+  );
   const [Status, setStatus] = useState("");
 
   const { trigger, isMutating, error } = useCreateUser<Error>();
@@ -15,11 +18,13 @@ export default function CreateUser() {
       const response = await trigger({
         name: Name,
         email: Email,
-        password: Password,
+        role: Role,
         pfp_key: null,
       });
       if (response.status === 200) {
-        setStatus(`Created user ${Name}`);
+        setStatus(
+          `Created user ${Name}. Temporary password: ${response.data.temp_password}`,
+        );
       } else {
         setStatus("Something went wrong.");
       }
@@ -51,13 +56,14 @@ export default function CreateUser() {
           />
         </div>
         <div className="form-group">
-          <label>Password:</label>
-          <input
-            type="text"
-            value={Password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <label>Role:</label>
+          <select
+            value={Role}
+            onChange={(e) => setRole(e.target.value as CreateUserInputBodyRole)}
+          >
+            <option value={CreateUserInputBodyRole.student}>Student</option>
+            <option value={CreateUserInputBodyRole.counselor}>Counselor</option>
+          </select>
         </div>
         <button type="submit" disabled={isMutating}>
           {isMutating ? "Creating User..." : "Create User"}

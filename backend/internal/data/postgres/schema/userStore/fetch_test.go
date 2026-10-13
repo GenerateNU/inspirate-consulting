@@ -22,7 +22,6 @@ func TestFetchUser(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "FetchMe"
 	input.Body.Email = "fetchme@gmail.com"
-	input.Body.Password = "2976$$Alen$$"
 	input.Body.PfpKey = &key
 
 	db := testutils.SetupTestDB(t)
@@ -34,7 +33,7 @@ func TestFetchUser(t *testing.T) {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	fetchInput := models.FetchUserInput{ID: created.Body.ID}
+	fetchInput := models.FetchUserInput{ID: created.Body.User.ID}
 	output, err := repo.FetchUser(ctx, fetchInput)
 	if err != nil {
 		t.Fatalf("FetchUser failed: %v", err)

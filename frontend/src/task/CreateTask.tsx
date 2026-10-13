@@ -22,8 +22,7 @@ export default function CreateTask() {
         setStatus("Something went wrong");
       }
     } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
+      setStatus("Something went wrong." + JSON.stringify(err));
     }
   };
 

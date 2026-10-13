@@ -22,7 +22,6 @@ func TestCreateUser(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "Aleng123"
 	input.Body.Email = "tt@gmail.com"
-	input.Body.Password = "2976$$Alen$$"
 	input.Body.PfpKey = &key
 
 	db := testutils.SetupTestDB(t)
@@ -34,14 +33,14 @@ func TestCreateUser(t *testing.T) {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	if output.Body.Name != input.Body.Name {
-		t.Errorf("expected name %q, got %q", input.Body.Name, output.Body.Name)
+	if output.Body.User.Name != input.Body.Name {
+		t.Errorf("expected name %q, got %q", input.Body.Name, output.Body.User.Name)
 	}
-	if output.Body.SupabaseID != supabaseID {
-		t.Errorf("expected supabase_id %q, got %q", supabaseID, output.Body.SupabaseID)
+	if output.Body.User.SupabaseID != supabaseID {
+		t.Errorf("expected supabase_id %q, got %q", supabaseID, output.Body.User.SupabaseID)
 	}
-	if output.Body.PfpKey == nil || *output.Body.PfpKey != key {
-		t.Errorf("expected pfp_key %q, got %v", key, output.Body.PfpKey)
+	if output.Body.User.PfpKey == nil || *output.Body.User.PfpKey != key {
+		t.Errorf("expected pfp_key %q, got %v", key, output.Body.User.PfpKey)
 	}
 }
 
@@ -56,7 +55,6 @@ func TestCreateUserNullPfpKey(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "NoPfpUser"
 	input.Body.Email = "nopfp@gmail.com"
-	input.Body.Password = "2976$$Alen$$"
 	input.Body.PfpKey = nil
 
 	db := testutils.SetupTestDB(t)
@@ -68,8 +66,8 @@ func TestCreateUserNullPfpKey(t *testing.T) {
 		t.Fatalf("CreateUser with nil pfp_key failed: %v", err)
 	}
 
-	if output.Body.PfpKey != nil {
-		t.Errorf("expected nil pfp_key, got %q", *output.Body.PfpKey)
+	if output.Body.User.PfpKey != nil {
+		t.Errorf("expected nil pfp_key, got %q", *output.Body.User.PfpKey)
 	}
 }
 
@@ -84,7 +82,6 @@ func TestCreateUser_Duplicate(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "DupeUser"
 	input.Body.Email = "dupe@gmail.com"
-	input.Body.Password = "2976$$Alen$$"
 
 	db := testutils.SetupTestDB(t)
 	repo := NewUserRepository(db)
