@@ -26,7 +26,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
                     setResetTime(resp.data.reset_time);
                     setUserID(resp.data.id);
                     console.log(resp.data.id);
-                    navigate("/");
+                    void navigate("/");
                 },
                 onError: () => {
                     console.log("login did not work");
@@ -43,7 +43,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             onSuccess: () => {
             setResetTime(null);
             setUserID(null);
-            navigate("/");
+            void navigate("/");
             },
         }
         )
@@ -57,7 +57,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             {new_password},
             {
                 onSuccess: () => {
-                     navigate("/");
+                     void navigate("/");
                 },
                 onError: () => {
                     console.log("resetting password did not work");
