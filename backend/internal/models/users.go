@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -14,12 +16,20 @@ const (
 	Senior    Year = "senior"
 )
 
+// type of role a counselor can create when making a user
+type Role string
+
+const (
+	CounselorRole Role = "counselor"
+	StudentRole   Role = "student"
+)
+
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	SupabaseID   uuid.UUID `json:"supabase_id"`
-	PfpKey       *string   `json:"pfp_key"`
-	NeedsToReset bool      `json:"needs_to_reset"`
+	ID         uuid.UUID  `json:"id"`
+	Name       string     `json:"name"`
+	SupabaseID uuid.UUID  `json:"supabase_id"`
+	PfpKey     *string    `json:"pfp_key"`
+	ResetTime  *time.Time `json:"reset_time"`
 }
 
 // I represented year under the assumption that we're following the american high school timeline
@@ -41,19 +51,28 @@ type Counselor struct {
 
 type CreateUserInput struct {
 	Body struct {
-		Name     string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
-		Email    string  `json:"email" doc:"email of user for supabase signup"`
-		Password string  `json:"password" doc:"password of user for supabase signup"`
+		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email  string  `json:"email" doc:"email of user for supabase signup"`
+		Role   Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
 	}
 }
 
+type CreateUserBody struct {
+	User         *User  `json:"user"`
+	TempPassword string `json:"temp_password"`
+}
+
 type CreateUserOutput struct {
-	Body *User `json:"body"`
+	Body *CreateUserBody
 }
 
 type FetchUserInput struct {
 	ID uuid.UUID `path:"id" required:"true"`
+}
+
+type FetchUserBySupabaseIDInput struct {
+	SupabaseID uuid.UUID `path:"supabase_id" required:"true"`
 }
 
 type FetchUserOutput struct {

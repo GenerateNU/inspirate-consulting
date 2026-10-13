@@ -1,13 +1,18 @@
 package models
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/google/uuid"
 )
 
 // SignUpPayload represents the payload for Supabase signup
 type SignUpPayload struct {
-	Email    string `json:"email" db:"email"`
-	Password string `json:"password" db:"password"`
+	Email        string            `json:"email" db:"email"`
+	Password     string            `json:"password" db:"password"`
+	AppMetadata  map[string]string `json:"app_metadata"`
+	EmailConfirm bool              `json:"email_confirm"`
 }
 
 // UserSignupResponse represents the user data returned from Supabase signup
@@ -54,4 +59,32 @@ type LoginResponse struct {
 	RefreshToken string       `json:"refresh_token"`
 	User         UserResponse `json:"user"`
 	Error        interface{}  `json:"error"`
+	ResetTime    *time.Time   `json:"reset_time"`
 }
+
+type LogoutInput struct{}
+
+type LoginOutput struct {
+	SetCookie http.Cookie `header:"Set-Cookie"`
+	Body      *LoginResponse
+}
+
+type LogoutResponse struct {
+}
+
+type ResetPasswordInput struct {
+	Body struct {
+		NewPassword string `json:"new_password"`
+	}
+}
+
+type ResetPasswordResponse struct {
+}
+
+// supabaseID here is the student of choice's supabase id
+type ForcePasswordResetInput struct {
+	SupabaseID uuid.UUID  `path:"supabase_id" required:"true"`
+	ResetTime  *time.Time `json:"reset_time"`
+}
+
+type ForcePasswordResetOutput struct{}
