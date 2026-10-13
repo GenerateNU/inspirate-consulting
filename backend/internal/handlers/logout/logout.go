@@ -6,6 +6,7 @@ import (
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/supabase"
+	"net/http"
 )
 
 func (h *Handler) Logout(ctx context.Context, input *models.LogoutInput, supabase supabase.SupabaseInterface) (*models.LogoutResponse, error) {
@@ -14,10 +15,20 @@ func (h *Handler) Logout(ctx context.Context, input *models.LogoutInput, supabas
 		return nil, errs.BadRequest("missing authorization token")
 	}
 
-	res, err := supabase.SupabaseLogout(auth.Client, token)
-	if err != nil {
+	if _, err := supabase.SupabaseLogout(auth.Client, token); err != nil {
 		return nil, err
 	}
 
-	return &res, nil
+	// resets the cookie
+	return &models.LogoutResponse{
+		SetCookie: http.Cookie{
+			Name:     "jwt",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
+		},
+	}, nil
 }
