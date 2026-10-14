@@ -143,7 +143,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetUpGreetingRoutes(api, repo, verifyRole)
 	SetUpExtracurricularRoutes(api, repo)
 	SetUpEssayRoutes(api, repo, verifyRole)
-	SetUpEssayGroupRoutes(api, repo, verifyRole)
+	SetUpEssayGroupRoutes(api, repo)
 	SetUpGlobalCollegeRoutes(api, repo, verifyRole)
 	SetUpTodoItemRoutes(api, repo, verifyRole)
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole)
