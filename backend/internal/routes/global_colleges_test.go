@@ -29,7 +29,7 @@ func setupTestAppWithGlobalCollege(mockGlobalCollege data.GlobalCollegeRepositor
 	repo := &data.Repository{
 		GlobalCollege: mockGlobalCollege,
 	}
-	app, _, err := SetupApp(cfg, repo)
+	app, _, err := SetupApp(cfg, repo, nil)
 	return app, err
 }
 
