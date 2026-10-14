@@ -83,7 +83,7 @@ export const getQueueNotificationEmailUrl = () => {
 
 
 
-  return `http://127.0.0.1:8080/queue/email-notification`
+  return `/api/queue/email-notification`
 }
 
 /**
@@ -129,7 +129,7 @@ export const getQueueNotificationEmailMutationFetcher = ( options?: RequestInit)
     return queueNotificationEmail(arg, options);
   }
 }
-export const getQueueNotificationEmailMutationKey = () => [`http://127.0.0.1:8080/queue/email-notification`] as const;
+export const getQueueNotificationEmailMutationKey = () => [`/api/queue/email-notification`] as const;
 
 export type QueueNotificationEmailMutationResult = NonNullable<Awaited<ReturnType<typeof queueNotificationEmail>>>
 
