@@ -271,118 +271,118 @@ func TestRoute_GetGlobalCollege(t *testing.T) {
 
 func TestRoute_CreateGlobalCollege_NearDuplicate(t *testing.T) {
 	t.Parallel()
- 
+
 	mockRepo := mocks.NewGlobalCollegeRepository(t)
 	mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Northeastern Boston Campus", "Boston MA", mock.Anything).
 		Return([]models.GlobalCollege{{ID: 7, SchoolName: "Northeastern University - Boston"}}, nil)
- 
+
 	app, err := setupTestAppWithGlobalCollege(mockRepo)
 	require.NoError(t, err)
- 
+
 	bodyBytes, err := json.Marshal(map[string]any{"school_name": "Northeastern Boston Campus", "school_location": "Boston MA"})
 	require.NoError(t, err)
 	req, err := http.NewRequest(http.MethodPost, "/colleges", bytes.NewReader(bodyBytes))
 	require.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
- 
+
 	resp, err := app.Test(req)
 	require.NoError(t, err)
 	defer func() { _ = resp.Body.Close() }()
- 
+
 	assert.Equal(t, http.StatusConflict, resp.StatusCode)
 }
- 
+
 func TestRoute_UpdateGlobalCollege(t *testing.T) {
 	t.Parallel()
- 
+
 	payload := map[string]any{"school_name": "Updated U", "school_location": "Updated City, UC"}
- 
+
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
- 
+
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
 		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Updated U", "Updated City, UC", mock.Anything).
 			Return([]models.GlobalCollege{}, nil)
 		mockRepo.On("UpdateGlobalCollege", mock.Anything, int64(1), mock.Anything).
 			Return(&models.GlobalCollege{ID: 1, SchoolName: "Updated U", SchoolLocation: "Updated City, UC"}, nil)
- 
+
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
- 
+
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
- 
+
 		req, err := http.NewRequest(http.MethodPut, "/colleges/1", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
- 
+
 		resp, err := app.Test(req)
 		require.NoError(t, err)
 		defer func() { _ = resp.Body.Close() }()
- 
+
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
- 
+
 		respBody, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		var output models.GlobalCollege
 		require.NoError(t, json.Unmarshal(respBody, &output))
 		assert.Equal(t, "Updated U", output.SchoolName)
 	})
- 
+
 	t.Run("near-duplicate of another college returns 409", func(t *testing.T) {
 		t.Parallel()
- 
+
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
 		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Updated U", "Updated City, UC", mock.Anything).
 			Return([]models.GlobalCollege{{ID: 7, SchoolName: "Updated University"}}, nil)
- 
+
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
- 
+
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
- 
+
 		req, err := http.NewRequest(http.MethodPut, "/colleges/1", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
- 
+
 		resp, err := app.Test(req)
 		require.NoError(t, err)
 		defer func() { _ = resp.Body.Close() }()
- 
+
 		assert.Equal(t, http.StatusConflict, resp.StatusCode)
 	})
- 
+
 	t.Run("not found returns 404", func(t *testing.T) {
 		t.Parallel()
- 
+
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
 		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Updated U", "Updated City, UC", mock.Anything).
 			Return([]models.GlobalCollege{}, nil)
 		mockRepo.On("UpdateGlobalCollege", mock.Anything, int64(999), mock.Anything).
 			Return(nil, errs.NotFound("global college", "id", int64(999)))
- 
+
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
- 
+
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
- 
+
 		req, err := http.NewRequest(http.MethodPut, "/colleges/999", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
- 
+
 		resp, err := app.Test(req)
 		require.NoError(t, err)
 		defer func() { _ = resp.Body.Close() }()
- 
+
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
- 
+
 func TestRoute_DeleteGlobalCollege(t *testing.T) {
 	t.Parallel()
- 
+
 	tests := []struct {
 		name       string
 		id         int64
@@ -393,32 +393,32 @@ func TestRoute_DeleteGlobalCollege(t *testing.T) {
 		{name: "not found returns 404", id: 999, repoErr: errs.NotFound("global college", "id", int64(999)), wantStatus: http.StatusNotFound},
 		{name: "still referenced returns 400", id: 2, repoErr: errs.BadRequest("cannot delete: this college is still in use"), wantStatus: http.StatusBadRequest},
 	}
- 
+
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
- 
+
 			mockRepo := mocks.NewGlobalCollegeRepository(t)
 			mockRepo.On("DeleteGlobalCollege", mock.Anything, tc.id).Return(tc.repoErr)
- 
+
 			app, err := setupTestAppWithGlobalCollege(mockRepo)
 			require.NoError(t, err)
- 
+
 			req, err := http.NewRequest(http.MethodDelete, "/colleges/"+strconv.FormatInt(tc.id, 10), nil)
 			require.NoError(t, err)
- 
+
 			resp, err := app.Test(req)
 			require.NoError(t, err)
 			defer func() { _ = resp.Body.Close() }()
- 
+
 			assert.Equal(t, tc.wantStatus, resp.StatusCode)
 		})
 	}
 }
- 
+
 func TestRoute_SearchGlobalColleges(t *testing.T) {
 	t.Parallel()
- 
+
 	tests := []struct {
 		name    string
 		query   string
@@ -431,26 +431,26 @@ func TestRoute_SearchGlobalColleges(t *testing.T) {
 		},
 		{name: "empty results", query: "Xyzzyqqqqq", results: []models.GlobalCollege{}},
 	}
- 
+
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
- 
+
 			mockRepo := mocks.NewGlobalCollegeRepository(t)
 			mockRepo.On("SearchGlobalColleges", mock.Anything, tc.query, mock.Anything, mock.Anything).Return(tc.results, nil)
- 
+
 			app, err := setupTestAppWithGlobalCollege(mockRepo)
 			require.NoError(t, err)
- 
+
 			req, err := http.NewRequest(http.MethodGet, "/college-search?query="+tc.query, nil)
 			require.NoError(t, err)
- 
+
 			resp, err := app.Test(req)
 			require.NoError(t, err)
 			defer func() { _ = resp.Body.Close() }()
- 
+
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
- 
+
 			respBody, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			var output []models.GlobalCollege
