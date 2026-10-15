@@ -23,12 +23,12 @@ func TestHandler_CheckNearDuplicate(t *testing.T) {
 	selfID := int64(1)
 
 	tests := []struct {
-		name        string
-		matches     []models.GlobalCollege
-		lookupErr   error
-		excludeID   *int64
+		name         string
+		matches      []models.GlobalCollege
+		lookupErr    error
+		excludeID    *int64
 		wantConflict bool
-		wantErr     error
+		wantErr      error
 	}{
 		{name: "no matches: allowed", matches: []models.GlobalCollege{}},
 		{
