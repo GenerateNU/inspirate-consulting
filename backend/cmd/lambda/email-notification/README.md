@@ -16,6 +16,13 @@ Each SQS message body is JSON matching `models.QueueEmailNotificationRequestBody
 }
 ```
 
+## Required Set up
+- Lambda environment variable `SENDER_EMAIL`: a verified SES identity
+- Execution role needs `ses:SendEmail` (plus the SQS execution role policy)
+- SES is in sandbox mode: recipients must also be verified identities
+  until production access / domain verification is set up
+- Timeout: 10 seconds
+
 ## Build and deploy
 
 Lambda runs on Amazon Linux, so the binary must be cross-compiled and
