@@ -1,8 +1,9 @@
 import { useState } from "react";
 
+import { errorMessage } from "../api/client";
 import {
-  updateExtracurricular,
   useListExtracurriculars,
+  useUpdateExtracurricular,
 } from "../api/endpoints/extracurriculars/extracurriculars";
 import {
   UpdateExtracurricularRequestStatus,
@@ -16,21 +17,15 @@ const toDateInput = (value?: string | null) =>
   value ? value.slice(0, 10) : "";
 
 export default function Extracurriculars() {
-  const { data, error, isLoading, mutate } = useListExtracurriculars<Error>();
+  const { data, error, isLoading, refetch } = useListExtracurriculars();
+  const update = useUpdateExtracurricular();
   const [editing, setEditing] = useState<number | null>(null);
   const [form, setForm] = useState<UpdateExtracurricularRequest>({});
-  const [msg, setMsg] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
 
-  const list: Extracurricular[] = data?.status === 200 ? (data.data ?? []) : [];
-  const listError = error
-    ? error.message
-    : data && data.status !== 200
-      ? JSON.stringify(data.data)
-      : null;
+  const list: Extracurricular[] = data ?? [];
 
   const startEdit = (item: Extracurricular) => {
-    setMsg(null);
+    update.reset();
     setEditing(item.id);
     setForm({
       name: item.name,
@@ -49,10 +44,8 @@ export default function Extracurriculars() {
     setForm({});
   };
 
-  const saveEdit = async () => {
+  const saveEdit = () => {
     if (editing === null) return;
-    setMsg(null);
-    setSaving(true);
 
     // Optional fields are sent only when filled in
     const payload: UpdateExtracurricularRequest = {
@@ -61,19 +54,15 @@ export default function Extracurriculars() {
       end_date: form.end_date || undefined,
     };
 
-    try {
-      const res = await updateExtracurricular(editing, payload);
-      if (res.status === 200) {
-        await mutate();
-        cancelEdit();
-      } else {
-        setMsg("Error: " + JSON.stringify(res.data));
-      }
-    } catch (err) {
-      setMsg("Error: " + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setSaving(false);
-    }
+    update.mutate(
+      { id: editing, data: payload },
+      {
+        onSuccess: async () => {
+          await refetch();
+          cancelEdit();
+        },
+      },
+    );
   };
 
   const updateField = <K extends keyof UpdateExtracurricularRequest>(
@@ -84,9 +73,9 @@ export default function Extracurriculars() {
   return (
     <div>
       <h2>Extracurriculars</h2>
-      {listError && <p>Error: {listError}</p>}
-      {msg && <p>{msg}</p>}
-      <button onClick={() => mutate()}>Refresh</button>
+      {error && <p>Error: {errorMessage(error)}</p>}
+      {update.error && <p>Error: {errorMessage(update.error)}</p>}
+      <button onClick={() => refetch()}>Refresh</button>
       {isLoading && <p>Loading...</p>}
       <ul>
         {list.map((item) => (
@@ -203,10 +192,10 @@ export default function Extracurriculars() {
                   </label>
                 </div>
                 <div>
-                  <button onClick={saveEdit} disabled={saving}>
-                    {saving ? "Saving..." : "Save"}
+                  <button onClick={saveEdit} disabled={update.isPending}>
+                    {update.isPending ? "Saving..." : "Save"}
                   </button>
-                  <button onClick={cancelEdit} disabled={saving}>
+                  <button onClick={cancelEdit} disabled={update.isPending}>
                     Cancel
                   </button>
                 </div>

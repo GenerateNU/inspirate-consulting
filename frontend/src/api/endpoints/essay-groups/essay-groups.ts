@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CreateEssayGroupBody,
@@ -51,35 +59,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type createEssayGroupResponse200 = {
-  data: EssayGroups
-  status: 200
-}
-
-export type createEssayGroupResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type createEssayGroupResponseSuccess = (createEssayGroupResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type createEssayGroupResponseError = (createEssayGroupResponseDefault) & {
-  headers: Headers;
-};
-
-export type createEssayGroupResponse = (createEssayGroupResponseSuccess | createEssayGroupResponseError)
 
 export const getCreateEssayGroupUrl = () => {
 
@@ -92,7 +88,7 @@ export const getCreateEssayGroupUrl = () => {
 /**
  * Creates an essay group for a student
  */
-export const createEssayGroup = async (createEssayGroupBody: NonReadonly<CreateEssayGroupBody>, options?: RequestInit): Promise<createEssayGroupResponse> => {
+export const createEssayGroup = async (createEssayGroupBody: NonReadonly<CreateEssayGroupBody>, options?: RequestInit): Promise<EssayGroups> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -119,59 +115,67 @@ const res = await fetch(getCreateEssayGroupUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createEssayGroupResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createEssayGroupResponse
-}
-
-
-
-
-export const getCreateEssayGroupMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<CreateEssayGroupBody> }) => {
-    return createEssayGroup(arg, options);
+    const err: globalThis.Error & {info?: EssayGroups, status?: number} = new globalThis.Error();
+    const data : EssayGroups = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getCreateEssayGroupMutationKey = () => [`/api/essay-groups`] as const;
-
-export type CreateEssayGroupMutationResult = NonNullable<Awaited<ReturnType<typeof createEssayGroup>>>
-
-export const useCreateEssayGroup = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createEssayGroup>>, TError, Key, NonReadonly<CreateEssayGroupBody>, Awaited<ReturnType<typeof createEssayGroup>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getCreateEssayGroupMutationKey();
-  const swrFn = getCreateEssayGroupMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type getEssayGroupsFromStudentResponse200 = {
-  data: EssayGroupListBody
-  status: 200
+  const data: EssayGroups = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type getEssayGroupsFromStudentResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type getEssayGroupsFromStudentResponseSuccess = (getEssayGroupsFromStudentResponse200) & {
-  headers: Headers;
-};
-export type getEssayGroupsFromStudentResponseError = (getEssayGroupsFromStudentResponseDefault) & {
-  headers: Headers;
-};
 
-export type getEssayGroupsFromStudentResponse = (getEssayGroupsFromStudentResponseSuccess | getEssayGroupsFromStudentResponseError)
 
-export const getGetEssayGroupsFromStudentUrl = (studentId: string,) => {
+
+export const getCreateEssayGroupMutationKey = () => ['createEssayGroup'] as const;
+
+export const getCreateEssayGroupMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEssayGroup>>, TError,CreateEssayGroupMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createEssayGroup>>, TError,CreateEssayGroupMutationVariables, TContext> => {
+
+const mutationKey = getCreateEssayGroupMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEssayGroup>>, CreateEssayGroupMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createEssayGroup(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateEssayGroupMutationResult = NonNullable<Awaited<ReturnType<typeof createEssayGroup>>>
+    export type CreateEssayGroupMutationBody = NonReadonly<CreateEssayGroupBody>
+    export type CreateEssayGroupMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateEssayGroupMutationVariables = {data: NonReadonly<CreateEssayGroupBody>}
+
+    export const useCreateEssayGroup = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEssayGroup>>, TError,CreateEssayGroupMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createEssayGroup>>,
+        TError,
+        CreateEssayGroupMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateEssayGroupMutationOptions(options), queryClient);
+    }
+    export const getGetEssayGroupsFromStudentUrl = (studentId: string,) => {
 
 
 
@@ -182,7 +186,7 @@ export const getGetEssayGroupsFromStudentUrl = (studentId: string,) => {
 /**
  * Shows all essay groups of a student
  */
-export const getEssayGroupsFromStudent = async (studentId: string, options?: RequestInit): Promise<getEssayGroupsFromStudentResponse> => {
+export const getEssayGroupsFromStudent = async (studentId: string, options?: RequestInit): Promise<EssayGroupListBody> => {
 
   const res = await fetch(getGetEssayGroupsFromStudentUrl(studentId),
   {
@@ -195,31 +199,90 @@ export const getEssayGroupsFromStudent = async (studentId: string, options?: Req
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getEssayGroupsFromStudentResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getEssayGroupsFromStudentResponse
+    const err: globalThis.Error & {info?: EssayGroupListBody, status?: number} = new globalThis.Error();
+    const data : EssayGroupListBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: EssayGroupListBody = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetEssayGroupsFromStudentKey = (studentId: string,) => [`/api/students/${studentId}/essay-groups`] as const;
+
+export const getGetEssayGroupsFromStudentQueryKey = (studentId: string,) => {
+    return [
+    `/api/students/${studentId}/essay-groups`
+    ] as const;
+    }
+
+
+export const getGetEssayGroupsFromStudentQueryOptions = <TData = Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEssayGroupsFromStudentQueryKey(studentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>> = ({ signal }) => getEssayGroupsFromStudent(studentId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: studentId !== null && studentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetEssayGroupsFromStudentQueryResult = NonNullable<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>>
+export type GetEssayGroupsFromStudentQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetEssayGroupsFromStudent = <TError = Promise<ErrorModel>>(
-  studentId: string, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false && studentId !== null && studentId !== undefined
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetEssayGroupsFromStudentKey(studentId) : null);
-  const swrFn = () => getEssayGroupsFromStudent(studentId, fetchOptions)
+export function useGetEssayGroupsFromStudent<TData = Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ studentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEssayGroupsFromStudent>>,
+          TError,
+          Awaited<ReturnType<typeof getEssayGroupsFromStudent>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEssayGroupsFromStudent<TData = Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEssayGroupsFromStudent>>,
+          TError,
+          Awaited<ReturnType<typeof getEssayGroupsFromStudent>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEssayGroupsFromStudent<TData = Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetEssayGroupsFromStudent<TData = Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGroupsFromStudent>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetEssayGroupsFromStudentQueryOptions(studentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

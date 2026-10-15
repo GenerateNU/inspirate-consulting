@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CreateUserBody,
@@ -51,35 +59,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type createUserResponse200 = {
-  data: CreateUserBody
-  status: 200
-}
-
-export type createUserResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type createUserResponseSuccess = (createUserResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type createUserResponseError = (createUserResponseDefault) & {
-  headers: Headers;
-};
-
-export type createUserResponse = (createUserResponseSuccess | createUserResponseError)
 
 export const getCreateUserUrl = () => {
 
@@ -92,7 +88,7 @@ export const getCreateUserUrl = () => {
 /**
  * Create a user (student/counselor)
  */
-export const createUser = async (createUserInputBody: NonReadonly<CreateUserInputBody>, options?: RequestInit): Promise<createUserResponse> => {
+export const createUser = async (createUserInputBody: NonReadonly<CreateUserInputBody>, options?: RequestInit): Promise<CreateUserBody> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -119,59 +115,67 @@ const res = await fetch(getCreateUserUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createUserResponse
-}
-
-
-
-
-export const getCreateUserMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<CreateUserInputBody> }) => {
-    return createUser(arg, options);
+    const err: globalThis.Error & {info?: CreateUserBody, status?: number} = new globalThis.Error();
+    const data : CreateUserBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getCreateUserMutationKey = () => [`/api/user`] as const;
-
-export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
-
-export const useCreateUser = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createUser>>, TError, Key, NonReadonly<CreateUserInputBody>, Awaited<ReturnType<typeof createUser>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getCreateUserMutationKey();
-  const swrFn = getCreateUserMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type fetchUserResponse200 = {
-  data: User
-  status: 200
+  const data: CreateUserBody = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type fetchUserResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type fetchUserResponseSuccess = (fetchUserResponse200) & {
-  headers: Headers;
-};
-export type fetchUserResponseError = (fetchUserResponseDefault) & {
-  headers: Headers;
-};
 
-export type fetchUserResponse = (fetchUserResponseSuccess | fetchUserResponseError)
 
-export const getFetchUserUrl = (id: string,) => {
+
+export const getCreateUserMutationKey = () => ['createUser'] as const;
+
+export const getCreateUserMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,CreateUserMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,CreateUserMutationVariables, TContext> => {
+
+const mutationKey = getCreateUserMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUser>>, CreateUserMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createUser(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
+    export type CreateUserMutationBody = NonReadonly<CreateUserInputBody>
+    export type CreateUserMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateUserMutationVariables = {data: NonReadonly<CreateUserInputBody>}
+
+    export const useCreateUser = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,CreateUserMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createUser>>,
+        TError,
+        CreateUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateUserMutationOptions(options), queryClient);
+    }
+    export const getFetchUserUrl = (id: string,) => {
 
 
 
@@ -182,7 +186,7 @@ export const getFetchUserUrl = (id: string,) => {
 /**
  * fetch a user (student/counselor)
  */
-export const fetchUser = async (id: string, options?: RequestInit): Promise<fetchUserResponse> => {
+export const fetchUser = async (id: string, options?: RequestInit): Promise<User> => {
 
   const res = await fetch(getFetchUserUrl(id),
   {
@@ -195,31 +199,90 @@ export const fetchUser = async (id: string, options?: RequestInit): Promise<fetc
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: fetchUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as fetchUserResponse
+    const err: globalThis.Error & {info?: User, status?: number} = new globalThis.Error();
+    const data : User = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: User = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getFetchUserKey = (id: string,) => [`/api/user/${id}`] as const;
+
+export const getFetchUserQueryKey = (id: string,) => {
+    return [
+    `/api/user/${id}`
+    ] as const;
+    }
+
+
+export const getFetchUserQueryOptions = <TData = Awaited<ReturnType<typeof fetchUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchUser>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFetchUserQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof fetchUser>>> = ({ signal }) => fetchUser(id, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fetchUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type FetchUserQueryResult = NonNullable<Awaited<ReturnType<typeof fetchUser>>>
+export type FetchUserQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useFetchUser = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof fetchUser>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false && id !== null && id !== undefined
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getFetchUserKey(id) : null);
-  const swrFn = () => fetchUser(id, fetchOptions)
+export function useFetchUser<TData = Awaited<ReturnType<typeof fetchUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchUser>>,
+          TError,
+          Awaited<ReturnType<typeof fetchUser>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchUser<TData = Awaited<ReturnType<typeof fetchUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchUser>>,
+          TError,
+          Awaited<ReturnType<typeof fetchUser>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchUser<TData = Awaited<ReturnType<typeof fetchUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchUser>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useFetchUser<TData = Awaited<ReturnType<typeof fetchUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchUser>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getFetchUserQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

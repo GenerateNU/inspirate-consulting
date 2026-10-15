@@ -18,16 +18,6 @@ export const LINK_TYPE_LABELS: Record<LinkType, string> = {
 };
 export const LINK_TYPES = Object.keys(LINK_TYPE_LABELS) as LinkType[];
 
-export const errorMessage = (body: unknown) => {
-  const { message, detail } = (body ?? {}) as {
-    message?: unknown;
-    detail?: unknown;
-  };
-  if (typeof message === "string") return message;
-  if (typeof detail === "string") return detail;
-  return "Something went wrong.";
-};
-
 export const formatDate = (value: string) =>
   new Date(value).toLocaleDateString();
 
@@ -44,24 +34,15 @@ export function useTodoLinkOptions() {
   const colleges = useListGlobalColleges();
 
   const options: Record<LinkType, { id: string; label: string }[]> = {
-    essay:
-      essays.data?.status === 200
-        ? (essays.data.data.essays ?? []).map((e) => ({
-            id: e.id,
-            label: e.type,
-          }))
-        : [],
-    media:
-      media.data?.status === 200
-        ? (media.data.data ?? []).map((m) => ({ id: m.id, label: m.title }))
-        : [],
-    college:
-      colleges.data?.status === 200
-        ? (colleges.data.data ?? []).map((c) => ({
-            id: String(c.id),
-            label: c.school_name,
-          }))
-        : [],
+    essay: (essays.data?.essays ?? []).map((e) => ({
+      id: e.id,
+      label: e.type,
+    })),
+    media: (media.data ?? []).map((m) => ({ id: m.id, label: m.title })),
+    college: (colleges.data ?? []).map((c) => ({
+      id: String(c.id),
+      label: c.school_name,
+    })),
   };
 
   const labelFor = (task: TodoItem) => {

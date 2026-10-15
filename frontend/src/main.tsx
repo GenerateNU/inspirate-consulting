@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./api/client";
 import "./index.css";
 import App from "./App";
 import Greeting from "./greeting/greeting";
@@ -26,43 +28,45 @@ import CreateUser from "./user/create-user";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<App />} />
-          <Route path="/greeting" element={<Greeting />} />
-          <Route
-            path="/create-extracurricular"
-            element={<CreateExtracurricular />}
-          />
-          <Route path="/extracurriculars" element={<Extracurriculars />} />
-          <Route path="/essay" element={<Essay />} />
-          <Route path="/create-college" element={<CreateCollege />} />
-          <Route path="/college-list" element={<CollegeList />} />
-          <Route
-            path="/create-application"
-            element={<CreateCollegeApplication />}
-          />
-          <Route path="/colleges" element={<CollegeApplicationList />} />
-          <Route path="/upload-video" element={<UploadVideo />} />
-          <Route path="/videos" element={<VideoList />} />
-          <Route path="/student" element={<Student />} />
-          <Route path="/counselor" element={<Counselor />} />
-          <Route path="/create-task" element={<CreateTask />} />
-          <Route path="/tasks" element={<TaskList />} />
-          <Route path="/upload-media" element={<UploadMedia />} />
-          <Route path="/student-media-list" element={<StudentMediaList />} />
-          <Route
-            path="/counselor-media-list"
-            element={<CounselorMediaList />}
-          />
-          <Route
-            path="/update-notification-preferences"
-            element={<UpdateNotificationPreferences />}
-          />
-          <Route path="/create-account" element={<CreateUser />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<App />} />
+            <Route path="/greeting" element={<Greeting />} />
+            <Route
+              path="/create-extracurricular"
+              element={<CreateExtracurricular />}
+            />
+            <Route path="/extracurriculars" element={<Extracurriculars />} />
+            <Route path="/essay" element={<Essay />} />
+            <Route path="/create-college" element={<CreateCollege />} />
+            <Route path="/college-list" element={<CollegeList />} />
+            <Route
+              path="/create-application"
+              element={<CreateCollegeApplication />}
+            />
+            <Route path="/colleges" element={<CollegeApplicationList />} />
+            <Route path="/upload-video" element={<UploadVideo />} />
+            <Route path="/videos" element={<VideoList />} />
+            <Route path="/student" element={<Student />} />
+            <Route path="/counselor" element={<Counselor />} />
+            <Route path="/create-task" element={<CreateTask />} />
+            <Route path="/tasks" element={<TaskList />} />
+            <Route path="/upload-media" element={<UploadMedia />} />
+            <Route path="/student-media-list" element={<StudentMediaList />} />
+            <Route
+              path="/counselor-media-list"
+              element={<CounselorMediaList />}
+            />
+            <Route
+              path="/update-notification-preferences"
+              element={<UpdateNotificationPreferences />}
+            />
+            <Route path="/create-account" element={<CreateUser />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   </StrictMode>,
 );
