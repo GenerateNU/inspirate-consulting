@@ -3,7 +3,6 @@ package globalCollegeRepository
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
@@ -21,11 +20,7 @@ func (r *GlobalCollegeRepository) DeleteGlobalCollege(ctx context.Context, id in
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
-			// foreign key violation
-			return errs.HTTPError{
-				Code:    http.StatusConflict,
-				Message: "cannot delete this college: one or more personal college applications still reference it",
-			}
+			return errs.BadRequest("cannot delete: this college is still in use")
 		}
 		return err
 	}

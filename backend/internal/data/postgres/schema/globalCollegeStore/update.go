@@ -3,8 +3,6 @@ package globalCollegeRepository
 import (
 	"context"
 	"errors"
-	"fmt"
-	"net/http"
 
 	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
@@ -16,24 +14,6 @@ import (
 
 // updates a global college's name, location, and deadlines
 func (r *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error) {
-	if !input.ConfirmDuplicate {
-		similarColleges, err := r.FindNearDuplicateGlobalColleges(ctx, input.SchoolName, input.SchoolLocation, nearDuplicateThreshold)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, similar := range similarColleges {
-			if similar.ID != id {
-				return nil, errs.HTTPError{
-					Code: http.StatusConflict,
-					Message: fmt.Sprintf(
-						"%q is very similar to an existing college: %q. Resubmit with confirm_duplicate=true to update it anyway.",
-						input.SchoolName, similar.SchoolName,
-					),
-				}
-			}
-		}
-	}
 
 	updatedCollege := &models.GlobalCollege{}
 

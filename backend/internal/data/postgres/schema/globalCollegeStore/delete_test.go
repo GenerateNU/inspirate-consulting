@@ -18,7 +18,7 @@ func TestDeleteGlobalCollege(t *testing.T) {
 	created, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
 		SchoolName:     "Delete Test University",
 		SchoolLocation: "Delete City, DC",
-	}, nearDuplicateThreshold)
+	})
 	if err != nil {
 		t.Fatalf("setup CreateGlobalCollege failed: %v", err)
 	}
