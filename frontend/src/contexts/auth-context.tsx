@@ -22,6 +22,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [resetTime, setResetTime] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [userID, setUserID] = useState<string | null>(null);
+  const [counselorID, setCounselorID] = useState<string | null>(null);
+  const [studentID, setStudentID] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [path, setPath] = useState("/");
   const [serverExpired, setServerExpired] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -35,6 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setResetTime(null);
     setExpiresAt(null);
     setUserID(null);
+    setCounselorID(null);
+    setStudentID(null);
     setServerExpired(false);
   };
 
@@ -46,10 +52,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setResetTime(user.reset_time);
           setExpiresAt(user.expires_at);
           setUserID(user.id);
-          void navigate("/");
+          void navigate(path);
         },
-        onError: () => {
-          console.log("login did not work");
+        onError: (err) => {
+          setError(err);
+          console.log("login did not work", error);
           return;
         },
       },
@@ -60,7 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return logoutFunc(undefined, {
       onSettled: clearSession,
       onSuccess: () => {
-        void navigate("/");
+        void navigate(path);
+        setPath("/");
+      },
+      onError: (err) => {
+        setError(err);
       },
     });
   };
@@ -92,10 +103,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { data: { new_password } },
       {
         onSuccess: () => {
-          void navigate("/");
+          void navigate(path);
         },
-        onError: () => {
-          console.log("resetting password did not work");
+        onError: (err) => {
+          setError(err);
+          console.log("resetting password did not work", error);
         },
       },
     );
@@ -111,6 +123,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resetTime: resetTime,
         expiresAt: expiresAt,
         userID: userID,
+        counselorID: counselorID,
+        studentID: studentID,
         login: login,
         logout: logout,
         reset_password: new_password,

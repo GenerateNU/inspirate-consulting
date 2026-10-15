@@ -14,6 +14,8 @@ const links = [
   { to: "/counselor", label: "Counselor" },
   { to: "/counselor-students", label: "Counselor Students" },
   { to: "/pending-reviews", label: "Counselor Pending Reviews" },
+  { to: "/login", label: "Login" },
+  { to: "/logout", label: "Logout" },
 ];
 
 export default function NavBar() {
