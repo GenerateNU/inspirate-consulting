@@ -79,8 +79,8 @@ func TestAuthMiddleware_RejectsInvalidTokens(t *testing.T) {
 	}{
 		{"not a jwt", "not-a-jwt"},
 		{"truncated jwt", sign(claimsFor(sub, roleCounselor))[:40]},
-		{"signed by an unknown key with the trusted kid", signWith(jwt.SigningMethodES256, attackerKey, testKeyID, claimsFor(sub, roleCounselor))},
-		{"signed with an unknown kid", signWith(jwt.SigningMethodES256, attackerKey, "other-kid", claimsFor(sub, roleCounselor))},
+		{"signed by an unknown key with the trusted kid", signWith(jwt.SigningMethodRS256, attackerKey, testKeyID, claimsFor(sub, roleCounselor))},
+		{"signed with an unknown kid", signWith(jwt.SigningMethodRS256, attackerKey, "other-kid", claimsFor(sub, roleCounselor))},
 		{"HS256 instead of ES256/RS256", signWith(jwt.SigningMethodHS256, []byte("secret"), testKeyID, claimsFor(sub, roleCounselor))},
 		{"unsigned alg none", signWith(jwt.SigningMethodNone, jwt.UnsafeAllowNoneSignatureType, testKeyID, claimsFor(sub, roleCounselor))},
 		{"expired", sign(expired)},
