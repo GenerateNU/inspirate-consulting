@@ -10,6 +10,7 @@ import (
 	"errors"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	"inspirate-consulting/internal/supabase"
 	"io"
 	"math/big"
@@ -161,7 +162,7 @@ func newAuthApp(t *testing.T, repo *data.Repository) *authApp {
 	if repo == nil {
 		repo = &data.Repository{}
 	}
-	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo)
+	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo, &sqsclient.SQSClient{})
 	require.NoError(t, err)
 	a.app = app
 	return a

@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { new_password },
       {
         onSuccess: () => {
-          navigate(path);
+          void navigate(path);
         },
         onError: (err) => {
           setError(err);
