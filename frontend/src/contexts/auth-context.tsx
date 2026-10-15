@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           setResetTime(resp.data.reset_time);
           setUserID(resp.data.id);
-          navigate(path);
+          void navigate(path);
         },
         onError: (err) => {
           setError(err);
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUserID(null);
           setCounselorID(null);
           setStudentID(null);
-          navigate(path);
+          void navigate(path);
           setPath("/");
         },
 
