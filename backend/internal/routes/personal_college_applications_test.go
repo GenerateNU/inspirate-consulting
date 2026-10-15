@@ -21,6 +21,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func intPtr(i int) *int { return &i }
+
 // setupTestAppWithPersonalCollegeApplication creates a Fiber app in test
 // mode with mocked personal college application and global college
 // repositories (the handler depends on both).
@@ -263,5 +265,145 @@ func TestRoute_ListPersonalCollegeApplications(t *testing.T) {
 		err = json.Unmarshal(respBody, &output)
 		require.NoError(t, err)
 		assert.Len(t, output, 0)
+	})
+}
+
+func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		deadline := time.Now().Add(24 * time.Hour)
+		college := &models.GlobalCollege{ID: 1, SchoolName: "Test U", RDDeadline: &deadline}
+
+		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
+		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
+
+		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		mockPCARepo.On("UpdatePersonalCollegeApplication", mock.Anything, mock.Anything, int64(42), mock.Anything).
+			Return(&models.PersonalCollegeApplication{ID: 42, GlobalCollegeID: 1, ApplicationType: "RD", Category: "safety"}, nil)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
+		require.NoError(t, err)
+
+		payload := map[string]any{"global_college_id": 1, "application_type": "RD", "category": "safety"}
+		bodyBytes, err := json.Marshal(payload)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPut, "/applications/42", bytes.NewReader(bodyBytes))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("validation error : invalid application_type", func(t *testing.T) {
+		t.Parallel()
+
+		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
+		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
+		require.NoError(t, err)
+
+		payload := map[string]any{"global_college_id": 1, "application_type": "BOGUS", "category": "safety"}
+		bodyBytes, err := json.Marshal(payload)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPut, "/applications/42", bytes.NewReader(bodyBytes))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
+
+func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		mockPCARepo.On("UpdateApplicationRank", mock.Anything, mock.Anything, int64(42), intPtr(1)).
+			Return([]models.PersonalCollegeApplication{{ID: 42, Rank: intPtr(1)}}, nil)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
+		require.NoError(t, err)
+
+		bodyBytes, err := json.Marshal(map[string]any{"rank": 1})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPut, "/applications/42/rank", bytes.NewReader(bodyBytes))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		var output []models.PersonalCollegeApplication
+		require.NoError(t, json.Unmarshal(respBody, &output))
+		assert.Len(t, output, 1)
+	})
+
+	t.Run("success : unrank with null", func(t *testing.T) {
+		t.Parallel()
+
+		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		mockPCARepo.On("UpdateApplicationRank", mock.Anything, mock.Anything, int64(42), (*int)(nil)).
+			Return([]models.PersonalCollegeApplication{{ID: 42, Rank: nil}}, nil)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
+		require.NoError(t, err)
+
+		bodyBytes, err := json.Marshal(map[string]any{"rank": nil})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPut, "/applications/42/rank", bytes.NewReader(bodyBytes))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+}
+
+func TestRoute_DeletePersonalCollegeApplication(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, mock.Anything, int64(42)).Return(nil)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/applications/42", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 	})
 }
