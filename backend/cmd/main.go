@@ -75,8 +75,11 @@ func LoadConfig() (*config.Config, error) {
 		S3          config.S3
 		SQS         config.SQS
 	}
-	var env envConf
-	err := envconfig.Process(context.Background(), &env)
+
+	var cfg config.Config
+	cfg.Supabase = supa
+	// Load configuration from environment variables for production
+	err := envconfig.Process(context.Background(), &cfg)
 	if err != nil {
 		log.Fatalln("Error processing environment variables: ", err)
 	}
