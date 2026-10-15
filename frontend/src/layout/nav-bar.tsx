@@ -12,6 +12,7 @@ const links = [
   { to: "/upload-video", label: "Upload Video" },
   { to: "/student", label: "Student" },
   { to: "/counselor", label: "Counselor" },
+  { to: "/create-account", label: "Create Account" },
   { to: "/login", label: "Login" },
   { to: "/logout", label: "Logout" },
 ];
