@@ -52,6 +52,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 	// Register DELETE /applications/{id} handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-personal-college-application",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodDelete,
 		Path:        "/applications/{id}",
 		Description: "Delete a personal college application for the authenticated student.",
@@ -67,6 +68,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 	// Register PUT /applications/{id}/rank handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "update-personal-college-application-rank",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPut,
 		Path:        "/applications/{id}/rank",
 		Description: "Update the rank of a personal college application for the authenticated student.",
@@ -82,6 +84,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 	// Register PUT /applications/{id} handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "update-personal-college-application",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPut,
 		Path:        "/applications/{id}",
 		Description: "Update a personal college application for the authenticated student.",
