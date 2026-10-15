@@ -5,15 +5,15 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
-  Arguments,
-  Key
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  MutationFunction,
+  QueryClient,
+  UseMutationOptions,
+  UseMutationResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -48,35 +48,8 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
-
-
-
- export type resetUserPasswordResponse204 = {
-  data: void
-  status: 204
-}
-
-export type resetUserPasswordResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 204>
-}
-
-export type resetUserPasswordResponseSuccess = (resetUserPasswordResponse204) & {
-  headers: Headers;
-};
-export type resetUserPasswordResponseError = (resetUserPasswordResponseDefault) & {
-  headers: Headers;
-};
-
-export type resetUserPasswordResponse = (resetUserPasswordResponseSuccess | resetUserPasswordResponseError)
 
 export const getResetUserPasswordUrl = () => {
 
@@ -89,7 +62,7 @@ export const getResetUserPasswordUrl = () => {
 /**
  * reset user password
  */
-export const resetUserPassword = async (resetPasswordInputBody: NonReadonly<ResetPasswordInputBody>, options?: RequestInit): Promise<resetUserPasswordResponse> => {
+export const resetUserPassword = async (resetPasswordInputBody: NonReadonly<ResetPasswordInputBody>, options?: RequestInit): Promise<void> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -116,59 +89,67 @@ const res = await fetch(getResetUserPasswordUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: resetUserPasswordResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as resetUserPasswordResponse
-}
-
-
-
-
-export const getResetUserPasswordMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<ResetPasswordInputBody> }) => {
-    return resetUserPassword(arg, options);
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getResetUserPasswordMutationKey = () => [`/api/user/reset-password`] as const;
-
-export type ResetUserPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof resetUserPassword>>>
-
-export const useResetUserPassword = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof resetUserPassword>>, TError, Key, NonReadonly<ResetPasswordInputBody>, Awaited<ReturnType<typeof resetUserPassword>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getResetUserPasswordMutationKey();
-  const swrFn = getResetUserPasswordMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type forcePasswordResetResponse204 = {
-  data: void
-  status: 204
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
 }
 
-export type forcePasswordResetResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 204>
-}
 
-export type forcePasswordResetResponseSuccess = (forcePasswordResetResponse204) & {
-  headers: Headers;
-};
-export type forcePasswordResetResponseError = (forcePasswordResetResponseDefault) & {
-  headers: Headers;
-};
 
-export type forcePasswordResetResponse = (forcePasswordResetResponseSuccess | forcePasswordResetResponseError)
 
-export const getForcePasswordResetUrl = (supabaseId: string,) => {
+
+export const getResetUserPasswordMutationKey = () => ['resetUserPassword'] as const;
+
+export const getResetUserPasswordMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUserPassword>>, TError,ResetUserPasswordMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof resetUserPassword>>, TError,ResetUserPasswordMutationVariables, TContext> => {
+
+const mutationKey = getResetUserPasswordMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetUserPassword>>, ResetUserPasswordMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  resetUserPassword(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetUserPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof resetUserPassword>>>
+    export type ResetUserPasswordMutationBody = NonReadonly<ResetPasswordInputBody>
+    export type ResetUserPasswordMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type ResetUserPasswordMutationVariables = {data: NonReadonly<ResetPasswordInputBody>}
+
+    export const useResetUserPassword = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUserPassword>>, TError,ResetUserPasswordMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resetUserPassword>>,
+        TError,
+        ResetUserPasswordMutationVariables,
+        TContext
+      > => {
+      return useMutation(getResetUserPasswordMutationOptions(options), queryClient);
+    }
+    export const getForcePasswordResetUrl = (supabaseId: string,) => {
 
 
 
@@ -179,7 +160,7 @@ export const getForcePasswordResetUrl = (supabaseId: string,) => {
 /**
  * Force a user to reset their password on next login
  */
-export const forcePasswordReset = async (supabaseId: string, options?: RequestInit): Promise<forcePasswordResetResponse> => {
+export const forcePasswordReset = async (supabaseId: string, options?: RequestInit): Promise<void> => {
 
   const res = await fetch(getForcePasswordResetUrl(supabaseId),
   {
@@ -192,36 +173,63 @@ export const forcePasswordReset = async (supabaseId: string, options?: RequestIn
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: forcePasswordResetResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as forcePasswordResetResponse
-}
-
-
-
-
-export const getForcePasswordResetMutationFetcher = (supabaseId: string, options?: RequestInit) => {
-  return (_: Key, __: { arg: Arguments }) => {
-    return forcePasswordReset(supabaseId, options);
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
 }
-export const getForcePasswordResetMutationKey = (supabaseId: string,) => [`/api/user/${supabaseId}/force-password-reset`] as const;
 
-export type ForcePasswordResetMutationResult = NonNullable<Awaited<ReturnType<typeof forcePasswordReset>>>
 
-export const useForcePasswordReset = <TError = Promise<ErrorModel>>(
-  supabaseId: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof forcePasswordReset>>, TError, Key, Arguments, Awaited<ReturnType<typeof forcePasswordReset>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getForcePasswordResetMutationKey(supabaseId);
-  const swrFn = getForcePasswordResetMutationFetcher(supabaseId, fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getForcePasswordResetMutationKey = () => ['forcePasswordReset'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getForcePasswordResetMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof forcePasswordReset>>, TError,ForcePasswordResetMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof forcePasswordReset>>, TError,ForcePasswordResetMutationVariables, TContext> => {
+
+const mutationKey = getForcePasswordResetMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof forcePasswordReset>>, ForcePasswordResetMutationVariables> = (props) => {
+          const {supabaseId} = props ?? {};
+
+          return  forcePasswordReset(supabaseId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ForcePasswordResetMutationResult = NonNullable<Awaited<ReturnType<typeof forcePasswordReset>>>
+
+    export type ForcePasswordResetMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type ForcePasswordResetMutationVariables = {supabaseId: string}
+
+    export const useForcePasswordReset = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof forcePasswordReset>>, TError,ForcePasswordResetMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof forcePasswordReset>>,
+        TError,
+        ForcePasswordResetMutationVariables,
+        TContext
+      > => {
+      return useMutation(getForcePasswordResetMutationOptions(options), queryClient);
+    }

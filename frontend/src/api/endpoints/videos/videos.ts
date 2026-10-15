@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -52,35 +60,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type listVideosResponse200 = {
-  data: Video[] | null
-  status: 200
-}
-
-export type listVideosResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type listVideosResponseSuccess = (listVideosResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type listVideosResponseError = (listVideosResponseDefault) & {
-  headers: Headers;
-};
-
-export type listVideosResponse = (listVideosResponseSuccess | listVideosResponseError)
 
 export const getListVideosUrl = () => {
 
@@ -93,7 +89,7 @@ export const getListVideosUrl = () => {
 /**
  * List all videos in the S3 bucket.
  */
-export const listVideos = async ( options?: RequestInit): Promise<listVideosResponse> => {
+export const listVideos = async ( options?: RequestInit): Promise<Video[] | null> => {
 
   const res = await fetch(getListVideosUrl(),
   {
@@ -106,52 +102,92 @@ export const listVideos = async ( options?: RequestInit): Promise<listVideosResp
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listVideosResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listVideosResponse
+    const err: globalThis.Error & {info?: Video[] | null, status?: number} = new globalThis.Error();
+    const data : Video[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Video[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListVideosKey = () => [`/api/videos`] as const;
+
+export const getListVideosQueryKey = () => {
+    return [
+    `/api/videos`
+    ] as const;
+    }
+
+
+export const getListVideosQueryOptions = <TData = Awaited<ReturnType<typeof listVideos>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVideos>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListVideosQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listVideos>>> = ({ signal }) => listVideos({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listVideos>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListVideosQueryResult = NonNullable<Awaited<ReturnType<typeof listVideos>>>
+export type ListVideosQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListVideos = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listVideos>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListVideosKey() : null);
-  const swrFn = () => listVideos(fetchOptions)
+export function useListVideos<TData = Awaited<ReturnType<typeof listVideos>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVideos>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVideos>>,
+          TError,
+          Awaited<ReturnType<typeof listVideos>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListVideos<TData = Awaited<ReturnType<typeof listVideos>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVideos>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVideos>>,
+          TError,
+          Awaited<ReturnType<typeof listVideos>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListVideos<TData = Awaited<ReturnType<typeof listVideos>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVideos>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListVideos<TData = Awaited<ReturnType<typeof listVideos>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVideos>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListVideosQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type uploadVideoResponse200 = {
-  data: PresignUploadResponse
-  status: 200
-}
 
-export type uploadVideoResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type uploadVideoResponseSuccess = (uploadVideoResponse200) & {
-  headers: Headers;
-};
-export type uploadVideoResponseError = (uploadVideoResponseDefault) & {
-  headers: Headers;
-};
 
-export type uploadVideoResponse = (uploadVideoResponseSuccess | uploadVideoResponseError)
+
+
 
 export const getUploadVideoUrl = () => {
 
@@ -164,7 +200,7 @@ export const getUploadVideoUrl = () => {
 /**
  * Upload a new video to the S3 bucket.
  */
-export const uploadVideo = async (presignUploadRequestBody: NonReadonly<PresignUploadRequestBody>, options?: RequestInit): Promise<uploadVideoResponse> => {
+export const uploadVideo = async (presignUploadRequestBody: NonReadonly<PresignUploadRequestBody>, options?: RequestInit): Promise<PresignUploadResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -191,59 +227,67 @@ const res = await fetch(getUploadVideoUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: uploadVideoResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as uploadVideoResponse
-}
-
-
-
-
-export const getUploadVideoMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<PresignUploadRequestBody> }) => {
-    return uploadVideo(arg, options);
+    const err: globalThis.Error & {info?: PresignUploadResponse, status?: number} = new globalThis.Error();
+    const data : PresignUploadResponse = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getUploadVideoMutationKey = () => [`/api/videos`] as const;
-
-export type UploadVideoMutationResult = NonNullable<Awaited<ReturnType<typeof uploadVideo>>>
-
-export const useUploadVideo = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof uploadVideo>>, TError, Key, NonReadonly<PresignUploadRequestBody>, Awaited<ReturnType<typeof uploadVideo>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getUploadVideoMutationKey();
-  const swrFn = getUploadVideoMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type getVideoResponse200 = {
-  data: Video
-  status: 200
+  const data: PresignUploadResponse = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type getVideoResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type getVideoResponseSuccess = (getVideoResponse200) & {
-  headers: Headers;
-};
-export type getVideoResponseError = (getVideoResponseDefault) & {
-  headers: Headers;
-};
 
-export type getVideoResponse = (getVideoResponseSuccess | getVideoResponseError)
 
-export const getGetVideoUrl = (params?: GetVideoParams,) => {
+
+export const getUploadVideoMutationKey = () => ['uploadVideo'] as const;
+
+export const getUploadVideoMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,UploadVideoMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,UploadVideoMutationVariables, TContext> => {
+
+const mutationKey = getUploadVideoMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadVideo>>, UploadVideoMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadVideo(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadVideoMutationResult = NonNullable<Awaited<ReturnType<typeof uploadVideo>>>
+    export type UploadVideoMutationBody = NonReadonly<PresignUploadRequestBody>
+    export type UploadVideoMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UploadVideoMutationVariables = {data: NonReadonly<PresignUploadRequestBody>}
+
+    export const useUploadVideo = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadVideo>>, TError,UploadVideoMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadVideo>>,
+        TError,
+        UploadVideoMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUploadVideoMutationOptions(options), queryClient);
+    }
+    export const getGetVideoUrl = (params?: GetVideoParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -261,7 +305,7 @@ export const getGetVideoUrl = (params?: GetVideoParams,) => {
 /**
  * Get a video by its S3 key.
  */
-export const getVideo = async (params?: GetVideoParams, options?: RequestInit): Promise<getVideoResponse> => {
+export const getVideo = async (params?: GetVideoParams, options?: RequestInit): Promise<Video> => {
 
   const res = await fetch(getGetVideoUrl(params),
   {
@@ -274,31 +318,90 @@ export const getVideo = async (params?: GetVideoParams, options?: RequestInit): 
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getVideoResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getVideoResponse
+    const err: globalThis.Error & {info?: Video, status?: number} = new globalThis.Error();
+    const data : Video = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Video = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetVideoKey = (params?: GetVideoParams,) => [`/api/videos/lookup`, ...(params ? [params]: [])] as const;
+
+export const getGetVideoQueryKey = (params?: GetVideoParams,) => {
+    return [
+    `/api/videos/lookup`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetVideoQueryOptions = <TData = Awaited<ReturnType<typeof getVideo>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: GetVideoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVideo>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVideoQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVideo>>> = ({ signal }) => getVideo(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVideo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetVideoQueryResult = NonNullable<Awaited<ReturnType<typeof getVideo>>>
+export type GetVideoQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetVideo = <TError = Promise<ErrorModel>>(
-  params?: GetVideoParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getVideo>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetVideoKey(params) : null);
-  const swrFn = () => getVideo(params, fetchOptions)
+export function useGetVideo<TData = Awaited<ReturnType<typeof getVideo>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  GetVideoParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVideo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVideo>>,
+          TError,
+          Awaited<ReturnType<typeof getVideo>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVideo<TData = Awaited<ReturnType<typeof getVideo>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetVideoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVideo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVideo>>,
+          TError,
+          Awaited<ReturnType<typeof getVideo>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVideo<TData = Awaited<ReturnType<typeof getVideo>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetVideoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVideo>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetVideo<TData = Awaited<ReturnType<typeof getVideo>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetVideoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVideo>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetVideoQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

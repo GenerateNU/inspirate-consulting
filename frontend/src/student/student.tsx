@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { errorMessage } from "../api/client";
 import {
-  requestEssayReview,
-  getEssayReviewStatus,
-  refundEssayReview,
+  useRequestEssayReview,
+  useGetEssayReviewStatus,
+  useRefundEssayReview,
 } from "../api/endpoints";
-import type { EssayReviewStatus } from "../api/models";
 
 export default function Student() {
   // Request a review
@@ -15,71 +15,57 @@ export default function Student() {
 
   // Look up the review on an essay
   const [lookupEssayId, setLookupEssayId] = useState("");
-  const [review, setReview] = useState<EssayReviewStatus | null>(null);
+  const [submittedEssayId, setSubmittedEssayId] = useState("");
   const [lookupResult, setLookupResult] = useState("");
 
-  const handleRequest = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const requestReview = useRequestEssayReview();
+  const lookup = useGetEssayReviewStatus(submittedEssayId, {
+    query: { enabled: !!submittedEssayId },
+  });
+  const refund = useRefundEssayReview();
+  const review = submittedEssayId ? lookup.data : undefined;
+
+  const handleRequest = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setRequestResult("");
-    try {
-      const response = await requestEssayReview({
-        student_id: studentId,
-        essay_id: essayId,
-        amount: Number(amount),
-      });
-
-      if (response.status === 200) {
-        setRequestResult(`Requested. Review id: ${response.data.id}`);
-      } else {
-        setRequestResult(
-          `Error ${response.status}: ${JSON.stringify(response.data)}`,
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      setRequestResult("Something went wrong.");
-    }
+    requestReview.mutate(
+      {
+        data: {
+          student_id: studentId,
+          essay_id: essayId,
+          amount: Number(amount),
+        },
+      },
+      {
+        onSuccess: (transaction) =>
+          setRequestResult(`Requested. Review id: ${transaction.id}`),
+      },
+    );
   };
 
-  const handleLookup = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const handleLookup = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLookupResult("");
-    setReview(null);
-    try {
-      const response = await getEssayReviewStatus(lookupEssayId);
-
-      if (response.status === 200) {
-        setReview(response.data);
-      } else {
-        setLookupResult(
-          `Error ${response.status}: ${JSON.stringify(response.data)}`,
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      setLookupResult("Something went wrong.");
-    }
+    refund.reset();
+    if (lookupEssayId === submittedEssayId) void lookup.refetch();
+    else setSubmittedEssayId(lookupEssayId);
   };
 
-  const handleRefund = async () => {
+  const handleRefund = () => {
     if (!review) return;
     setLookupResult("");
-    try {
-      const response = await refundEssayReview(review.transaction_id);
-
-      if (response.status === 200) {
-        setLookupResult(`Refunded. Balance credited back.`);
-        setReview(null);
-      } else {
-        setLookupResult(
-          `Error ${response.status}: ${JSON.stringify(response.data)}`,
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      setLookupResult("Something went wrong.");
-    }
+    refund.mutate(
+      { id: review.transaction_id },
+      {
+        onSuccess: () => {
+          setLookupResult(`Refunded. Balance credited back.`);
+          setSubmittedEssayId("");
+        },
+      },
+    );
   };
+
+  const lookupError = submittedEssayId ? lookup.error : null;
 
   return (
     <div className="form-container">
@@ -116,6 +102,7 @@ export default function Student() {
         <button type="submit">Request Review</button>
       </form>
       {requestResult && <p>{requestResult}</p>}
+      {requestReview.error && <p>Error: {errorMessage(requestReview.error)}</p>}
 
       <h2>Review Status for an Essay</h2>
       <form onSubmit={handleLookup}>
@@ -142,6 +129,8 @@ export default function Student() {
         </div>
       )}
       {lookupResult && <p>{lookupResult}</p>}
+      {lookupError && <p>Error: {errorMessage(lookupError)}</p>}
+      {refund.error && <p>Error: {errorMessage(refund.error)}</p>}
     </div>
   );
 }

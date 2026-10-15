@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { errorMessage } from "../api/client";
 import { useCreateMedia } from "../api/endpoints";
 
 export default function CreateMedia() {
@@ -6,30 +7,29 @@ export default function CreateMedia() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateMedia<Error>();
+  const { mutate, isPending, error } = useCreateMedia();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const response = await trigger({
-        title,
-        description,
-        length_in_mins: 10,
-        school_year: null,
-        s3_key: "video-bucket/dummy-video.mp4",
-      });
-
-      if (response.status === 200) {
-        setStatus(`Created: ${response.data.title}`);
-        setTitle("");
-        setDescription("");
-      } else {
-        setStatus("Something went wrong.");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
-    }
+    setStatus("");
+    mutate(
+      {
+        data: {
+          title,
+          description,
+          length_in_mins: 10,
+          school_year: null,
+          s3_key: "video-bucket/dummy-video.mp4",
+        },
+      },
+      {
+        onSuccess: (media) => {
+          setStatus(`Created: ${media.title}`);
+          setTitle("");
+          setDescription("");
+        },
+      },
+    );
   };
 
   return (
@@ -54,12 +54,12 @@ export default function CreateMedia() {
             required
           />
         </div>
-        <button type="submit" disabled={isMutating}>
-          {isMutating ? "Uploading..." : "Upload Video"}
+        <button type="submit" disabled={isPending}>
+          {isPending ? "Uploading..." : "Upload Video"}
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {error.message}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

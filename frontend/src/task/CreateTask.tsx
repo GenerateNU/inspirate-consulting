@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { errorMessage } from "../api/client";
 import { useCreateTodoItem } from "../api/endpoints";
 import type { CreateTodoItemRequestBody } from "../api/models";
 import {
   DEFAULT_DUE_TIME,
   LINK_TYPE_LABELS,
-  errorMessage,
   useTodoLinkOptions,
   type LinkType,
 } from "./todoShared";
@@ -18,10 +18,11 @@ export default function CreateTask() {
   const [status, setStatus] = useState("");
 
   const { options } = useTodoLinkOptions();
-  const { trigger, isMutating, error } = useCreateTodoItem<Error>();
+  const { mutate, isPending, error } = useCreateTodoItem();
 
-  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setStatus("");
 
     const body: CreateTodoItemRequestBody = { todo_description: description };
     if (deadline)
@@ -32,22 +33,19 @@ export default function CreateTask() {
     if (linkType === "media") body.media_id = linkId;
     if (linkType === "college") body.global_college_id = Number(linkId);
 
-    try {
-      const response = await trigger(body);
-
-      if (response.status === 200) {
-        setStatus(`Created: ${response.data.todo_description}`);
-        setDescription("");
-        setDeadline("");
-        setDeadlineTime("");
-        setLinkType("");
-        setLinkId("");
-      } else {
-        setStatus(errorMessage(response.data));
-      }
-    } catch (err) {
-      setStatus("Something went wrong." + JSON.stringify(err));
-    }
+    mutate(
+      { data: body },
+      {
+        onSuccess: (todo) => {
+          setStatus(`Created: ${todo.todo_description}`);
+          setDescription("");
+          setDeadline("");
+          setDeadlineTime("");
+          setLinkType("");
+          setLinkId("");
+        },
+      },
+    );
   };
 
   return (
@@ -111,12 +109,12 @@ export default function CreateTask() {
             </select>
           )}
         </div>
-        <button type="submit" disabled={isMutating}>
-          {isMutating ? "Creating Task..." : "Create Task"}
+        <button type="submit" disabled={isPending}>
+          {isPending ? "Creating Task..." : "Create Task"}
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {error.message}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

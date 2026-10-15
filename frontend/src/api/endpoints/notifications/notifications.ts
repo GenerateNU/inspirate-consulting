@@ -5,14 +5,15 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
-  Key
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  MutationFunction,
+  QueryClient,
+  UseMutationOptions,
+  UseMutationResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -48,35 +49,8 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
-
-
-
- export type queueNotificationEmailResponse200 = {
-  data: QueueEmailNotificationResponseBody
-  status: 200
-}
-
-export type queueNotificationEmailResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type queueNotificationEmailResponseSuccess = (queueNotificationEmailResponse200) & {
-  headers: Headers;
-};
-export type queueNotificationEmailResponseError = (queueNotificationEmailResponseDefault) & {
-  headers: Headers;
-};
-
-export type queueNotificationEmailResponse = (queueNotificationEmailResponseSuccess | queueNotificationEmailResponseError)
 
 export const getQueueNotificationEmailUrl = () => {
 
@@ -89,7 +63,7 @@ export const getQueueNotificationEmailUrl = () => {
 /**
  * Queue a single email notification to SQS
  */
-export const queueNotificationEmail = async (queueEmailNotificationRequestBody: NonReadonly<QueueEmailNotificationRequestBody>, options?: RequestInit): Promise<queueNotificationEmailResponse> => {
+export const queueNotificationEmail = async (queueEmailNotificationRequestBody: NonReadonly<QueueEmailNotificationRequestBody>, options?: RequestInit): Promise<QueueEmailNotificationResponseBody> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -116,36 +90,63 @@ const res = await fetch(getQueueNotificationEmailUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: queueNotificationEmailResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as queueNotificationEmailResponse
-}
-
-
-
-
-export const getQueueNotificationEmailMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<QueueEmailNotificationRequestBody> }) => {
-    return queueNotificationEmail(arg, options);
+    const err: globalThis.Error & {info?: QueueEmailNotificationResponseBody, status?: number} = new globalThis.Error();
+    const data : QueueEmailNotificationResponseBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: QueueEmailNotificationResponseBody = body ? JSON.parse(body) : {}
+  return data
 }
-export const getQueueNotificationEmailMutationKey = () => [`/api/queue/email-notification`] as const;
 
-export type QueueNotificationEmailMutationResult = NonNullable<Awaited<ReturnType<typeof queueNotificationEmail>>>
 
-export const useQueueNotificationEmail = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof queueNotificationEmail>>, TError, Key, NonReadonly<QueueEmailNotificationRequestBody>, Awaited<ReturnType<typeof queueNotificationEmail>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getQueueNotificationEmailMutationKey();
-  const swrFn = getQueueNotificationEmailMutationFetcher(fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getQueueNotificationEmailMutationKey = () => ['queueNotificationEmail'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getQueueNotificationEmailMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queueNotificationEmail>>, TError,QueueNotificationEmailMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof queueNotificationEmail>>, TError,QueueNotificationEmailMutationVariables, TContext> => {
+
+const mutationKey = getQueueNotificationEmailMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof queueNotificationEmail>>, QueueNotificationEmailMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  queueNotificationEmail(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type QueueNotificationEmailMutationResult = NonNullable<Awaited<ReturnType<typeof queueNotificationEmail>>>
+    export type QueueNotificationEmailMutationBody = NonReadonly<QueueEmailNotificationRequestBody>
+    export type QueueNotificationEmailMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type QueueNotificationEmailMutationVariables = {data: NonReadonly<QueueEmailNotificationRequestBody>}
+
+    export const useQueueNotificationEmail = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queueNotificationEmail>>, TError,QueueNotificationEmailMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof queueNotificationEmail>>,
+        TError,
+        QueueNotificationEmailMutationVariables,
+        TContext
+      > => {
+      return useMutation(getQueueNotificationEmailMutationOptions(options), queryClient);
+    }
