@@ -95,7 +95,7 @@ export const getSearchGlobalCollegesUrl = (params?: SearchGlobalCollegesParams,)
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://127.0.0.1:8080/college-search?${stringifiedParams}` : `http://127.0.0.1:8080/college-search`
+  return stringifiedParams.length > 0 ? `/api/college-search?${stringifiedParams}` : `/api/college-search`
 }
 
 /**
@@ -122,7 +122,7 @@ export const searchGlobalColleges = async (params?: SearchGlobalCollegesParams, 
 
 
 
-export const getSearchGlobalCollegesKey = (params?: SearchGlobalCollegesParams,) => [`http://127.0.0.1:8080/college-search`, ...(params ? [params]: [])] as const;
+export const getSearchGlobalCollegesKey = (params?: SearchGlobalCollegesParams,) => [`/api/college-search`, ...(params ? [params]: [])] as const;
 
 export type SearchGlobalCollegesQueryResult = NonNullable<Awaited<ReturnType<typeof searchGlobalColleges>>>
 
@@ -327,7 +327,7 @@ export const getDeleteGlobalCollegeUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/colleges/${id}`
+  return `/api/colleges/${id}`
 }
 
 /**
@@ -359,7 +359,7 @@ export const getDeleteGlobalCollegeMutationFetcher = (id: number, options?: Requ
     return deleteGlobalCollege(id, options);
   }
 }
-export const getDeleteGlobalCollegeMutationKey = (id: number,) => [`http://127.0.0.1:8080/colleges/${id}`] as const;
+export const getDeleteGlobalCollegeMutationKey = (id: number,) => [`/api/colleges/${id}`] as const;
 
 export type DeleteGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteGlobalCollege>>>
 
@@ -474,7 +474,7 @@ export const getUpdateGlobalCollegeUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/colleges/${id}`
+  return `/api/colleges/${id}`
 }
 
 /**
@@ -521,7 +521,7 @@ export const getUpdateGlobalCollegeMutationFetcher = (id: number, options?: Requ
     return updateGlobalCollege(id, arg, options);
   }
 }
-export const getUpdateGlobalCollegeMutationKey = (id: number,) => [`http://127.0.0.1:8080/colleges/${id}`] as const;
+export const getUpdateGlobalCollegeMutationKey = (id: number,) => [`/api/colleges/${id}`] as const;
 
 export type UpdateGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof updateGlobalCollege>>>
 
