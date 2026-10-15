@@ -13,7 +13,7 @@ import (
 )
 
 // updates a global college's name, location, and deadlines
-func (r *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error) {
+func (r *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
 
 	updatedCollege := &models.GlobalCollege{}
 

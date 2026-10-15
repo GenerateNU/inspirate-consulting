@@ -15,7 +15,7 @@ func (h *Handler) UpdateGlobalCollege(ctx context.Context, id int64, input model
 		}
 	}
 
-	updated, err := h.GlobalCollegeRepository.UpdateGlobalCollege(ctx, id, input, nearDuplicateThreshold)
+	updated, err := h.GlobalCollegeRepository.UpdateGlobalCollege(ctx, id, input)
 	if err != nil {
 		return nil, err
 	}

@@ -76,7 +76,7 @@ type GlobalCollegeRepository interface {
 	DeleteGlobalCollege(ctx context.Context, id int64) error
 	FindNearDuplicateGlobalColleges(ctx context.Context, name string, location string, threshold float64) ([]models.GlobalCollege, error)
 	SearchGlobalColleges(ctx context.Context, query string, threshold float64, limit int) ([]models.GlobalCollege, error)
-	UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error)
+	UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error)
 }
 
 // To represent the Personal College Application schema

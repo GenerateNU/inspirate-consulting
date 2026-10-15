@@ -183,9 +183,9 @@ func (_m *GlobalCollegeRepository) SearchGlobalColleges(ctx context.Context, que
 	return r0, r1
 }
 
-// UpdateGlobalCollege provides a mock function with given fields: ctx, id, input, nearDuplicateThreshold
-func (_m *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error) {
-	ret := _m.Called(ctx, id, input, nearDuplicateThreshold)
+// UpdateGlobalCollege provides a mock function with given fields: ctx, id, input
+func (_m *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
+	ret := _m.Called(ctx, id, input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateGlobalCollege")
@@ -193,19 +193,19 @@ func (_m *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id i
 
 	var r0 *models.GlobalCollege
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UpdateGlobalCollegeRequestBody, float64) (*models.GlobalCollege, error)); ok {
-		return rf(ctx, id, input, nearDuplicateThreshold)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error)); ok {
+		return rf(ctx, id, input)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UpdateGlobalCollegeRequestBody, float64) *models.GlobalCollege); ok {
-		r0 = rf(ctx, id, input, nearDuplicateThreshold)
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.UpdateGlobalCollegeRequestBody) *models.GlobalCollege); ok {
+		r0 = rf(ctx, id, input)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.GlobalCollege)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int64, models.UpdateGlobalCollegeRequestBody, float64) error); ok {
-		r1 = rf(ctx, id, input, nearDuplicateThreshold)
+	if rf, ok := ret.Get(1).(func(context.Context, int64, models.UpdateGlobalCollegeRequestBody) error); ok {
+		r1 = rf(ctx, id, input)
 	} else {
 		r1 = ret.Error(1)
 	}
