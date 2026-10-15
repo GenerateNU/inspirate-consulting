@@ -47,15 +47,14 @@ func formatEmail(n models.QueueEmailNotificationRequestBody) (string, string) {
 	dueDate := n.DueDate.Format("January 2, 2006")
 
 	if n.IsOverdue {
-		subject := fmt.Sprintf("Overdue: %s", n.TaskName)
-		body := fmt.Sprintf("Hi,\n\nYour task \"%s\" was due on %s and is now past due.\n\nPlease complete it as soon as you can.",
-			n.TaskName, dueDate)
+		subject := fmt.Sprintf("Inspirate Consulting Task Overdue: %s", n.TaskName)
+		body := fmt.Sprintf("Your Insipirate Consulting task, %s, was due on %s", n.TaskName, dueDate)
 		return subject, body
 	}
 
-	subject := fmt.Sprintf("Upcoming deadline: %s", n.TaskName)
+	subject := fmt.Sprintf("Inspirate Consulting Upcoming Deadline: %s", n.TaskName)
 	body := fmt.Sprintf(
-		"Hi,\n\nThis is a reminder that your task \"%s\" is due on %s.",
+		"Hi,\n\nThis is a reminder that your Inspirate Consulting task \"%s\" is due on %s.",
 		n.TaskName, dueDate,
 	)
 	return subject, body
