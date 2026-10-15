@@ -55,7 +55,7 @@ func TestListGlobalColleges(t *testing.T) {
 
 	created := make([]models.GlobalCollege, 0, len(inputs))
 	for _, input := range inputs {
-		output, err := repo.CreateGlobalCollege(ctx, input, nearDuplicateThreshold)
+		output, err := repo.CreateGlobalCollege(ctx, input)
 		if err != nil {
 			t.Fatalf("setup CreateGlobalCollege(%q) failed: %v", input.SchoolName, err)
 		}

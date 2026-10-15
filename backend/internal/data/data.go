@@ -68,12 +68,12 @@ type NotificationLogRepository interface {
 
 // To represent the Global College schema
 type GlobalCollegeRepository interface {
-	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error)
+	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error)
 	GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error)
 	ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error)
 	DeleteGlobalCollege(ctx context.Context, id int64) error
 	FindNearDuplicateGlobalColleges(ctx context.Context, name string, location string, threshold float64) ([]models.GlobalCollege, error)
-	SearchGlobalColleges(ctx context.Context, query string, threshold float64) ([]models.GlobalCollege, error)
+	SearchGlobalColleges(ctx context.Context, query string, threshold float64, limit int) ([]models.GlobalCollege, error)
 	UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error)
 }
 
