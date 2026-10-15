@@ -115,6 +115,7 @@ var routeTable = []routeAccess{
 	// notification preferences
 	{http.MethodGet, "/notification-preferences", anyRole, nil},
 	{http.MethodPut, "/notification-preferences", anyRole, nil},
+	{http.MethodPost, "/queue/email-notification", anyRole, nil},
 }
 
 var pathParam = regexp.MustCompile(`\{[^}]+\}`)

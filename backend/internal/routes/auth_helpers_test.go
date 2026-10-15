@@ -2,9 +2,8 @@ package routes
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -36,13 +35,13 @@ const testKeyID = "test-key"
 
 var (
 	testKeyOnce sync.Once
-	testKey     *ecdsa.PrivateKey
+	testKey     *rsa.PrivateKey
 	tokenSeq    atomic.Int64
 )
 
 // signingKey returns the process-wide test key, starting the JWKS server and
 // pointing SUPABASE_URL at it on first use (once, so parallel tests agree).
-func signingKey() *ecdsa.PrivateKey {
+func signingKey() *rsa.PrivateKey {
 	testKeyOnce.Do(func() {
 		testKey = newTestKey()
 		jwks := jwksFor(&testKey.PublicKey, testKeyID)
@@ -61,23 +60,19 @@ func signingKey() *ecdsa.PrivateKey {
 	return testKey
 }
 
-func newTestKey() *ecdsa.PrivateKey {
-	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+func newTestKey() *rsa.PrivateKey {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic(err)
 	}
 	return key
 }
 
-func jwksFor(pub *ecdsa.PublicKey, kid string) []byte {
-	b64 := func(n *big.Int) string {
-		buf := make([]byte, 32)
-		n.FillBytes(buf)
-		return base64.RawURLEncoding.EncodeToString(buf)
-	}
+func jwksFor(pub *rsa.PublicKey, kid string) []byte {
+	b64 := func(b []byte) string { return base64.RawURLEncoding.EncodeToString(b) }
 	out, err := json.Marshal(map[string]any{"keys": []map[string]string{{
-		"kty": "EC", "crv": "P-256", "x": b64(pub.X), "y": b64(pub.Y),
-		"kid": kid, "alg": "ES256", "use": "sig",
+		"kty": "RSA", "n": b64(pub.N.Bytes()), "e": b64(big.NewInt(int64(pub.E)).Bytes()),
+		"kid": kid, "alg": "RS256", "use": "sig",
 	}}})
 	if err != nil {
 		panic(err)
@@ -117,7 +112,7 @@ func signWith(method jwt.SigningMethod, key any, kid string, claims jwt.MapClaim
 
 // sign returns a token the verifier accepts (subject to the claims).
 func sign(claims jwt.MapClaims) string {
-	return signWith(jwt.SigningMethodES256, signingKey(), testKeyID, claims)
+	return signWith(jwt.SigningMethodRS256, signingKey(), testKeyID, claims)
 }
 
 // tokenFor returns a valid session token for the given role.
