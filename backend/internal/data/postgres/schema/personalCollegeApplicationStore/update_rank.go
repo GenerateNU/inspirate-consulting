@@ -92,74 +92,83 @@ func (r *PersonalCollegeApplicationRepository) UpdateApplicationRank(
 func computeRankShift(applications []appRank, applicationID int64, oldRank *int, newRank *int) []rankUpdate {
 
 	// case 1: ranked -> unranked
-	// every application ranked below the its old position shifts up by one to close the gap
 	if newRank == nil {
-		var updates []rankUpdate
-		if oldRank != nil {
-			old := *oldRank
-			for _, app := range applications {
-				if app.ID == applicationID {
-					continue
-				}
-				if app.Rank != nil && *app.Rank > old {
-					shifted := *app.Rank - 1
-					updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
-				}
-			}
-		}
-		updates = append(updates, rankUpdate{ID: applicationID, Rank: nil})
-		return updates
+		return rankedToUnranked(applications, applicationID, oldRank)
 	}
-
-	target := *newRank
-	var updates []rankUpdate
 
 	// case 2: unranked -> ranked
-	// ranks at or below shift down by one to make room for the new rank
 	if oldRank == nil {
-		for _, app := range applications {
-			if app.ID == applicationID {
-				continue
-			}
-			if app.Rank != nil && *app.Rank >= target {
-				shifted := *app.Rank + 1
-				updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
-			}
-		}
-		updates = append(updates, rankUpdate{ID: applicationID, Rank: &target})
-		return updates
+		return unrankedToRanked(applications, applicationID, *newRank)
 	}
 
-	old := *oldRank
-
 	// case 3: higher rank -> lower rank (moving up)
-	// everything between the new position and the old one shifts down by one
-	if target < old {
-		for _, app := range applications {
-			if app.ID == applicationID {
-				continue
-			}
-			if app.Rank != nil && *app.Rank >= target && *app.Rank < old {
-				shifted := *app.Rank + 1
-				updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
-			}
-		}
+	if *newRank < *oldRank {
+		return moveUp(applications, applicationID, *oldRank, *newRank)
 	}
 
 	// case 4: lower rank -> higher rank (moving down)
-	// everything between the old position and the new one shifts up by one
-	if target > old {
+	return moveDown(applications, applicationID, *oldRank, *newRank)
+}
+
+// everything ranked below the old position shifts up by one to close the gap left behind
+func rankedToUnranked(applications []appRank, applicationID int64, oldRank *int) []rankUpdate {
+	var updates []rankUpdate
+	if oldRank != nil {
+		old := *oldRank
 		for _, app := range applications {
 			if app.ID == applicationID {
 				continue
 			}
-			if app.Rank != nil && *app.Rank > old && *app.Rank <= target {
+			if app.Rank != nil && *app.Rank > old {
 				shifted := *app.Rank - 1
 				updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
 			}
 		}
 	}
+	return append(updates, rankUpdate{ID: applicationID, Rank: nil})
+}
 
-	updates = append(updates, rankUpdate{ID: applicationID, Rank: &target})
-	return updates
+// everything at or below the target shifts down by one to make room for the newly-ranked application
+func unrankedToRanked(applications []appRank, applicationID int64, target int) []rankUpdate {
+	var updates []rankUpdate
+	for _, app := range applications {
+		if app.ID == applicationID {
+			continue
+		}
+		if app.Rank != nil && *app.Rank >= target {
+			shifted := *app.Rank + 1
+			updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
+		}
+	}
+	return append(updates, rankUpdate{ID: applicationID, Rank: &target})
+}
+
+// moving to a lower numeric rank (target < old) = everything between the new and old position shifts down by one
+func moveUp(applications []appRank, applicationID int64, old int, target int) []rankUpdate {
+	var updates []rankUpdate
+	for _, app := range applications {
+		if app.ID == applicationID {
+			continue
+		}
+		if app.Rank != nil && *app.Rank >= target && *app.Rank < old {
+			shifted := *app.Rank + 1
+			updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
+		}
+	}
+	return append(updates, rankUpdate{ID: applicationID, Rank: &target})
+}
+
+// moving to a higher numeric rank (target > old) = everything between the old and new position shifts up by one
+func moveDown(applications []appRank, applicationID int64, old int, target int) []rankUpdate {
+	var updates []rankUpdate
+	for _, app := range applications {
+		if app.ID == applicationID {
+			continue
+		}
+		if app.Rank != nil && *app.Rank > old && *app.Rank <= target {
+			shifted := *app.Rank - 1
+			updates = append(updates, rankUpdate{ID: app.ID, Rank: &shifted})
+		}
+	}
+	return append(updates, rankUpdate{ID: applicationID, Rank: &target})
 }

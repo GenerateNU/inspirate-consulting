@@ -249,7 +249,7 @@ export const getDeletePersonalCollegeApplicationUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/applications/${id}`
+  return `/api/applications/${id}`
 }
 
 /**
@@ -281,7 +281,7 @@ export const getDeletePersonalCollegeApplicationMutationFetcher = (id: number, o
     return deletePersonalCollegeApplication(id, options);
   }
 }
-export const getDeletePersonalCollegeApplicationMutationKey = (id: number,) => [`http://127.0.0.1:8080/applications/${id}`] as const;
+export const getDeletePersonalCollegeApplicationMutationKey = (id: number,) => [`/api/applications/${id}`] as const;
 
 export type DeletePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>>
 
@@ -325,7 +325,7 @@ export const getUpdatePersonalCollegeApplicationUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/applications/${id}`
+  return `/api/applications/${id}`
 }
 
 /**
@@ -372,7 +372,7 @@ export const getUpdatePersonalCollegeApplicationMutationFetcher = (id: number, o
     return updatePersonalCollegeApplication(id, arg, options);
   }
 }
-export const getUpdatePersonalCollegeApplicationMutationKey = (id: number,) => [`http://127.0.0.1:8080/applications/${id}`] as const;
+export const getUpdatePersonalCollegeApplicationMutationKey = (id: number,) => [`/api/applications/${id}`] as const;
 
 export type UpdatePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>>
 
@@ -416,7 +416,7 @@ export const getUpdatePersonalCollegeApplicationRankUrl = (id: number,) => {
 
 
 
-  return `http://127.0.0.1:8080/applications/${id}/rank`
+  return `/api/applications/${id}/rank`
 }
 
 /**
@@ -463,7 +463,7 @@ export const getUpdatePersonalCollegeApplicationRankMutationFetcher = (id: numbe
     return updatePersonalCollegeApplicationRank(id, arg, options);
   }
 }
-export const getUpdatePersonalCollegeApplicationRankMutationKey = (id: number,) => [`http://127.0.0.1:8080/applications/${id}/rank`] as const;
+export const getUpdatePersonalCollegeApplicationRankMutationKey = (id: number,) => [`/api/applications/${id}/rank`] as const;
 
 export type UpdatePersonalCollegeApplicationRankMutationResult = NonNullable<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>>
 
