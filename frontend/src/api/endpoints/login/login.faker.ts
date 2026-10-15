@@ -10,9 +10,9 @@ import {
 } from '@faker-js/faker';
 
 import type {
-  LoginResponse
+  User
 } from '../../models';
 
 
-export const getLoginUserResponseMock = (overrideResponse: Partial<Extract<LoginResponse, object>> = {}): LoginResponse => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), access_token: faker.string.alpha({length: {min: 10, max: 20}}), error: {}, expires_in: faker.number.int(), refresh_token: faker.string.alpha({length: {min: 10, max: 20}}), reset_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), token_type: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.alpha({length: {min: 10, max: 20}})}, ...overrideResponse})
+export const getLoginUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reset_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
