@@ -8,6 +8,8 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
+const nearDuplicateThreshold = 0.45
+
 // similar name and location should be flagged as a near-duplicate
 func TestFindNearDuplicateGlobalColleges_MatchesSimilarNameAndLocation(t *testing.T) {
 	t.Parallel()
@@ -19,7 +21,7 @@ func TestFindNearDuplicateGlobalColleges_MatchesSimilarNameAndLocation(t *testin
 	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
 		SchoolName:     "Northeastern University - Boston",
 		SchoolLocation: "Boston, MA",
-	}, nearDuplicateThreshold)
+	})
 	if err != nil {
 		t.Fatalf("setup create failed: %v", err)
 	}
@@ -45,7 +47,7 @@ func TestFindNearDuplicateGlobalColleges_DoesNotMatchDifferentNameAndLocation(t 
 	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
 		SchoolName:     "Boston College",
 		SchoolLocation: "Boston, MA",
-	}, nearDuplicateThreshold)
+	})
 	if err != nil {
 		t.Fatalf("setup create failed: %v", err)
 	}
@@ -71,7 +73,7 @@ func TestFindNearDuplicateGlobalColleges_DoesNotMatchSimilarNameDifferentLocatio
 	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
 		SchoolName:     "Western State University",
 		SchoolLocation: "Colorado City, CO",
-	}, nearDuplicateThreshold)
+	})
 	if err != nil {
 		t.Fatalf("setup create failed: %v", err)
 	}
@@ -97,7 +99,7 @@ func TestFindNearDuplicateGlobalColleges_DoesNotMatchSimilarLocationDifferentNam
 	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
 		SchoolName:     "Totally Unrelated College",
 		SchoolLocation: "Shared City, SC",
-	}, nearDuplicateThreshold)
+	})
 	if err != nil {
 		t.Fatalf("setup create failed: %v", err)
 	}

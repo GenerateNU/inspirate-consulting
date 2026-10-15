@@ -15,9 +15,9 @@ type GlobalCollegeRepository struct {
 	mock.Mock
 }
 
-// CreateGlobalCollege provides a mock function with given fields: ctx, global_college, nearDuplicateThreshold
-func (_m *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error) {
-	ret := _m.Called(ctx, global_college, nearDuplicateThreshold)
+// CreateGlobalCollege provides a mock function with given fields: ctx, global_college
+func (_m *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
+	ret := _m.Called(ctx, global_college)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateGlobalCollege")
@@ -25,19 +25,19 @@ func (_m *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, glob
 
 	var r0 *models.GlobalCollege
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.CreateGlobalCollegeRequestBody, float64) (*models.GlobalCollege, error)); ok {
-		return rf(ctx, global_college, nearDuplicateThreshold)
+	if rf, ok := ret.Get(0).(func(context.Context, models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error)); ok {
+		return rf(ctx, global_college)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.CreateGlobalCollegeRequestBody, float64) *models.GlobalCollege); ok {
-		r0 = rf(ctx, global_college, nearDuplicateThreshold)
+	if rf, ok := ret.Get(0).(func(context.Context, models.CreateGlobalCollegeRequestBody) *models.GlobalCollege); ok {
+		r0 = rf(ctx, global_college)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.GlobalCollege)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, models.CreateGlobalCollegeRequestBody, float64) error); ok {
-		r1 = rf(ctx, global_college, nearDuplicateThreshold)
+	if rf, ok := ret.Get(1).(func(context.Context, models.CreateGlobalCollegeRequestBody) error); ok {
+		r1 = rf(ctx, global_college)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -153,9 +153,9 @@ func (_m *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]mo
 	return r0, r1
 }
 
-// SearchGlobalColleges provides a mock function with given fields: ctx, query, threshold
-func (_m *GlobalCollegeRepository) SearchGlobalColleges(ctx context.Context, query string, threshold float64) ([]models.GlobalCollege, error) {
-	ret := _m.Called(ctx, query, threshold)
+// SearchGlobalColleges provides a mock function with given fields: ctx, query, threshold, limit
+func (_m *GlobalCollegeRepository) SearchGlobalColleges(ctx context.Context, query string, threshold float64, limit int) ([]models.GlobalCollege, error) {
+	ret := _m.Called(ctx, query, threshold, limit)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SearchGlobalColleges")
@@ -163,19 +163,19 @@ func (_m *GlobalCollegeRepository) SearchGlobalColleges(ctx context.Context, que
 
 	var r0 []models.GlobalCollege
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, float64) ([]models.GlobalCollege, error)); ok {
-		return rf(ctx, query, threshold)
+	if rf, ok := ret.Get(0).(func(context.Context, string, float64, int) ([]models.GlobalCollege, error)); ok {
+		return rf(ctx, query, threshold, limit)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, float64) []models.GlobalCollege); ok {
-		r0 = rf(ctx, query, threshold)
+	if rf, ok := ret.Get(0).(func(context.Context, string, float64, int) []models.GlobalCollege); ok {
+		r0 = rf(ctx, query, threshold, limit)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.GlobalCollege)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, float64) error); ok {
-		r1 = rf(ctx, query, threshold)
+	if rf, ok := ret.Get(1).(func(context.Context, string, float64, int) error); ok {
+		r1 = rf(ctx, query, threshold, limit)
 	} else {
 		r1 = ret.Error(1)
 	}

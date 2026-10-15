@@ -23,7 +23,7 @@ func TestGetGlobalCollege(t *testing.T) {
 		SchoolName:     "Findable University",
 		SchoolLocation: "Search City, SC",
 	}
-	createOutput, err := repo.CreateGlobalCollege(ctx, input, nearDuplicateThreshold)
+	createOutput, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("setup CreateGlobalCollege failed: %v", err)
 	}

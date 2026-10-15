@@ -43,9 +43,12 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
+	
+		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Northeastern University", "Boston, MA", mock.Anything).
+			Return([]models.GlobalCollege{}, nil)
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
 			return in.SchoolName == "Northeastern University" && in.SchoolLocation == "Boston, MA"
-		}), mock.Anything).Return(&models.GlobalCollege{
+		})).Return(&models.GlobalCollege{
 			ID:             1,
 			CreatedAt:      createdAt,
 			UpdatedAt:      createdAt,
@@ -89,9 +92,12 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
+	
+		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Duplicate University", "Dupe City, DC", mock.Anything).
+			Return([]models.GlobalCollege{}, nil)
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
 			return in.SchoolName == "Duplicate University"
-		}), mock.Anything).Return(nil, errs.Conflict("global college", "school_name/school_location", "Duplicate University / Dupe City, DC"))
+		})).Return(nil, errs.Conflict("global college", "school_name/school_location", "Duplicate University / Dupe City, DC"))
 
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
@@ -111,8 +117,6 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		require.NoError(t, err)
 		defer func() { _ = resp.Body.Close() }()
 
-		// The repository's unique-index violation is translated to errs.Conflict,
-		// which the central ErrorHandler surfaces as a real 409.
 		assert.Equal(t, http.StatusConflict, resp.StatusCode)
 	})
 
@@ -120,7 +124,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-		// Mock should NOT be called when Huma validation fails.
+		// No mocks: Huma validation rejects the request before the handler runs.
 
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
 		require.NoError(t, err)
@@ -260,7 +264,6 @@ func TestRoute_GetGlobalCollege(t *testing.T) {
 		require.NoError(t, err)
 		defer func() { _ = resp.Body.Close() }()
 
-		// GetGlobalCollege's repository returns an errs.NotFound (HTTPError).
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }

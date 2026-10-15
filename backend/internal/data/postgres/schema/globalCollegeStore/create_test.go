@@ -9,8 +9,6 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-const nearDuplicateThreshold = 0.45
-
 // test normal global college creation with valid input
 func TestCreateGlobalCollege(t *testing.T) {
 	if testing.Short() {
@@ -32,7 +30,7 @@ func TestCreateGlobalCollege(t *testing.T) {
 		RDDeadline:     nil,
 	}
 
-	output, err := repo.CreateGlobalCollege(ctx, input, nearDuplicateThreshold)
+	output, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("CreateGlobalCollege failed: %v", err)
 	}
@@ -82,7 +80,7 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 		SchoolLocation: "Nowhere, NA",
 	}
 
-	output, err := repo.CreateGlobalCollege(ctx, input, nearDuplicateThreshold)
+	output, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("expected create with all-nil deadlines to succeed, got error: %v", err)
 	}
@@ -110,7 +108,7 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 		SchoolLocation: "Dupe City, DC",
 	}
 
-	_, err := repo.CreateGlobalCollege(ctx, input, nearDuplicateThreshold)
+	_, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
 		t.Fatalf("first CreateGlobalCollege failed: %v", err)
 	}
@@ -120,100 +118,8 @@ func TestCreateGlobalCollege_Duplicate(t *testing.T) {
 		SchoolName:     "duplicate university",
 		SchoolLocation: "DUPE CITY, DC",
 	}
-	_, err = repo.CreateGlobalCollege(ctx, dupInput, nearDuplicateThreshold)
+	_, err = repo.CreateGlobalCollege(ctx, dupInput)
 	if err == nil {
 		t.Fatal("expected an error creating a case-insensitive duplicate, got nil")
-	}
-}
-
-// test a near-duplicate (not exact) is rejected by the fuzzy check
-func TestCreateGlobalCollege_RejectsNearDuplicate(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test in short mode")
-	}
-	t.Parallel()
-
-	db := testutils.SetupTestDB(t)
-	repo := NewGlobalCollegeRepository(db)
-	ctx := context.Background()
-
-	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
-		SchoolName:     "Northeastern University - Boston",
-		SchoolLocation: "Boston, MA",
-	}, nearDuplicateThreshold)
-	if err != nil {
-		t.Fatalf("first CreateGlobalCollege failed: %v", err)
-	}
-
-	_, err = repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
-		SchoolName:     "Northeastern Boston Campus",
-		SchoolLocation: "Boston, MA",
-	}, nearDuplicateThreshold)
-	if err == nil {
-		t.Fatal("expected an error creating a near-duplicate college, got nil")
-	}
-}
-
-// test that ConfirmDuplicate allows creation despite a detected near-duplicate
-func TestCreateGlobalCollege_ConfirmDuplicateOverridesNearDuplicateCheck(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test in short mode")
-	}
-	t.Parallel()
-
-	db := testutils.SetupTestDB(t)
-	repo := NewGlobalCollegeRepository(db)
-	ctx := context.Background()
-
-	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
-		SchoolName:     "Northeastern University - Boston",
-		SchoolLocation: "Boston, MA",
-	}, nearDuplicateThreshold)
-	if err != nil {
-		t.Fatalf("first CreateGlobalCollege failed: %v", err)
-	}
-
-	created, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
-		SchoolName:       "Northeastern Boston Campus",
-		SchoolLocation:   "Boston, MA",
-		ConfirmDuplicate: true,
-	}, nearDuplicateThreshold)
-	if err != nil {
-		t.Fatalf("expected ConfirmDuplicate to allow creation despite the near-duplicate warning, got error: %v", err)
-	}
-	if created.SchoolName != "Northeastern Boston Campus" {
-		t.Errorf("expected SchoolName 'Northeastern Boston Campus', got %q", created.SchoolName)
-	}
-}
-
-// test that a similarly-named college in a genuinely DIFFERENT location is NOT flagged
-func TestCreateGlobalCollege_SimilarNameDifferentLocationNotFlagged(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test in short mode")
-	}
-	t.Parallel()
-
-	db := testutils.SetupTestDB(t)
-	repo := NewGlobalCollegeRepository(db)
-	ctx := context.Background()
-
-	_, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
-		SchoolName:     "Western State University",
-		SchoolLocation: "Colorado City, CO",
-	}, nearDuplicateThreshold)
-	if err != nil {
-		t.Fatalf("first CreateGlobalCollege failed: %v", err)
-	}
-
-	// should be allowed because the location is different, even though the name is similar
-	created, err := repo.CreateGlobalCollege(ctx, models.CreateGlobalCollegeRequestBody{
-		SchoolName:     "Western State University",
-		SchoolLocation: "Somewhere Else, SE",
-	}, nearDuplicateThreshold)
-	if err != nil {
-		t.Fatalf("expected no near-duplicate rejection for a different location, got error: %v", err)
-	}
-	if created.SchoolLocation != "Somewhere Else, SE" {
-		t.Errorf("expected SchoolLocation 'Somewhere Else, SE', got %q", created.SchoolLocation)
 	}
 }

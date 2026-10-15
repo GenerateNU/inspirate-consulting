@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/jackc/pgx/v5/pgconn"
 
@@ -13,24 +12,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeRequestBody, nearDuplicateThreshold float64) (*models.GlobalCollege, error) {
-
-	// near-duplicate check: skipped if the caller has already confirmed they want to proceed despite a prior warning
-	if !inputGlobalCollege.ConfirmDuplicate {
-		similarColleges, err := r.FindNearDuplicateGlobalColleges(ctx, inputGlobalCollege.SchoolName, inputGlobalCollege.SchoolLocation, nearDuplicateThreshold)
-		if err != nil {
-			return nil, err
-		}
-		if len(similarColleges) > 0 {
-			return nil, errs.HTTPError{
-				Code: http.StatusConflict,
-				Message: fmt.Sprintf(
-					"%q is very similar to an existing college: %q. Resubmit with confirm_duplicate=true to create it anyway.",
-					inputGlobalCollege.SchoolName, similarColleges[0].SchoolName,
-				),
-			}
-		}
-	}
+func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
 
 	createdGlobalCollege := &models.GlobalCollege{}
 
