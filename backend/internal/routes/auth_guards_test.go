@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	"inspirate-consulting/internal/supabase"
 	"net/http"
 	"regexp"
@@ -146,7 +147,7 @@ func TestRouteTable_CoversEveryRegisteredRoute(t *testing.T) {
 	t.Parallel()
 
 	signingKey()
-	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{})
+	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{}, &sqsclient.SQSClient{})
 	require.NoError(t, err)
 
 	var registered []string
