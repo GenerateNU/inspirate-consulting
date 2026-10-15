@@ -26,7 +26,7 @@ func TestUpdateGlobalCollege(t *testing.T) {
 	updated, err := repo.UpdateGlobalCollege(ctx, created.ID, models.UpdateGlobalCollegeRequestBody{
 		SchoolName:     "Updated Name University",
 		SchoolLocation: "New City, NC",
-	}, nearDuplicateThreshold)
+	})
 	if err != nil {
 		t.Fatalf("UpdateGlobalCollege failed: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestUpdateGlobalCollege_NotFound(t *testing.T) {
 	_, err := repo.UpdateGlobalCollege(ctx, 999999, models.UpdateGlobalCollegeRequestBody{
 		SchoolName:     "Nonexistent University",
 		SchoolLocation: "Nowhere, NW",
-	}, nearDuplicateThreshold)
+	})
 	if err == nil {
 		t.Fatal("expected an error updating a nonexistent college, got nil")
 	}
