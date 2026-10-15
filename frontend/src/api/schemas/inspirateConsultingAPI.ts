@@ -1023,15 +1023,11 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
 
 export const LoginUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "access_token": /*#__PURE__*/ zod.string(),
-  "error": /*#__PURE__*/ zod.unknown(),
-  "expires_in": /*#__PURE__*/ zod.int(),
-  "refresh_token": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
-  "token_type": /*#__PURE__*/ zod.string(),
-  "user": /*#__PURE__*/ zod.object({
-  "id": /*#__PURE__*/ zod.string()
-})
+  "supabase_id": /*#__PURE__*/ zod.string()
 })
 
 
