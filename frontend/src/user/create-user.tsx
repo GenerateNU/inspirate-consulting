@@ -4,7 +4,7 @@ import { CreateUserInputBodyRole } from "../api/models";
 
 export default function CreateUser() {
   const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [Role, setRole] = useState<CreateUserInputBodyRole>(
     CreateUserInputBodyRole.student,
   );
@@ -17,7 +17,7 @@ export default function CreateUser() {
     try {
       const response = await trigger({
         name: Name,
-        email: Email,
+        email: email,
         role: Role,
         pfp_key: null,
       });
@@ -50,7 +50,7 @@ export default function CreateUser() {
           <label>Email:</label>
           <input
             type="text"
-            value={Email}
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />

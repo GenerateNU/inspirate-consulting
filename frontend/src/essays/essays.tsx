@@ -31,6 +31,7 @@ export default function Essay() {
     try {
       const result = await fetch(
         `${API_BASE_URL}/students/${studentId.trim()}/essays`,
+        { credentials: "include" },
       );
 
       const data = await result.json();
@@ -56,6 +57,7 @@ export default function Essay() {
     try {
       const result = await fetch(`${API_BASE_URL}/essays`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -91,6 +93,7 @@ export default function Essay() {
         `${API_BASE_URL}/essays/${essayId.trim()}/status`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

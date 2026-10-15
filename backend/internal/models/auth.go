@@ -15,6 +15,15 @@ type SignUpPayload struct {
 	EmailConfirm bool              `json:"email_confirm"`
 }
 
+type RefreshTokenPayload struct {
+	RefreshToken string `json:"refresh_token" db:"refresh_token"`
+}
+
+type RefreshTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token" db:"refresh_token"`
+}
+
 // UserSignupResponse represents the user data returned from Supabase signup
 type UserSignupResponse struct {
 	ID uuid.UUID `json:"id"`
@@ -64,12 +73,15 @@ type LoginResponse struct {
 
 type LogoutInput struct{}
 
+// tokens stay in the cookie only, body returns the logged in user
 type LoginOutput struct {
 	SetCookie http.Cookie `header:"Set-Cookie"`
-	Body      *LoginResponse
+	Body      *User
 }
 
+// expires the jwt cookie set on login
 type LogoutResponse struct {
+	SetCookie http.Cookie `header:"Set-Cookie"`
 }
 
 type ResetPasswordInput struct {
