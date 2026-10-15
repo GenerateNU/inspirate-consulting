@@ -43,7 +43,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		createdAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-	
+
 		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Northeastern University", "Boston, MA", mock.Anything).
 			Return([]models.GlobalCollege{}, nil)
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
@@ -92,7 +92,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewGlobalCollegeRepository(t)
-	
+
 		mockRepo.On("FindNearDuplicateGlobalColleges", mock.Anything, "Duplicate University", "Dupe City, DC", mock.Anything).
 			Return([]models.GlobalCollege{}, nil)
 		mockRepo.On("CreateGlobalCollege", mock.Anything, mock.MatchedBy(func(in models.CreateGlobalCollegeRequestBody) bool {
