@@ -19,10 +19,12 @@ import type {
 
 import {
   getCreatePersonalCollegeApplicationResponseMock,
-  getListPersonalCollegeApplicationsResponseMock
+  getListPersonalCollegeApplicationsResponseMock,
+  getUpdatePersonalCollegeApplicationRankResponseMock,
+  getUpdatePersonalCollegeApplicationResponseMock
 } from './personal-college-applications.faker';
 
-export { getListPersonalCollegeApplicationsResponseMock, getCreatePersonalCollegeApplicationResponseMock } from './personal-college-applications.faker';
+export { getListPersonalCollegeApplicationsResponseMock, getCreatePersonalCollegeApplicationResponseMock, getUpdatePersonalCollegeApplicationResponseMock, getUpdatePersonalCollegeApplicationRankResponseMock } from './personal-college-applications.faker';
 
 
 export const getListPersonalCollegeApplicationsMockHandler = (overrideResponse?: PersonalCollegeApplication[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PersonalCollegeApplication[] | null> | PersonalCollegeApplication[] | null), options?: RequestHandlerOptions) => {
@@ -48,7 +50,44 @@ export const getCreatePersonalCollegeApplicationMockHandler = (overrideResponse?
       })
   }, options)
 }
+
+export const getDeletePersonalCollegeApplicationMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/applications/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
+export const getUpdatePersonalCollegeApplicationMockHandler = (overrideResponse?: PersonalCollegeApplication | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<PersonalCollegeApplication> | PersonalCollegeApplication), options?: RequestHandlerOptions) => {
+  return http.put('*/applications/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdatePersonalCollegeApplicationResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUpdatePersonalCollegeApplicationRankMockHandler = (overrideResponse?: PersonalCollegeApplication[] | null | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<PersonalCollegeApplication[] | null> | PersonalCollegeApplication[] | null), options?: RequestHandlerOptions) => {
+  return http.put('*/applications/:id/rank', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdatePersonalCollegeApplicationRankResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getPersonalCollegeApplicationsMock = () => [
   getListPersonalCollegeApplicationsMockHandler(),
-  getCreatePersonalCollegeApplicationMockHandler()
+  getCreatePersonalCollegeApplicationMockHandler(),
+  getDeletePersonalCollegeApplicationMockHandler(),
+  getUpdatePersonalCollegeApplicationMockHandler(),
+  getUpdatePersonalCollegeApplicationRankMockHandler()
 ]
