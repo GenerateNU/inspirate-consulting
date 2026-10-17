@@ -6,6 +6,7 @@ import (
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
+	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
@@ -80,6 +81,13 @@ type PersonalCollegeApplicationRepository interface {
 	UpdateApplicationRank(ctx context.Context, studentID uuid.UUID, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error)
 	UpdatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
 	DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error
+}
+
+// To represent the Counselor's view of their students and pending essay reviews
+type CounselorRepository interface {
+	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
+	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
+	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
 }
 
 type UserRepository interface {
@@ -158,6 +166,7 @@ type Repository struct {
 	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	Counselor                  CounselorRepository
 	Media                      MediaRepository
 	MediaAccess                MediaAccessRepository
 	User                       UserRepository
@@ -196,5 +205,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
+		Counselor:                  counselorRepository.NewCounselorRepository(db),
 	}
 }
