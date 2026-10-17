@@ -1,6 +1,6 @@
 module inspirate-consulting
 
-go 1.25.5
+go 1.26
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.8.2
