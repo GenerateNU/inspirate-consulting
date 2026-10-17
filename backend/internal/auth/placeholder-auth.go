@@ -15,6 +15,10 @@ func GetStudentID(ctx context.Context) string {
 	return "00000000-0000-0000-0000-000000000002"
 }
 
+func GetCounselorID(ctx context.Context) string {
+	return "00000000-0000-0000-0000-000000000003"
+}
+
 // WithUserID stores the current user's users.id on the context for GetUserID to read.
 func WithUserID(ctx context.Context, id string) context.Context {
 	return context.WithValue(ctx, userIDKey{}, id)
