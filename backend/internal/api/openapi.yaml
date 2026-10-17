@@ -108,6 +108,35 @@ components:
         - last_message_read_at
         - unread_count
       type: object
+    CounselorStudent:
+      additionalProperties: false
+      properties:
+        has_pending_review:
+          description: True when the student has an essay review that is still open
+          type: boolean
+        is_falling_behind:
+          description: True when the student has an incomplete to-do item past its deadline
+          type: boolean
+        name:
+          description: Name of the student
+          examples:
+            - Jane Doe
+          type: string
+        student_id:
+          description: The student's unique ID
+          type: string
+        year:
+          description: School year of the student
+          examples:
+            - junior
+          type: string
+      required:
+        - is_falling_behind
+        - has_pending_review
+        - student_id
+        - name
+        - year
+      type: object
     CreateChatMessageRequestBody:
       additionalProperties: false
       properties:
@@ -1042,6 +1071,46 @@ components:
         - days_before_due
         - notify_past_due
       type: object
+    PendingReview:
+      additionalProperties: false
+      properties:
+        essay_id:
+          description: ID of the essay to review
+          type: string
+        essay_link:
+          description: Link to the essay's content, so the counselor can open it to review
+          examples:
+            - https://docs.google.com/document/d/abc123
+          type: string
+        essay_type:
+          description: Type of the essay to review
+          examples:
+            - personal-statement
+          type: string
+        requested_at:
+          description: When the review was requested
+          format: date-time
+          type: string
+        student_id:
+          description: ID of the student who requested the review
+          type: string
+        student_name:
+          description: Name of the student who requested the review
+          examples:
+            - Jane Doe
+          type: string
+        transaction_id:
+          description: ID of the review transaction, used to complete or refund the review
+          type: string
+      required:
+        - transaction_id
+        - essay_id
+        - essay_type
+        - essay_link
+        - student_id
+        - student_name
+        - requested_at
+      type: object
     PersonalCollegeApplication:
       additionalProperties: false
       properties:
@@ -1799,6 +1868,94 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /counselors/reviews:
+    get:
+      description: List the open essay reviews the authenticated counselor needs to complete, oldest first.
+      operationId: list-counselor-pending-reviews
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/PendingReview"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
+  /counselors/students:
+    get:
+      description: List the authenticated counselor's students, flagged for falling behind and pending essay reviews.
+      operationId: list-counselor-students
+      parameters:
+        - description: Only return students in this school year
+          explode: false
+          in: query
+          name: year
+          schema:
+            description: Only return students in this school year
+            enum:
+              - freshman
+              - sophomore
+              - junior
+              - senior
+            type: string
+        - description: Only return students with an open essay review
+          explode: false
+          in: query
+          name: has_pending_review
+          schema:
+            description: Only return students with an open essay review
+            type: boolean
+        - description: Field to sort by
+          explode: false
+          in: query
+          name: sort_by
+          schema:
+            default: name
+            description: Field to sort by
+            enum:
+              - name
+              - year
+            type: string
+        - description: Sort direction
+          explode: false
+          in: query
+          name: sort_order
+          schema:
+            default: asc
+            description: Sort direction
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/CounselorStudent"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
   /essay-groups:
     post:
       description: Creates an essay group for a student

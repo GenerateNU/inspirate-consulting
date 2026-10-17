@@ -175,6 +175,44 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * List the open essay reviews the authenticated counselor needs to complete, oldest first.
+ */
+export const ListCounselorPendingReviewsResponseItem = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the essay to review')),
+  "essay_link": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Link to the essay\'s content, so the counselor can open it to review')),
+  "essay_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Type of the essay to review')),
+  "requested_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('When the review was requested')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who requested the review')),
+  "student_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the student who requested the review')),
+  "transaction_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the review transaction, used to complete or refund the review'))
+})
+export const ListCounselorPendingReviewsResponse = /*#__PURE__*/ zod.array(ListCounselorPendingReviewsResponseItem)
+
+
+/**
+ * List the authenticated counselor's students, flagged for falling behind and pending essay reviews.
+ */
+export const listCounselorStudentsQuerySortByDefault = `name`;
+export const listCounselorStudentsQuerySortOrderDefault = `asc`;
+
+export const ListCounselorStudentsQueryParams = /*#__PURE__*/ zod.object({
+  "year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['freshman', 'sophomore', 'junior', 'senior'])).check(/*#__PURE__*/ zod.describe('Only return students in this school year')),
+  "has_pending_review": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()).check(/*#__PURE__*/ zod.describe('Only return students with an open essay review')),
+  "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['name', 'year']), listCounselorStudentsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
+  "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), listCounselorStudentsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction'))
+})
+
+export const ListCounselorStudentsResponseItem = /*#__PURE__*/ zod.object({
+  "has_pending_review": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an essay review that is still open')),
+  "is_falling_behind": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an incomplete to-do item past its deadline')),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the student')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The student\'s unique ID')),
+  "year": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('School year of the student'))
+})
+export const ListCounselorStudentsResponse = /*#__PURE__*/ zod.array(ListCounselorStudentsResponseItem)
+
+
+/**
  * Creates an essay group for a student
  */
 export const createEssayGroupBodyNameMax = 100;
