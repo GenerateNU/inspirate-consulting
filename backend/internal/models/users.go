@@ -39,7 +39,7 @@ type Student struct {
 	ID            uuid.UUID  `json:"id"`
 	UserID        uuid.UUID  `json:"user_id"`
 	Year          Year       `json:"year"`
-	Interest      *string    `json:"area_of_interest"`
+	Interest      *string    `json:"student_interest"`
 	Organization  *string    `json:"organization"`
 	GPA           int        `json:"gpa"`
 	ReviewBalance int        `json:"review_balance"`
@@ -53,10 +53,11 @@ type Counselor struct {
 
 type CreateUserInput struct {
 	Body struct {
-		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
-		Email  string  `json:"email" doc:"email of user for supabase signup"`
-		Role   Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
+		Name     string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email    string  `json:"email" doc:"email of user for supabase signup"`
+		Role     Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
+		Interest *string `json:"area_of_interest,omitempty" doc:"student's area of interest; only used when role is student"`
 	}
 }
 
