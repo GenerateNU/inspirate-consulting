@@ -9,8 +9,6 @@
 export interface Student {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  /** @nullable */
-  area_of_interest: string | null;
   counselor_id: string;
   gpa: number;
   id: string;
