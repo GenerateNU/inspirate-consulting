@@ -1253,6 +1253,10 @@ components:
           format: uri
           readOnly: true
           type: string
+        area_of_interest:
+          type:
+            - string
+            - "null"
         counselor_id:
           type: string
         gpa:
@@ -1275,6 +1279,7 @@ components:
         - id
         - user_id
         - year
+        - area_of_interest
         - organization
         - gpa
         - review_balance
@@ -1510,6 +1515,8 @@ components:
           format: uri
           readOnly: true
           type: string
+        email:
+          type: string
         id:
           type: string
         name:
@@ -1528,6 +1535,7 @@ components:
       required:
         - id
         - name
+        - email
         - supabase_id
         - pfp_key
         - reset_time

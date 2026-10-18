@@ -785,6 +785,7 @@ export const SetStudentReviewBalanceBody = /*#__PURE__*/ zod.object({
 
 export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "area_of_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "counselor_id": /*#__PURE__*/ zod.string(),
   "gpa": /*#__PURE__*/ zod.int(),
   "id": /*#__PURE__*/ zod.string(),
@@ -1001,6 +1002,7 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "temp_password": /*#__PURE__*/ zod.string(),
   "user": /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
@@ -1020,6 +1022,7 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
 
 export const LoginUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
@@ -1053,6 +1056,7 @@ export const FetchUserParams = /*#__PURE__*/ zod.object({
 
 export const FetchUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
