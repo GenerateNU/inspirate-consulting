@@ -1329,6 +1329,10 @@ components:
           format: uri
           readOnly: true
           type: string
+        area_of_interest:
+          type:
+            - string
+            - "null"
         counselor_id:
           type: string
         gpa:

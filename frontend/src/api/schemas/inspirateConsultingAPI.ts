@@ -886,6 +886,7 @@ export const SetStudentReviewBalanceBody = /*#__PURE__*/ zod.object({
 
 export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "area_of_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "counselor_id": /*#__PURE__*/ zod.string(),
   "gpa": /*#__PURE__*/ zod.int(),
   "id": /*#__PURE__*/ zod.string(),
