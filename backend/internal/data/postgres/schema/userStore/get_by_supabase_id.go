@@ -24,7 +24,7 @@ func (r *UserRepository) FetchUserBySupabaseID(ctx context.Context, input models
 		ctx,
 		query,
 		input.SupabaseID,
-	).Scan(&User.Body.ID, &User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey, &User.Body.ResetTime)
+	).Scan(&User.Body.ID, &User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey, &User.Body.ResetTime, &User.Body.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errs.NotFound("user", "supabase_id", input.SupabaseID.String())
