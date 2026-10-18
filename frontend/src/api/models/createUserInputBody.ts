@@ -10,8 +10,6 @@ import type { CreateUserInputBodyRole } from './createUserInputBodyRole';
 export interface CreateUserInputBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  /** student's area of interest; only used when role is student */
-  area_of_interest?: string;
   /** email of user for supabase signup */
   email: string;
   /**
@@ -27,4 +25,6 @@ export interface CreateUserInputBody {
   pfp_key: string | null;
   /** the type of user the counselor would like to create */
   role: CreateUserInputBodyRole;
+  /** student's area of interest; only used when role is student */
+  student_interest?: string;
 }
