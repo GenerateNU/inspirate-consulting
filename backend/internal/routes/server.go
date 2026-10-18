@@ -7,6 +7,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/aws"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	"inspirate-consulting/internal/data/postgres"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -35,11 +36,12 @@ func InitApp(config config.Config) (*App, error) {
 	ctx := context.Background()
 	repo := postgres.NewRepository(ctx, config.DB)
 	awsRepo := aws.NewRepository(ctx, config.S3)
+	sqsClient := sqsclient.NewSQSConnection(ctx, config.SQS.QueueURL)
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video
 
-	app, humaAPI, err := SetupApp(config, repo)
+	app, humaAPI, err := SetupApp(config, repo, sqsClient)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +53,7 @@ func InitApp(config config.Config) (*App, error) {
 }
 
 // Setup the fiber app with the specified configuration and database.
-func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API, error) {
+func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.SQSClient) (*fiber.App, huma.API, error) {
 	app := fiber.New(fiber.Config{
 		JSONEncoder:  go_json.Marshal,
 		JSONDecoder:  go_json.Unmarshal,
@@ -127,7 +129,8 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 		return c.Status(fiber.StatusOK).SendString("Welcome to Inspirate Consulting!")
 	})
 
-	if err := setupProtectedHumaRoutes(humaAPI, repo, config, verifyRole); err != nil {
+	// Register protected Huma endpoints
+	if err := setupProtectedHumaRoutes(humaAPI, repo, sqsClient, config, verifyRole); err != nil {
 		return nil, nil, err
 	}
 
@@ -135,7 +138,8 @@ func SetupApp(config config.Config, repo *data.Repository) (*fiber.App, huma.API
 }
 
 // Setup protected Huma routes (behind auth middleware)
-func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config.Config, verifyRole auth.RoleVerifier) error {
+func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sqsclient.SQSClient, config config.Config, verifyRole auth.RoleVerifier) error {
+	// Attach each of the routes to the API here
 	SetUpGreetingRoutes(api, repo, verifyRole)
 	SetUpExtracurricularRoutes(api, repo)
 	SetUpEssayRoutes(api, repo, verifyRole)
@@ -151,6 +155,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, config config
 	SetUpStudentRoutes(api, repo, verifyRole)
 	SetUpChatMessageRoutes(api, repo)
 	SetUpNotificationPreferencesRoutes(api, repo)
+	SetUpNotificationRoutes(api, sqsClient)
 	SetupLoginRoutes(api, repo, &config)
 	SetupLogoutRoutes(api, repo, &config)
 	SetupResetPasswordRoutes(api, repo, &config, verifyRole)

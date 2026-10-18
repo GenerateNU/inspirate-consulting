@@ -3,3 +3,5 @@ tmp/
 
 # local build output
 bin/
+bootstrap
+*.zip

@@ -14,6 +14,7 @@ import (
 	greetingRepository "inspirate-consulting/internal/data/postgres/schema/greetingStore"
 	mediaAccessRepository "inspirate-consulting/internal/data/postgres/schema/mediaAccessStore"
 	mediaRepository "inspirate-consulting/internal/data/postgres/schema/mediaStore"
+	notificationLogRepository "inspirate-consulting/internal/data/postgres/schema/notificationLogStore"
 	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
@@ -56,6 +57,13 @@ type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
 	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
+}
+
+// To represent the Notification Log schema
+type NotificationLogRepository interface {
+	CreateNotificationLog(ctx context.Context, input *models.CreateNotificationLogInput) (*models.NotificationLog, error)
+	GetPastDueTasks(ctx context.Context) ([]models.TaskNotification, error)
+	GetWithinDueTasks(ctx context.Context) ([]models.TaskNotification, error)
 }
 
 // To represent the Global College schema
@@ -152,6 +160,7 @@ type Repository struct {
 	Video                      VideoRepository
 	EssayReview                EssayReviewRepository
 	NotificationPreferences    NotificationPreferencesRepository
+	NotificationLog            NotificationLogRepository
 }
 
 // Close closes the database connection pool
@@ -182,5 +191,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		User:                       userRepository.NewUserRepository(db),
 		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
+		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
 	}
 }

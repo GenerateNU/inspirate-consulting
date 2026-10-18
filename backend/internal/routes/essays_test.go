@@ -28,7 +28,7 @@ func setupEssayTestApp(mockEssay data.EssayRepository) (*fiber.App, error) {
 	repo := &data.Repository{
 		Essay: mockEssay,
 	}
-	app, _, err := SetupApp(cfg, repo)
+	app, _, err := SetupApp(cfg, repo, nil)
 	return app, err
 }
 

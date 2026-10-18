@@ -663,6 +663,22 @@ export const UpdateNotificationPreferencesResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Queue a single email notification to SQS
+ */
+export const QueueNotificationEmailBody = /*#__PURE__*/ zod.object({
+  "due_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "is_overdue": /*#__PURE__*/ zod.boolean(),
+  "task_name": /*#__PURE__*/ zod.string(),
+  "user_email": /*#__PURE__*/ zod.string()
+})
+
+export const QueueNotificationEmailResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "message_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string())
+})
+
+
+/**
  * Spend a student's review balance to open a review on an essay.
  */
 export const requestEssayReviewBodyAmountDefault = 1;

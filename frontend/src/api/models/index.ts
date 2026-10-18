@@ -57,6 +57,8 @@ export * from './notificationPreferences';
 export * from './personalCollegeApplication';
 export * from './presignUploadRequestBody';
 export * from './presignUploadResponse';
+export * from './queueEmailNotificationRequestBody';
+export * from './queueEmailNotificationResponseBody';
 export * from './refundEssayReviewResponseBody';
 export * from './requestEssayReviewRequestBody';
 export * from './resetPasswordInputBody';
