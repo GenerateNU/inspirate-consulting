@@ -404,6 +404,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        area_of_interest:
+          description: student's area of interest; only used when role is student
+          type: string
         email:
           description: email of user for supabase signup
           type: string
@@ -1253,10 +1256,6 @@ components:
           format: uri
           readOnly: true
           type: string
-        area_of_interest:
-          type:
-            - string
-            - "null"
         counselor_id:
           type: string
         gpa:
@@ -1271,6 +1270,10 @@ components:
         review_balance:
           format: int64
           type: integer
+        student_interest:
+          type:
+            - string
+            - "null"
         user_id:
           type: string
         year:
@@ -1279,7 +1282,7 @@ components:
         - id
         - user_id
         - year
-        - area_of_interest
+        - student_interest
         - organization
         - gpa
         - review_balance

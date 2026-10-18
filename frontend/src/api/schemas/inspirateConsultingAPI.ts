@@ -785,12 +785,12 @@ export const SetStudentReviewBalanceBody = /*#__PURE__*/ zod.object({
 
 export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "area_of_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "counselor_id": /*#__PURE__*/ zod.string(),
   "gpa": /*#__PURE__*/ zod.int(),
   "id": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "review_balance": /*#__PURE__*/ zod.int(),
+  "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "user_id": /*#__PURE__*/ zod.string(),
   "year": /*#__PURE__*/ zod.string()
 })
@@ -991,6 +991,7 @@ export const createUserBodyNameMax = 200;
 
 
 export const CreateUserBody = /*#__PURE__*/ zod.object({
+  "area_of_interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('student\'s area of interest; only used when role is student')),
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
