@@ -433,9 +433,6 @@ components:
           format: uri
           readOnly: true
           type: string
-        area_of_interest:
-          description: student's area of interest; only used when role is student
-          type: string
         email:
           description: email of user for supabase signup
           type: string
@@ -454,6 +451,9 @@ components:
           enum:
             - student
             - counselor
+          type: string
+        student_interest:
+          description: student's area of interest; only used when role is student
           type: string
       required:
         - name
