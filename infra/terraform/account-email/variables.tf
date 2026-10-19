@@ -16,9 +16,14 @@ variable "app_url" {
   type = string
 }
 
+variable "claim_token_secret" {
+  type      = string
+  sensitive = true
+}
+
 variable "lambda_zip_path" {
   type    = string
-  default = "build/bootstrap"
+  default = "${path.module}/build/account-email.zip"
 }
 
 variable "lambda_timeout_seconds" {
