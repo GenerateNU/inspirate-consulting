@@ -10,7 +10,6 @@ import (
 
 // CreatePersonalCollegeApplication creates a new personal college application entry in the database
 func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error) {
-
 	// validate requested deadline exists
 	college, err := h.GlobalCollegeRepository.GetGlobalCollege(ctx, input.GlobalCollegeID)
 	if err != nil {
@@ -33,9 +32,12 @@ func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input mo
 		return nil, errs.BadRequest("invalid application_type")
 	}
 
-	studentID := auth.GetStudentID(ctx)
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID, input)
+	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID.String(), input)
 	if err != nil {
 		return nil, err
 	}

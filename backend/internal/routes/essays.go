@@ -12,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	essayHandler := essays.NewHandler(repository.Essay)
+func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
+	essayHandler := essays.NewHandler(repository.Essay, authorizer)
 
 	// GET route that shows all of a students essay
 	huma.Register(api, huma.Operation{

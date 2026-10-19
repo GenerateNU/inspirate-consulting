@@ -12,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	studentHandler := student.NewHandler(repository.EssayReview)
+func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
+	studentHandler := student.NewHandler(repository.EssayReview, authorizer)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "set-student-review-balance",

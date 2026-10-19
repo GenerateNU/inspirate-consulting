@@ -10,10 +10,10 @@ import (
 
 // ListExtracurriculars fetches every extracurricular for the authenticated student.
 func (h *Handler) ListExtracurriculars(ctx context.Context) ([]models.Extracurricular, error) {
-	studentID := auth.GetStudentID(ctx)
-	if studentID == "" {
-		return nil, errs.BadRequest("student id not found in request context")
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, errs.Unauthorized()
 	}
 
-	return h.ExtracurricularRepository.ListExtracurriculars(ctx, studentID)
+	return h.ExtracurricularRepository.ListExtracurriculars(ctx, studentID.String())
 }

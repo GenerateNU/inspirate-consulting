@@ -109,13 +109,14 @@ func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.
 
 	// Apply auth middleware — only affects routes registered after this point
 	if config.TestMode {
-		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI, config.TestMode))
+		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI))
 	} else {
 		verifier, err := auth.NewVerifier(os.Getenv("SUPABASE_URL"))
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to load supabase signing keys: %w", err)
 		}
 		humaAPI.UseMiddleware(auth.AuthMiddleware(humaAPI, verifier, config.Supabase))
+		humaAPI.UseMiddleware(auth.ResolveIdentityMiddleware(humaAPI, repo.GetDB()))
 	}
 
 	verifyRole := auth.RoleVerifier(auth.VerifyRole)
@@ -139,20 +140,24 @@ func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.
 
 // Setup protected Huma routes (behind auth middleware)
 func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sqsclient.SQSClient, config config.Config, verifyRole auth.RoleVerifier) error {
-	// Attach each of the routes to the API here
+	var authorizer *auth.Authorizer
+	if !config.TestMode {
+		authorizer = auth.NewAuthorizer(repo.GetDB())
+	}
+
 	SetUpGreetingRoutes(api, repo, verifyRole)
-	SetUpExtracurricularRoutes(api, repo)
-	SetUpEssayRoutes(api, repo, verifyRole)
-	SetUpEssayGroupRoutes(api, repo)
+	SetUpExtracurricularRoutes(api, repo, authorizer)
+	SetUpEssayRoutes(api, repo, verifyRole, authorizer)
+	SetUpEssayGroupRoutes(api, repo, authorizer)
 	SetUpGlobalCollegeRoutes(api, repo, verifyRole)
-	SetUpTodoItemRoutes(api, repo, verifyRole)
+	SetUpTodoItemRoutes(api, repo, verifyRole, authorizer)
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole)
 	SetupUserRoutes(api, repo, &config, verifyRole)
 	SetUpVideoRoutes(api, repo, verifyRole)
 	SetUpMediaRoutes(api, repo)
-	SetUpMediaAccessRoutes(api, repo)
-	SetUpEssayReviewRoutes(api, repo, verifyRole)
-	SetUpStudentRoutes(api, repo, verifyRole)
+	SetUpMediaAccessRoutes(api, repo, authorizer)
+	SetUpEssayReviewRoutes(api, repo, verifyRole, authorizer)
+	SetUpStudentRoutes(api, repo, verifyRole, authorizer)
 	SetUpChatMessageRoutes(api, repo)
 	SetUpNotificationPreferencesRoutes(api, repo)
 	SetUpNotificationRoutes(api, sqsClient)
