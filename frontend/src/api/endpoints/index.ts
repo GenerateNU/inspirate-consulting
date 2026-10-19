@@ -1,4 +1,5 @@
 export * from './chat/chat';
+export * from './claim-password/claim-password';
 export * from './counselors/counselors';
 export * from './essay-groups/essay-groups';
 export * from './essay-reviews/essay-reviews';

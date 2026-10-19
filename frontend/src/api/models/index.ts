@@ -10,6 +10,8 @@ export * from './assignCounselorInputBody';
 export * from './chatMessage';
 export * from './chatMessagePage';
 export * from './chatSummary';
+export * from './claimPasswordBody';
+export * from './claimPasswordParams';
 export * from './counselor';
 export * from './counselorListItem';
 export * from './counselorOption';

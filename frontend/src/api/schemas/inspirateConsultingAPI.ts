@@ -177,6 +177,20 @@ export const MarkChatReadResponse = /*#__PURE__*/ zod.void()
 
 
 /**
+ * Exchange a claim-password token (from an account-created or password-reset email) for the temporary password it carries
+ */
+export const ClaimPasswordQueryParams = /*#__PURE__*/ zod.object({
+  "token": /*#__PURE__*/ zod.string()
+})
+
+export const ClaimPasswordResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
+  "temp_password": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Search global colleges by name or location.
  */
 export const SearchGlobalCollegesQueryParams = /*#__PURE__*/ zod.object({
