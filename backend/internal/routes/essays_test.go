@@ -113,14 +113,9 @@ func TestRoute_CreateEssay(t *testing.T) {
 
 		studentID := uuid.New()
 
-		// Mock the repository call expected for valid input. ID and Status are
-		// left unset so the database applies its own defaults.
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("CreateEssay", mock.Anything, mock.MatchedBy(func(essay models.Essays) bool {
-			return essay.StudentID == studentID &&
-				essay.Type == "personal-statement" &&
-				essay.ID == uuid.Nil &&
-				essay.Status == ""
+		mockRepo.On("CreateEssay", mock.Anything, studentID, mock.MatchedBy(func(body models.CreateEssayBody) bool {
+			return body.Type == "personal-statement"
 		})).Return(nil)
 
 		app, err := setupEssayTestApp(mockRepo)
@@ -128,7 +123,6 @@ func TestRoute_CreateEssay(t *testing.T) {
 
 		// Send valid JSON payload
 		payload := map[string]any{
-			"student_id":      studentID.String(),
 			"type":            "personal-statement",
 			"link_to_content": "https://docs.google.com/document/d/abc123",
 		}
@@ -138,6 +132,7 @@ func TestRoute_CreateEssay(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, "/essays", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Student-ID", studentID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)

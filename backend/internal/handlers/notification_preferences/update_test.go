@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
@@ -16,7 +17,7 @@ import (
 func TestHandler_UpdateNotificationPreferences(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
+	ctx := auth.WithUserID(context.Background(), uuid.New())
 	input := models.UpdateNotificationPreferencesRequestBody{
 		EmailEnabled:                false,
 		WeeklySummaryEnabled:        false,

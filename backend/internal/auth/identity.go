@@ -121,25 +121,31 @@ func ResolveIdentityMiddleware(api huma.API, db *pgxpool.Pool) func(ctx huma.Con
 	}
 }
 
+const (
+	testModeDefaultUserID    = "00000000-0000-0000-0000-000000000001"
+	testModeDefaultStudentID = "00000000-0000-0000-0000-000000000002"
+)
+
+// TestModeUserMiddleware sets identity from X-* headers, defaulting to placeholder user and student IDs when they are omitted.
 func TestModeUserMiddleware(api huma.API) func(ctx huma.Context, next func(huma.Context)) {
 	return func(ctx huma.Context, next func(huma.Context)) {
 		userID := ctx.Header("X-User-ID")
 		studentID := ctx.Header("X-Student-ID")
 		counselorID := ctx.Header("X-Counselor-ID")
 
-		if userID == "" && studentID == "" && counselorID == "" {
-			next(ctx)
-			return
+		if userID == "" {
+			userID = testModeDefaultUserID
+		}
+		if studentID == "" && counselorID == "" {
+			studentID = testModeDefaultStudentID
 		}
 
-		if userID != "" {
-			parsed, err := uuid.Parse(userID)
-			if err != nil {
-				_ = huma.WriteErr(api, ctx, http.StatusBadRequest, "X-User-ID must be a UUID")
-				return
-			}
-			ctx = huma.WithValue(ctx, userIDKey{}, parsed)
+		parsedUserID, err := uuid.Parse(userID)
+		if err != nil {
+			_ = huma.WriteErr(api, ctx, http.StatusBadRequest, "X-User-ID must be a UUID")
+			return
 		}
+		ctx = huma.WithValue(ctx, userIDKey{}, parsedUserID)
 
 		if studentID != "" {
 			parsed, err := uuid.Parse(studentID)

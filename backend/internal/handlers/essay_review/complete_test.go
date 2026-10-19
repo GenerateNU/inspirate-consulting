@@ -51,7 +51,7 @@ func TestHandler_CompleteEssayReview(t *testing.T) {
 			expectTx(mockRepo)
 			mockRepo.On("LockTransaction", mock.Anything, mock.Anything, tc.review.ID).Return(tc.review, nil)
 
-			handler := NewHandler(mockRepo)
+			handler := NewHandler(mockRepo, nil)
 			res, err := handler.CompleteEssayReview(ctx, tc.review.ID)
 
 			assert.Nil(t, res)
@@ -81,7 +81,7 @@ func TestHandler_CompleteEssayReview(t *testing.T) {
 		mockRepo.On("LockTransaction", mock.Anything, mock.Anything, review.ID).Return(review, nil)
 		mockRepo.On("MarkCompleted", mock.Anything, mock.Anything, review.ID).Return(completed, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CompleteEssayReview(ctx, review.ID)
 
 		require.NoError(t, err)
@@ -100,7 +100,7 @@ func TestHandler_CompleteEssayReview(t *testing.T) {
 		mockRepo.On("LockTransaction", mock.Anything, mock.Anything, id).
 			Return(nil, errs.NotFound("essay review", "id", id.String()))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CompleteEssayReview(ctx, id)
 
 		assert.Nil(t, res)

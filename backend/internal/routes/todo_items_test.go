@@ -2,7 +2,6 @@ package routes
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -10,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
@@ -36,7 +34,7 @@ func setupTodoItemTestApp(mockTodoItem data.TodoItemRepository) (*fiber.App, err
 }
 
 // doRequest sends a request through the app and returns the response with its body read.
-func doRequest(t *testing.T, app *fiber.App, method, path string, body any) (*http.Response, []byte) {
+func doRequest(t *testing.T, app *fiber.App, method, path string, body any, headers ...map[string]string) (*http.Response, []byte) {
 	t.Helper()
 
 	var reader io.Reader
@@ -49,6 +47,11 @@ func doRequest(t *testing.T, app *fiber.App, method, path string, body any) (*ht
 	req, err := http.NewRequest(method, path, reader)
 	require.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
+	for _, h := range headers {
+		for k, v := range h {
+			req.Header.Set(k, v)
+		}
+	}
 
 	resp, err := app.Test(req)
 	require.NoError(t, err)
@@ -79,13 +82,17 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		expectedStudentID := auth.GetStudentID(context.Background())
-		expectedUserID := auth.GetUserID(context.Background())
+		expectedStudentID := uuid.NewString()
+		expectedUserID := uuid.NewString()
+		idHeaders := map[string]string{
+			"X-User-ID":    expectedUserID,
+			"X-Student-ID": expectedStudentID,
+		}
 
-		// The repository should receive the decoded request body
+		// The student and creator come from the caller's identity, not the body
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("CreateTodoItem", mock.Anything, mock.MatchedBy(func(in *models.CreateTodoItemRequestBody) bool {
-			return in.StudentID == expectedStudentID && in.TodoDescription == "Finish the Common App essay"
+		mockRepo.On("CreateTodoItem", mock.Anything, expectedStudentID, expectedUserID, mock.MatchedBy(func(in models.CreateTodoItemRequestBody) bool {
+			return in.TodoDescription == "Finish the Common App essay"
 		})).Return(&models.TodoItem{
 			ID:              uuid.NewString(),
 			StudentID:       expectedStudentID,
@@ -96,7 +103,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 		app, err := setupTodoItemTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, respBody := doRequest(t, app, http.MethodPost, "/todo-items", payload)
+		resp, respBody := doRequest(t, app, http.MethodPost, "/todo-items", payload, idHeaders)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var created models.TodoItem
@@ -128,7 +135,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 
 		// Simulate a database failure
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("CreateTodoItem", mock.Anything, mock.Anything).
+		mockRepo.On("CreateTodoItem", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupTodoItemTestApp(mockRepo)
@@ -143,8 +150,10 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 func TestRoute_ListTodoItems(t *testing.T) {
 	t.Parallel()
 
-	// The route reads the student from the request context, not the URL
-	studentID := auth.GetStudentID(context.Background())
+	studentID := uuid.NewString()
+	idHeaders := map[string]string{
+		"X-Student-ID": studentID,
+	}
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
@@ -158,7 +167,7 @@ func TestRoute_ListTodoItems(t *testing.T) {
 		app, err := setupTodoItemTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, respBody := doRequest(t, app, http.MethodGet, "/todo-items", nil)
+		resp, respBody := doRequest(t, app, http.MethodGet, "/todo-items", nil, idHeaders)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var page models.TodoItemPage
@@ -177,7 +186,7 @@ func TestRoute_ListTodoItems(t *testing.T) {
 		app, err := setupTodoItemTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, _ := doRequest(t, app, http.MethodGet, "/todo-items", nil)
+		resp, _ := doRequest(t, app, http.MethodGet, "/todo-items", nil, idHeaders)
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }

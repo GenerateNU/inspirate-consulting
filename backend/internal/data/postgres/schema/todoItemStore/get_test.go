@@ -25,30 +25,27 @@ func TestListTodoItems(t *testing.T) {
 
 	deadline := time.Now().Add(14 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	inputs := []*models.CreateTodoItemRequestBody{
-		{
-			StudentID:       studentID,
-			UserID:          userID,
+	inputs := []struct {
+		studentID string
+		body      models.CreateTodoItemRequestBody
+	}{
+		{studentID, models.CreateTodoItemRequestBody{
 			TodoDescription: "Request a letter of recommendation",
 			Deadline:        &deadline,
-		},
-		{
-			StudentID:       studentID,
-			UserID:          userID,
+		}},
+		{studentID, models.CreateTodoItemRequestBody{
 			TodoDescription: "Schedule a campus tour",
-		},
-		{
-			StudentID:       otherStudentID,
-			UserID:          userID,
+		}},
+		{otherStudentID, models.CreateTodoItemRequestBody{
 			TodoDescription: "Belongs to a different student",
-		},
+		}},
 	}
 
 	created := make([]models.TodoItem, 0, len(inputs))
 	for _, input := range inputs {
-		output, err := repo.CreateTodoItem(ctx, input)
+		output, err := repo.CreateTodoItem(ctx, input.studentID, userID, input.body)
 		if err != nil {
-			t.Fatalf("setup CreateTodoItem(%q) failed: %v", input.TodoDescription, err)
+			t.Fatalf("setup CreateTodoItem(%q) failed: %v", input.body.TodoDescription, err)
 		}
 
 		created = append(created, *output)

@@ -37,7 +37,7 @@ func TestHandler_GetEssayReviewStatus(t *testing.T) {
 		mockRepo.On("DB").Return(nil)
 		mockRepo.On("FindEssayReviewStatus", mock.Anything, mock.Anything, essayID).Return(expectedEntity, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssayReviewStatus(ctx, essayID)
 
 		assert.NoError(t, err)
@@ -54,7 +54,7 @@ func TestHandler_GetEssayReviewStatus(t *testing.T) {
 		mockRepo.On("FindEssayReviewStatus", mock.Anything, mock.Anything, essayID).
 			Return(nil, errs.NotFound("essay review", "essay_id", essayID.String()))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssayReviewStatus(ctx, essayID)
 
 		assert.Nil(t, res)

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
@@ -18,21 +19,19 @@ import (
 func TestHandler_CreateTodoItem(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-	studentID := uuid.NewString()
-	userID := uuid.NewString()
+	studentID := uuid.New()
+	userID := uuid.New()
+	ctx := auth.WithUserID(auth.WithStudentID(context.Background(), studentID), userID)
 	deadline := time.Now().Add(7 * 24 * time.Hour)
 
 	input := &models.CreateTodoItemRequestBody{
-		StudentID:       studentID,
-		UserID:          userID,
 		TodoDescription: "Finish the Common App essay",
 		Deadline:        &deadline,
 	}
 	expectedOutput := &models.TodoItem{
 		ID:              uuid.NewString(),
-		StudentID:       studentID,
-		UserID:          userID,
+		StudentID:       studentID.String(),
+		UserID:          userID.String(),
 		TodoDescription: "Finish the Common App essay",
 		Deadline:        &deadline,
 	}
@@ -42,10 +41,10 @@ func TestHandler_CreateTodoItem(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("CreateTodoItem", mock.Anything, input).Return(expectedOutput, nil)
+		mockRepo.On("CreateTodoItem", mock.Anything, studentID.String(), userID.String(), *input).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateTodoItem(ctx, input)
 
 		// Verify result
@@ -58,9 +57,9 @@ func TestHandler_CreateTodoItem(t *testing.T) {
 
 		// A freshly created todo item should come back with no completion timestamp
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("CreateTodoItem", mock.Anything, input).Return(expectedOutput, nil)
+		mockRepo.On("CreateTodoItem", mock.Anything, studentID.String(), userID.String(), *input).Return(expectedOutput, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateTodoItem(ctx, input)
 
 		assert.NoError(t, err)
@@ -72,10 +71,10 @@ func TestHandler_CreateTodoItem(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("CreateTodoItem", mock.Anything, input).Return(nil, errors.New("database error"))
+		mockRepo.On("CreateTodoItem", mock.Anything, studentID.String(), userID.String(), *input).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateTodoItem(ctx, input)
 
 		// Verify error propagation
