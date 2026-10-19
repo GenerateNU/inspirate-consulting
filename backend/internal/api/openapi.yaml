@@ -108,6 +108,24 @@ components:
         - last_message_read_at
         - unread_count
       type: object
+    ClaimPasswordBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ClaimPasswordBody.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+        temp_password:
+          type: string
+      required:
+        - email
+        - temp_password
+      type: object
     CreateChatMessageRequestBody:
       additionalProperties: false
       properties:
@@ -1726,6 +1744,32 @@ paths:
           description: Error
       tags:
         - Chat
+  /claim-password:
+    get:
+      description: Exchange a claim-password token (from an account-created or password-reset email) for the temporary password it carries
+      operationId: claim-password
+      parameters:
+        - explode: false
+          in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimPasswordBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ClaimPassword
   /colleges:
     get:
       description: List all global colleges.
