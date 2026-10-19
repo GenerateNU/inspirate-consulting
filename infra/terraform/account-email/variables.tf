@@ -23,7 +23,7 @@ variable "claim_token_secret" {
 
 variable "lambda_zip_path" {
   type    = string
-  default = "${path.module}/build/account-email.zip"
+  default = "build/bootstrap"
 }
 
 variable "lambda_timeout_seconds" {
