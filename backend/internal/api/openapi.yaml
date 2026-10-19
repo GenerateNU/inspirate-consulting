@@ -153,16 +153,12 @@ components:
             - https://docs.google.com/document/d/abc123
           minLength: 10
           type: string
-        student_id:
-          description: Student the essay belongs to
-          type: string
         type:
           examples:
             - personal-statement
           maxLength: 100
           type: string
       required:
-        - student_id
         - type
         - link_to_content
       type: object
@@ -189,11 +185,10 @@ components:
           minLength: 1
           type: string
         student_id:
-          description: Student the group belongs to
+          description: Student the group is for; required for counselors, defaults to the authenticated student
           type: string
       required:
         - name
-        - student_id
       type: object
     CreateExtracurricularRequest:
       additionalProperties: false
@@ -373,10 +368,10 @@ components:
           format: uuid
           type: string
         student_id:
+          description: Student the task is for; required for counselors, defaults to the authenticated student
+          format: uuid
           type: string
         todo_description:
-          type: string
-        user_id:
           type: string
       required:
         - todo_description
@@ -1209,13 +1204,7 @@ components:
           examples:
             - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
           type: string
-        student_id:
-          description: Student requesting the review
-          examples:
-            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
-          type: string
       required:
-        - student_id
         - essay_id
         - amount
       type: object

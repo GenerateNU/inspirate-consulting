@@ -101,3 +101,20 @@ func (r *EssayReviewRepository) FindEssayReviewStatus(ctx context.Context, db db
 
 	return &status, nil
 }
+
+func (r *EssayReviewRepository) FindEssayStudentID(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (uuid.UUID, error) {
+	selectQuery, err := schema.ReadSQLBaseScript("get_essay_student_id.sql", SqlEssayReviewFiles)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	var studentID uuid.UUID
+	if err := db.QueryRow(ctx, selectQuery, essayID).Scan(&studentID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return uuid.Nil, errs.NotFound("essay", "id", essayID.String())
+		}
+		return uuid.Nil, err
+	}
+
+	return studentID, nil
+}

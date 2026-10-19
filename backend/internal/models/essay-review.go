@@ -41,9 +41,8 @@ type EssayReviewTransaction struct {
 
 // To represent the input needed to open a review against an essay.
 type RequestEssayReviewRequestBody struct {
-	StudentID uuid.UUID `json:"student_id" example:"3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09" doc:"Student requesting the review"`
-	EssayID   uuid.UUID `json:"essay_id" example:"b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b" doc:"Essay to review"`
-	Amount    int       `json:"amount" minimum:"1" default:"1" example:"1" doc:"Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal."`
+	EssayID uuid.UUID `json:"essay_id" example:"b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b" doc:"Essay to review"`
+	Amount  int       `json:"amount" minimum:"1" default:"1" example:"1" doc:"Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal."`
 }
 
 // To represent the result of refunding a charge: the charge itself, now

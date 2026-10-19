@@ -8,9 +8,18 @@ import (
 )
 
 func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
-	input.StudentID = auth.GetStudentID(ctx)
-	input.UserID = auth.GetUserID(ctx)
-
+	requested, err := auth.ParseOptionalStudentID(input.StudentID)
+	if err != nil {
+		return nil, err
+	}
+	studentID, err := h.Authorizer.ResolveStudentID(ctx, requested)
+	if err != nil {
+		return nil, err
+	}
+	userID, err := auth.GetUserID(ctx)
+	if err != nil {
+		return nil, errs.Unauthorized()
+	}
 	linked := 0
 	if input.EssayID != nil {
 		linked++
@@ -25,7 +34,7 @@ func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoIt
 		return nil, errs.BadRequest("a todo item can be linked to at most one of essay, media, or college")
 	}
 
-	createdTodoItem, err := h.TodoItemRepository.CreateTodoItem(ctx, input)
+	createdTodoItem, err := h.TodoItemRepository.CreateTodoItem(ctx, studentID.String(), userID.String(), *input)
 	if err != nil {
 		return nil, err
 	}

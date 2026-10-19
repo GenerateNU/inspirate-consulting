@@ -13,7 +13,7 @@ import (
 )
 
 func (h *Handler) ListTodoItems(ctx context.Context, input *models.ListTodoItemsInput) (*models.TodoItemPage, error) {
-	query, err := buildTodoItemQuery(ctx, input.TodoItemFilters, input.Cursor, input.Limit)
+	query, err := buildTodoItemQuery(input.TodoItemFilters, input.Cursor, input.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (h *Handler) SearchTodoItems(ctx context.Context, input *models.SearchTodoI
 		return nil, errs.BadRequest("search query must not be blank")
 	}
 
-	query, err := buildTodoItemQuery(ctx, input.TodoItemFilters, input.Cursor, input.Limit)
+	query, err := buildTodoItemQuery(input.TodoItemFilters, input.Cursor, input.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,16 @@ func (h *Handler) SearchTodoItems(ctx context.Context, input *models.SearchTodoI
 }
 
 func (h *Handler) listTodoItemPage(ctx context.Context, query models.TodoItemQuery) (*models.TodoItemPage, error) {
+	requested, err := auth.ParseOptionalStudentID(query.StudentID)
+	if err != nil {
+		return nil, err
+	}
+	studentID, err := h.Authorizer.ResolveStudentID(ctx, requested)
+	if err != nil {
+		return nil, err
+	}
+	query.StudentID = studentID.String()
+
 	limit := query.Limit
 	query.Limit = limit + 1
 
@@ -58,7 +68,7 @@ func (h *Handler) listTodoItemPage(ctx context.Context, query models.TodoItemQue
 	return &models.TodoItemPage{Items: items, NextCursor: nextCursor}, nil
 }
 
-func buildTodoItemQuery(ctx context.Context, filters models.TodoItemFilters, cursor string, limit int) (models.TodoItemQuery, error) {
+func buildTodoItemQuery(filters models.TodoItemFilters, cursor string, limit int) (models.TodoItemQuery, error) {
 	query := models.TodoItemQuery{
 		StudentID: filters.StudentID,
 		Status:    filters.Status,
@@ -68,10 +78,6 @@ func buildTodoItemQuery(ctx context.Context, filters models.TodoItemFilters, cur
 		SortBy:    filters.SortBy,
 		SortOrder: filters.SortOrder,
 		Limit:     limit,
-	}
-	// TODO: restrict student_id so students only see their own todos once auth is implemented.
-	if query.StudentID == "" {
-		query.StudentID = auth.GetStudentID(ctx)
 	}
 	if filters.GlobalCollegeID != 0 {
 		query.GlobalCollegeID = &filters.GlobalCollegeID

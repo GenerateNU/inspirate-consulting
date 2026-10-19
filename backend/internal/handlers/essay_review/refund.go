@@ -14,13 +14,15 @@ import (
 )
 
 func (h *Handler) RefundEssayReview(ctx context.Context, id uuid.UUID) (*models.RefundEssayReviewResponseBody, error) {
-	// TODO: guard by role - students only, and only this transaction's requester.
-
 	result := &models.RefundEssayReviewResponseBody{}
 
 	err := h.EssayReviewRepository.WithTx(ctx, func(db dbinterface.QueryInterface) error {
 		charge, err := h.EssayReviewRepository.LockTransaction(ctx, db, id)
 		if err != nil {
+			return err
+		}
+
+		if err := h.Authorizer.CanAccessStudent(ctx, charge.StudentID); err != nil {
 			return err
 		}
 

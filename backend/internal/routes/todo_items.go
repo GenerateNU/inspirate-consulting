@@ -12,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	todoItemHandler := todoitem.NewHandler(repository.TodoItem)
+func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
+	todoItemHandler := todoitem.NewHandler(repository.TodoItem, authorizer)
 
 	//Register POST /todo-items handler
 	huma.Register(api, huma.Operation{
@@ -36,7 +36,7 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 	//Register GET /todo-items handler
 	huma.Register(api, huma.Operation{
 		OperationID: "get-todo-items",
-		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/todo-items",
 		Description: "Get a student's to-do items, with optional filters, sorting, and cursor pagination",
@@ -53,7 +53,7 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 	//Register GET /todo-items/search handler
 	huma.Register(api, huma.Operation{
 		OperationID: "search-todo-items",
-		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/todo-items/search",
 		Description: "Search a student's to-do items by description, with the same filters as listing",
@@ -70,7 +70,7 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 	//Register PATCH /todo-items/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-item-completed",
-		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/todo-items/{id}",
 		Description: "Update a to-do item's completion status",

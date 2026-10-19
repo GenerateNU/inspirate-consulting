@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/handlers/extracurricular"
 	"inspirate-consulting/internal/models"
@@ -11,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository) {
-	extracurricularHandler := extracurricular.NewHandler(repository.Extracurricular)
+func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, authorizer *auth.Authorizer) {
+	extracurricularHandler := extracurricular.NewHandler(repository.Extracurricular, authorizer)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "create-extracurricular",

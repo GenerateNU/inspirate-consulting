@@ -5,24 +5,35 @@ import (
 	"fmt"
 	"net/http"
 
+	"inspirate-consulting/internal/auth"
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 )
 
 func (h *Handler) RequestEssayReview(ctx context.Context, input models.RequestEssayReviewRequestBody) (*models.EssayReviewTransaction, error) {
-	// TODO: guard by role - students only, input.StudentID must be the caller,
-	// and the essay must belong to them.
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	if input.Amount < 1 {
 		return nil, errs.BadRequest("amount must be at least 1")
 	}
 
+	essayOwnerID, err := h.EssayReviewRepository.FindEssayStudentID(ctx, h.EssayReviewRepository.DB(), input.EssayID)
+	if err != nil {
+		return nil, err
+	}
+	if essayOwnerID != studentID {
+		return nil, errs.Forbidden("you can only request reviews for your own essays")
+	}
+
 	var spend *models.EssayReviewTransaction
 
-	err := h.EssayReviewRepository.WithTx(ctx, func(db dbinterface.QueryInterface) error {
+	err = h.EssayReviewRepository.WithTx(ctx, func(db dbinterface.QueryInterface) error {
 
-		student, err := h.EssayReviewRepository.LockStudent(ctx, db, input.StudentID)
+		student, err := h.EssayReviewRepository.LockStudent(ctx, db, studentID)
 		if err != nil {
 			return err
 		}
@@ -43,11 +54,11 @@ func (h *Handler) RequestEssayReview(ctx context.Context, input models.RequestEs
 			))
 		}
 
-		if err := h.EssayReviewRepository.AdjustStudentBalance(ctx, db, input.StudentID, -input.Amount); err != nil {
+		if err := h.EssayReviewRepository.AdjustStudentBalance(ctx, db, studentID, -input.Amount); err != nil {
 			return err
 		}
 
-		spend, err = h.EssayReviewRepository.InsertSpend(ctx, db, input.StudentID, input.EssayID, input.Amount)
+		spend, err = h.EssayReviewRepository.InsertSpend(ctx, db, studentID, input.EssayID, input.Amount)
 		return err
 	})
 	if err != nil {

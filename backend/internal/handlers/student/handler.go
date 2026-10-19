@@ -1,14 +1,18 @@
 package student
 
-import storage "inspirate-consulting/internal/data"
+import (
+	"inspirate-consulting/internal/auth"
+	storage "inspirate-consulting/internal/data"
+)
 
-// Holds the essay review repository because setting a balance is a ledger write.
 type Handler struct {
 	EssayReviewRepository storage.EssayReviewRepository
+	Authorizer            *auth.Authorizer
 }
 
-func NewHandler(essayReviewRepository storage.EssayReviewRepository) *Handler {
+func NewHandler(essayReviewRepository storage.EssayReviewRepository, authorizer *auth.Authorizer) *Handler {
 	return &Handler{
 		EssayReviewRepository: essayReviewRepository,
+		Authorizer:            authorizer,
 	}
 }

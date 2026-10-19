@@ -14,14 +14,15 @@ import (
 )
 
 func (h *Handler) CompleteEssayReview(ctx context.Context, id uuid.UUID) (*models.EssayReviewTransaction, error) {
-	// TODO: guard by role - counselors only, and only the requester's assigned
-	// counselor.
-
 	var completed *models.EssayReviewTransaction
 
 	err := h.EssayReviewRepository.WithTx(ctx, func(db dbinterface.QueryInterface) error {
 		review, err := h.EssayReviewRepository.LockTransaction(ctx, db, id)
 		if err != nil {
+			return err
+		}
+
+		if err := h.Authorizer.CanAccessStudent(ctx, review.StudentID); err != nil {
 			return err
 		}
 

@@ -17,8 +17,7 @@ type TodoItem struct {
 }
 
 type CreateTodoItemRequestBody struct {
-	StudentID       string     `json:"student_id,omitempty"`
-	UserID          string     `json:"user_id,omitempty"`
+	StudentID       string     `json:"student_id,omitempty" required:"false" format:"uuid" doc:"Student the task is for; required for counselors, defaults to the authenticated student"`
 	TodoDescription string     `json:"todo_description"`
 	CompletedAt     *time.Time `json:"completed_at,omitempty"`
 	Deadline        *time.Time `json:"deadline,omitempty"`

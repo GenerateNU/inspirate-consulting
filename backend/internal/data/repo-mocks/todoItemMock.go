@@ -17,9 +17,9 @@ type TodoItemRepository struct {
 	mock.Mock
 }
 
-// CreateTodoItem provides a mock function with given fields: ctx, item
-func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
-	ret := _m.Called(ctx, item)
+// CreateTodoItem provides a mock function with given fields: ctx, studentID, userID, item
+func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
+	ret := _m.Called(ctx, studentID, userID, item)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateTodoItem")
@@ -27,19 +27,19 @@ func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.C
 
 	var r0 *models.TodoItem
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *models.CreateTodoItemRequestBody) (*models.TodoItem, error)); ok {
-		return rf(ctx, item)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, models.CreateTodoItemRequestBody) (*models.TodoItem, error)); ok {
+		return rf(ctx, studentID, userID, item)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *models.CreateTodoItemRequestBody) *models.TodoItem); ok {
-		r0 = rf(ctx, item)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, models.CreateTodoItemRequestBody) *models.TodoItem); ok {
+		r0 = rf(ctx, studentID, userID, item)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.TodoItem)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *models.CreateTodoItemRequestBody) error); ok {
-		r1 = rf(ctx, item)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, models.CreateTodoItemRequestBody) error); ok {
+		r1 = rf(ctx, studentID, userID, item)
 	} else {
 		r1 = ret.Error(1)
 	}

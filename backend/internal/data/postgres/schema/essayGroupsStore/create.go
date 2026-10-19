@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"inspirate-consulting/internal/data/postgres/schema"
@@ -11,7 +12,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *EssayGroupRepository) CreateEssayGroup(ctx context.Context, group models.CreateEssayGroupBody) (*models.EssayGroups, error) {
+func (r *EssayGroupRepository) CreateEssayGroup(ctx context.Context, studentID uuid.UUID, group models.CreateEssayGroupBody) (*models.EssayGroups, error) {
 	createdEssayGroup := &models.EssayGroups{}
 
 	insertQuery, err := schema.ReadSQLBaseScript("create_essay_group.sql", SqlEssayGroupFiles)
@@ -24,7 +25,7 @@ func (r *EssayGroupRepository) CreateEssayGroup(ctx context.Context, group model
 		insertQuery,
 		group.Name,
 		group.Description,
-		group.StudentID,
+		studentID,
 	).Scan(
 		&createdEssayGroup.ID,
 		&createdEssayGroup.Name,
