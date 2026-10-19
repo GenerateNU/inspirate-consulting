@@ -1,2 +1,10 @@
 .env
 **/.vscode/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+infra/terraform/*/build/
