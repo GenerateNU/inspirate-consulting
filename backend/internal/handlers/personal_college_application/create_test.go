@@ -6,9 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -18,7 +20,7 @@ import (
 func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
+	ctx := auth.WithStudentID(context.Background(), uuid.New())
 	edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	t.Run("success", func(t *testing.T) {

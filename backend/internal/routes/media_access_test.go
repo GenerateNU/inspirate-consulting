@@ -1,13 +1,11 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"testing"
 
-	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
@@ -143,15 +141,17 @@ func TestRoute_RevokeMediaAccess(t *testing.T) {
 func TestRoute_ListAccessibleMedia(t *testing.T) {
 	t.Parallel()
 
-	// The route reads the student from the request context, not the URL
-	studentID := auth.GetStudentID(context.Background())
+	studentID := uuid.New()
+	idHeaders := map[string]string{
+		"X-Student-ID": studentID.String(),
+	}
 
 	t.Run("success with default pagination", func(t *testing.T) {
 		t.Parallel()
 
 		// No query params should fall back to limit=20, offset=0
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 20, 0).Return([]models.Media{
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID.String(), 20, 0).Return([]models.Media{
 			{ID: uuid.NewString(), Title: "Common App Essay Tips", LengthInMins: 15},
 			{ID: uuid.NewString(), Title: "Navigating the FAFSA", LengthInMins: 20},
 		}, nil)
@@ -159,7 +159,7 @@ func TestRoute_ListAccessibleMedia(t *testing.T) {
 		app, err := setupMediaAccessTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, respBody := doRequest(t, app, http.MethodGet, "/media-access", nil)
+		resp, respBody := doRequest(t, app, http.MethodGet, "/media-access", nil, idHeaders)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var accessible []models.Media
@@ -172,14 +172,14 @@ func TestRoute_ListAccessibleMedia(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 1, 1).Return([]models.Media{
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID.String(), 1, 1).Return([]models.Media{
 			{ID: uuid.NewString(), Title: "Navigating the FAFSA", LengthInMins: 20},
 		}, nil)
 
 		app, err := setupMediaAccessTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, respBody := doRequest(t, app, http.MethodGet, "/media-access?limit=1&offset=1", nil)
+		resp, respBody := doRequest(t, app, http.MethodGet, "/media-access?limit=1&offset=1", nil, idHeaders)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var accessible []models.Media
@@ -198,7 +198,7 @@ func TestRoute_ListAccessibleMedia(t *testing.T) {
 			app, err := setupMediaAccessTestApp(mockRepo)
 			require.NoError(t, err)
 
-			resp, _ := doRequest(t, app, http.MethodGet, "/media-access"+query, nil)
+			resp, _ := doRequest(t, app, http.MethodGet, "/media-access"+query, nil, idHeaders)
 			assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode, "query: %s", query)
 		}
 	})
@@ -207,13 +207,13 @@ func TestRoute_ListAccessibleMedia(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 20, 0).
+		mockRepo.On("ListAccessibleMedia", mock.Anything, mock.Anything, 20, 0).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupMediaAccessTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, _ := doRequest(t, app, http.MethodGet, "/media-access", nil)
+		resp, _ := doRequest(t, app, http.MethodGet, "/media-access", nil, idHeaders)
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }

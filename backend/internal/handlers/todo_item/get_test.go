@@ -18,20 +18,21 @@ import (
 func TestHandler_ListTodoItems(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-	studentID := auth.GetStudentID(ctx)
+	studentID := uuid.New()
+	ctx := auth.WithStudentID(context.Background(), studentID)
+	studentIDStr := studentID.String()
 	userID := uuid.NewString()
 
 	expectedOutput := []models.TodoItem{
 		{
 			ID:              uuid.NewString(),
-			StudentID:       studentID,
+			StudentID:       studentIDStr,
 			UserID:          userID,
 			TodoDescription: "Submit the FAFSA",
 		},
 		{
 			ID:              uuid.NewString(),
-			StudentID:       studentID,
+			StudentID:       studentIDStr,
 			UserID:          userID,
 			TodoDescription: "Request a recommendation letter",
 		},
@@ -42,10 +43,10 @@ func TestHandler_ListTodoItems(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return(expectedOutput, nil)
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentIDStr })).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListTodoItems(ctx, &models.ListTodoItemsInput{})
 
 		// Verify result
@@ -60,9 +61,9 @@ func TestHandler_ListTodoItems(t *testing.T) {
 
 		// A student with no tasks is an empty list, not an error
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return([]models.TodoItem{}, nil)
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentIDStr })).Return([]models.TodoItem{}, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListTodoItems(ctx, &models.ListTodoItemsInput{})
 
 		assert.NoError(t, err)
@@ -74,10 +75,10 @@ func TestHandler_ListTodoItems(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentID })).Return(nil, errors.New("database error"))
+		mockRepo.On("ListTodoItems", mock.Anything, mock.MatchedBy(func(q models.TodoItemQuery) bool { return q.StudentID == studentIDStr })).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListTodoItems(ctx, &models.ListTodoItemsInput{})
 
 		// Verify error propagation

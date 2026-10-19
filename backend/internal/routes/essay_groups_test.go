@@ -42,8 +42,8 @@ func TestRoute_CreateEssayGroup(t *testing.T) {
 		groupID := uuid.New()
 
 		mockRepo := mocks.NewEssayGroupRepository(t)
-		mockRepo.On("CreateEssayGroup", mock.Anything, mock.MatchedBy(func(body models.CreateEssayGroupBody) bool {
-			return body.Name == "Common App" && body.StudentID == studentID
+		mockRepo.On("CreateEssayGroup", mock.Anything, studentID, mock.MatchedBy(func(body models.CreateEssayGroupBody) bool {
+			return body.Name == "Common App"
 		})).Return(&models.EssayGroups{
 			ID:        groupID,
 			Name:      "Common App",
@@ -54,8 +54,7 @@ func TestRoute_CreateEssayGroup(t *testing.T) {
 		require.NoError(t, err)
 
 		payload := map[string]any{
-			"name":       "Common App",
-			"student_id": studentID.String(),
+			"name": "Common App",
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
@@ -63,6 +62,7 @@ func TestRoute_CreateEssayGroup(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, "/essay-groups", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Student-ID", studentID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)

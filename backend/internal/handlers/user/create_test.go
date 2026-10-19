@@ -41,7 +41,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		repoOutput := models.CreateUserOutput{Body: &models.CreateUserBody{User: &expectedUser}}
 
 		mockRepo := mocks.NewUserRepository(t)
-		mockRepo.On("CreateUser", mock.Anything, input).Return(&repoOutput, nil)
+		mockRepo.On("CreateUser", mock.Anything, input, mock.Anything).Return(&repoOutput, nil)
 
 		handler := NewHandler(mockRepo)
 		res, err := handler.CreateUser(ctx, &input, &supabase.MockSupabase{})
@@ -55,7 +55,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewUserRepository(t)
-		mockRepo.On("CreateUser", mock.Anything, input).
+		mockRepo.On("CreateUser", mock.Anything, input, mock.Anything).
 			Return(nil, errors.New("user already exists"))
 
 		handler := NewHandler(mockRepo)
