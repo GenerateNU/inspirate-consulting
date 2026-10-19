@@ -60,7 +60,6 @@ export default function Essay() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          student_id: studentId.trim(),
           type,
           college_id: collegeId.trim() === "" ? null : Number(collegeId),
           link_to_content: linkToContent,
@@ -139,15 +138,6 @@ export default function Essay() {
       <h2>Create Essay</h2>
 
       <form onSubmit={createEssay}>
-        <div>
-          <label>Student ID: </label>
-          <input
-            type="text"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-          />
-        </div>
-
         <div>
           <label>Type: </label>
           <input
