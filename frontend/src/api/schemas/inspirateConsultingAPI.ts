@@ -184,7 +184,7 @@ export const createEssayGroupBodyNameMax = 100;
 export const CreateEssayGroupBody = /*#__PURE__*/ zod.object({
   "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Optional description of the group')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createEssayGroupBodyNameMax)).check(/*#__PURE__*/ zod.describe('Unique name for the group')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the group belongs to'))
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Student the group is for; required for counselors, defaults to the authenticated student'))
 })
 
 export const CreateEssayGroupResponse = /*#__PURE__*/ zod.object({
@@ -230,7 +230,6 @@ export const CreateEssayBody = /*#__PURE__*/ zod.object({
   "college_id": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Optional college this essay targets')),
   "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('optional group this essay belongs to')),
   "link_to_content": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(createEssayBodyLinkToContentMin)),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the essay belongs to')),
   "type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.maxLength(createEssayBodyTypeMax))
 })
 
@@ -687,8 +686,7 @@ export const requestEssayReviewBodyAmountDefault = 1;
 
 export const RequestEssayReviewBody = /*#__PURE__*/ zod.object({
   "amount": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)), requestEssayReviewBodyAmountDefault).check(/*#__PURE__*/ zod.describe('Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.')),
-  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student requesting the review'))
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review'))
 })
 
 export const RequestEssayReviewResponse = /*#__PURE__*/ zod.object({
@@ -890,9 +888,8 @@ export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Essay this task is for; at most one of essay_id, media_id, global_college_id')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College this task is for; at most one of essay_id, media_id, global_college_id')),
   "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Media this task is for; at most one of essay_id, media_id, global_college_id')),
-  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "todo_description": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student the task is for; required for counselors, defaults to the authenticated student')),
+  "todo_description": /*#__PURE__*/ zod.string()
 })
 
 export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({

@@ -16,6 +16,4 @@ export interface RequestEssayReviewRequestBody {
   amount: number;
   /** Essay to review */
   essay_id: string;
-  /** Student requesting the review */
-  student_id: string;
 }

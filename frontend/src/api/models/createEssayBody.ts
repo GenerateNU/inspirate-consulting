@@ -18,8 +18,6 @@ export interface CreateEssayBody {
   essay_group_id?: string;
   /** @minLength 10 */
   link_to_content: string;
-  /** Student the essay belongs to */
-  student_id: string;
   /** @maxLength 100 */
   type: string;
 }
