@@ -18,11 +18,24 @@ import type {
 } from '../../models';
 
 import {
+  getGetStudentResponseMock,
   getSetStudentReviewBalanceResponseMock
 } from './students.faker';
 
-export { getSetStudentReviewBalanceResponseMock } from './students.faker';
+export { getGetStudentResponseMock, getSetStudentReviewBalanceResponseMock } from './students.faker';
 
+
+export const getGetStudentMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
+  return http.get('*/students/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetStudentResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getSetStudentReviewBalanceMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
   return http.patch('*/students/:id/review-balance', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
@@ -36,5 +49,6 @@ export const getSetStudentReviewBalanceMockHandler = (overrideResponse?: Student
   }, options)
 }
 export const getStudentsMock = () => [
+  getGetStudentMockHandler(),
   getSetStudentReviewBalanceMockHandler()
 ]

@@ -2518,6 +2518,31 @@ paths:
           description: Error
       tags:
         - Essay Reviews
+  /students/{id}:
+    get:
+      description: Get a student
+      operationId: get-student
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
   /students/{id}/review-balance:
     patch:
       description: Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
