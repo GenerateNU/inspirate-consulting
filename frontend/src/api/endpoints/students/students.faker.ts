@@ -14,5 +14,5 @@ import type {
 } from '../../models';
 
 
-export const getSetStudentReviewBalanceResponseMock = (overrideResponse: Partial<Extract<Student, object>> = {}): Student => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselor_id: faker.string.alpha({length: {min: 10, max: 20}}), gpa: faker.number.int(), id: faker.string.alpha({length: {min: 10, max: 20}}), organization: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), review_balance: faker.number.int(), user_id: faker.string.alpha({length: {min: 10, max: 20}}), year: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+export const getSetStudentReviewBalanceResponseMock = (overrideResponse: Partial<Extract<Student, object>> = {}): Student => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselor_id: faker.string.alpha({length: {min: 10, max: 20}}), gpa: faker.number.int(), id: faker.string.alpha({length: {min: 10, max: 20}}), organization: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), review_balance: faker.number.int(), student_interest: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), user_id: faker.string.alpha({length: {min: 10, max: 20}}), year: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

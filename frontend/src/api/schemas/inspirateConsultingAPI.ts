@@ -790,6 +790,7 @@ export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "review_balance": /*#__PURE__*/ zod.int(),
+  "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "user_id": /*#__PURE__*/ zod.string(),
   "year": /*#__PURE__*/ zod.string()
 })
@@ -993,7 +994,8 @@ export const CreateUserBody = /*#__PURE__*/ zod.object({
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
-  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create'))
+  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create')),
+  "student_interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('student\'s area of interest; only used when role is student'))
 })
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({
@@ -1001,6 +1003,7 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "temp_password": /*#__PURE__*/ zod.string(),
   "user": /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
@@ -1020,6 +1023,7 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
 
 export const LoginUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
@@ -1053,6 +1057,7 @@ export const FetchUserParams = /*#__PURE__*/ zod.object({
 
 export const FetchUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),

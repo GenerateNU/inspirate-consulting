@@ -14,8 +14,9 @@ func createTestUser(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 	var userID uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-		`INSERT INTO public.users (name) VALUES ($1) RETURNING id`,
+		`INSERT INTO public.users (name, email) VALUES ($1, $2) RETURNING id`,
 		"Test User",
+		uuid.NewString()+"@test.com",
 	).Scan(&userID)
 	if err != nil {
 		t.Fatalf("failed to create test user: %v", err)
