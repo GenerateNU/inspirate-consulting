@@ -30,20 +30,7 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 		return &models.SetStudentReviewBalanceOutput{Body: *updated}, nil
 	})
 
-	huma.Register(api, huma.Operation{
-		OperationID: "get-student",
-		Method:      http.MethodGet,
-		Path:        "/students/{id}",
-		Description: "Get a student",
-		Tags:        []string{"Students"},
-	}, func(ctx context.Context, input *models.GetStudentInput) (*models.GetStudentOutput, error) {
-		fetchedStudent, err := studentHandler.GetStudent(ctx, input.ID)
-		if err != nil {
-			return nil, err
-		}
-		return &models.GetStudentOutput{Body: fetchedStudent}, nil
-	})
-
+	// Registered before GET /students/{id} so "fetchall" is not captured as an id.
 	huma.Register(api, huma.Operation{
 		OperationID: "fetch-students",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
@@ -57,6 +44,20 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 			return nil, err
 		}
 		return &models.FetchStudentsOutput{Body: page}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "get-student",
+		Method:      http.MethodGet,
+		Path:        "/students/{id}",
+		Description: "Get a student",
+		Tags:        []string{"Students"},
+	}, func(ctx context.Context, input *models.GetStudentInput) (*models.GetStudentOutput, error) {
+		fetchedStudent, err := studentHandler.GetStudent(ctx, input.ID)
+		if err != nil {
+			return nil, err
+		}
+		return &models.GetStudentOutput{Body: fetchedStudent}, nil
 	})
 
 	huma.Register(api, huma.Operation{
