@@ -75,11 +75,11 @@ type GlobalCollegeRepository interface {
 
 // To represent the Personal College Application schema
 type PersonalCollegeApplicationRepository interface {
-	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
-	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
-	UpdateApplicationRank(ctx context.Context, studentID string, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error)
-	UpdatePersonalCollegeApplication(ctx context.Context, studentID string, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
-	DeletePersonalCollegeApplication(ctx context.Context, studentID string, applicationID int64) error
+	CreatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID uuid.UUID) ([]models.PersonalCollegeApplication, error)
+	UpdateApplicationRank(ctx context.Context, studentID uuid.UUID, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error)
+	UpdatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error
 }
 
 type UserRepository interface {

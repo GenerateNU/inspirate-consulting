@@ -20,7 +20,10 @@ func (h *Handler) UpdatePersonalCollegeApplication(ctx context.Context, id int64
 		return nil, err
 	}
 
-	studentID := auth.GetStudentID(ctx)
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	updatedPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.UpdatePersonalCollegeApplication(ctx, studentID, id, input)
 	if err != nil {

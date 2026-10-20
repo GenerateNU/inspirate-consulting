@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
+
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
@@ -17,7 +19,7 @@ func TestUpdatePersonalCollegeApplication(t *testing.T) {
 
 	collegeA := createTestGlobalCollege(t, db, "Update Test Alpha University", "Alpha City, AA")
 	collegeB := createTestGlobalCollege(t, db, "Update Test Beta University", "Beta City, BB")
-	studentID := "00000000-0000-0000-0000-000000000021"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000021")
 
 	created, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeA,
@@ -67,8 +69,8 @@ func TestUpdatePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Update Ownership University", "Ownership City, OC")
-	ownerStudentID := "00000000-0000-0000-0000-000000000022"
-	otherStudentID := "00000000-0000-0000-0000-000000000023"
+	ownerStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000022")
+	otherStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000023")
 
 	created, err := repo.CreatePersonalCollegeApplication(ctx, ownerStudentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,

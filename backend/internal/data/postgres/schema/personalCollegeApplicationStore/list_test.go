@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
+
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
@@ -19,8 +21,8 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	studentID := "00000000-0000-0000-0000-000000000099"
-	otherStudentID := "00000000-0000-0000-0000-000000000098"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000099")
+	otherStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000098")
 
 	collegeA := createTestGlobalCollege(t, db, "List Test Alpha University", "Alpha City, AA")
 	collegeB := createTestGlobalCollege(t, db, "List Test Beta University", "Beta City, BB")
@@ -66,7 +68,7 @@ func TestListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	for _, r := range results {
 		foundIDs[r.ID] = true
 		if r.StudentID != studentID {
-			t.Errorf("expected all results to have StudentID %q, got %q", studentID, r.StudentID)
+			t.Errorf("expected all results to have StudentID %v, got %v", studentID, r.StudentID)
 		}
 	}
 	if !foundIDs[appA.ID] || !foundIDs[appB.ID] {
@@ -86,7 +88,7 @@ func TestListPersonalCollegeApplicationsByStudentID_NoApplications(t *testing.T)
 	repo := NewPersonalCollegeApplicationRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
-	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, "00000000-0000-0000-0000-000000000077")
+	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, uuid.MustParse("00000000-0000-0000-0000-000000000077"))
 	if err != nil {
 		t.Fatalf("ListPersonalCollegeApplicationsByStudentID failed: %v", err)
 	}

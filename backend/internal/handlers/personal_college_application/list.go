@@ -12,7 +12,7 @@ func (h *Handler) ListPersonalCollegeApplicationsByStudentID(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	applications, err := h.PersonalCollegeApplicationRepository.ListPersonalCollegeApplicationsByStudentID(ctx, studentID.String())
+	applications, err := h.PersonalCollegeApplicationRepository.ListPersonalCollegeApplicationsByStudentID(ctx, studentID)
 	if err != nil {
 		return nil, err
 	}

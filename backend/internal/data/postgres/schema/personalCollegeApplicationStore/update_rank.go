@@ -7,6 +7,7 @@ import (
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -25,7 +26,7 @@ type rankUpdate struct {
 // and preserve the relative order of all other applications
 func (r *PersonalCollegeApplicationRepository) UpdateApplicationRank(
 	ctx context.Context,
-	studentID string,
+	studentID uuid.UUID,
 	applicationID int64,
 	newRank *int,
 ) ([]models.PersonalCollegeApplication, error) {

@@ -8,13 +8,14 @@ import (
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
 // updates an application's global_college_id, application_type, and category
 func (r *PersonalCollegeApplicationRepository) UpdatePersonalCollegeApplication(
 	ctx context.Context,
-	studentID string,
+	studentID uuid.UUID,
 	applicationID int64,
 	input models.UpdatePersonalCollegeApplicationRequestBody,
 ) (*models.PersonalCollegeApplication, error) {

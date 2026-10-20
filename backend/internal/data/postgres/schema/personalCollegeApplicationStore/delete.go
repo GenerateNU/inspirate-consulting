@@ -3,11 +3,13 @@ package personalCollegeApplicationRepository
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/errs"
 )
 
-func (r *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID string, applicationID int64) error {
+func (r *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error {
 	deleteQuery, err := schema.ReadSQLBaseScript("delete_personal_college_application.sql", SqlPersonalCollegeApplicationFiles)
 	if err != nil {
 		return err

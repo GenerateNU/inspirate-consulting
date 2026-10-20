@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
+
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
@@ -21,7 +23,7 @@ func TestUpdateApplicationRank_UnrankedToRanked(t *testing.T) {
 
 	collegeA := createTestGlobalCollege(t, db, "Rank Test Alpha", "Alpha City, AA")
 	collegeB := createTestGlobalCollege(t, db, "Rank Test Beta", "Beta City, BB")
-	studentID := "00000000-0000-0000-0000-000000000031"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000031")
 
 	appA, _ := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeA, ApplicationType: "ED", Category: "reach",
@@ -60,7 +62,7 @@ func TestUpdateApplicationRank_MoveUp(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	studentID := "00000000-0000-0000-0000-000000000032"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000032")
 	ids := make([]int64, 4)
 	for i := 0; i < 4; i++ {
 		college := createTestGlobalCollege(t, db, fmt.Sprintf("Move Up College %d", i), fmt.Sprintf("City %d, ST", i))
@@ -99,7 +101,7 @@ func TestUpdateApplicationRank_MoveDown(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	studentID := "00000000-0000-0000-0000-000000000033"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000033")
 	ids := make([]int64, 4)
 	for i := 0; i < 4; i++ {
 		college := createTestGlobalCollege(t, db, fmt.Sprintf("Move Down College %d", i), fmt.Sprintf("City %d, ST", i))
@@ -138,7 +140,7 @@ func TestUpdateApplicationRank_UnrankCompactsRemaining(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	studentID := "00000000-0000-0000-0000-000000000034"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000034")
 	ids := make([]int64, 4)
 	for i := 0; i < 4; i++ {
 		college := createTestGlobalCollege(t, db, fmt.Sprintf("Unrank College %d", i), fmt.Sprintf("City %d, ST", i))
@@ -179,7 +181,7 @@ func TestUpdateApplicationRank_NonexistentApplicationFails(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	_, err := repo.UpdateApplicationRank(ctx, "00000000-0000-0000-0000-000000000035", 999999, intPtr(1))
+	_, err := repo.UpdateApplicationRank(ctx, uuid.MustParse("00000000-0000-0000-0000-000000000035"), 999999, intPtr(1))
 	if err == nil {
 		t.Fatal("expected an error ranking a nonexistent application, got nil")
 	}
@@ -193,8 +195,8 @@ func TestUpdateApplicationRank_WrongStudentFails(t *testing.T) {
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Rank Ownership College", "City, ST")
-	ownerStudentID := "00000000-0000-0000-0000-000000000036"
-	otherStudentID := "00000000-0000-0000-0000-000000000037"
+	ownerStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000036")
+	otherStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000037")
 
 	app, err := repo.CreatePersonalCollegeApplication(ctx, ownerStudentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID, ApplicationType: "ED", Category: "reach",

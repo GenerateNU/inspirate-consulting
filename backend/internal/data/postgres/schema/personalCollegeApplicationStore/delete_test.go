@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
+
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
@@ -16,7 +18,7 @@ func TestDeletePersonalCollegeApplication(t *testing.T) {
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Delete Test University", "Delete City, DC")
-	studentID := "00000000-0000-0000-0000-000000000011"
+	studentID := uuid.MustParse("00000000-0000-0000-0000-000000000011")
 
 	created, err := repo.CreatePersonalCollegeApplication(ctx, studentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,
@@ -50,7 +52,7 @@ func TestDeletePersonalCollegeApplication_NotFound(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	err := repo.DeletePersonalCollegeApplication(ctx, "00000000-0000-0000-0000-000000000012", 999999)
+	err := repo.DeletePersonalCollegeApplication(ctx, uuid.MustParse("00000000-0000-0000-0000-000000000012"), 999999)
 	if err == nil {
 		t.Fatal("expected an error deleting a nonexistent application, got nil")
 	}
@@ -64,8 +66,8 @@ func TestDeletePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	ctx := context.Background()
 
 	collegeID := createTestGlobalCollege(t, db, "Ownership Test University", "Ownership City, OC")
-	ownerStudentID := "00000000-0000-0000-0000-000000000013"
-	otherStudentID := "00000000-0000-0000-0000-000000000014"
+	ownerStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000013")
+	otherStudentID := uuid.MustParse("00000000-0000-0000-0000-000000000014")
 
 	created, err := repo.CreatePersonalCollegeApplication(ctx, ownerStudentID, models.CreatePersonalCollegeApplicationRequestBody{
 		GlobalCollegeID: collegeID,

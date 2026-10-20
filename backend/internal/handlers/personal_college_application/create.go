@@ -24,7 +24,7 @@ func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input mo
 		return nil, err
 	}
 
-	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID.String(), input)
+	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID, input)
 	if err != nil {
 		return nil, err
 	}
