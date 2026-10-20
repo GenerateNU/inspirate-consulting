@@ -13,7 +13,7 @@ import (
 )
 
 // SetUpCounselorRoutes registers the counselor endpoints:
-// list pending reviews and list students
+// list pending reviews, list students, and fetch all counselors
 func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	counselorHandler := counselor.NewHandler(repository.Counselor)
 
@@ -47,5 +47,21 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 			return nil, err
 		}
 		return &models.ListCounselorStudentsOutput{Body: students}, nil
+	})
+
+	// Register GET /counselors/fetchall handler.
+	huma.Register(api, huma.Operation{
+		OperationID: "fetch-counselors",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodGet,
+		Path:        "/counselors/fetchall",
+		Description: "Fetch a page of counselors, optionally filtered by user_id and name",
+		Tags:        []string{"Counselors"},
+	}, func(ctx context.Context, input *models.FetchCounselorsInput) (*models.FetchCounselorsOutput, error) {
+		page, err := counselorHandler.ListCounselors(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.FetchCounselorsOutput{Body: page}, nil
 	})
 }

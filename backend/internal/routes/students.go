@@ -43,4 +43,34 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 		}
 		return &models.GetStudentOutput{Body: fetchedStudent}, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "fetch-students",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodGet,
+		Path:        "/students/fetchall",
+		Description: "Fetch a page of students, optionally filtered by user_id and name",
+		Tags:        []string{"Students"},
+	}, func(ctx context.Context, input *models.FetchStudentsInput) (*models.FetchStudentsOutput, error) {
+		page, err := studentHandler.ListStudents(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.FetchStudentsOutput{Body: page}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "assign-counselor",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/students/assign",
+		Description: "Assign a counselor to a particular student",
+		Tags:        []string{"Counselors"},
+	}, func(ctx context.Context, input *models.AssignCounselorInput) (*models.AssignCounselorOutput, error) {
+		updated, err := studentHandler.AssignCounselor(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.AssignCounselorOutput{Body: *updated}, nil
+	})
 }
