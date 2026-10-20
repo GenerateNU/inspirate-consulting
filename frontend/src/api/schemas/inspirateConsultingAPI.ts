@@ -175,6 +175,33 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Fetch a page of counselors, optionally filtered by user_id and name
+ */
+export const fetchCounselorsQueryLimitDefault = 5;
+export const fetchCounselorsQueryLimitMax = 10;
+
+
+
+export const FetchCounselorsQueryParams = /*#__PURE__*/ zod.object({
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('user id of counselor')),
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('name of counselor')),
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(fetchCounselorsQueryLimitMax)), fetchCounselorsQueryLimitDefault)
+})
+
+export const FetchCounselorsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselors": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "user_id": /*#__PURE__*/ zod.string()
+}))),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get the next page; null when there are none'))
+})
+
+
+/**
  * Creates an essay group for a student
  */
 export const createEssayGroupBodyNameMax = 100;
@@ -765,6 +792,58 @@ export const RefundEssayReviewResponse = /*#__PURE__*/ zod.object({
   "subtotal": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Signed change to the student\'s balance. Negative for a spend, positive for a refund or grant. Sums to the balance.')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the transaction was last updated'))
 }).check(/*#__PURE__*/ zod.describe('The original charge, now marked refunded'))
+})
+
+
+/**
+ * Assign a counselor to a particular student
+ */
+export const AssignCounselorBody = /*#__PURE__*/ zod.object({
+  "counselor_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('id of the counselor to assign')),
+  "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('user id of the student being assigned'))
+})
+
+export const AssignCounselorResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.string(),
+  "gpa": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "review_balance": /*#__PURE__*/ zod.int(),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "year": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Fetch a page of students, optionally filtered by user_id and name
+ */
+export const fetchStudentsQueryLimitDefault = 5;
+export const fetchStudentsQueryLimitMax = 10;
+
+
+
+export const FetchStudentsQueryParams = /*#__PURE__*/ zod.object({
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('user id of student')),
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('name of student')),
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(fetchStudentsQueryLimitMax)), fetchStudentsQueryLimitDefault)
+})
+
+export const FetchStudentsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get the next page; null when there are none')),
+  "students": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "counselor_id": /*#__PURE__*/ zod.string(),
+  "gpa": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "review_balance": /*#__PURE__*/ zod.int(),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "year": /*#__PURE__*/ zod.string()
+})))
 })
 
 

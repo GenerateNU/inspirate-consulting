@@ -6,6 +6,7 @@ import (
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
+	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
@@ -17,6 +18,7 @@ import (
 	notificationLogRepository "inspirate-consulting/internal/data/postgres/schema/notificationLogStore"
 	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	studentRepository "inspirate-consulting/internal/data/postgres/schema/studentStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
@@ -128,7 +130,15 @@ type EssayReviewRepository interface {
 	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
 
-// To represent the Chat Message schema
+type StudentRepository interface {
+	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.StudentListItem, error)
+	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
+}
+
+type CounselorRepository interface {
+	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error)
+}
+
 type ChatMessageRepository interface {
 	CreateChatMessage(ctx context.Context, senderID uuid.UUID, body models.CreateChatMessageRequestBody) (*models.ChatMessage, error)
 	ListChats(ctx context.Context, userID uuid.UUID) ([]models.ChatSummary, error)
@@ -162,6 +172,8 @@ type Repository struct {
 	EssayReview                EssayReviewRepository
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository
+	Student                    StudentRepository
+	Counselor                  CounselorRepository
 }
 
 // Close closes the database connection pool
@@ -193,5 +205,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
+		Student:                    studentRepository.NewStudentRepository(db),
+		Counselor:                  counselorRepository.NewCounselorRepository(db),
 	}
 }

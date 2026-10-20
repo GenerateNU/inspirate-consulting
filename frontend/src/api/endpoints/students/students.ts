@@ -5,8 +5,10 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import useSwr from 'swr';
 import type {
-  Key
+  Key,
+  SWRConfiguration
 } from 'swr';
 
 import useSWRMutation from 'swr/mutation';
@@ -16,6 +18,8 @@ import type {
 
 import type {
   ErrorModel,
+  FetchStudentsBody,
+  FetchStudentsParams,
   SetStudentReviewBalanceRequestBody,
   Student
 } from '../../models';
@@ -59,7 +63,85 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
 
- export type setStudentReviewBalanceResponse200 = {
+ export type fetchStudentsResponse200 = {
+  data: FetchStudentsBody
+  status: 200
+}
+
+export type fetchStudentsResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type fetchStudentsResponseSuccess = (fetchStudentsResponse200) & {
+  headers: Headers;
+};
+export type fetchStudentsResponseError = (fetchStudentsResponseDefault) & {
+  headers: Headers;
+};
+
+export type fetchStudentsResponse = (fetchStudentsResponseSuccess | fetchStudentsResponseError)
+
+export const getFetchStudentsUrl = (params?: FetchStudentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/students/fetchall?${stringifiedParams}` : `/api/students/fetchall`
+}
+
+/**
+ * Fetch a page of students, optionally filtered by user_id and name
+ */
+export const fetchStudents = async (params?: FetchStudentsParams, options?: RequestInit): Promise<fetchStudentsResponse> => {
+
+  const res = await fetch(getFetchStudentsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: fetchStudentsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as fetchStudentsResponse
+}
+
+
+
+
+export const getFetchStudentsKey = (params?: FetchStudentsParams,) => [`/api/students/fetchall`, ...(params ? [params]: [])] as const;
+
+export type FetchStudentsQueryResult = NonNullable<Awaited<ReturnType<typeof fetchStudents>>>
+
+export const useFetchStudents = <TError = Promise<ErrorModel>>(
+  params?: FetchStudentsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof fetchStudents>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+) => {
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getFetchStudentsKey(params) : null);
+  const swrFn = () => fetchStudents(params, fetchOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type setStudentReviewBalanceResponse200 = {
   data: Student
   status: 200
 }
