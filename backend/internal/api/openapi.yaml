@@ -436,6 +436,10 @@ components:
         email:
           description: email of user for supabase signup
           type: string
+        expires_at:
+          description: when the account expires; omit for no expiration
+          format: date-time
+          type: string
         name:
           description: Name of the user
           maxLength: 200
@@ -1638,6 +1642,11 @@ components:
           format: uri
           readOnly: true
           type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
         id:
           type: string
         name:
@@ -1659,6 +1668,7 @@ components:
         - supabase_id
         - pfp_key
         - reset_time
+        - expires_at
       type: object
     Video:
       additionalProperties: false
