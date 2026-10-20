@@ -33,8 +33,9 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 	t.Run("negative balance is rejected before any database work", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := mocks.NewEssayReviewRepository(t)
-		handler := NewHandler(mockRepo, nil)
+		mockEssayRepo := mocks.NewEssayReviewRepository(t)
+		mockStudentRepo := mocks.NewStudentRepository(t)
+		handler := NewHandler(mockEssayRepo, mockStudentRepo, nil)
 
 		res, err := handler.SetReviewBalance(ctx, uuid.New(), models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: -1,
@@ -43,7 +44,7 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		assert.Nil(t, res)
 		require.Error(t, err)
 		assert.Equal(t, 400, err.(errs.HTTPError).Code)
-		mockRepo.AssertNotCalled(t, "WithTx", mock.Anything, mock.Anything)
+		mockEssayRepo.AssertNotCalled(t, "WithTx", mock.Anything, mock.Anything)
 	})
 
 	t.Run("raising the balance records a positive adjustment", func(t *testing.T) {
@@ -51,14 +52,15 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 
 		studentID := uuid.New()
 
-		mockRepo := mocks.NewEssayReviewRepository(t)
-		expectTx(mockRepo)
-		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
+		mockEssayRepo := mocks.NewEssayReviewRepository(t)
+		mockStudentRepo := mocks.NewStudentRepository(t)
+		expectTx(mockEssayRepo)
+		mockEssayRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 2}, nil)
-		mockRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 7).Return(nil)
-		mockRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, 5).Return(nil)
+		mockEssayRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 7).Return(nil)
+		mockEssayRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, 5).Return(nil)
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockEssayRepo, mockStudentRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 7,
 		})
@@ -72,14 +74,15 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 
 		studentID := uuid.New()
 
-		mockRepo := mocks.NewEssayReviewRepository(t)
-		expectTx(mockRepo)
-		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
+		mockEssayRepo := mocks.NewEssayReviewRepository(t)
+		mockStudentRepo := mocks.NewStudentRepository(t)
+		expectTx(mockEssayRepo)
+		mockEssayRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 5}, nil)
-		mockRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 1).Return(nil)
-		mockRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, -4).Return(nil)
+		mockEssayRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 1).Return(nil)
+		mockEssayRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, -4).Return(nil)
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockEssayRepo, mockStudentRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 1,
 		})
@@ -93,12 +96,13 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 
 		studentID := uuid.New()
 
-		mockRepo := mocks.NewEssayReviewRepository(t)
-		expectTx(mockRepo)
-		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
+		mockEssayRepo := mocks.NewEssayReviewRepository(t)
+		mockStudentRepo := mocks.NewStudentRepository(t)
+		expectTx(mockEssayRepo)
+		mockEssayRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 4}, nil)
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockEssayRepo, mockStudentRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 4,
 		})
@@ -106,8 +110,8 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, 4, res.ReviewBalance)
 		// a zero delta would be a meaningless ledger row
-		mockRepo.AssertNotCalled(t, "SetStudentBalance", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
-		mockRepo.AssertNotCalled(t, "InsertAdjustment", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		mockEssayRepo.AssertNotCalled(t, "SetStudentBalance", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		mockEssayRepo.AssertNotCalled(t, "InsertAdjustment", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
 	})
 
 	t.Run("unknown student propagates the repository error", func(t *testing.T) {
@@ -115,12 +119,13 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 
 		studentID := uuid.New()
 
-		mockRepo := mocks.NewEssayReviewRepository(t)
-		expectTx(mockRepo)
-		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
+		mockEssayRepo := mocks.NewEssayReviewRepository(t)
+		mockStudentRepo := mocks.NewStudentRepository(t)
+		expectTx(mockEssayRepo)
+		mockEssayRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(nil, errs.NotFound("student", "id", studentID.String()))
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockEssayRepo, mockStudentRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 3,
 		})
