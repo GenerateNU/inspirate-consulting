@@ -34,13 +34,15 @@ func setupTestAppWithCounselor(mockCounselorRepo data.CounselorRepository) (*fib
 func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 	t.Parallel()
 
+	counselorID := uuid.New()
+
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
 		reviewID := uuid.New()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{
 				{TransactionID: reviewID, EssayID: uuid.New(), EssayType: "personal-statement", EssayLink: "https://example.com/a", StudentID: uuid.New(), StudentName: "Alice"},
 			}, nil)
@@ -50,6 +52,7 @@ func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/reviews", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -73,7 +76,7 @@ func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -81,6 +84,7 @@ func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/reviews", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -101,7 +105,7 @@ func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -109,6 +113,7 @@ func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/reviews", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -121,6 +126,8 @@ func TestRoute_ListCounselorPendingReviews(t *testing.T) {
 func TestRoute_ListCounselorStudents(t *testing.T) {
 	t.Parallel()
 
+	counselorID := uuid.New()
+
 	t.Run("success applies default sort and sets flags", func(t *testing.T) {
 		t.Parallel()
 
@@ -128,15 +135,15 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		aliceID, bobID, carolID := uuid.New(), uuid.New(), uuid.New()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, mock.Anything).
+		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
 				{StudentID: carolID, Name: "Carol", Year: models.Freshman},
 				{StudentID: bobID, Name: "Bob", Year: models.Senior},
 				{StudentID: aliceID, Name: "Alice", Year: models.Junior},
 			}, nil)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{{TransactionID: uuid.New(), StudentID: aliceID, StudentName: "Alice"}}, nil)
-		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, mock.Anything).
+		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, counselorID).
 			Return([]uuid.UUID{bobID}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -144,6 +151,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -180,14 +188,14 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		aliceID, bobID := uuid.New(), uuid.New()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, mock.Anything).
+		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
 				{StudentID: bobID, Name: "Bob", Year: models.Senior},
 				{StudentID: aliceID, Name: "Alice", Year: models.Junior},
 			}, nil)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{{TransactionID: uuid.New(), StudentID: aliceID, StudentName: "Alice"}}, nil)
-		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, mock.Anything).
+		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, counselorID).
 			Return([]uuid.UUID{}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -195,6 +203,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?has_pending_review=true", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -216,14 +225,14 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, mock.Anything).
+		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
 				{StudentID: uuid.New(), Name: "Bob", Year: models.Senior},
 				{StudentID: uuid.New(), Name: "Alice", Year: models.Junior},
 			}, nil)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
-		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, mock.Anything).
+		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, counselorID).
 			Return([]uuid.UUID{}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -231,6 +240,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?year=senior", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -252,15 +262,15 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, mock.Anything).
+		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
 				{StudentID: uuid.New(), Name: "Carol", Year: models.Freshman},
 				{StudentID: uuid.New(), Name: "Bob", Year: models.Senior},
 				{StudentID: uuid.New(), Name: "Alice", Year: models.Junior},
 			}, nil)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
-		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, mock.Anything).
+		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, counselorID).
 			Return([]uuid.UUID{}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -268,6 +278,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?sort_by=year&sort_order=desc", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -291,13 +302,13 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, mock.Anything).
+		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
 				{StudentID: uuid.New(), Name: "Alice", Year: models.Junior},
 			}, nil)
-		mockRepo.On("ListPendingReviews", mock.Anything, mock.Anything).
+		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
-		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, mock.Anything).
+		mockRepo.On("ListFallingBehindStudentIDs", mock.Anything, counselorID).
 			Return([]uuid.UUID{}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -305,6 +316,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?year=sophomore", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -328,6 +340,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?year=graduate", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -347,6 +360,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?sort_by=gpa", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -366,6 +380,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?sort_order=sideways", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -385,6 +400,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students?has_pending_review=maybe", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
@@ -397,7 +413,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, mock.Anything).
+		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return(nil, errors.New("database error"))
 
 		app, err := setupTestAppWithCounselor(mockRepo)
@@ -405,6 +421,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/counselors/students", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", counselorID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)

@@ -18,7 +18,7 @@ type CounselorRepository struct {
 }
 
 // ListFallingBehindStudentIDs provides a mock function with given fields: ctx, counselorID
-func (_m *CounselorRepository) ListFallingBehindStudentIDs(ctx context.Context, counselorID string) ([]uuid.UUID, error) {
+func (_m *CounselorRepository) ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error) {
 	ret := _m.Called(ctx, counselorID)
 
 	if len(ret) == 0 {
@@ -27,10 +27,10 @@ func (_m *CounselorRepository) ListFallingBehindStudentIDs(ctx context.Context, 
 
 	var r0 []uuid.UUID
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) ([]uuid.UUID, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) ([]uuid.UUID, error)); ok {
 		return rf(ctx, counselorID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) []uuid.UUID); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) []uuid.UUID); ok {
 		r0 = rf(ctx, counselorID)
 	} else {
 		if ret.Get(0) != nil {
@@ -38,7 +38,7 @@ func (_m *CounselorRepository) ListFallingBehindStudentIDs(ctx context.Context, 
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
 		r1 = rf(ctx, counselorID)
 	} else {
 		r1 = ret.Error(1)
@@ -48,7 +48,7 @@ func (_m *CounselorRepository) ListFallingBehindStudentIDs(ctx context.Context, 
 }
 
 // ListPendingReviews provides a mock function with given fields: ctx, counselorID
-func (_m *CounselorRepository) ListPendingReviews(ctx context.Context, counselorID string) ([]models.PendingReview, error) {
+func (_m *CounselorRepository) ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error) {
 	ret := _m.Called(ctx, counselorID)
 
 	if len(ret) == 0 {
@@ -57,10 +57,10 @@ func (_m *CounselorRepository) ListPendingReviews(ctx context.Context, counselor
 
 	var r0 []models.PendingReview
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) ([]models.PendingReview, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) ([]models.PendingReview, error)); ok {
 		return rf(ctx, counselorID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) []models.PendingReview); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) []models.PendingReview); ok {
 		r0 = rf(ctx, counselorID)
 	} else {
 		if ret.Get(0) != nil {
@@ -68,7 +68,7 @@ func (_m *CounselorRepository) ListPendingReviews(ctx context.Context, counselor
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
 		r1 = rf(ctx, counselorID)
 	} else {
 		r1 = ret.Error(1)
@@ -78,7 +78,7 @@ func (_m *CounselorRepository) ListPendingReviews(ctx context.Context, counselor
 }
 
 // ListStudents provides a mock function with given fields: ctx, counselorID
-func (_m *CounselorRepository) ListStudents(ctx context.Context, counselorID string) ([]models.CounselorStudentRow, error) {
+func (_m *CounselorRepository) ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error) {
 	ret := _m.Called(ctx, counselorID)
 
 	if len(ret) == 0 {
@@ -87,10 +87,10 @@ func (_m *CounselorRepository) ListStudents(ctx context.Context, counselorID str
 
 	var r0 []models.CounselorStudentRow
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) ([]models.CounselorStudentRow, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) ([]models.CounselorStudentRow, error)); ok {
 		return rf(ctx, counselorID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) []models.CounselorStudentRow); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) []models.CounselorStudentRow); ok {
 		r0 = rf(ctx, counselorID)
 	} else {
 		if ret.Get(0) != nil {
@@ -98,7 +98,7 @@ func (_m *CounselorRepository) ListStudents(ctx context.Context, counselorID str
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
 		r1 = rf(ctx, counselorID)
 	} else {
 		r1 = ret.Error(1)

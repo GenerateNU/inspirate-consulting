@@ -14,6 +14,8 @@ import (
 )
 
 var (
+	testCounselorID = uuid.MustParse("00000000-0000-0000-0000-000000000003")
+
 	aliceID = uuid.MustParse("00000000-0000-0000-0000-00000000000a")
 	bobID   = uuid.MustParse("00000000-0000-0000-0000-00000000000b")
 	carolID = uuid.MustParse("00000000-0000-0000-0000-00000000000c")
@@ -47,14 +49,12 @@ func testFallingBehindIDs() []uuid.UUID {
 	return []uuid.UUID{bobID, daveID}
 }
 
-// sets up a mock returning the test roster, reviews, and falling behind ids
+// sets up a mock returning the test roster, reviews, and falling behind ids for testCounselorID
 func newTestRepo(t *testing.T, ctx context.Context) *mocks.CounselorRepository {
-	counselorID := auth.GetCounselorID(ctx)
-
 	mockRepo := mocks.NewCounselorRepository(t)
-	mockRepo.On("ListStudents", ctx, counselorID).Return(testRoster(), nil)
-	mockRepo.On("ListPendingReviews", ctx, counselorID).Return(testReviews(), nil)
-	mockRepo.On("ListFallingBehindStudentIDs", ctx, counselorID).Return(testFallingBehindIDs(), nil)
+	mockRepo.On("ListStudents", ctx, testCounselorID).Return(testRoster(), nil)
+	mockRepo.On("ListPendingReviews", ctx, testCounselorID).Return(testReviews(), nil)
+	mockRepo.On("ListFallingBehindStudentIDs", ctx, testCounselorID).Return(testFallingBehindIDs(), nil)
 	return mockRepo
 }
 
@@ -67,12 +67,25 @@ func names(students []models.CounselorStudent) []string {
 }
 
 // Unit tests for the ListStudents handler logic
-// Written with stub counselor ID
+// The counselor ID is set on the context the same way the auth middleware does
 func TestHandler_ListStudents(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-	counselorID := auth.GetCounselorID(ctx)
+	counselorID := testCounselorID
+	ctx := auth.WithCounselorID(context.Background(), counselorID)
+
+	t.Run("missing counselor id returns error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewCounselorRepository(t)
+		// no repository methods are called without a counselor id
+
+		handler := NewHandler(mockRepo)
+		res, err := handler.ListStudents(context.Background(), models.ListCounselorStudentsInput{SortBy: "name", SortOrder: "asc"})
+
+		assert.ErrorIs(t, err, auth.ErrNoCounselorID)
+		assert.Nil(t, res)
+	})
 
 	t.Run("success sets flags", func(t *testing.T) {
 		t.Parallel()

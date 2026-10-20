@@ -14,12 +14,12 @@ import (
 )
 
 // Unit tests for the ListPendingReviews handler logic
-// Written with stub counselor ID
+// The counselor ID is set on the context the same way the auth middleware does
 func TestHandler_ListPendingReviews(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-	counselorID := auth.GetCounselorID(ctx)
+	counselorID := uuid.New()
+	ctx := auth.WithCounselorID(context.Background(), counselorID)
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
@@ -64,5 +64,18 @@ func TestHandler_ListPendingReviews(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")
+	})
+
+	t.Run("missing counselor id returns error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewCounselorRepository(t)
+		// ListPendingReviews is not called without a counselor id
+
+		handler := NewHandler(mockRepo)
+		res, err := handler.ListPendingReviews(context.Background())
+
+		assert.ErrorIs(t, err, auth.ErrNoCounselorID)
+		assert.Nil(t, res)
 	})
 }
