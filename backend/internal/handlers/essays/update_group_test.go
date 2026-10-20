@@ -33,7 +33,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		mockRepo := mocks.NewEssayRepository(t)
 		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, &groupID).Return(updatedEssay, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateEssayGroup(ctx, &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},
@@ -57,7 +57,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		mockRepo := mocks.NewEssayRepository(t)
 		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, (*uuid.UUID)(nil)).Return(updatedEssay, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateEssayGroup(ctx, &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: nil},
@@ -75,7 +75,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, &groupID).
 			Return((*models.Essays)(nil), errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateEssayGroup(ctx, &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},

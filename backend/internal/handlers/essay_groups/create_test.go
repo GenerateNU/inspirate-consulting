@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
@@ -17,15 +18,14 @@ import (
 func TestHandler_CreateEssayGroup(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
 	studentID := uuid.New()
+	ctx := auth.WithStudentID(context.Background(), studentID)
 	description := "Essays for the Common App"
 
 	input := &models.CreateEssayGroupInput{
 		Body: models.CreateEssayGroupBody{
 			Name:        "Common App",
 			Description: &description,
-			StudentID:   studentID,
 		},
 	}
 
@@ -43,10 +43,11 @@ func TestHandler_CreateEssayGroup(t *testing.T) {
 		mockRepo.On(
 			"CreateEssayGroup",
 			mock.Anything,
+			studentID,
 			input.Body,
 		).Return(createdGroup, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateEssayGroup(ctx, input)
 
 		assert.NoError(t, err)
@@ -61,8 +62,7 @@ func TestHandler_CreateEssayGroup(t *testing.T) {
 
 		noDescriptionInput := &models.CreateEssayGroupInput{
 			Body: models.CreateEssayGroupBody{
-				Name:      "Supplementals",
-				StudentID: studentID,
+				Name: "Supplementals",
 			},
 		}
 
@@ -76,10 +76,11 @@ func TestHandler_CreateEssayGroup(t *testing.T) {
 		mockRepo.On(
 			"CreateEssayGroup",
 			mock.Anything,
+			studentID,
 			noDescriptionInput.Body,
 		).Return(createdGroup, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateEssayGroup(ctx, noDescriptionInput)
 
 		assert.NoError(t, err)
@@ -93,10 +94,11 @@ func TestHandler_CreateEssayGroup(t *testing.T) {
 		mockRepo.On(
 			"CreateEssayGroup",
 			mock.Anything,
+			studentID,
 			input.Body,
 		).Return((*models.EssayGroups)(nil), errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateEssayGroup(ctx, input)
 
 		assert.Error(t, err)

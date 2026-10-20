@@ -87,6 +87,36 @@ func (_m *EssayReviewRepository) FindEssayReviewStatus(ctx context.Context, db d
 	return r0, r1
 }
 
+// FindEssayStudentID provides a mock function with given fields: ctx, db, essayID
+func (_m *EssayReviewRepository) FindEssayStudentID(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (uuid.UUID, error) {
+	ret := _m.Called(ctx, db, essayID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindEssayStudentID")
+	}
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, dbinterface.QueryInterface, uuid.UUID) (uuid.UUID, error)); ok {
+		return rf(ctx, db, essayID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, dbinterface.QueryInterface, uuid.UUID) uuid.UUID); ok {
+		r0 = rf(ctx, db, essayID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, dbinterface.QueryInterface, uuid.UUID) error); ok {
+		r1 = rf(ctx, db, essayID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindOpenReviewForEssay provides a mock function with given fields: ctx, db, essayID
 func (_m *EssayReviewRepository) FindOpenReviewForEssay(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*uuid.UUID, error) {
 	ret := _m.Called(ctx, db, essayID)

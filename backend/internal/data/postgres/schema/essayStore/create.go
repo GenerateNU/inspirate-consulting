@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"inspirate-consulting/internal/data/postgres/schema"
@@ -11,13 +12,13 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *EssayRepository) CreateEssay(ctx context.Context, essay models.Essays) error {
+func (r *EssayRepository) CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error {
 	insertQuery, err := schema.ReadSQLBaseScript("create_essay.sql", SqlEssayFiles)
 	if err != nil {
 		return errs.InternalServerError("Failed to read base query: ", err.Error())
 	}
 
-	_, err = r.db.Exec(ctx, insertQuery, essay.StudentID, essay.Type, essay.CollegeID, essay.LinkToContent, essay.EssayGroupID)
+	_, err = r.db.Exec(ctx, insertQuery, studentID, essay.Type, essay.CollegeID, essay.LinkToContent, essay.EssayGroupID)
 
 	if err != nil {
 		var pgErr *pgconn.PgError

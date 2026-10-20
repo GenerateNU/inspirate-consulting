@@ -30,10 +30,9 @@ func TestCreateEssayGroup(t *testing.T) {
 	input := models.CreateEssayGroupBody{
 		Name:        "Common App",
 		Description: &description,
-		StudentID:   studentID,
 	}
 
-	created, err := repo.CreateEssayGroup(ctx, input)
+	created, err := repo.CreateEssayGroup(ctx, studentID, input)
 	if err != nil {
 		t.Fatalf("CreateEssayGroup failed: %v", err)
 	}
@@ -66,9 +65,8 @@ func TestCreateEssayGroup_NilDescription(t *testing.T) {
 	repo := NewEssayGroupRepository(db)
 	ctx := context.Background()
 
-	created, err := repo.CreateEssayGroup(ctx, models.CreateEssayGroupBody{
-		Name:      "Supplementals",
-		StudentID: uuid.New(),
+	created, err := repo.CreateEssayGroup(ctx, uuid.New(), models.CreateEssayGroupBody{
+		Name: "Supplementals",
 	})
 	if err != nil {
 		t.Fatalf("expected create with nil description to succeed, got error: %v", err)
@@ -91,18 +89,16 @@ func TestCreateEssayGroup_DuplicateName(t *testing.T) {
 	ctx := context.Background()
 
 	input := models.CreateEssayGroupBody{
-		Name:      "Duplicate Group",
-		StudentID: uuid.New(),
+		Name: "Duplicate Group",
 	}
 
-	if _, err := repo.CreateEssayGroup(ctx, input); err != nil {
+	if _, err := repo.CreateEssayGroup(ctx, uuid.New(), input); err != nil {
 		t.Fatalf("first CreateEssayGroup failed: %v", err)
 	}
 
 	// A different student reusing the name still collides, since name is globally unique.
-	_, err := repo.CreateEssayGroup(ctx, models.CreateEssayGroupBody{
-		Name:      "Duplicate Group",
-		StudentID: uuid.New(),
+	_, err := repo.CreateEssayGroup(ctx, uuid.New(), models.CreateEssayGroupBody{
+		Name: "Duplicate Group",
 	})
 	if err == nil {
 		t.Fatal("expected an error creating a duplicate name, got nil")

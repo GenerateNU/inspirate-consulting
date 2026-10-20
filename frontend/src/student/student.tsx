@@ -8,7 +8,6 @@ import type { EssayReviewStatus } from "../api/models";
 
 export default function Student() {
   // Request a review
-  const [studentId, setStudentId] = useState("");
   const [essayId, setEssayId] = useState("");
   const [amount, setAmount] = useState("1");
   const [requestResult, setRequestResult] = useState("");
@@ -23,7 +22,6 @@ export default function Student() {
     setRequestResult("");
     try {
       const response = await requestEssayReview({
-        student_id: studentId,
         essay_id: essayId,
         amount: Number(amount),
       });
@@ -85,15 +83,6 @@ export default function Student() {
     <div className="form-container">
       <h2>Request a Review</h2>
       <form onSubmit={handleRequest}>
-        <div className="form-group">
-          <label>Student ID:</label>
-          <input
-            type="text"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            required
-          />
-        </div>
         <div className="form-group">
           <label>Essay ID:</label>
           <input

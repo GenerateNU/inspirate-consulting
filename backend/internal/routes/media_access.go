@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/data"
 	mediaaccess "inspirate-consulting/internal/handlers/media_access"
 	"inspirate-consulting/internal/models"
@@ -11,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository) {
-	mediaAccessHandler := mediaaccess.NewHandler(repository.MediaAccess)
+func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository, authorizer *auth.Authorizer) {
+	mediaAccessHandler := mediaaccess.NewHandler(repository.MediaAccess, authorizer)
 
 	//Register POST /media-access handler
 	huma.Register(api, huma.Operation{

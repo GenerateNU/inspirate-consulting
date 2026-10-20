@@ -10,10 +10,17 @@ import (
 
 // CreateExtracurricular creates a new extracurricular entry using the authenticated student's id from context.
 func (h *Handler) CreateExtracurricular(ctx context.Context, input *models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error) {
-	userID := auth.GetUserID(ctx)
-	if userID == "" {
-		return nil, errs.BadRequest("user id not found in request context")
+	studentID, err := auth.ParseStudentID(input.StudentID)
+	if err != nil {
+		return nil, err
+	}
+	if err := h.Authorizer.CanAccessStudent(ctx, studentID); err != nil {
+		return nil, err
+	}
+	userID, err := auth.GetUserID(ctx)
+	if err != nil {
+		return nil, errs.Unauthorized()
 	}
 
-	return h.ExtracurricularRepository.CreateExtracurricular(ctx, userID, *input)
+	return h.ExtracurricularRepository.CreateExtracurricular(ctx, userID.String(), *input)
 }

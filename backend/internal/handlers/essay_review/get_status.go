@@ -9,7 +9,12 @@ import (
 )
 
 func (h *Handler) GetEssayReviewStatus(ctx context.Context, essayID uuid.UUID) (*models.EssayReviewStatus, error) {
-	// TODO: guard by role - the essay's owner or their assigned counselor.
-
-	return h.EssayReviewRepository.FindEssayReviewStatus(ctx, h.EssayReviewRepository.DB(), essayID)
+	status, err := h.EssayReviewRepository.FindEssayReviewStatus(ctx, h.EssayReviewRepository.DB(), essayID)
+	if err != nil {
+		return nil, err
+	}
+	if err := h.Authorizer.CanAccessStudent(ctx, status.StudentID); err != nil {
+		return nil, err
+	}
+	return status, nil
 }

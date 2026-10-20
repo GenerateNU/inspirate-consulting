@@ -3,19 +3,17 @@ package essays
 import (
 	"context"
 
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/models"
 )
 
 func (h *Handler) CreateEssay(ctx context.Context, input *models.CreateEssayInput) (*models.CreateEssayOutput, error) {
-	essay := models.Essays{
-		StudentID:     input.Body.StudentID,
-		Type:          input.Body.Type,
-		CollegeID:     input.Body.CollegeID,
-		LinkToContent: input.Body.LinkToContent,
-		EssayGroupID:  input.Body.EssayGroupID,
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := h.EssayRepository.CreateEssay(ctx, essay); err != nil {
+	if err := h.EssayRepository.CreateEssay(ctx, studentID, input.Body); err != nil {
 		return nil, err
 	}
 

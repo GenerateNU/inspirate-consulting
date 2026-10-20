@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
@@ -17,25 +18,16 @@ import (
 func TestHandler_CreateEssay(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
 	studentID := uuid.New()
+	ctx := auth.WithStudentID(context.Background(), studentID)
 	collegeID := int64(42)
 
 	input := &models.CreateEssayInput{
 		Body: models.CreateEssayBody{
-			StudentID:     studentID,
 			Type:          "personal-statement",
 			CollegeID:     &collegeID,
 			LinkToContent: "https://docs.google.com/document/d/abc123",
 		},
-	}
-	// The row struct the handler is expected to build from that input. ID and
-	// Status stay zero so the database applies its own defaults.
-	expectedEssay := models.Essays{
-		StudentID:     studentID,
-		Type:          "personal-statement",
-		CollegeID:     &collegeID,
-		LinkToContent: "https://docs.google.com/document/d/abc123",
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -43,10 +35,10 @@ func TestHandler_CreateEssay(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("CreateEssay", mock.Anything, expectedEssay).Return(nil)
+		mockRepo.On("CreateEssay", mock.Anything, studentID, input.Body).Return(nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateEssay(ctx, input)
 
 		// Verify result
@@ -59,10 +51,10 @@ func TestHandler_CreateEssay(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("CreateEssay", mock.Anything, expectedEssay).Return(errors.New("database error"))
+		mockRepo.On("CreateEssay", mock.Anything, studentID, input.Body).Return(errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateEssay(ctx, input)
 
 		// Verify error propagation

@@ -24,15 +24,16 @@ func TestListEssayGroups(t *testing.T) {
 	studentID := uuid.New()
 	otherStudentID := uuid.New()
 
-	inputs := []models.CreateEssayGroupBody{
-		{Name: "Common App", StudentID: studentID},
-		{Name: "Supplementals", StudentID: studentID},
-		{Name: "Scholarships", StudentID: otherStudentID},
-	}
-
-	for _, input := range inputs {
-		if _, err := repo.CreateEssayGroup(ctx, input); err != nil {
-			t.Fatalf("setup CreateEssayGroup(%q) failed: %v", input.Name, err)
+	for _, tc := range []struct {
+		sid  uuid.UUID
+		body models.CreateEssayGroupBody
+	}{
+		{studentID, models.CreateEssayGroupBody{Name: "Common App"}},
+		{studentID, models.CreateEssayGroupBody{Name: "Supplementals"}},
+		{otherStudentID, models.CreateEssayGroupBody{Name: "Scholarships"}},
+	} {
+		if _, err := repo.CreateEssayGroup(ctx, tc.sid, tc.body); err != nil {
+			t.Fatalf("setup CreateEssayGroup(%q) failed: %v", tc.body.Name, err)
 		}
 	}
 

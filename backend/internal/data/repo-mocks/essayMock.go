@@ -17,17 +17,17 @@ type EssayRepository struct {
 	mock.Mock
 }
 
-// CreateEssay provides a mock function with given fields: ctx, essay
-func (_m *EssayRepository) CreateEssay(ctx context.Context, essay models.Essays) error {
-	ret := _m.Called(ctx, essay)
+// CreateEssay provides a mock function with given fields: ctx, studentID, essay
+func (_m *EssayRepository) CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error {
+	ret := _m.Called(ctx, studentID, essay)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateEssay")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.Essays) error); ok {
-		r0 = rf(ctx, essay)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.CreateEssayBody) error); ok {
+		r0 = rf(ctx, studentID, essay)
 	} else {
 		r0 = ret.Error(0)
 	}

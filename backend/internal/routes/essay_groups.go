@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/handlers/essay_groups"
 	"inspirate-consulting/internal/models"
@@ -11,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpEssayGroupRoutes(api huma.API, repository *data.Repository) {
-	essayGroupHandler := essay_groups.NewHandler(repository.EssayGroup)
+func SetUpEssayGroupRoutes(api huma.API, repository *data.Repository, authorizer *auth.Authorizer) {
+	essayGroupHandler := essay_groups.NewHandler(repository.EssayGroup, authorizer)
 
 	// POST route that inserts a row into the essay_groups table
 	huma.Register(api, huma.Operation{

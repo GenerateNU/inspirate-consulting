@@ -17,9 +17,9 @@ type EssayGroupRepository struct {
 	mock.Mock
 }
 
-// CreateEssayGroup provides a mock function with given fields: ctx, group
-func (_m *EssayGroupRepository) CreateEssayGroup(ctx context.Context, group models.CreateEssayGroupBody) (*models.EssayGroups, error) {
-	ret := _m.Called(ctx, group)
+// CreateEssayGroup provides a mock function with given fields: ctx, studentID, group
+func (_m *EssayGroupRepository) CreateEssayGroup(ctx context.Context, studentID uuid.UUID, group models.CreateEssayGroupBody) (*models.EssayGroups, error) {
+	ret := _m.Called(ctx, studentID, group)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateEssayGroup")
@@ -27,19 +27,19 @@ func (_m *EssayGroupRepository) CreateEssayGroup(ctx context.Context, group mode
 
 	var r0 *models.EssayGroups
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, models.CreateEssayGroupBody) (*models.EssayGroups, error)); ok {
-		return rf(ctx, group)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.CreateEssayGroupBody) (*models.EssayGroups, error)); ok {
+		return rf(ctx, studentID, group)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, models.CreateEssayGroupBody) *models.EssayGroups); ok {
-		r0 = rf(ctx, group)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.CreateEssayGroupBody) *models.EssayGroups); ok {
+		r0 = rf(ctx, studentID, group)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.EssayGroups)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, models.CreateEssayGroupBody) error); ok {
-		r1 = rf(ctx, group)
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, models.CreateEssayGroupBody) error); ok {
+		r1 = rf(ctx, studentID, group)
 	} else {
 		r1 = ret.Error(1)
 	}

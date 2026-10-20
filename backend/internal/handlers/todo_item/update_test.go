@@ -39,7 +39,7 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 		})).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateTodoItemCompletedAt(ctx, id, true)
 
 		// Verify result
@@ -62,7 +62,7 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, id, (*time.Time)(nil)).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateTodoItemCompletedAt(ctx, id, false)
 
 		// Verify result
@@ -79,7 +79,7 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, id, mock.Anything).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateTodoItemCompletedAt(ctx, id, true)
 
 		// Verify error propagation

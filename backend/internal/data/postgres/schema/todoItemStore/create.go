@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
+func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
 	createdItem := &models.TodoItem{}
 
 	insertQuery, err := schema.ReadSQLBaseScript("create_todo_item.sql", SqlTodoItemFiles)
@@ -22,8 +22,8 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, item *models.Cr
 	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
-		item.StudentID,
-		item.UserID,
+		studentID,
+		userID,
 		item.TodoDescription,
 		item.Deadline,
 		item.EssayID,

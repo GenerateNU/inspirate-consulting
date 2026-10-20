@@ -26,8 +26,7 @@ func TestGetEssaysFromStudent(t *testing.T) {
 	studentID := uuid.New()
 	groupID := insertEssayGroup(t, db, studentID, "Common App")
 
-	err := repo.CreateEssay(ctx, models.Essays{
-		StudentID:     studentID,
+	err := repo.CreateEssay(ctx, studentID, models.CreateEssayBody{
 		Type:          "personal-statement",
 		LinkToContent: "https://docs.google.com/document/d/abc123",
 		EssayGroupID:  &groupID,
@@ -76,8 +75,7 @@ func TestGetEssaysFromStudent_NoGroup(t *testing.T) {
 
 	studentID := uuid.New()
 
-	err := repo.CreateEssay(ctx, models.Essays{
-		StudentID:     studentID,
+	err := repo.CreateEssay(ctx, studentID, models.CreateEssayBody{
 		Type:          "supplemental",
 		LinkToContent: "https://docs.google.com/document/d/no-group",
 	})
@@ -113,16 +111,16 @@ func TestGetEssaysByGroup(t *testing.T) {
 	groupID := insertEssayGroup(t, db, studentID, "Common App")
 	otherGroupID := insertEssayGroup(t, db, studentID, "Supplementals")
 
-	essaysToCreate := []models.Essays{
-		{StudentID: studentID, Type: "personal-statement", LinkToContent: "https://example.com/1", EssayGroupID: &groupID},
-		{StudentID: studentID, Type: "why-us", LinkToContent: "https://example.com/2", EssayGroupID: &groupID},
-		{StudentID: studentID, Type: "supplemental", LinkToContent: "https://example.com/3", EssayGroupID: &otherGroupID},
+	essaysToCreate := []models.CreateEssayBody{
+		{Type: "personal-statement", LinkToContent: "https://example.com/1", EssayGroupID: &groupID},
+		{Type: "why-us", LinkToContent: "https://example.com/2", EssayGroupID: &groupID},
+		{Type: "supplemental", LinkToContent: "https://example.com/3", EssayGroupID: &otherGroupID},
 		// Ungrouped essays must not appear in any group's result.
-		{StudentID: studentID, Type: "orphan", LinkToContent: "https://example.com/4"},
+		{Type: "orphan", LinkToContent: "https://example.com/4"},
 	}
 
 	for _, essay := range essaysToCreate {
-		if err := repo.CreateEssay(ctx, essay); err != nil {
+		if err := repo.CreateEssay(ctx, studentID, essay); err != nil {
 			t.Fatalf("setup CreateEssay(%q) failed: %v", essay.Type, err)
 		}
 	}

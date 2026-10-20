@@ -7,9 +7,12 @@ import (
 )
 
 func (h *Handler) ListAccessibleMedia(ctx context.Context, limit int, offset int) ([]models.Media, error) {
-	studentID := auth.GetStudentID(ctx)
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	accessibleMedia, err := h.MediaAccessRepository.ListAccessibleMedia(ctx, studentID, limit, offset)
+	accessibleMedia, err := h.MediaAccessRepository.ListAccessibleMedia(ctx, studentID.String(), limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -57,7 +57,7 @@ func TestRoute_CreateUser(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("CreateUser", mock.Anything, mock.MatchedBy(func(in models.CreateUserInput) bool {
 			return in.Body.Name == "Aleng123"
-		})).Return(&models.CreateUserOutput{
+		}), mock.Anything).Return(&models.CreateUserOutput{
 			Body: &models.CreateUserBody{User: &userTest},
 		}, nil)
 
