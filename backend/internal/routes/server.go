@@ -36,7 +36,7 @@ func InitApp(config config.Config) (*App, error) {
 	ctx := context.Background()
 	repo := postgres.NewRepository(ctx, config.DB)
 	awsRepo := aws.NewRepository(ctx, config.S3)
-	sqsClient := sqsclient.NewSQSConnection(ctx, config.SQS.QueueURL)
+	sqsClient := sqsclient.NewSQSConnection(ctx, config.SQS)
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video

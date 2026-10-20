@@ -73,6 +73,7 @@ func LoadConfig() (*config.Config, error) {
 		DB          config.DB
 		Supabase    supabase.Supabase
 		S3          config.S3
+		SQS         config.SQS
 	}
 	var env envConf
 	err := envconfig.Process(context.Background(), &env)
@@ -85,6 +86,7 @@ func LoadConfig() (*config.Config, error) {
 		DB:          env.DB,
 		Supabase:    &env.Supabase,
 		S3:          env.S3,
+		SQS:         env.SQS,
 		TestMode:    testMode == "true",
 	}, nil
 }

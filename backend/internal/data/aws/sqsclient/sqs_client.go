@@ -30,7 +30,7 @@ func NewSQSClientWithAPI(api SQSAPI, queueURL string) *SQSClient {
 
 func NewSQSClient(ctx context.Context, queueURL string) (*SQSClient, error) {
 	if queueURL == "" {
-		return nil, fmt.Errorf("sqsclietn: queueURL required")
+		return nil, fmt.Errorf("sqsclient: queueURL required")
 	}
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
