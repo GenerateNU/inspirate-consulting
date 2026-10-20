@@ -5,10 +5,12 @@ import storage "inspirate-consulting/internal/data"
 // Holds the essay review repository because setting a balance is a ledger write.
 type Handler struct {
 	EssayReviewRepository storage.EssayReviewRepository
+	StudentRepository     storage.StudentRepository
 }
 
-func NewHandler(essayReviewRepository storage.EssayReviewRepository) *Handler {
+func NewHandler(essayReviewRepository storage.EssayReviewRepository, studentRepository storage.StudentRepository) *Handler {
 	return &Handler{
 		EssayReviewRepository: essayReviewRepository,
+		StudentRepository:     studentRepository,
 	}
 }
