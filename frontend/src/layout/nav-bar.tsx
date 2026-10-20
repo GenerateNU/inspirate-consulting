@@ -17,6 +17,7 @@ const links = [
   { to: "/create-account", label: "Create Account" },
   { to: "/login", label: "Login" },
   { to: "/logout", label: "Logout" },
+  { to: "/search", label: "Claim Students" },
 ];
 
 export default function NavBar() {

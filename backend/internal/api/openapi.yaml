@@ -1395,6 +1395,59 @@ components:
       required:
         - new_password
       type: object
+    SessionUser:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/SessionUser.json
+          format: uri
+          readOnly: true
+          type: string
+        counselor_id:
+          description: id of the user's counselor profile; null when the user is not a counselor
+          type:
+            - string
+            - "null"
+        email:
+          type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        student_id:
+          description: id of the user's student profile; null when the user is not a student
+          type:
+            - string
+            - "null"
+        supabase_id:
+          type: string
+      required:
+        - student_id
+        - counselor_id
+        - id
+        - name
+        - email
+        - supabase_id
+        - pfp_key
+        - reset_time
+        - expires_at
+      type: object
     SetStudentReviewBalanceRequestBody:
       additionalProperties: false
       properties:
@@ -3674,7 +3727,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/SessionUser"
           description: OK
           headers:
             Set-Cookie:
@@ -3707,6 +3760,25 @@ paths:
           description: Error
       tags:
         - Logout
+  /user/me:
+    get:
+      description: fetch the logged-in user along with their student or counselor profile id
+      operationId: fetch-current-user
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionUser"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
   /user/reset-password:
     patch:
       description: reset user password

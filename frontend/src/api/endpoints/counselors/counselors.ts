@@ -6,26 +6,61 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  AssignCounselorInputBody,
   CounselorStudent,
   ErrorModel,
+  FetchCounselorsBody,
+  FetchCounselorsParams,
   ListCounselorStudentsParams,
-  PendingReview
+  PendingReview,
+  Student
 } from '../../models';
+
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
 
 
 
@@ -45,6 +80,124 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getFetchCounselorsUrl = (params?: FetchCounselorsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/counselors/fetchall?${stringifiedParams}` : `/api/counselors/fetchall`
+}
+
+/**
+ * Fetch a page of counselors, optionally filtered by user_id and name
+ */
+export const fetchCounselors = async (params?: FetchCounselorsParams, options?: RequestInit): Promise<FetchCounselorsBody> => {
+
+  const res = await fetch(getFetchCounselorsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: FetchCounselorsBody, status?: number} = new globalThis.Error();
+    const data : FetchCounselorsBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: FetchCounselorsBody = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getFetchCounselorsQueryKey = (params?: FetchCounselorsParams,) => {
+    return [
+    `/api/counselors/fetchall`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getFetchCounselorsQueryOptions = <TData = Awaited<ReturnType<typeof fetchCounselors>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: FetchCounselorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCounselors>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFetchCounselorsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof fetchCounselors>>> = ({ signal }) => fetchCounselors(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fetchCounselors>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FetchCounselorsQueryResult = NonNullable<Awaited<ReturnType<typeof fetchCounselors>>>
+export type FetchCounselorsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
+
+
+export function useFetchCounselors<TData = Awaited<ReturnType<typeof fetchCounselors>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  FetchCounselorsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCounselors>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchCounselors>>,
+          TError,
+          Awaited<ReturnType<typeof fetchCounselors>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchCounselors<TData = Awaited<ReturnType<typeof fetchCounselors>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: FetchCounselorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCounselors>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchCounselors>>,
+          TError,
+          Awaited<ReturnType<typeof fetchCounselors>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchCounselors<TData = Awaited<ReturnType<typeof fetchCounselors>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: FetchCounselorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCounselors>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useFetchCounselors<TData = Awaited<ReturnType<typeof fetchCounselors>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: FetchCounselorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCounselors>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFetchCounselorsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
 
 export const getListCounselorPendingReviewsUrl = () => {
 
@@ -275,3 +428,101 @@ export function useListCounselorStudents<TData = Awaited<ReturnType<typeof listC
 
 
 
+export const getAssignCounselorUrl = () => {
+
+
+
+
+  return `/api/students/assign`
+}
+
+/**
+ * Assign a counselor to a particular student
+ */
+export const assignCounselor = async (assignCounselorInputBody: NonReadonly<AssignCounselorInputBody>, options?: RequestInit): Promise<Student> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getAssignCounselorUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(assignCounselorInputBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: Student, status?: number} = new globalThis.Error();
+    const data : Student = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Student = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getAssignCounselorMutationKey = () => ['assignCounselor'] as const;
+
+export const getAssignCounselorMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignCounselor>>, TError,AssignCounselorMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof assignCounselor>>, TError,AssignCounselorMutationVariables, TContext> => {
+
+const mutationKey = getAssignCounselorMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof assignCounselor>>, AssignCounselorMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  assignCounselor(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AssignCounselorMutationResult = NonNullable<Awaited<ReturnType<typeof assignCounselor>>>
+    export type AssignCounselorMutationBody = NonReadonly<AssignCounselorInputBody>
+    export type AssignCounselorMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type AssignCounselorMutationVariables = {data: NonReadonly<AssignCounselorInputBody>}
+
+    export const useAssignCounselor = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignCounselor>>, TError,AssignCounselorMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof assignCounselor>>,
+        TError,
+        AssignCounselorMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAssignCounselorMutationOptions(options), queryClient);
+    }

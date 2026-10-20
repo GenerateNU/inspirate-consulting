@@ -28,6 +28,7 @@ import UpdateNotificationPreferences from "./notifications/update-notification-p
 import CreateUser from "./user/create-user";
 import LogOut from "./logout/logout";
 import LogIn from "./login/login";
+import SearchStudents from "./counselor/search-students.tsx";
 import { AuthProvider } from "./contexts/auth-context.tsx";
 import CollegeApplications from "./college/college-applications.tsx";
 import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
@@ -88,6 +89,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/login" element={<LogIn />} />
               <Route path="/logout" element={<LogOut />} />
               <Route path="/students/:id" element={<StudentProfile />} />
+              <Route path="/search" element={<SearchStudents />} />
             </Route>
           </Routes>
         </AuthProvider>

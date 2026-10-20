@@ -45,11 +45,11 @@ func TestHandler_Login(t *testing.T) {
 	t.Run("success returns the users row and sets the session cookie", func(t *testing.T) {
 		t.Parallel()
 		supabaseID := uuid.New()
-		user := &models.User{ID: uuid.New(), Name: "Sam", SupabaseID: supabaseID}
+		user := &models.SessionUser{User: models.User{ID: uuid.New(), Name: "Sam", SupabaseID: supabaseID}}
 
 		repo := mocks.NewUserRepository(t)
-		repo.On("FetchUserBySupabaseID", mock.Anything, models.FetchUserBySupabaseIDInput{SupabaseID: supabaseID}).
-			Return(&models.FetchUserOutput{Body: user}, nil).Once()
+		repo.On("FetchSessionUserBySupabaseID", mock.Anything, supabaseID).
+			Return(user, nil).Once()
 
 		out, err := NewHandler(repo).Login(ctx, loginInput("sam@example.com", "Password1!"), supabaseLoggingIn(supabaseID))
 		require.NoError(t, err)
@@ -71,8 +71,8 @@ func TestHandler_Login(t *testing.T) {
 		supabaseID := uuid.New()
 		resetTime := time.Now().Add(-time.Second)
 		repo := mocks.NewUserRepository(t)
-		repo.On("FetchUserBySupabaseID", mock.Anything, mock.Anything).
-			Return(&models.FetchUserOutput{Body: &models.User{SupabaseID: supabaseID, ResetTime: &resetTime}}, nil)
+		repo.On("FetchSessionUserBySupabaseID", mock.Anything, mock.Anything).
+			Return(&models.SessionUser{User: models.User{SupabaseID: supabaseID, ResetTime: &resetTime}}, nil)
 
 		out, err := NewHandler(repo).Login(ctx, loginInput("new@example.com", "Temp-Pass-1"), supabaseLoggingIn(supabaseID))
 		require.NoError(t, err)
@@ -99,7 +99,7 @@ func TestHandler_Login(t *testing.T) {
 	t.Run("missing users row fails the login", func(t *testing.T) {
 		t.Parallel()
 		repo := mocks.NewUserRepository(t)
-		repo.On("FetchUserBySupabaseID", mock.Anything, mock.Anything).
+		repo.On("FetchSessionUserBySupabaseID", mock.Anything, mock.Anything).
 			Return(nil, errs.NotFound("User", "supabase_id", "x"))
 
 		out, err := NewHandler(repo).Login(ctx, loginInput("orphan@example.com", "Password1!"), supabaseLoggingIn(uuid.New()))

@@ -83,6 +83,16 @@ type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
 
+type SessionUser struct {
+	User
+	StudentID   *uuid.UUID `json:"student_id" nullable:"true" doc:"id of the user's student profile; null when the user is not a student"`
+	CounselorID *uuid.UUID `json:"counselor_id" nullable:"true" doc:"id of the user's counselor profile; null when the user is not a counselor"`
+}
+
+type FetchCurrentUserOutput struct {
+	Body *SessionUser
+}
+
 type FetchStudentsInput struct {
 	UserID uuid.UUID `query:"user_id" required:"false" doc:"user id of student"`
 	Name   string    `query:"name" required:"false" doc:"name of student"`
