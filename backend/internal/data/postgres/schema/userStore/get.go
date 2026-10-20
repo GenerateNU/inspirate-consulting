@@ -21,7 +21,7 @@ func (r *UserRepository) FetchUser(ctx context.Context, user models.FetchUserInp
 		ctx,
 		query,
 		user.ID,
-	).Scan(&User.Body.ID, &User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey, &User.Body.ResetTime, &User.Body.Email)
+	).Scan(&User.Body.ID, &User.Body.Name, &User.Body.SupabaseID, &User.Body.PfpKey, &User.Body.ResetTime, &User.Body.Email, &User.Body.ExpiresAt)
 	if err != nil {
 		return nil, err
 	}

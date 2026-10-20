@@ -31,6 +31,7 @@ type User struct {
 	SupabaseID uuid.UUID  `json:"supabase_id"`
 	PfpKey     *string    `json:"pfp_key"`
 	ResetTime  *time.Time `json:"reset_time"`
+	ExpiresAt  *time.Time `json:"expires_at"`
 }
 
 // I represented year under the assumption that we're following the american high school timeline
@@ -53,10 +54,11 @@ type Counselor struct {
 
 type CreateUserInput struct {
 	Body struct {
-		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
-		Email  string  `json:"email" doc:"email of user for supabase signup"`
-		Role   Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
+		Name      string     `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey    *string    `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email     string     `json:"email" doc:"email of user for supabase signup"`
+		Role      Role       `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
+		ExpiresAt *time.Time `json:"expires_at,omitempty" required:"false" doc:"when the account expires; omit for no expiration"`
 	}
 }
 

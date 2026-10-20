@@ -29,7 +29,8 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 		user.Body.PfpKey,
 		oneSecondAgo,
 		user.Body.Email,
-	).Scan(&createdUser.ID, &createdUser.Name, &createdUser.SupabaseID, &createdUser.PfpKey, &createdUser.ResetTime, &createdUser.Email)
+	).Scan(&createdUser.ID, &createdUser.Name, &createdUser.SupabaseID, &createdUser.PfpKey, &createdUser.ResetTime, &createdUser.Email, &createdUser.ExpiresAt)
+
 	if err != nil {
 		return nil, err
 	}
