@@ -94,6 +94,13 @@ type GetCurrentUserOutput struct {
 	Body *CurrentUser
 }
 
+// SessionUser is returned by login: the user plus their student or counselor profile id
+type SessionUser struct {
+	User
+	StudentID   *uuid.UUID `json:"student_id" nullable:"true" doc:"id of the user's student profile; null when the user is not a student"`
+	CounselorID *uuid.UUID `json:"counselor_id" nullable:"true" doc:"id of the user's counselor profile; null when the user is not a counselor"`
+}
+
 type FetchStudentsInput struct {
 	UserID uuid.UUID `query:"user_id" required:"false" doc:"user id of student"`
 	Name   string    `query:"name" required:"false" doc:"name of student"`
