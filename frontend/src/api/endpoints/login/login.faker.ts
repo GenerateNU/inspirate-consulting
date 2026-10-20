@@ -10,9 +10,9 @@ import {
 } from '@faker-js/faker';
 
 import type {
-  User
+  SessionUser
 } from '../../models';
 
 
-export const getLoginUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reset_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+export const getLoginUserResponseMock = (overrideResponse: Partial<Extract<SessionUser, object>> = {}): SessionUser => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselor_id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reset_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), student_id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

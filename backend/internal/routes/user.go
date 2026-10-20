@@ -31,6 +31,21 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "fetch-current-user",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Method:      http.MethodGet,
+		Path:        "/user/me",
+		Description: "fetch the logged-in user along with their student or counselor profile id",
+		Tags:        []string{"User"},
+	}, func(ctx context.Context, input *struct{}) (*models.FetchCurrentUserOutput, error) {
+		user, err := userHandler.FetchCurrentUser(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &models.FetchCurrentUserOutput{Body: user}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID: "fetch-user",
 		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,

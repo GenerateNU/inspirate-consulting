@@ -1,7 +1,8 @@
 import { AuthContext } from "./auth-context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  useFetchCurrentUser,
   useLoginUser,
   useLogoutUser,
   useResetUserPassword,
@@ -11,11 +12,27 @@ import {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [resetTime, setResetTime] = useState<string | null>(null);
   const [userID, setUserID] = useState<string | null>(null);
+  const [counselorID, setCounselorID] = useState<string | null>(null);
+  const [studentID, setStudentID] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const { trigger: loginFunc } = useLoginUser();
   const { trigger: logoutFunc } = useLogoutUser();
   const { trigger: passFunc } = useResetUserPassword();
+
+  const { data: currentUser, mutate: mutateCurrentUser } = useFetchCurrentUser({
+    swr: { shouldRetryOnError: false, revalidateOnFocus: false },
+  });
+
+  useEffect(() => {
+    if (currentUser?.status !== 200) {
+      return;
+    }
+    setResetTime(currentUser.data.reset_time);
+    setUserID(currentUser.data.id);
+    setCounselorID(currentUser.data.counselor_id);
+    setStudentID(currentUser.data.student_id);
+  }, [currentUser]);
 
   const login = (email: string, password: string) => {
     return loginFunc(
@@ -27,6 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           setResetTime(resp.data.reset_time);
           setUserID(resp.data.id);
+          setCounselorID(resp.data.counselor_id);
+          setStudentID(resp.data.student_id);
           console.log(resp.data.id);
           void navigate("/");
         },
@@ -45,6 +64,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onSuccess: () => {
           setResetTime(null);
           setUserID(null);
+          setCounselorID(null);
+          setStudentID(null);
+          void mutateCurrentUser(undefined, { revalidate: false });
           void navigate("/");
         },
       },
@@ -70,6 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         resetTime: resetTime,
         userID: userID,
+        counselorID: counselorID,
+        studentID: studentID,
         login: login,
         logout: logout,
         reset_password: new_password,

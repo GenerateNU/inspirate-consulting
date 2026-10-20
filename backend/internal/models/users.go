@@ -78,3 +78,75 @@ type FetchUserBySupabaseIDInput struct {
 type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
+
+type SessionUser struct {
+	User
+	StudentID   *uuid.UUID `json:"student_id" nullable:"true" doc:"id of the user's student profile; null when the user is not a student"`
+	CounselorID *uuid.UUID `json:"counselor_id" nullable:"true" doc:"id of the user's counselor profile; null when the user is not a counselor"`
+}
+
+type FetchCurrentUserOutput struct {
+	Body *SessionUser
+}
+
+type FetchStudentsInput struct {
+	UserID uuid.UUID `query:"user_id" required:"false" doc:"user id of student"`
+	Name   string    `query:"name" required:"false" doc:"name of student"`
+	Cursor string    `query:"cursor" required:"false" doc:"next_cursor from the previous page"`
+	Limit  int       `query:"limit" default:"5" minimum:"1" maximum:"10"`
+}
+
+type FetchStudentsOutput struct {
+	Body *FetchStudentsBody
+}
+
+type StudentListItem struct {
+	ID            uuid.UUID  `json:"id"`
+	UserID        uuid.UUID  `json:"user_id"`
+	Name          string     `json:"name"`
+	PfpKey        *string    `json:"pfp_key"`
+	Year          Year       `json:"year"`
+	Organization  *string    `json:"organization"`
+	GPA           int        `json:"gpa"`
+	ReviewBalance int        `json:"review_balance"`
+	CounselorID   *uuid.UUID `json:"counselor_id"`
+}
+
+type FetchStudentsBody struct {
+	Students   []StudentListItem `json:"students"`
+	NextCursor *string           `json:"next_cursor" doc:"Pass as cursor to get the next page; null when there are none"`
+}
+
+type FetchCounselorsInput struct {
+	UserID uuid.UUID `query:"user_id" required:"false" doc:"user id of counselor"`
+	Name   string    `query:"name" required:"false" doc:"name of counselor"`
+	Cursor string    `query:"cursor" required:"false" doc:"next_cursor from the previous page"`
+	Limit  int       `query:"limit" default:"5" minimum:"1" maximum:"10"`
+}
+
+type FetchCounselorsOutput struct {
+	Body *FetchCounselorsBody
+}
+
+type CounselorListItem struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+	Name   string    `json:"name"`
+	PfpKey *string   `json:"pfp_key"`
+}
+
+type FetchCounselorsBody struct {
+	Counselors []CounselorListItem `json:"counselors"`
+	NextCursor *string             `json:"next_cursor" doc:"Pass as cursor to get the next page; null when there are none"`
+}
+
+type AssignCounselorInput struct {
+	Body struct {
+		CounselorID uuid.UUID `json:"counselor_id" db:"counselor_id" doc:"id of the counselor to assign"`
+		UserID      uuid.UUID `json:"user_id" db:"user_id" doc:"user id of the student being assigned"`
+	}
+}
+
+type AssignCounselorOutput struct {
+	Body Student
+}

@@ -17,7 +17,7 @@ import type {
 import type {
   ErrorModel,
   LoginInputBody,
-  User
+  SessionUser
 } from '../../models';
 
 
@@ -60,7 +60,7 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
  export type loginUserResponse200 = {
-  data: User
+  data: SessionUser
   status: 200
 }
 

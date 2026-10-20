@@ -1,5 +1,25 @@
 components:
   schemas:
+    AssignCounselorInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/AssignCounselorInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        counselor_id:
+          description: id of the counselor to assign
+          type: string
+        user_id:
+          description: user id of the student being assigned
+          type: string
+      required:
+        - counselor_id
+        - user_id
+      type: object
     ChatMessage:
       additionalProperties: false
       properties:
@@ -107,6 +127,25 @@ components:
         - last_message_at
         - last_message_read_at
         - unread_count
+      type: object
+    CounselorListItem:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        user_id:
+          type: string
+      required:
+        - id
+        - user_id
+        - name
+        - pfp_key
       type: object
     CreateChatMessageRequestBody:
       additionalProperties: false
@@ -791,6 +830,56 @@ components:
         - start_date
         - organization
       type: object
+    FetchCounselorsBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/FetchCounselorsBody.json
+          format: uri
+          readOnly: true
+          type: string
+        counselors:
+          items:
+            $ref: "#/components/schemas/CounselorListItem"
+          type:
+            - array
+            - "null"
+        next_cursor:
+          description: Pass as cursor to get the next page; null when there are none
+          type:
+            - string
+            - "null"
+      required:
+        - counselors
+        - next_cursor
+      type: object
+    FetchStudentsBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/FetchStudentsBody.json
+          format: uri
+          readOnly: true
+          type: string
+        next_cursor:
+          description: Pass as cursor to get the next page; null when there are none
+          type:
+            - string
+            - "null"
+        students:
+          items:
+            $ref: "#/components/schemas/StudentListItem"
+          type:
+            - array
+            - "null"
+      required:
+        - students
+        - next_cursor
+      type: object
     GlobalCollege:
       additionalProperties: false
       properties:
@@ -1223,6 +1312,50 @@ components:
       required:
         - new_password
       type: object
+    SessionUser:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/SessionUser.json
+          format: uri
+          readOnly: true
+          type: string
+        counselor_id:
+          description: id of the user's counselor profile; null when the user is not a counselor
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        student_id:
+          description: id of the user's student profile; null when the user is not a student
+          type:
+            - string
+            - "null"
+        supabase_id:
+          type: string
+      required:
+        - student_id
+        - counselor_id
+        - id
+        - name
+        - supabase_id
+        - pfp_key
+        - reset_time
+      type: object
     SetStudentReviewBalanceRequestBody:
       additionalProperties: false
       properties:
@@ -1274,6 +1407,44 @@ components:
       required:
         - id
         - user_id
+        - year
+        - organization
+        - gpa
+        - review_balance
+        - counselor_id
+      type: object
+    StudentListItem:
+      additionalProperties: false
+      properties:
+        counselor_id:
+          type: string
+        gpa:
+          format: int64
+          type: integer
+        id:
+          type: string
+        name:
+          type: string
+        organization:
+          type:
+            - string
+            - "null"
+        pfp_key:
+          type:
+            - string
+            - "null"
+        review_balance:
+          format: int64
+          type: integer
+        user_id:
+          type: string
+        year:
+          type: string
+      required:
+        - id
+        - user_id
+        - name
+        - pfp_key
         - year
         - organization
         - gpa
@@ -1788,6 +1959,56 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /counselors/fetchall:
+    get:
+      description: Fetch a page of counselors, optionally filtered by user_id and name
+      operationId: fetch-counselors
+      parameters:
+        - description: user id of counselor
+          explode: false
+          in: query
+          name: user_id
+          schema:
+            description: user id of counselor
+            type: string
+        - description: name of counselor
+          explode: false
+          in: query
+          name: name
+          schema:
+            description: name of counselor
+            type: string
+        - description: next_cursor from the previous page
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: next_cursor from the previous page
+            type: string
+        - explode: false
+          in: query
+          name: limit
+          schema:
+            default: 5
+            format: int64
+            maximum: 10
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FetchCounselorsBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
   /essay-groups:
     post:
       description: Creates an essay group for a student
@@ -2507,6 +2728,81 @@ paths:
           description: Error
       tags:
         - Essay Reviews
+  /students/assign:
+    patch:
+      description: Assign a counselor to a particular student
+      operationId: assign-counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignCounselorInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
+  /students/fetchall:
+    get:
+      description: Fetch a page of students, optionally filtered by user_id and name
+      operationId: fetch-students
+      parameters:
+        - description: user id of student
+          explode: false
+          in: query
+          name: user_id
+          schema:
+            description: user id of student
+            type: string
+        - description: name of student
+          explode: false
+          in: query
+          name: name
+          schema:
+            description: name of student
+            type: string
+        - description: next_cursor from the previous page
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: next_cursor from the previous page
+            type: string
+        - explode: false
+          in: query
+          name: limit
+          schema:
+            default: 5
+            format: int64
+            maximum: 10
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FetchStudentsBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
   /students/{id}/review-balance:
     patch:
       description: Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
@@ -2933,7 +3229,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/SessionUser"
           description: OK
           headers:
             Set-Cookie:
@@ -2966,6 +3262,25 @@ paths:
           description: Error
       tags:
         - Logout
+  /user/me:
+    get:
+      description: fetch the logged-in user along with their student or counselor profile id
+      operationId: fetch-current-user
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionUser"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
   /user/reset-password:
     patch:
       description: reset user password
