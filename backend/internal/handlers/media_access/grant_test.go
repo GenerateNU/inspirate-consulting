@@ -39,7 +39,7 @@ func TestHandler_GrantMediaAccess(t *testing.T) {
 		mockRepo.On("GrantMediaAccess", mock.Anything, input).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GrantMediaAccess(ctx, input)
 
 		// Verify result
@@ -55,7 +55,7 @@ func TestHandler_GrantMediaAccess(t *testing.T) {
 		mockRepo.On("GrantMediaAccess", mock.Anything, input).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GrantMediaAccess(ctx, input)
 
 		// Verify error propagation

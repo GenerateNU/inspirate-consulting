@@ -51,7 +51,7 @@ func TestHandler_RefundEssayReview(t *testing.T) {
 			expectTx(mockRepo)
 			mockRepo.On("LockTransaction", mock.Anything, mock.Anything, tc.charge.ID).Return(tc.charge, nil)
 
-			handler := NewHandler(mockRepo)
+			handler := NewHandler(mockRepo, nil)
 			res, err := handler.RefundEssayReview(ctx, tc.charge.ID)
 
 			assert.Nil(t, res)
@@ -91,7 +91,7 @@ func TestHandler_RefundEssayReview(t *testing.T) {
 		mockRepo.On("LinkRefund", mock.Anything, mock.Anything, charge.ID, reversal.ID).Return(refunded, nil)
 		mockRepo.On("AdjustStudentBalance", mock.Anything, mock.Anything, studentID, 1).Return(nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.RefundEssayReview(ctx, charge.ID)
 
 		require.NoError(t, err)
@@ -109,7 +109,7 @@ func TestHandler_RefundEssayReview(t *testing.T) {
 		mockRepo.On("LockTransaction", mock.Anything, mock.Anything, id).
 			Return(nil, errs.NotFound("essay review", "id", id.String()))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.RefundEssayReview(ctx, id)
 
 		assert.Nil(t, res)

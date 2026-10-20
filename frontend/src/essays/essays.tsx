@@ -1,118 +1,81 @@
 import { useState } from "react";
 
-const API_BASE_URL = "http://localhost:8080";
-
-type Essay = {
-  id: string;
-  student_id: string;
-  type: string;
-  college_id: number | null;
-  link_to_content: string;
-  status: "Submitted" | "Draft" | "Review" | "Archived";
-};
+import { errorMessage } from "../api/client";
+import {
+  useCreateEssay,
+  useGetEssaysFromStudent,
+  useUpdateEssayStatus,
+} from "../api/endpoints";
+import { UpdateStatusBodyStatus } from "../api/models";
 
 export default function Essay() {
   const [studentId, setStudentId] = useState("");
+  const [submittedStudentId, setSubmittedStudentId] = useState("");
   const [type, setType] = useState("");
   const [collegeId, setCollegeId] = useState("");
   const [linkToContent, setLinkToContent] = useState("");
 
   const [essayId, setEssayId] = useState("");
-  const [status, setStatus] = useState<Essay["status"]>("Draft");
+  const [status, setStatus] = useState<UpdateStatusBodyStatus>("Draft");
 
-  const [essays, setEssays] = useState<Essay[]>([]);
   const [response, setResponse] = useState("");
-  const [error, setError] = useState("");
 
-  const getEssays = async () => {
-    setError("");
-    setResponse("");
+  const essaysQuery = useGetEssaysFromStudent(submittedStudentId, {
+    query: { enabled: !!submittedStudentId },
+  });
+  const create = useCreateEssay();
+  const update = useUpdateEssayStatus();
 
-    try {
-      const result = await fetch(
-        `${API_BASE_URL}/students/${studentId.trim()}/essays`,
-      );
+  const essays = (submittedStudentId && essaysQuery.data?.essays) || [];
+  const error =
+    (submittedStudentId && essaysQuery.error) || create.error || update.error;
 
-      const data = await result.json();
-
-      if (!result.ok) {
-        throw new Error(JSON.stringify(data));
-      }
-
-      setEssays(data.essays ?? []);
-      setResponse(JSON.stringify(data, null, 2));
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong.");
-    }
+  const refreshEssays = () => {
+    if (submittedStudentId) void essaysQuery.refetch();
   };
 
-  const createEssay = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setError("");
+  const getEssays = () => {
     setResponse("");
+    create.reset();
+    update.reset();
+    const trimmed = studentId.trim();
+    if (trimmed === submittedStudentId) refreshEssays();
+    else setSubmittedStudentId(trimmed);
+  };
 
-    try {
-      const result = await fetch(`${API_BASE_URL}/essays`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          student_id: studentId.trim(),
+  const createEssay = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setResponse("");
+    update.reset();
+    create.mutate(
+      {
+        data: {
           type,
           college_id: collegeId.trim() === "" ? null : Number(collegeId),
           link_to_content: linkToContent,
-        }),
-      });
-
-      const data = await result.json().catch(() => ({}));
-
-      if (!result.ok) {
-        throw new Error(JSON.stringify(data));
-      }
-
-      setResponse(JSON.stringify(data, null, 2));
-
-      await getEssays();
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong.");
-    }
+        },
+      },
+      {
+        onSuccess: () => {
+          setResponse("Essay created.");
+          refreshEssays();
+        },
+      },
+    );
   };
 
-  const updateStatus = async () => {
-    setError("");
+  const updateStatus = () => {
     setResponse("");
-
-    try {
-      const result = await fetch(
-        `${API_BASE_URL}/essays/${essayId.trim()}/status`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status,
-          }),
+    create.reset();
+    update.mutate(
+      { essayId: essayId.trim(), data: { status } },
+      {
+        onSuccess: (essay) => {
+          setResponse(JSON.stringify(essay, null, 2));
+          refreshEssays();
         },
-      );
-
-      const data = await result.json().catch(() => ({}));
-
-      if (!result.ok) {
-        throw new Error(JSON.stringify(data));
-      }
-
-      setResponse(JSON.stringify(data, null, 2));
-
-      await getEssays();
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong.");
-    }
+      },
+    );
   };
 
   return (
@@ -140,15 +103,6 @@ export default function Essay() {
 
       <form onSubmit={createEssay}>
         <div>
-          <label>Student ID: </label>
-          <input
-            type="text"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-          />
-        </div>
-
-        <div>
           <label>Type: </label>
           <input
             type="text"
@@ -175,7 +129,9 @@ export default function Essay() {
           />
         </div>
 
-        <button type="submit">Create Essay</button>
+        <button type="submit" disabled={create.isPending}>
+          Create Essay
+        </button>
       </form>
 
       <hr />
@@ -196,16 +152,17 @@ export default function Essay() {
         <label>Status: </label>
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as Essay["status"])}
+          onChange={(e) => setStatus(e.target.value as UpdateStatusBodyStatus)}
         >
-          <option value="Draft">Draft</option>
-          <option value="Submitted">Submitted</option>
-          <option value="Review">Review</option>
-          <option value="Archived">Archived</option>
+          {Object.values(UpdateStatusBodyStatus).map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
         </select>
       </div>
 
-      <button type="button" onClick={updateStatus}>
+      <button type="button" onClick={updateStatus} disabled={update.isPending}>
         Update Status
       </button>
 
@@ -213,7 +170,9 @@ export default function Essay() {
 
       <h2>Essays</h2>
 
-      {essays.length === 0 ? (
+      {essaysQuery.isLoading ? (
+        <p>Loading...</p>
+      ) : essays.length === 0 ? (
         <p>No essays found.</p>
       ) : (
         <ul>
@@ -233,7 +192,7 @@ export default function Essay() {
       {error && (
         <div>
           <h3>Error</h3>
-          <pre>{error}</pre>
+          <pre>{errorMessage(error)}</pre>
         </div>
       )}
 

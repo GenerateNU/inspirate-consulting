@@ -40,7 +40,7 @@ func expectTx(mockRepo *mocks.EssayReviewRepository) {
 		})
 }
 
-func doJSON(t *testing.T, app *fiber.App, method, path string, payload any) (*http.Response, []byte) {
+func doJSON(t *testing.T, app *fiber.App, method, path string, payload any, headers ...map[string]string) (*http.Response, []byte) {
 	t.Helper()
 
 	var body io.Reader
@@ -54,6 +54,11 @@ func doJSON(t *testing.T, app *fiber.App, method, path string, payload any) (*ht
 	require.NoError(t, err)
 	if payload != nil {
 		req.Header.Set("Content-Type", "application/json")
+	}
+	for _, h := range headers {
+		for k, v := range h {
+			req.Header.Set(k, v)
+		}
 	}
 
 	resp, err := app.Test(req)
@@ -80,6 +85,8 @@ func TestRoute_RequestEssayReview(t *testing.T) {
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
+		mockRepo.On("DB").Return(nil)
+		mockRepo.On("FindEssayStudentID", mock.Anything, mock.Anything, essayID).Return(studentID, nil)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 5}, nil)
 		mockRepo.On("FindOpenReviewForEssay", mock.Anything, mock.Anything, essayID).Return(nil, nil)
@@ -90,8 +97,8 @@ func TestRoute_RequestEssayReview(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, body := doJSON(t, app, http.MethodPost, "/reviews", map[string]any{
-			"student_id": studentID, "essay_id": essayID, "amount": 1,
-		})
+			"essay_id": essayID, "amount": 1,
+		}, map[string]string{"X-Student-ID": studentID.String()})
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -113,7 +120,7 @@ func TestRoute_RequestEssayReview(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, body := doJSON(t, app, http.MethodPost, "/reviews", map[string]any{
-			"student_id": uuid.New(), "essay_id": uuid.New(), "amount": 0,
+			"essay_id": uuid.New(), "amount": 0,
 		})
 
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
@@ -127,6 +134,8 @@ func TestRoute_RequestEssayReview(t *testing.T) {
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
+		mockRepo.On("DB").Return(nil)
+		mockRepo.On("FindEssayStudentID", mock.Anything, mock.Anything, essayID).Return(studentID, nil)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 5}, nil)
 		mockRepo.On("FindOpenReviewForEssay", mock.Anything, mock.Anything, essayID).Return(&openID, nil)
@@ -135,8 +144,8 @@ func TestRoute_RequestEssayReview(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, body := doJSON(t, app, http.MethodPost, "/reviews", map[string]any{
-			"student_id": studentID, "essay_id": essayID, "amount": 1,
-		})
+			"essay_id": essayID, "amount": 1,
+		}, map[string]string{"X-Student-ID": studentID.String()})
 
 		assert.Equal(t, http.StatusConflict, resp.StatusCode)
 		assert.Contains(t, string(body), "essay already has an open review")

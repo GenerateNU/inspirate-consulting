@@ -22,7 +22,7 @@ func NewHandler(chatMessageRepository storage.ChatMessageRepository) *Handler {
 }
 
 func currentUserID(ctx context.Context) (uuid.UUID, error) {
-	id, err := uuid.Parse(auth.GetUserID(ctx))
+	id, err := auth.GetUserID(ctx)
 	if err != nil {
 		return uuid.Nil, errs.Unauthorized()
 	}

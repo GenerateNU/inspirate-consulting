@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -18,16 +19,16 @@ import (
 func TestHandler_RequestEssayReview(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-
 	t.Run("amount below one is rejected before any database work", func(t *testing.T) {
 		t.Parallel()
 
+		sid := uuid.New()
+		ctx := auth.WithStudentID(context.Background(), sid)
 		mockRepo := mocks.NewEssayReviewRepository(t)
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 
 		res, err := handler.RequestEssayReview(ctx, models.RequestEssayReviewRequestBody{
-			StudentID: uuid.New(), EssayID: uuid.New(), Amount: 0,
+			EssayID: uuid.New(), Amount: 0,
 		})
 
 		assert.Nil(t, res)
@@ -40,17 +41,20 @@ func TestHandler_RequestEssayReview(t *testing.T) {
 		t.Parallel()
 
 		studentID, essayID, openID := uuid.New(), uuid.New(), uuid.New()
+		ctx := auth.WithStudentID(context.Background(), studentID)
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
+		mockRepo.On("DB").Return(nil)
+		mockRepo.On("FindEssayStudentID", mock.Anything, mock.Anything, mock.Anything).Return(studentID, nil)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 10}, nil)
 		mockRepo.On("FindOpenReviewForEssay", mock.Anything, mock.Anything, essayID).
 			Return(&openID, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.RequestEssayReview(ctx, models.RequestEssayReviewRequestBody{
-			StudentID: studentID, EssayID: essayID, Amount: 1,
+			EssayID: essayID, Amount: 1,
 		})
 
 		assert.Nil(t, res)
@@ -65,17 +69,20 @@ func TestHandler_RequestEssayReview(t *testing.T) {
 		t.Parallel()
 
 		studentID, essayID := uuid.New(), uuid.New()
+		ctx := auth.WithStudentID(context.Background(), studentID)
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
+		mockRepo.On("DB").Return(nil)
+		mockRepo.On("FindEssayStudentID", mock.Anything, mock.Anything, mock.Anything).Return(studentID, nil)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 2}, nil)
 		mockRepo.On("FindOpenReviewForEssay", mock.Anything, mock.Anything, essayID).
 			Return(nil, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.RequestEssayReview(ctx, models.RequestEssayReviewRequestBody{
-			StudentID: studentID, EssayID: essayID, Amount: 5,
+			EssayID: essayID, Amount: 5,
 		})
 
 		assert.Nil(t, res)
@@ -89,6 +96,7 @@ func TestHandler_RequestEssayReview(t *testing.T) {
 		t.Parallel()
 
 		studentID, essayID := uuid.New(), uuid.New()
+		ctx := auth.WithStudentID(context.Background(), studentID)
 		expectedEntity := transactionRow(func(row *models.EssayReviewTransaction) {
 			row.StudentID = studentID
 			row.EssayID = &essayID
@@ -96,6 +104,8 @@ func TestHandler_RequestEssayReview(t *testing.T) {
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
+		mockRepo.On("DB").Return(nil)
+		mockRepo.On("FindEssayStudentID", mock.Anything, mock.Anything, mock.Anything).Return(studentID, nil)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 10}, nil)
 		mockRepo.On("FindOpenReviewForEssay", mock.Anything, mock.Anything, essayID).
@@ -104,9 +114,9 @@ func TestHandler_RequestEssayReview(t *testing.T) {
 		mockRepo.On("InsertSpend", mock.Anything, mock.Anything, studentID, essayID, 3).
 			Return(expectedEntity, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.RequestEssayReview(ctx, models.RequestEssayReviewRequestBody{
-			StudentID: studentID, EssayID: essayID, Amount: 3,
+			EssayID: essayID, Amount: 3,
 		})
 
 		assert.NoError(t, err)
@@ -117,15 +127,18 @@ func TestHandler_RequestEssayReview(t *testing.T) {
 		t.Parallel()
 
 		studentID := uuid.New()
+		ctx := auth.WithStudentID(context.Background(), studentID)
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
+		mockRepo.On("DB").Return(nil)
+		mockRepo.On("FindEssayStudentID", mock.Anything, mock.Anything, mock.Anything).Return(studentID, nil)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(nil, errs.NotFound("student", "id", studentID.String()))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.RequestEssayReview(ctx, models.RequestEssayReviewRequestBody{
-			StudentID: studentID, EssayID: uuid.New(), Amount: 1,
+			EssayID: uuid.New(), Amount: 1,
 		})
 
 		assert.Nil(t, res)

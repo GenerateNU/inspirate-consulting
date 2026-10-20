@@ -18,8 +18,8 @@ import (
 func TestHandler_ListAccessibleMedia(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-	studentID := auth.GetStudentID(ctx)
+	studentID := uuid.New()
+	ctx := auth.WithStudentID(context.Background(), studentID)
 	limit, offset := 20, 0
 
 	expectedOutput := []models.Media{
@@ -42,10 +42,10 @@ func TestHandler_ListAccessibleMedia(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, limit, offset).Return(expectedOutput, nil)
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID.String(), limit, offset).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListAccessibleMedia(ctx, limit, offset)
 
 		// Verify result
@@ -59,9 +59,9 @@ func TestHandler_ListAccessibleMedia(t *testing.T) {
 
 		// The mock only matches the exact pagination values, so a mismatch fails the test
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, 1, 1).Return(expectedOutput[1:], nil)
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID.String(), 1, 1).Return(expectedOutput[1:], nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListAccessibleMedia(ctx, 1, 1)
 
 		assert.NoError(t, err)
@@ -74,9 +74,9 @@ func TestHandler_ListAccessibleMedia(t *testing.T) {
 
 		// A student who hasn't been granted any media is an empty list, not an error
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, limit, offset).Return([]models.Media{}, nil)
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID.String(), limit, offset).Return([]models.Media{}, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListAccessibleMedia(ctx, limit, offset)
 
 		assert.NoError(t, err)
@@ -88,10 +88,10 @@ func TestHandler_ListAccessibleMedia(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewMediaAccessRepository(t)
-		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID, limit, offset).Return(nil, errors.New("database error"))
+		mockRepo.On("ListAccessibleMedia", mock.Anything, studentID.String(), limit, offset).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListAccessibleMedia(ctx, limit, offset)
 
 		// Verify error propagation

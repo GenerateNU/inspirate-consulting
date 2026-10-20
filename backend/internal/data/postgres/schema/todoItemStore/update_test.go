@@ -21,13 +21,11 @@ func TestUpdateTodoItemCompletedAt(t *testing.T) {
 
 	deadline := time.Now().Add(3 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	input := &models.CreateTodoItemRequestBody{
-		StudentID:       uuid.NewString(),
-		UserID:          uuid.NewString(),
+	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Submit the FAFSA",
 		Deadline:        &deadline,
 	}
-	created, err := repo.CreateTodoItem(ctx, input)
+	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}
@@ -92,12 +90,10 @@ func TestUpdateTodoItemCompletedAt_Clear(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := &models.CreateTodoItemRequestBody{
-		StudentID:       uuid.NewString(),
-		UserID:          uuid.NewString(),
+	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Completed by mistake",
 	}
-	created, err := repo.CreateTodoItem(ctx, input)
+	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}

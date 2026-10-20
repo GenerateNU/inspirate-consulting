@@ -153,16 +153,12 @@ components:
             - https://docs.google.com/document/d/abc123
           minLength: 10
           type: string
-        student_id:
-          description: Student the essay belongs to
-          type: string
         type:
           examples:
             - personal-statement
           maxLength: 100
           type: string
       required:
-        - student_id
         - type
         - link_to_content
       type: object
@@ -189,11 +185,10 @@ components:
           minLength: 1
           type: string
         student_id:
-          description: Student the group belongs to
+          description: Student the group is for; required for counselors, defaults to the authenticated student
           type: string
       required:
         - name
-        - student_id
       type: object
     CreateExtracurricularRequest:
       additionalProperties: false
@@ -373,10 +368,10 @@ components:
           format: uuid
           type: string
         student_id:
+          description: Student the task is for; required for counselors, defaults to the authenticated student
+          format: uuid
           type: string
         todo_description:
-          type: string
-        user_id:
           type: string
       required:
         - todo_description
@@ -950,42 +945,6 @@ components:
         - email
         - password
       type: object
-    LoginResponse:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - http://localhost:8080/schemas/LoginResponse.json
-          format: uri
-          readOnly: true
-          type: string
-        access_token:
-          type: string
-        error: {}
-        expires_in:
-          format: int64
-          type: integer
-        refresh_token:
-          type: string
-        reset_time:
-          format: date-time
-          type:
-            - string
-            - "null"
-        token_type:
-          type: string
-        user:
-          $ref: "#/components/schemas/UserResponse"
-      required:
-        - access_token
-        - token_type
-        - expires_in
-        - refresh_token
-        - user
-        - error
-        - reset_time
-      type: object
     Media:
       additionalProperties: false
       properties:
@@ -1245,13 +1204,7 @@ components:
           examples:
             - b2c3d4e5-f6a7-4859-9a0b-1c2d3e4f5a6b
           type: string
-        student_id:
-          description: Student requesting the review
-          examples:
-            - 3f2b1a0c-9d8e-4c7b-8a6f-5e4d3c2b1a09
-          type: string
       required:
-        - student_id
         - essay_id
         - amount
       type: object
@@ -1578,14 +1531,6 @@ components:
         - supabase_id
         - pfp_key
         - reset_time
-      type: object
-    UserResponse:
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-      required:
-        - id
       type: object
     Video:
       additionalProperties: false
@@ -2988,7 +2933,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: "#/components/schemas/User"
           description: OK
           headers:
             Set-Cookie:
@@ -3009,6 +2954,10 @@ paths:
       responses:
         "204":
           description: No Content
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
         default:
           content:
             application/problem+json:

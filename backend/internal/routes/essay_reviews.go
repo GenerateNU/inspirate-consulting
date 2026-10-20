@@ -12,8 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	essayReviewHandler := essayreview.NewHandler(repository.EssayReview)
+func SetUpEssayReviewRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
+	essayReviewHandler := essayreview.NewHandler(repository.EssayReview, authorizer)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "request-essay-review",

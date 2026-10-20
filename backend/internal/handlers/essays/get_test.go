@@ -48,7 +48,7 @@ func TestHandler_GetEssaysFromStudent(t *testing.T) {
 		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID).Return(storedEssays, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssaysFromStudent(ctx, input)
 
 		// Verify result
@@ -64,7 +64,7 @@ func TestHandler_GetEssaysFromStudent(t *testing.T) {
 		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssaysFromStudent(ctx, input)
 
 		// Verify error propagation
