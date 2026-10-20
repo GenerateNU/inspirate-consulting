@@ -70,7 +70,9 @@ type LoginOutput struct {
 	Body      *User
 }
 
+// expires the jwt cookie set on login
 type LogoutResponse struct {
+	SetCookie http.Cookie `header:"Set-Cookie"`
 }
 
 type ResetPasswordInput struct {

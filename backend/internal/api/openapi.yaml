@@ -2954,6 +2954,10 @@ paths:
       responses:
         "204":
           description: No Content
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
         default:
           content:
             application/problem+json:
