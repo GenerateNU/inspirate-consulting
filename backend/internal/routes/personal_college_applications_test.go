@@ -271,6 +271,8 @@ func TestRoute_ListPersonalCollegeApplications(t *testing.T) {
 func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 	t.Parallel()
 
+	studentID := uuid.New()
+
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
@@ -281,7 +283,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
 
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPCARepo.On("UpdatePersonalCollegeApplication", mock.Anything, mock.Anything, int64(42), mock.Anything).
+		mockPCARepo.On("UpdatePersonalCollegeApplication", mock.Anything, studentID, int64(42), mock.Anything).
 			Return(&models.PersonalCollegeApplication{ID: 42, GlobalCollegeID: 1, ApplicationType: "RD", Category: "safety"}, nil)
 
 		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
@@ -293,6 +295,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodPut, "/applications/42", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
+		req.Header.Set("X-Student-ID", studentID.String())
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := app.Test(req)
@@ -317,6 +320,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodPut, "/applications/42", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
+		req.Header.Set("X-Student-ID", studentID.String())
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := app.Test(req)
@@ -330,11 +334,13 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 	t.Parallel()
 
+	studentID := uuid.New()
+
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPCARepo.On("UpdateApplicationRank", mock.Anything, mock.Anything, int64(42), intPtr(1)).
+		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, int64(42), intPtr(1)).
 			Return([]models.PersonalCollegeApplication{{ID: 42, Rank: intPtr(1)}}, nil)
 
 		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
@@ -345,6 +351,7 @@ func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodPut, "/applications/42/rank", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
+		req.Header.Set("X-Student-ID", studentID.String())
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := app.Test(req)
@@ -364,7 +371,7 @@ func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		t.Parallel()
 
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPCARepo.On("UpdateApplicationRank", mock.Anything, mock.Anything, int64(42), (*int)(nil)).
+		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, int64(42), (*int)(nil)).
 			Return([]models.PersonalCollegeApplication{{ID: 42, Rank: nil}}, nil)
 
 		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
@@ -375,6 +382,7 @@ func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodPut, "/applications/42/rank", bytes.NewReader(bodyBytes))
 		require.NoError(t, err)
+		req.Header.Set("X-Student-ID", studentID.String())
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := app.Test(req)
@@ -388,17 +396,20 @@ func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 func TestRoute_DeletePersonalCollegeApplication(t *testing.T) {
 	t.Parallel()
 
+	studentID := uuid.New()
+
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, mock.Anything, int64(42)).Return(nil)
+		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, studentID, int64(42)).Return(nil)
 
 		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
 		require.NoError(t, err)
 
 		req, err := http.NewRequest(http.MethodDelete, "/applications/42", nil)
 		require.NoError(t, err)
+		req.Header.Set("X-Student-ID", studentID.String())
 
 		resp, err := app.Test(req)
 		require.NoError(t, err)
