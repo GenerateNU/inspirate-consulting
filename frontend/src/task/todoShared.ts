@@ -3,20 +3,20 @@ import {
   useGetMediaAccess,
   useListGlobalColleges,
 } from "../api/endpoints";
-import type { TodoItem } from "../api/models";
+import { GetTodoItemsLinkedTo, type TodoItem } from "../api/models";
 
 const PLACEHOLDER_STUDENT_ID = "00000000-0000-0000-0000-000000000002";
 
 export const DEFAULT_DUE_TIME = "23:59:59";
 
-export type LinkType = "essay" | "media" | "college";
+export type LinkType = GetTodoItemsLinkedTo;
 
 export const LINK_TYPE_LABELS: Record<LinkType, string> = {
   essay: "Essay",
   media: "Video",
   college: "College",
 };
-export const LINK_TYPES = Object.keys(LINK_TYPE_LABELS) as LinkType[];
+export const LINK_TYPES = Object.values(GetTodoItemsLinkedTo);
 
 export const formatDate = (value: string) =>
   new Date(value).toLocaleDateString();

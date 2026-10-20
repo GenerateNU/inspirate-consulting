@@ -5,6 +5,10 @@ import {
   useCreateGlobalCollege,
   useCreatePersonalCollegeApplication,
 } from "../api/endpoints";
+import {
+  CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
+  CreatePersonalCollegeApplicationRequestBodyCategory as Category,
+} from "../api/models";
 
 type CollegeMode = "select" | "create";
 
@@ -29,12 +33,10 @@ export default function CreateCollegeApplication() {
   const [newRdDeadline, setNewRdDeadline] = useState("");
 
   // Application-specific fields
-  const [applicationType, setApplicationType] = useState<
-    "EA" | "ED" | "RD" | ""
-  >("");
-  const [category, setCategory] = useState<"safety" | "target" | "reach" | "">(
+  const [applicationType, setApplicationType] = useState<ApplicationType | "">(
     "",
   );
+  const [category, setCategory] = useState<Category | "">("");
 
   const [status, setStatus] = useState("");
 
@@ -44,8 +46,8 @@ export default function CreateCollegeApplication() {
   const submitApplication = (
     globalCollegeId: number,
     collegeName: string,
-    applicationType: "EA" | "ED" | "RD",
-    category: "safety" | "target" | "reach",
+    applicationType: ApplicationType,
+    category: Category,
   ) =>
     createApplication.mutate(
       {
@@ -214,9 +216,9 @@ export default function CreateCollegeApplication() {
             required
           >
             <option value="">-- Select a deadline type --</option>
-            <option value="EA">Early Action (EA)</option>
-            <option value="ED">Early Decision (ED)</option>
-            <option value="RD">Regular Decision (RD)</option>
+            <option value={ApplicationType.EA}>Early Action (EA)</option>
+            <option value={ApplicationType.ED}>Early Decision (ED)</option>
+            <option value={ApplicationType.RD}>Regular Decision (RD)</option>
           </select>
         </div>
 
@@ -228,9 +230,9 @@ export default function CreateCollegeApplication() {
             required
           >
             <option value="">-- Select a category --</option>
-            <option value="safety">Safety</option>
-            <option value="target">Target</option>
-            <option value="reach">Reach</option>
+            <option value={Category.safety}>Safety</option>
+            <option value={Category.target}>Target</option>
+            <option value={Category.reach}>Reach</option>
           </select>
         </div>
 

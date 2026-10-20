@@ -4,6 +4,7 @@ import { useCreateTodoItem } from "../api/endpoints";
 import type { CreateTodoItemRequestBody } from "../api/models";
 import {
   DEFAULT_DUE_TIME,
+  LINK_TYPES,
   LINK_TYPE_LABELS,
   useTodoLinkOptions,
   type LinkType,
@@ -86,7 +87,7 @@ export default function CreateTask() {
             }}
           >
             <option value="">Nothing</option>
-            {(Object.keys(LINK_TYPE_LABELS) as LinkType[]).map((type) => (
+            {LINK_TYPES.map((type) => (
               <option key={type} value={type}>
                 {LINK_TYPE_LABELS[type]}
               </option>
