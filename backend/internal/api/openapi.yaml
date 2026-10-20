@@ -128,16 +128,24 @@ components:
         - last_message_read_at
         - unread_count
       type: object
-    Counselor:
+    CounselorListItem:
       additionalProperties: false
       properties:
         id:
           type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
         user_id:
           type: string
       required:
         - id
         - user_id
+        - name
+        - pfp_key
       type: object
     CreateChatMessageRequestBody:
       additionalProperties: false
@@ -834,7 +842,7 @@ components:
           type: string
         counselors:
           items:
-            $ref: "#/components/schemas/Counselor"
+            $ref: "#/components/schemas/CounselorListItem"
           type:
             - array
             - "null"
@@ -864,7 +872,7 @@ components:
             - "null"
         students:
           items:
-            $ref: "#/components/schemas/Student"
+            $ref: "#/components/schemas/StudentListItem"
           type:
             - array
             - "null"
@@ -1355,6 +1363,44 @@ components:
       required:
         - id
         - user_id
+        - year
+        - organization
+        - gpa
+        - review_balance
+        - counselor_id
+      type: object
+    StudentListItem:
+      additionalProperties: false
+      properties:
+        counselor_id:
+          type: string
+        gpa:
+          format: int64
+          type: integer
+        id:
+          type: string
+        name:
+          type: string
+        organization:
+          type:
+            - string
+            - "null"
+        pfp_key:
+          type:
+            - string
+            - "null"
+        review_balance:
+          format: int64
+          type: integer
+        user_id:
+          type: string
+        year:
+          type: string
+      required:
+        - id
+        - user_id
+        - name
+        - pfp_key
         - year
         - organization
         - gpa
