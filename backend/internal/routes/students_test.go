@@ -16,6 +16,7 @@ import (
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/pagination"
 )
 
 func setupTestAppWithStudent(mockRepo data.EssayReviewRepository) (*fiber.App, error) {
@@ -216,5 +217,144 @@ func TestRoute_AssignCounselor(t *testing.T) {
 			map[string]any{"user_id": "not-a-uuid", "counselor_id": "also-not-a-uuid"})
 
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
+
+func listNameIs(want string) any {
+	return mock.MatchedBy(func(name *string) bool { return name != nil && *name == want })
+}
+
+func listNoCursor() any {
+	return mock.MatchedBy(func(after *pagination.NameIDKey) bool { return after == nil })
+}
+
+func listCursorAt(name string, id uuid.UUID) any {
+	return mock.MatchedBy(func(after *pagination.NameIDKey) bool {
+		return after != nil && after.Name == name && after.ID == id
+	})
+}
+
+func studentListRows(names ...string) []models.StudentListItem {
+	rows := make([]models.StudentListItem, len(names))
+	for i, name := range names {
+		rows[i] = models.StudentListItem{ID: uuid.New(), UserID: uuid.New(), Name: name, Year: models.Junior}
+	}
+	return rows
+}
+
+func decodeStudentPage(t *testing.T, body []byte) ([]string, *string) {
+	t.Helper()
+
+	var out models.FetchStudentsBody
+	require.NoError(t, json.Unmarshal(body, &out))
+	names := make([]string, len(out.Students))
+	for i, s := range out.Students {
+		names[i] = s.Name
+	}
+	return names, out.NextCursor
+}
+
+func TestRoute_FetchStudents(t *testing.T) {
+	t.Parallel()
+
+	t.Run("no query params uses the default limit of 5", func(t *testing.T) {
+		t.Parallel()
+
+		rows := studentListRows("Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu", "Eva Park", "Finn Ross")
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 6).Return(rows, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodGet, "/students/fetchall", nil)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		names, next := decodeStudentPage(t, body)
+		assert.Equal(t, []string{"Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu", "Eva Park"}, names)
+		assert.NotNil(t, next)
+	})
+
+	t.Run("a custom limit is passed through", func(t *testing.T) {
+		t.Parallel()
+
+		rows := studentListRows("Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu")
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 4).Return(rows, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodGet, "/students/fetchall?limit=3", nil)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		names, next := decodeStudentPage(t, body)
+		assert.Equal(t, []string{"Anna Lee", "Ben Cho", "Cara Diaz"}, names)
+		assert.NotNil(t, next)
+	})
+
+	t.Run("a name is passed through as the search term", func(t *testing.T) {
+		t.Parallel()
+
+		rows := studentListRows("Anna Lee", "Hannah Kim")
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs("ann"), listNoCursor(), 6).Return(rows, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodGet, "/students/fetchall?name=ann", nil)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		names, next := decodeStudentPage(t, body)
+		assert.Equal(t, []string{"Anna Lee", "Hannah Kim"}, names)
+		assert.Nil(t, next)
+	})
+
+	t.Run("the next cursor fetches the following page", func(t *testing.T) {
+		t.Parallel()
+
+		first := studentListRows("Anna Lee", "Ben Cho", "Cara Diaz")
+		second := studentListRows("Dan Wu", "Eva Park")
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 3).Return(first, nil).Once()
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listCursorAt("Ben Cho", first[1].ID), 3).Return(second, nil).Once()
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodGet, "/students/fetchall?limit=2", nil)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		names, next := decodeStudentPage(t, body)
+		assert.Equal(t, []string{"Anna Lee", "Ben Cho"}, names)
+		require.NotNil(t, next)
+
+		resp, body = doJSON(t, app, http.MethodGet, "/students/fetchall?limit=2&cursor="+*next, nil)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		names, _ = decodeStudentPage(t, body)
+		assert.Equal(t, []string{"Dan Wu", "Eva Park"}, names)
+	})
+
+	t.Run("fewer rows than the limit returns a null next cursor", func(t *testing.T) {
+		t.Parallel()
+
+		rows := studentListRows("Dan Wu", "Eva Park", "Finn Ross")
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 6).Return(rows, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodGet, "/students/fetchall", nil)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		names, next := decodeStudentPage(t, body)
+		assert.Len(t, names, 3)
+		assert.Nil(t, next)
 	})
 }
