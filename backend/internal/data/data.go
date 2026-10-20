@@ -17,6 +17,7 @@ import (
 	notificationLogRepository "inspirate-consulting/internal/data/postgres/schema/notificationLogStore"
 	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	studentRepository "inspirate-consulting/internal/data/postgres/schema/studentStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
@@ -143,6 +144,10 @@ type NotificationPreferencesRepository interface {
 	UpdateNotificationPreferences(ctx context.Context, userID uuid.UUID, preferences models.UpdateNotificationPreferencesRequestBody) (*models.NotificationPreferences, error)
 }
 
+type StudentRepository interface {
+	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
@@ -162,6 +167,7 @@ type Repository struct {
 	EssayReview                EssayReviewRepository
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository
+	Student                    StudentRepository
 }
 
 // Close closes the database connection pool
@@ -193,5 +199,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
+		Student:                    studentRepository.NewStudentRepository(db),
 	}
 }
