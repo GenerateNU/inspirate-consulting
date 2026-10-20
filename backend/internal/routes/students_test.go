@@ -109,3 +109,112 @@ func TestRoute_SetStudentReviewBalance(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
+
+func setupTestAppWithStudentRepo(mockRepo data.StudentRepository) (*fiber.App, error) {
+	cfg := config.Config{TestMode: true}
+	repo := &data.Repository{Student: mockRepo}
+	app, _, err := SetupApp(cfg, repo, nil)
+	return app, err
+}
+
+func TestRoute_AssignCounselor(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success returns the student with the new counselor", func(t *testing.T) {
+		t.Parallel()
+
+		studentUserID := uuid.New()
+		counselorID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("AssignCounselor", mock.Anything, studentUserID, counselorID).
+			Return(&models.Student{ID: uuid.New(), UserID: studentUserID, Year: models.Junior, GPA: 4, CounselorID: &counselorID}, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodPatch, "/students/assign",
+			map[string]any{"user_id": studentUserID, "counselor_id": counselorID})
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var out models.Student
+		require.NoError(t, json.Unmarshal(body, &out))
+		assert.Equal(t, studentUserID, out.UserID)
+		require.NotNil(t, out.CounselorID)
+		assert.Equal(t, counselorID, *out.CounselorID)
+	})
+
+	t.Run("unknown student returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		studentUserID := uuid.New()
+		counselorID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("AssignCounselor", mock.Anything, studentUserID, counselorID).
+			Return(nil, errs.NotFound("student", "user_id", studentUserID))
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/assign",
+			map[string]any{"user_id": studentUserID, "counselor_id": counselorID})
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("unknown counselor returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		studentUserID := uuid.New()
+		counselorID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("AssignCounselor", mock.Anything, studentUserID, counselorID).
+			Return(nil, errs.NotFound("counselor", "id", counselorID))
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/assign",
+			map[string]any{"user_id": studentUserID, "counselor_id": counselorID})
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("assigning a counselor to another counselor returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		// A counselor's user id has no student row, so there is no student to assign.
+		counselorUserID := uuid.New()
+		counselorID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("AssignCounselor", mock.Anything, counselorUserID, counselorID).
+			Return(nil, errs.NotFound("student", "user_id", counselorUserID))
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/assign",
+			map[string]any{"user_id": counselorUserID, "counselor_id": counselorID})
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("malformed ids are rejected by validation", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		// The handler is never reached.
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/assign",
+			map[string]any{"user_id": "not-a-uuid", "counselor_id": "also-not-a-uuid"})
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
