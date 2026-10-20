@@ -10,9 +10,12 @@ import {
 } from '@faker-js/faker';
 
 import type {
+  FetchStudentsBody,
   Student
 } from '../../models';
 
+
+export const getFetchStudentsResponseMock = (overrideResponse: Partial<Extract<FetchStudentsBody, object>> = {}): FetchStudentsBody => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), next_cursor: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), students: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({counselor_id: faker.string.alpha({length: {min: 10, max: 20}}), gpa: faker.number.int(), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), organization: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), review_balance: faker.number.int(), user_id: faker.string.alpha({length: {min: 10, max: 20}}), year: faker.string.alpha({length: {min: 10, max: 20}})})), null]), ...overrideResponse})
 
 export const getSetStudentReviewBalanceResponseMock = (overrideResponse: Partial<Extract<Student, object>> = {}): Student => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselor_id: faker.string.alpha({length: {min: 10, max: 20}}), gpa: faker.number.int(), id: faker.string.alpha({length: {min: 10, max: 20}}), organization: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), review_balance: faker.number.int(), user_id: faker.string.alpha({length: {min: 10, max: 20}}), year: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

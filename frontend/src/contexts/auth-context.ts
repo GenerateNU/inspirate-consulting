@@ -8,6 +8,8 @@ import type {
 
 export interface AuthContextType {
   resetTime: string | null;
+  counselorID: string | null;
+  studentID: string | null;
   userID: string | null;
   login: (email: string, password: string) => Promise<loginUserResponse>;
   logout: () => Promise<logoutUserResponse>;

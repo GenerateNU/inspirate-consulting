@@ -175,6 +175,33 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Fetch a page of counselors, optionally filtered by user_id and name
+ */
+export const fetchCounselorsQueryLimitDefault = 5;
+export const fetchCounselorsQueryLimitMax = 10;
+
+
+
+export const FetchCounselorsQueryParams = /*#__PURE__*/ zod.object({
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('user id of counselor')),
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('name of counselor')),
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(fetchCounselorsQueryLimitMax)), fetchCounselorsQueryLimitDefault)
+})
+
+export const FetchCounselorsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselors": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "user_id": /*#__PURE__*/ zod.string()
+}))),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get the next page; null when there are none'))
+})
+
+
+/**
  * Creates an essay group for a student
  */
 export const createEssayGroupBodyNameMax = 100;
@@ -769,6 +796,58 @@ export const RefundEssayReviewResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Assign a counselor to a particular student
+ */
+export const AssignCounselorBody = /*#__PURE__*/ zod.object({
+  "counselor_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('id of the counselor to assign')),
+  "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('user id of the student being assigned'))
+})
+
+export const AssignCounselorResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.string(),
+  "gpa": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "review_balance": /*#__PURE__*/ zod.int(),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "year": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Fetch a page of students, optionally filtered by user_id and name
+ */
+export const fetchStudentsQueryLimitDefault = 5;
+export const fetchStudentsQueryLimitMax = 10;
+
+
+
+export const FetchStudentsQueryParams = /*#__PURE__*/ zod.object({
+  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('user id of student')),
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('name of student')),
+  "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page')),
+  "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(fetchStudentsQueryLimitMax)), fetchStudentsQueryLimitDefault)
+})
+
+export const FetchStudentsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "next_cursor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Pass as cursor to get the next page; null when there are none')),
+  "students": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "counselor_id": /*#__PURE__*/ zod.string(),
+  "gpa": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "review_balance": /*#__PURE__*/ zod.int(),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "year": /*#__PURE__*/ zod.string()
+})))
+})
+
+
+/**
  * Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
  */
 export const SetStudentReviewBalanceParams = /*#__PURE__*/ zod.object({
@@ -1020,10 +1099,12 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
 
 export const LoginUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the user\'s counselor profile; null when the user is not a counselor')),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "student_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the user\'s student profile; null when the user is not a student')),
   "supabase_id": /*#__PURE__*/ zod.string()
 })
 
@@ -1032,6 +1113,21 @@ export const LoginUserResponse = /*#__PURE__*/ zod.object({
  * user logout
  */
 export const LogoutUserResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * fetch the logged-in user along with their student or counselor profile id
+ */
+export const FetchCurrentUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the user\'s counselor profile; null when the user is not a counselor')),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "student_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the user\'s student profile; null when the user is not a student')),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
 
 
 /**

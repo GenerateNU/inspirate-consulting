@@ -25,6 +25,7 @@ import UpdateNotificationPreferences from "./notifications/update-notification-p
 import CreateUser from "./user/create-user";
 import LogOut from "./logout/logout";
 import LogIn from "./login/login";
+import SearchStudents from "./counselor/search-students.tsx";
 import { AuthProvider } from "./contexts/auth-context.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -67,6 +68,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/create-account" element={<CreateUser />} />
             <Route path="/login" element={<LogIn />} />
             <Route path="/logout" element={<LogOut />} />
+            <Route path="/search" element={<SearchStudents/>} />
           </Route>
         </Routes>
       </AuthProvider>

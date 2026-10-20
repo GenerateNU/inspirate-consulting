@@ -20,6 +20,7 @@ import type {
   CreateUserBody,
   CreateUserInputBody,
   ErrorModel,
+  SessionUser,
   User
 } from '../../models';
 
@@ -146,6 +147,77 @@ export const useCreateUser = <TError = Promise<ErrorModel>>(
   const swrFn = getCreateUserMutationFetcher(fetchOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type fetchCurrentUserResponse200 = {
+  data: SessionUser
+  status: 200
+}
+
+export type fetchCurrentUserResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type fetchCurrentUserResponseSuccess = (fetchCurrentUserResponse200) & {
+  headers: Headers;
+};
+export type fetchCurrentUserResponseError = (fetchCurrentUserResponseDefault) & {
+  headers: Headers;
+};
+
+export type fetchCurrentUserResponse = (fetchCurrentUserResponseSuccess | fetchCurrentUserResponseError)
+
+export const getFetchCurrentUserUrl = () => {
+
+
+
+
+  return `/api/user/me`
+}
+
+/**
+ * fetch the logged-in user along with their student or counselor profile id
+ */
+export const fetchCurrentUser = async ( options?: RequestInit): Promise<fetchCurrentUserResponse> => {
+
+  const res = await fetch(getFetchCurrentUserUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: fetchCurrentUserResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as fetchCurrentUserResponse
+}
+
+
+
+
+export const getFetchCurrentUserKey = () => [`/api/user/me`] as const;
+
+export type FetchCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof fetchCurrentUser>>>
+
+export const useFetchCurrentUser = <TError = Promise<ErrorModel>>(
+   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof fetchCurrentUser>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+) => {
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getFetchCurrentUserKey() : null);
+  const swrFn = () => fetchCurrentUser(fetchOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 
   return {
     swrKey,

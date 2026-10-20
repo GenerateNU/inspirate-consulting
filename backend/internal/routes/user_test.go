@@ -195,3 +195,61 @@ func TestRoute_FetchUser(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
+
+func TestRoute_FetchCurrentUser(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns the user with their counselor id", func(t *testing.T) {
+		t.Parallel()
+
+		userID := uuid.New()
+		counselorID := uuid.New()
+
+		mockUser := mocks.NewUserRepository(t)
+		mockUser.On("FetchUser", mock.Anything, models.FetchUserInput{ID: userID}).
+			Return(&models.FetchUserOutput{Body: &models.User{ID: userID, Name: "Test Counselor"}}, nil)
+
+		app, err := setupTestAppWithUser(mockUser, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodGet, "/user/me", nil)
+		require.NoError(t, err)
+		req.Header.Set("X-User-ID", userID.String())
+		req.Header.Set("X-Counselor-ID", counselorID.String())
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var out models.SessionUser
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&out))
+		assert.Equal(t, userID, out.ID)
+		assert.Equal(t, "Test Counselor", out.Name)
+		require.NotNil(t, out.CounselorID)
+		assert.Equal(t, counselorID, *out.CounselorID)
+		assert.Nil(t, out.StudentID)
+	})
+
+	t.Run("unknown user returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		userID := uuid.New()
+
+		mockUser := mocks.NewUserRepository(t)
+		mockUser.On("FetchUser", mock.Anything, models.FetchUserInput{ID: userID}).
+			Return(nil, errs.NotFound("user", "id", userID.String()))
+
+		app, err := setupTestAppWithUser(mockUser, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodGet, "/user/me", nil)
+		require.NoError(t, err)
+		req.Header.Set("X-User-ID", userID.String())
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+}
