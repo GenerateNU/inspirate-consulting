@@ -9,7 +9,7 @@ import (
 // To represent a student's application to a specific global college.
 type PersonalCollegeApplication struct {
 	ID              int64     `json:"id" doc:"Unique identifier for the application"`
-	StudentID       uuid.UUID    `json:"student_id" doc:"ID of the student who owns this application"`
+	StudentID       uuid.UUID `json:"student_id" doc:"ID of the student who owns this application"`
 	GlobalCollegeID int64     `json:"global_college_id" doc:"ID of the global college being applied to"`
 	ApplicationType string    `json:"application_type" example:"ED" doc:"Which deadline the student is applying by: EA, ED, or RD"`
 	Category        string    `json:"category" example:"reach" doc:"How the student categorizes this school: safety, target, or reach"`
