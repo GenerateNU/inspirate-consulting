@@ -61,3 +61,45 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, student models.Student) m
 	}
 	return student
 }
+
+// createNamedTestCounselor inserts a counselor (and its backing user) with the
+// given name, returning the user's id and the counselor's id.
+func createNamedTestCounselor(t *testing.T, db *pgxpool.Pool, name string) (uuid.UUID, uuid.UUID) {
+	t.Helper()
+
+	userID := createTestUser(t, db, name)
+
+	var counselorID uuid.UUID
+	if err := db.QueryRow(context.Background(),
+		`INSERT INTO public.counselor (user_id) VALUES ($1) RETURNING id`, userID).Scan(&counselorID); err != nil {
+		t.Fatalf("failed to create test counselor: %v", err)
+	}
+	return userID, counselorID
+}
+
+// createAssignedTestStudent inserts a user and a student row assigned to counselorID,
+// returning the user's id.
+func createAssignedTestStudent(t *testing.T, db *pgxpool.Pool, name string, counselorID uuid.UUID) uuid.UUID {
+	t.Helper()
+
+	userID := createTestUser(t, db, name)
+	if _, err := db.Exec(context.Background(),
+		`INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
+		 VALUES ($1, 'junior', 4, 0, $2)`,
+		userID, counselorID); err != nil {
+		t.Fatalf("failed to create test student: %v", err)
+	}
+	return userID
+}
+
+// counselorOf reads the counselor currently assigned to the student with the given user id.
+func counselorOf(t *testing.T, db *pgxpool.Pool, studentUserID uuid.UUID) uuid.UUID {
+	t.Helper()
+
+	var counselorID uuid.UUID
+	if err := db.QueryRow(context.Background(),
+		`SELECT counselor_id FROM public.student WHERE user_id = $1`, studentUserID).Scan(&counselorID); err != nil {
+		t.Fatalf("failed to read student's counselor: %v", err)
+	}
+	return counselorID
+}
