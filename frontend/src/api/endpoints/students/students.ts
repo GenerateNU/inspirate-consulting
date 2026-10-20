@@ -5,8 +5,10 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import useSwr from 'swr';
 import type {
-  Key
+  Key,
+  SWRConfiguration
 } from 'swr';
 
 import useSWRMutation from 'swr/mutation';
@@ -59,7 +61,78 @@ export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatus
 
 
 
- export type setStudentReviewBalanceResponse200 = {
+ export type getStudentResponse200 = {
+  data: Student
+  status: 200
+}
+
+export type getStudentResponseDefault = {
+  data: ErrorModel
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type getStudentResponseSuccess = (getStudentResponse200) & {
+  headers: Headers;
+};
+export type getStudentResponseError = (getStudentResponseDefault) & {
+  headers: Headers;
+};
+
+export type getStudentResponse = (getStudentResponseSuccess | getStudentResponseError)
+
+export const getGetStudentUrl = (id: string,) => {
+
+
+
+
+  return `/api/students/${id}`
+}
+
+/**
+ * Get a student
+ */
+export const getStudent = async (id: string, options?: RequestInit): Promise<getStudentResponse> => {
+
+  const res = await fetch(getGetStudentUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getStudentResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getStudentResponse
+}
+
+
+
+
+export const getGetStudentKey = (id: string,) => [`/api/students/${id}`] as const;
+
+export type GetStudentQueryResult = NonNullable<Awaited<ReturnType<typeof getStudent>>>
+
+export const useGetStudent = <TError = Promise<ErrorModel>>(
+  id: string, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getStudent>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
+) => {
+  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false && id !== null && id !== undefined
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetStudentKey(id) : null);
+  const swrFn = () => getStudent(id, fetchOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+export type setStudentReviewBalanceResponse200 = {
   data: Student
   status: 200
 }
