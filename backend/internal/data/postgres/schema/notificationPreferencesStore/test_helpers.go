@@ -2,6 +2,7 @@ package notificationPreferencesRepository
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -14,8 +15,9 @@ func createTestUser(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 	var userID uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-		`INSERT INTO public.users (name) VALUES ($1) RETURNING id`,
+		`INSERT INTO public.users (name, email) VALUES ($1, $2) RETURNING id`,
 		"Test User",
+		fmt.Sprintf("test-%s@example.com", uuid.NewString()),
 	).Scan(&userID)
 	if err != nil {
 		t.Fatalf("failed to create test user: %v", err)

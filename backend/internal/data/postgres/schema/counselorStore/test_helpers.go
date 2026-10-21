@@ -2,6 +2,7 @@ package counselorRepository
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -18,8 +19,9 @@ func createTestCounselor(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 	var id uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-		`WITH new_user AS (INSERT INTO public.users (name) VALUES ('Test Counselor') RETURNING id)
+		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ('Test Counselor', $1) RETURNING id)
 		INSERT INTO public.counselor (user_id) SELECT id FROM new_user RETURNING id`,
+		fmt.Sprintf("counselor-%s@example.com", uuid.NewString()),
 	).Scan(&id)
 	if err != nil {
 		t.Fatalf("failed to create test counselor: %v", err)
@@ -35,12 +37,13 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, na
 	var id uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-		`WITH new_user AS (INSERT INTO public.users (name) VALUES ($1) RETURNING id)
+		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ($1, $4) RETURNING id)
 		INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
 		SELECT id, $2, 4, 5, $3 FROM new_user RETURNING id`,
 		name,
 		year,
 		counselorID,
+		fmt.Sprintf("student-%s@example.com", uuid.NewString()),
 	).Scan(&id)
 	if err != nil {
 		t.Fatalf("failed to create test student: %v", err)
