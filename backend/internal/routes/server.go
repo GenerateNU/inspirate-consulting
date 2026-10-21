@@ -164,5 +164,6 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetupLoginRoutes(api, repo, &config)
 	SetupLogoutRoutes(api, repo, &config)
 	SetupResetPasswordRoutes(api, repo, &config, verifyRole)
+	SetUpCounselorRoutes(api, repo, verifyRole)
 	return nil
 }
