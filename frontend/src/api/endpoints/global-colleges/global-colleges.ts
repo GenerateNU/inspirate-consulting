@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CreateGlobalCollegeRequestBody,
@@ -50,35 +58,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type listGlobalCollegesResponse200 = {
-  data: GlobalCollege[] | null
-  status: 200
-}
-
-export type listGlobalCollegesResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type listGlobalCollegesResponseSuccess = (listGlobalCollegesResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type listGlobalCollegesResponseError = (listGlobalCollegesResponseDefault) & {
-  headers: Headers;
-};
-
-export type listGlobalCollegesResponse = (listGlobalCollegesResponseSuccess | listGlobalCollegesResponseError)
 
 export const getListGlobalCollegesUrl = () => {
 
@@ -91,7 +87,7 @@ export const getListGlobalCollegesUrl = () => {
 /**
  * List all global colleges.
  */
-export const listGlobalColleges = async ( options?: RequestInit): Promise<listGlobalCollegesResponse> => {
+export const listGlobalColleges = async ( options?: RequestInit): Promise<GlobalCollege[] | null> => {
 
   const res = await fetch(getListGlobalCollegesUrl(),
   {
@@ -104,52 +100,92 @@ export const listGlobalColleges = async ( options?: RequestInit): Promise<listGl
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listGlobalCollegesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listGlobalCollegesResponse
+    const err: globalThis.Error & {info?: GlobalCollege[] | null, status?: number} = new globalThis.Error();
+    const data : GlobalCollege[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: GlobalCollege[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListGlobalCollegesKey = () => [`/api/colleges`] as const;
+
+export const getListGlobalCollegesQueryKey = () => {
+    return [
+    `/api/colleges`
+    ] as const;
+    }
+
+
+export const getListGlobalCollegesQueryOptions = <TData = Awaited<ReturnType<typeof listGlobalColleges>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGlobalColleges>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListGlobalCollegesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listGlobalColleges>>> = ({ signal }) => listGlobalColleges({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listGlobalColleges>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListGlobalCollegesQueryResult = NonNullable<Awaited<ReturnType<typeof listGlobalColleges>>>
+export type ListGlobalCollegesQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListGlobalColleges = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listGlobalColleges>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListGlobalCollegesKey() : null);
-  const swrFn = () => listGlobalColleges(fetchOptions)
+export function useListGlobalColleges<TData = Awaited<ReturnType<typeof listGlobalColleges>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGlobalColleges>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listGlobalColleges>>,
+          TError,
+          Awaited<ReturnType<typeof listGlobalColleges>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListGlobalColleges<TData = Awaited<ReturnType<typeof listGlobalColleges>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGlobalColleges>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listGlobalColleges>>,
+          TError,
+          Awaited<ReturnType<typeof listGlobalColleges>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListGlobalColleges<TData = Awaited<ReturnType<typeof listGlobalColleges>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGlobalColleges>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListGlobalColleges<TData = Awaited<ReturnType<typeof listGlobalColleges>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGlobalColleges>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListGlobalCollegesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type createGlobalCollegeResponse200 = {
-  data: GlobalCollege
-  status: 200
-}
 
-export type createGlobalCollegeResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type createGlobalCollegeResponseSuccess = (createGlobalCollegeResponse200) & {
-  headers: Headers;
-};
-export type createGlobalCollegeResponseError = (createGlobalCollegeResponseDefault) & {
-  headers: Headers;
-};
 
-export type createGlobalCollegeResponse = (createGlobalCollegeResponseSuccess | createGlobalCollegeResponseError)
+
+
 
 export const getCreateGlobalCollegeUrl = () => {
 
@@ -162,7 +198,7 @@ export const getCreateGlobalCollegeUrl = () => {
 /**
  * Create a global college with a name, location, and optional EA/ED/RD deadlines.
  */
-export const createGlobalCollege = async (createGlobalCollegeRequestBody: NonReadonly<CreateGlobalCollegeRequestBody>, options?: RequestInit): Promise<createGlobalCollegeResponse> => {
+export const createGlobalCollege = async (createGlobalCollegeRequestBody: NonReadonly<CreateGlobalCollegeRequestBody>, options?: RequestInit): Promise<GlobalCollege> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -189,59 +225,67 @@ const res = await fetch(getCreateGlobalCollegeUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createGlobalCollegeResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createGlobalCollegeResponse
-}
-
-
-
-
-export const getCreateGlobalCollegeMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<CreateGlobalCollegeRequestBody> }) => {
-    return createGlobalCollege(arg, options);
+    const err: globalThis.Error & {info?: GlobalCollege, status?: number} = new globalThis.Error();
+    const data : GlobalCollege = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getCreateGlobalCollegeMutationKey = () => [`/api/colleges`] as const;
-
-export type CreateGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof createGlobalCollege>>>
-
-export const useCreateGlobalCollege = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createGlobalCollege>>, TError, Key, NonReadonly<CreateGlobalCollegeRequestBody>, Awaited<ReturnType<typeof createGlobalCollege>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getCreateGlobalCollegeMutationKey();
-  const swrFn = getCreateGlobalCollegeMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type getGlobalCollegeResponse200 = {
-  data: GlobalCollege
-  status: 200
+  const data: GlobalCollege = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type getGlobalCollegeResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type getGlobalCollegeResponseSuccess = (getGlobalCollegeResponse200) & {
-  headers: Headers;
-};
-export type getGlobalCollegeResponseError = (getGlobalCollegeResponseDefault) & {
-  headers: Headers;
-};
 
-export type getGlobalCollegeResponse = (getGlobalCollegeResponseSuccess | getGlobalCollegeResponseError)
 
-export const getGetGlobalCollegeUrl = (id: number,) => {
+
+export const getCreateGlobalCollegeMutationKey = () => ['createGlobalCollege'] as const;
+
+export const getCreateGlobalCollegeMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGlobalCollege>>, TError,CreateGlobalCollegeMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createGlobalCollege>>, TError,CreateGlobalCollegeMutationVariables, TContext> => {
+
+const mutationKey = getCreateGlobalCollegeMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createGlobalCollege>>, CreateGlobalCollegeMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createGlobalCollege(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateGlobalCollegeMutationResult = NonNullable<Awaited<ReturnType<typeof createGlobalCollege>>>
+    export type CreateGlobalCollegeMutationBody = NonReadonly<CreateGlobalCollegeRequestBody>
+    export type CreateGlobalCollegeMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateGlobalCollegeMutationVariables = {data: NonReadonly<CreateGlobalCollegeRequestBody>}
+
+    export const useCreateGlobalCollege = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGlobalCollege>>, TError,CreateGlobalCollegeMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createGlobalCollege>>,
+        TError,
+        CreateGlobalCollegeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateGlobalCollegeMutationOptions(options), queryClient);
+    }
+    export const getGetGlobalCollegeUrl = (id: number,) => {
 
 
 
@@ -252,7 +296,7 @@ export const getGetGlobalCollegeUrl = (id: number,) => {
 /**
  * Get a global college by ID.
  */
-export const getGlobalCollege = async (id: number, options?: RequestInit): Promise<getGlobalCollegeResponse> => {
+export const getGlobalCollege = async (id: number, options?: RequestInit): Promise<GlobalCollege> => {
 
   const res = await fetch(getGetGlobalCollegeUrl(id),
   {
@@ -265,31 +309,90 @@ export const getGlobalCollege = async (id: number, options?: RequestInit): Promi
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getGlobalCollegeResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getGlobalCollegeResponse
+    const err: globalThis.Error & {info?: GlobalCollege, status?: number} = new globalThis.Error();
+    const data : GlobalCollege = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: GlobalCollege = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetGlobalCollegeKey = (id: number,) => [`/api/colleges/${id}`] as const;
+
+export const getGetGlobalCollegeQueryKey = (id: number,) => {
+    return [
+    `/api/colleges/${id}`
+    ] as const;
+    }
+
+
+export const getGetGlobalCollegeQueryOptions = <TData = Awaited<ReturnType<typeof getGlobalCollege>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGlobalCollege>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetGlobalCollegeQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGlobalCollege>>> = ({ signal }) => getGlobalCollege(id, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGlobalCollege>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetGlobalCollegeQueryResult = NonNullable<Awaited<ReturnType<typeof getGlobalCollege>>>
+export type GetGlobalCollegeQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetGlobalCollege = <TError = Promise<ErrorModel>>(
-  id: number, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getGlobalCollege>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false && id !== null && id !== undefined
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetGlobalCollegeKey(id) : null);
-  const swrFn = () => getGlobalCollege(id, fetchOptions)
+export function useGetGlobalCollege<TData = Awaited<ReturnType<typeof getGlobalCollege>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGlobalCollege>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGlobalCollege>>,
+          TError,
+          Awaited<ReturnType<typeof getGlobalCollege>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetGlobalCollege<TData = Awaited<ReturnType<typeof getGlobalCollege>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGlobalCollege>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGlobalCollege>>,
+          TError,
+          Awaited<ReturnType<typeof getGlobalCollege>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetGlobalCollege<TData = Awaited<ReturnType<typeof getGlobalCollege>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGlobalCollege>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetGlobalCollege<TData = Awaited<ReturnType<typeof getGlobalCollege>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGlobalCollege>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetGlobalCollegeQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

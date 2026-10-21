@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { errorMessage } from "../api/client";
 import { useCreateGlobalCollege } from "../api/endpoints";
 
 export default function CreateCollege() {
@@ -9,32 +10,26 @@ export default function CreateCollege() {
   const [rdDeadline, setRdDeadline] = useState("");
   const [status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateGlobalCollege<Error>();
+  const { mutate, isPending, error } = useCreateGlobalCollege();
 
-  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const toISODateTime = (dateStr: string) =>
-        dateStr ? `${dateStr}T00:00:00Z` : undefined;
+    setStatus("");
+    const toISODateTime = (dateStr: string) =>
+      dateStr ? `${dateStr}T00:00:00Z` : undefined;
 
-      const response = await trigger({
-        school_name: schoolName,
-        school_location: schoolLocation,
-        ea_deadline: toISODateTime(eaDeadline),
-        ed_deadline: toISODateTime(edDeadline),
-        rd_deadline: toISODateTime(rdDeadline),
-      });
-
-      // result is { GlobalCollege (or error), status, headers }
-      if (response.status === 200) {
-        setStatus(`Created: ${response.data.school_name}`);
-      } else {
-        setStatus("Something went wrong.");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
-    }
+    mutate(
+      {
+        data: {
+          school_name: schoolName,
+          school_location: schoolLocation,
+          ea_deadline: toISODateTime(eaDeadline),
+          ed_deadline: toISODateTime(edDeadline),
+          rd_deadline: toISODateTime(rdDeadline),
+        },
+      },
+      { onSuccess: (college) => setStatus(`Created: ${college.school_name}`) },
+    );
   };
 
   return (
@@ -83,12 +78,12 @@ export default function CreateCollege() {
             onChange={(e) => setRdDeadline(e.target.value)}
           />
         </div>
-        <button type="submit" disabled={isMutating}>
-          {isMutating ? "Creating..." : "Create College"}
+        <button type="submit" disabled={isPending}>
+          {isPending ? "Creating..." : "Create College"}
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {error.message}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CreateTodoItemRequestBody,
@@ -54,35 +62,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type getTodoItemsResponse200 = {
-  data: TodoItemPage
-  status: 200
-}
-
-export type getTodoItemsResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type getTodoItemsResponseSuccess = (getTodoItemsResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type getTodoItemsResponseError = (getTodoItemsResponseDefault) & {
-  headers: Headers;
-};
-
-export type getTodoItemsResponse = (getTodoItemsResponseSuccess | getTodoItemsResponseError)
 
 export const getGetTodoItemsUrl = (params?: GetTodoItemsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -102,7 +98,7 @@ export const getGetTodoItemsUrl = (params?: GetTodoItemsParams,) => {
 /**
  * Get a student's to-do items, with optional filters, sorting, and cursor pagination
  */
-export const getTodoItems = async (params?: GetTodoItemsParams, options?: RequestInit): Promise<getTodoItemsResponse> => {
+export const getTodoItems = async (params?: GetTodoItemsParams, options?: RequestInit): Promise<TodoItemPage> => {
 
   const res = await fetch(getGetTodoItemsUrl(params),
   {
@@ -115,52 +111,92 @@ export const getTodoItems = async (params?: GetTodoItemsParams, options?: Reques
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getTodoItemsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getTodoItemsResponse
+    const err: globalThis.Error & {info?: TodoItemPage, status?: number} = new globalThis.Error();
+    const data : TodoItemPage = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItemPage = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetTodoItemsKey = (params?: GetTodoItemsParams,) => [`/api/todo-items`, ...(params ? [params]: [])] as const;
+
+export const getGetTodoItemsQueryKey = (params?: GetTodoItemsParams,) => {
+    return [
+    `/api/todo-items`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTodoItemsQueryOptions = <TData = Awaited<ReturnType<typeof getTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: GetTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItems>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTodoItemsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTodoItems>>> = ({ signal }) => getTodoItems(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTodoItems>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof getTodoItems>>>
+export type GetTodoItemsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetTodoItems = <TError = Promise<ErrorModel>>(
-  params?: GetTodoItemsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getTodoItems>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetTodoItemsKey(params) : null);
-  const swrFn = () => getTodoItems(params, fetchOptions)
+export function useGetTodoItems<TData = Awaited<ReturnType<typeof getTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  GetTodoItemsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItems>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTodoItems>>,
+          TError,
+          Awaited<ReturnType<typeof getTodoItems>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTodoItems<TData = Awaited<ReturnType<typeof getTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItems>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTodoItems>>,
+          TError,
+          Awaited<ReturnType<typeof getTodoItems>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTodoItems<TData = Awaited<ReturnType<typeof getTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItems>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetTodoItems<TData = Awaited<ReturnType<typeof getTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItems>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetTodoItemsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type createTodoItemResponse200 = {
-  data: TodoItem
-  status: 200
-}
 
-export type createTodoItemResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type createTodoItemResponseSuccess = (createTodoItemResponse200) & {
-  headers: Headers;
-};
-export type createTodoItemResponseError = (createTodoItemResponseDefault) & {
-  headers: Headers;
-};
 
-export type createTodoItemResponse = (createTodoItemResponseSuccess | createTodoItemResponseError)
+
+
 
 export const getCreateTodoItemUrl = () => {
 
@@ -173,7 +209,7 @@ export const getCreateTodoItemUrl = () => {
 /**
  * Create a to-do item with a description and optional deadline
  */
-export const createTodoItem = async (createTodoItemRequestBody: NonReadonly<CreateTodoItemRequestBody>, options?: RequestInit): Promise<createTodoItemResponse> => {
+export const createTodoItem = async (createTodoItemRequestBody: NonReadonly<CreateTodoItemRequestBody>, options?: RequestInit): Promise<TodoItem> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -200,59 +236,67 @@ const res = await fetch(getCreateTodoItemUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createTodoItemResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createTodoItemResponse
-}
-
-
-
-
-export const getCreateTodoItemMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<CreateTodoItemRequestBody> }) => {
-    return createTodoItem(arg, options);
+    const err: globalThis.Error & {info?: TodoItem, status?: number} = new globalThis.Error();
+    const data : TodoItem = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getCreateTodoItemMutationKey = () => [`/api/todo-items`] as const;
-
-export type CreateTodoItemMutationResult = NonNullable<Awaited<ReturnType<typeof createTodoItem>>>
-
-export const useCreateTodoItem = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createTodoItem>>, TError, Key, NonReadonly<CreateTodoItemRequestBody>, Awaited<ReturnType<typeof createTodoItem>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getCreateTodoItemMutationKey();
-  const swrFn = getCreateTodoItemMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type searchTodoItemsResponse200 = {
-  data: TodoItemPage
-  status: 200
+  const data: TodoItem = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type searchTodoItemsResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type searchTodoItemsResponseSuccess = (searchTodoItemsResponse200) & {
-  headers: Headers;
-};
-export type searchTodoItemsResponseError = (searchTodoItemsResponseDefault) & {
-  headers: Headers;
-};
 
-export type searchTodoItemsResponse = (searchTodoItemsResponseSuccess | searchTodoItemsResponseError)
 
-export const getSearchTodoItemsUrl = (params: SearchTodoItemsParams,) => {
+
+export const getCreateTodoItemMutationKey = () => ['createTodoItem'] as const;
+
+export const getCreateTodoItemMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTodoItem>>, TError,CreateTodoItemMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createTodoItem>>, TError,CreateTodoItemMutationVariables, TContext> => {
+
+const mutationKey = getCreateTodoItemMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTodoItem>>, CreateTodoItemMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTodoItem(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTodoItemMutationResult = NonNullable<Awaited<ReturnType<typeof createTodoItem>>>
+    export type CreateTodoItemMutationBody = NonReadonly<CreateTodoItemRequestBody>
+    export type CreateTodoItemMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateTodoItemMutationVariables = {data: NonReadonly<CreateTodoItemRequestBody>}
+
+    export const useCreateTodoItem = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTodoItem>>, TError,CreateTodoItemMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createTodoItem>>,
+        TError,
+        CreateTodoItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateTodoItemMutationOptions(options), queryClient);
+    }
+    export const getSearchTodoItemsUrl = (params: SearchTodoItemsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -270,7 +314,7 @@ export const getSearchTodoItemsUrl = (params: SearchTodoItemsParams,) => {
 /**
  * Search a student's to-do items by description, with the same filters as listing
  */
-export const searchTodoItems = async (params: SearchTodoItemsParams, options?: RequestInit): Promise<searchTodoItemsResponse> => {
+export const searchTodoItems = async (params: SearchTodoItemsParams, options?: RequestInit): Promise<TodoItemPage> => {
 
   const res = await fetch(getSearchTodoItemsUrl(params),
   {
@@ -283,52 +327,92 @@ export const searchTodoItems = async (params: SearchTodoItemsParams, options?: R
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: searchTodoItemsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as searchTodoItemsResponse
+    const err: globalThis.Error & {info?: TodoItemPage, status?: number} = new globalThis.Error();
+    const data : TodoItemPage = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItemPage = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getSearchTodoItemsKey = (params: SearchTodoItemsParams,) => [`/api/todo-items/search`, ...(params ? [params]: [])] as const;
+
+export const getSearchTodoItemsQueryKey = (params?: SearchTodoItemsParams,) => {
+    return [
+    `/api/todo-items/search`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchTodoItemsQueryOptions = <TData = Awaited<ReturnType<typeof searchTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params: SearchTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTodoItems>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchTodoItemsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchTodoItems>>> = ({ signal }) => searchTodoItems(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchTodoItems>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type SearchTodoItemsQueryResult = NonNullable<Awaited<ReturnType<typeof searchTodoItems>>>
+export type SearchTodoItemsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useSearchTodoItems = <TError = Promise<ErrorModel>>(
-  params: SearchTodoItemsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof searchTodoItems>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getSearchTodoItemsKey(params) : null);
-  const swrFn = () => searchTodoItems(params, fetchOptions)
+export function useSearchTodoItems<TData = Awaited<ReturnType<typeof searchTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: SearchTodoItemsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTodoItems>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchTodoItems>>,
+          TError,
+          Awaited<ReturnType<typeof searchTodoItems>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchTodoItems<TData = Awaited<ReturnType<typeof searchTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: SearchTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTodoItems>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchTodoItems>>,
+          TError,
+          Awaited<ReturnType<typeof searchTodoItems>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchTodoItems<TData = Awaited<ReturnType<typeof searchTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: SearchTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTodoItems>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useSearchTodoItems<TData = Awaited<ReturnType<typeof searchTodoItems>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: SearchTodoItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTodoItems>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getSearchTodoItemsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type updateTodoItemCompletedResponse200 = {
-  data: TodoItem
-  status: 200
-}
 
-export type updateTodoItemCompletedResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type updateTodoItemCompletedResponseSuccess = (updateTodoItemCompletedResponse200) & {
-  headers: Headers;
-};
-export type updateTodoItemCompletedResponseError = (updateTodoItemCompletedResponseDefault) & {
-  headers: Headers;
-};
 
-export type updateTodoItemCompletedResponse = (updateTodoItemCompletedResponseSuccess | updateTodoItemCompletedResponseError)
+
+
 
 export const getUpdateTodoItemCompletedUrl = (id: string,) => {
 
@@ -342,7 +426,7 @@ export const getUpdateTodoItemCompletedUrl = (id: string,) => {
  * Update a to-do item's completion status
  */
 export const updateTodoItemCompleted = async (id: string,
-    updateTodoItemCompletedAtInputBody: NonReadonly<UpdateTodoItemCompletedAtInputBody>, options?: RequestInit): Promise<updateTodoItemCompletedResponse> => {
+    updateTodoItemCompletedAtInputBody: NonReadonly<UpdateTodoItemCompletedAtInputBody>, options?: RequestInit): Promise<TodoItem> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -369,36 +453,63 @@ const res = await fetch(getUpdateTodoItemCompletedUrl(id),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: updateTodoItemCompletedResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateTodoItemCompletedResponse
-}
-
-
-
-
-export const getUpdateTodoItemCompletedMutationFetcher = (id: string, options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<UpdateTodoItemCompletedAtInputBody> }) => {
-    return updateTodoItemCompleted(id, arg, options);
+    const err: globalThis.Error & {info?: TodoItem, status?: number} = new globalThis.Error();
+    const data : TodoItem = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: TodoItem = body ? JSON.parse(body) : {}
+  return data
 }
-export const getUpdateTodoItemCompletedMutationKey = (id: string,) => [`/api/todo-items/${id}`] as const;
 
-export type UpdateTodoItemCompletedMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemCompleted>>>
 
-export const useUpdateTodoItemCompleted = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updateTodoItemCompleted>>, TError, Key, NonReadonly<UpdateTodoItemCompletedAtInputBody>, Awaited<ReturnType<typeof updateTodoItemCompleted>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getUpdateTodoItemCompletedMutationKey(id);
-  const swrFn = getUpdateTodoItemCompletedMutationFetcher(id, fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getUpdateTodoItemCompletedMutationKey = () => ['updateTodoItemCompleted'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getUpdateTodoItemCompletedMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemCompleted>>, TError,UpdateTodoItemCompletedMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemCompleted>>, TError,UpdateTodoItemCompletedMutationVariables, TContext> => {
+
+const mutationKey = getUpdateTodoItemCompletedMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTodoItemCompleted>>, UpdateTodoItemCompletedMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTodoItemCompleted(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTodoItemCompletedMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemCompleted>>>
+    export type UpdateTodoItemCompletedMutationBody = NonReadonly<UpdateTodoItemCompletedAtInputBody>
+    export type UpdateTodoItemCompletedMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateTodoItemCompletedMutationVariables = {id: string;data: NonReadonly<UpdateTodoItemCompletedAtInputBody>}
+
+    export const useUpdateTodoItemCompleted = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemCompleted>>, TError,UpdateTodoItemCompletedMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTodoItemCompleted>>,
+        TError,
+        UpdateTodoItemCompletedMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateTodoItemCompletedMutationOptions(options), queryClient);
+    }

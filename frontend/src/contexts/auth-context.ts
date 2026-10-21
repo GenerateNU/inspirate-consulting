@@ -1,17 +1,13 @@
 import { createContext } from "react";
 
-import type {
-  loginUserResponse,
-  logoutUserResponse,
-  resetUserPasswordResponse,
-} from "../api/endpoints";
+import type { User } from "../api/models";
 
 export interface AuthContextType {
   resetTime: string | null;
   userID: string | null;
-  login: (email: string, password: string) => Promise<loginUserResponse>;
-  logout: () => Promise<logoutUserResponse>;
-  reset_password: (new_password: string) => Promise<resetUserPasswordResponse>;
+  login: (email: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
+  reset_password: (new_password: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(

@@ -8,7 +8,8 @@ export default defineConfig({
     },
     output: {
       mode: "tags-split",
-      client: "swr",
+      client: "react-query",
+      httpClient: "fetch",
       target: "src/api/endpoints",
       schemas: "src/api/models",
       mock: true,
@@ -16,6 +17,14 @@ export default defineConfig({
       // The '/api' prefix is stripped by the Vite dev proxy in development and
       // by the Netlify proxy in production, before the backend sees it.
       baseUrl: "/api",
+      override: {
+        fetch: {
+          // Return the response body directly and throw on non-2xx, so
+          // TanStack Query surfaces failures through its `error` state.
+          includeHttpResponseReturnType: false,
+          forceSuccessResponse: true,
+        },
+      },
     },
   },
   zodSchemas: {

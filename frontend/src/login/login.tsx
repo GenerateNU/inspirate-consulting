@@ -11,14 +11,8 @@ export default function LogIn() {
   const handleSubmit = async (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
     try {
-      {
-        const response = await login(Email, Password);
-        if (response.status != 200) {
-          setStatus("Something went wrong");
-        } else {
-          setStatus("Logged in");
-        }
-      }
+      await login(Email, Password);
+      setStatus("Logged in");
     } catch (err) {
       console.error(err);
       setStatus("Something went wrong");

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { errorMessage } from "../api/client";
 import { useUpdateTodoItemCompleted } from "../api/endpoints";
 import {
   GetTodoItemsSortBy,
@@ -10,7 +11,6 @@ import {
 import {
   LINK_TYPES,
   LINK_TYPE_LABELS,
-  errorMessage,
   formatDate,
   formatDeadline,
   useTodoLinkOptions,
@@ -34,17 +34,13 @@ function TaskItem({
   linkLabel: string | null;
   onToggled: () => void;
 }) {
-  const { trigger } = useUpdateTodoItemCompleted(task.id);
+  const { mutate, error } = useUpdateTodoItemCompleted();
 
-  const handleToggle = async () => {
-    try {
-      const res = await trigger({ completed: task.completed_at == null });
-      if (res.status !== 200) console.error(errorMessage(res.data));
-      onToggled();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const handleToggle = () =>
+    mutate(
+      { id: task.id, data: { completed: task.completed_at == null } },
+      { onSettled: onToggled },
+    );
 
   const overdue =
     task.completed_at == null &&
@@ -70,6 +66,7 @@ function TaskItem({
         <span> — completed {formatDate(task.completed_at)}</span>
       )}
       {linkLabel && <span> [{linkLabel}]</span>}
+      {error && <span> — Error: {errorMessage(error)}</span>}
     </li>
   );
 }
@@ -171,7 +168,7 @@ export default function TaskList() {
       </div>
 
       {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
       {!isLoading && !error && items.length === 0 && (
         <p>{q.trim() ? "No tasks match your search." : "No tasks yet."}</p>
       )}
