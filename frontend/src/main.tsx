@@ -28,6 +28,7 @@ import CreateUser from "./user/create-user";
 import LogOut from "./logout/logout";
 import LogIn from "./login/login";
 import { AuthProvider } from "./contexts/auth-context.tsx";
+import StudentProfile from "./student/student-profile.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -73,6 +74,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/create-account" element={<CreateUser />} />
               <Route path="/login" element={<LogIn />} />
               <Route path="/logout" element={<LogOut />} />
+              <Route path="/students/:id" element={<StudentProfile />} />
             </Route>
           </Routes>
         </AuthProvider>
