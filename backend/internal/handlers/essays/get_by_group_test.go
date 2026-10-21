@@ -34,7 +34,7 @@ func TestHandler_GetEssaysByGroup(t *testing.T) {
 		mockRepo := mocks.NewEssayRepository(t)
 		mockRepo.On("GetEssaysByGroup", mock.Anything, groupID).Return(essays, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssaysByGroup(ctx, input)
 
 		assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestHandler_GetEssaysByGroup(t *testing.T) {
 		mockRepo := mocks.NewEssayRepository(t)
 		mockRepo.On("GetEssaysByGroup", mock.Anything, groupID).Return([]models.Essays{}, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssaysByGroup(ctx, input)
 
 		assert.NoError(t, err)
@@ -62,7 +62,7 @@ func TestHandler_GetEssaysByGroup(t *testing.T) {
 		mockRepo.On("GetEssaysByGroup", mock.Anything, groupID).
 			Return([]models.Essays(nil), errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.GetEssaysByGroup(ctx, input)
 
 		assert.Error(t, err)

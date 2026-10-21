@@ -11,8 +11,9 @@ import (
 )
 
 func (h *Handler) SetReviewBalance(ctx context.Context, id uuid.UUID, input models.SetStudentReviewBalanceRequestBody) (*models.Student, error) {
-	// TODO: guard by role - admins and counselors only. This mints review credit
-	// from nothing, so a student must never reach it.
+	if err := h.Authorizer.CanAccessStudent(ctx, id); err != nil {
+		return nil, err
+	}
 
 	if input.ReviewBalance < 0 {
 		return nil, errs.BadRequest("review_balance cannot be negative")

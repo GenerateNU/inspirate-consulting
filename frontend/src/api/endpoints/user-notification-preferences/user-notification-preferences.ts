@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -50,35 +58,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type getNotificationPreferencesResponse200 = {
-  data: NotificationPreferences
-  status: 200
-}
-
-export type getNotificationPreferencesResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type getNotificationPreferencesResponseSuccess = (getNotificationPreferencesResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type getNotificationPreferencesResponseError = (getNotificationPreferencesResponseDefault) & {
-  headers: Headers;
-};
-
-export type getNotificationPreferencesResponse = (getNotificationPreferencesResponseSuccess | getNotificationPreferencesResponseError)
 
 export const getGetNotificationPreferencesUrl = () => {
 
@@ -91,7 +87,7 @@ export const getGetNotificationPreferencesUrl = () => {
 /**
  * Get notification preferences for the authenticated user.
  */
-export const getNotificationPreferences = async ( options?: RequestInit): Promise<getNotificationPreferencesResponse> => {
+export const getNotificationPreferences = async ( options?: RequestInit): Promise<NotificationPreferences> => {
 
   const res = await fetch(getGetNotificationPreferencesUrl(),
   {
@@ -104,52 +100,92 @@ export const getNotificationPreferences = async ( options?: RequestInit): Promis
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getNotificationPreferencesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getNotificationPreferencesResponse
+    const err: globalThis.Error & {info?: NotificationPreferences, status?: number} = new globalThis.Error();
+    const data : NotificationPreferences = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: NotificationPreferences = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetNotificationPreferencesKey = () => [`/api/notification-preferences`] as const;
+
+export const getGetNotificationPreferencesQueryKey = () => {
+    return [
+    `/api/notification-preferences`
+    ] as const;
+    }
+
+
+export const getGetNotificationPreferencesQueryOptions = <TData = Awaited<ReturnType<typeof getNotificationPreferences>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotificationPreferences>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNotificationPreferencesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotificationPreferences>>> = ({ signal }) => getNotificationPreferences({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotificationPreferences>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetNotificationPreferencesQueryResult = NonNullable<Awaited<ReturnType<typeof getNotificationPreferences>>>
+export type GetNotificationPreferencesQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetNotificationPreferences = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getNotificationPreferences>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetNotificationPreferencesKey() : null);
-  const swrFn = () => getNotificationPreferences(fetchOptions)
+export function useGetNotificationPreferences<TData = Awaited<ReturnType<typeof getNotificationPreferences>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotificationPreferences>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotificationPreferences>>,
+          TError,
+          Awaited<ReturnType<typeof getNotificationPreferences>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetNotificationPreferences<TData = Awaited<ReturnType<typeof getNotificationPreferences>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotificationPreferences>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotificationPreferences>>,
+          TError,
+          Awaited<ReturnType<typeof getNotificationPreferences>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetNotificationPreferences<TData = Awaited<ReturnType<typeof getNotificationPreferences>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotificationPreferences>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetNotificationPreferences<TData = Awaited<ReturnType<typeof getNotificationPreferences>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotificationPreferences>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetNotificationPreferencesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type updateNotificationPreferencesResponse200 = {
-  data: NotificationPreferences
-  status: 200
-}
 
-export type updateNotificationPreferencesResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type updateNotificationPreferencesResponseSuccess = (updateNotificationPreferencesResponse200) & {
-  headers: Headers;
-};
-export type updateNotificationPreferencesResponseError = (updateNotificationPreferencesResponseDefault) & {
-  headers: Headers;
-};
 
-export type updateNotificationPreferencesResponse = (updateNotificationPreferencesResponseSuccess | updateNotificationPreferencesResponseError)
+
+
 
 export const getUpdateNotificationPreferencesUrl = () => {
 
@@ -162,7 +198,7 @@ export const getUpdateNotificationPreferencesUrl = () => {
 /**
  * Update notification preferences for the authenticated user.
  */
-export const updateNotificationPreferences = async (updateNotificationPreferencesRequestBody: NonReadonly<UpdateNotificationPreferencesRequestBody>, options?: RequestInit): Promise<updateNotificationPreferencesResponse> => {
+export const updateNotificationPreferences = async (updateNotificationPreferencesRequestBody: NonReadonly<UpdateNotificationPreferencesRequestBody>, options?: RequestInit): Promise<NotificationPreferences> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -189,36 +225,63 @@ const res = await fetch(getUpdateNotificationPreferencesUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: updateNotificationPreferencesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateNotificationPreferencesResponse
-}
-
-
-
-
-export const getUpdateNotificationPreferencesMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<UpdateNotificationPreferencesRequestBody> }) => {
-    return updateNotificationPreferences(arg, options);
+    const err: globalThis.Error & {info?: NotificationPreferences, status?: number} = new globalThis.Error();
+    const data : NotificationPreferences = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: NotificationPreferences = body ? JSON.parse(body) : {}
+  return data
 }
-export const getUpdateNotificationPreferencesMutationKey = () => [`/api/notification-preferences`] as const;
 
-export type UpdateNotificationPreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof updateNotificationPreferences>>>
 
-export const useUpdateNotificationPreferences = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updateNotificationPreferences>>, TError, Key, NonReadonly<UpdateNotificationPreferencesRequestBody>, Awaited<ReturnType<typeof updateNotificationPreferences>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getUpdateNotificationPreferencesMutationKey();
-  const swrFn = getUpdateNotificationPreferencesMutationFetcher(fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getUpdateNotificationPreferencesMutationKey = () => ['updateNotificationPreferences'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getUpdateNotificationPreferencesMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNotificationPreferences>>, TError,UpdateNotificationPreferencesMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateNotificationPreferences>>, TError,UpdateNotificationPreferencesMutationVariables, TContext> => {
+
+const mutationKey = getUpdateNotificationPreferencesMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateNotificationPreferences>>, UpdateNotificationPreferencesMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateNotificationPreferences(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateNotificationPreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof updateNotificationPreferences>>>
+    export type UpdateNotificationPreferencesMutationBody = NonReadonly<UpdateNotificationPreferencesRequestBody>
+    export type UpdateNotificationPreferencesMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateNotificationPreferencesMutationVariables = {data: NonReadonly<UpdateNotificationPreferencesRequestBody>}
+
+    export const useUpdateNotificationPreferences = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNotificationPreferences>>, TError,UpdateNotificationPreferencesMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateNotificationPreferences>>,
+        TError,
+        UpdateNotificationPreferencesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateNotificationPreferencesMutationOptions(options), queryClient);
+    }

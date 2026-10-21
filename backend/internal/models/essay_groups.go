@@ -11,9 +11,9 @@ type EssayGroups struct {
 }
 
 type CreateEssayGroupBody struct {
-	Name        string    `json:"name" minLength:"1" maxLength:"100" example:"Common App" doc:"Unique name for the group"`
-	Description *string   `json:"description" required:"false" doc:"Optional description of the group"`
-	StudentID   uuid.UUID `json:"student_id" doc:"Student the group belongs to"`
+	Name        string     `json:"name" minLength:"1" maxLength:"100" example:"Common App" doc:"Unique name for the group"`
+	Description *string    `json:"description" required:"false" doc:"Optional description of the group"`
+	StudentID   *uuid.UUID `json:"student_id,omitempty" required:"false" doc:"Student the group is for; required for counselors, defaults to the authenticated student"`
 }
 
 type CreateEssayGroupInput struct {

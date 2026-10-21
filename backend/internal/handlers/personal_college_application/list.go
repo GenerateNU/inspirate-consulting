@@ -8,7 +8,10 @@ import (
 )
 
 func (h *Handler) ListPersonalCollegeApplicationsByStudentID(ctx context.Context) ([]models.PersonalCollegeApplication, error) {
-	studentID := auth.GetStudentID(ctx)
+	studentID, err := auth.GetStudentID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	applications, err := h.PersonalCollegeApplicationRepository.ListPersonalCollegeApplicationsByStudentID(ctx, studentID)
 	if err != nil {
 		return nil, err

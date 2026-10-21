@@ -5,17 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Arguments,
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   ChatMessage,
@@ -56,35 +63,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type listChatsResponse200 = {
-  data: ChatSummary[] | null
-  status: 200
-}
-
-export type listChatsResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type listChatsResponseSuccess = (listChatsResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type listChatsResponseError = (listChatsResponseDefault) & {
-  headers: Headers;
-};
-
-export type listChatsResponse = (listChatsResponseSuccess | listChatsResponseError)
 
 export const getListChatsUrl = () => {
 
@@ -97,7 +92,7 @@ export const getListChatsUrl = () => {
 /**
  * List the current user's conversations with their latest message and unread count, most recent first.
  */
-export const listChats = async ( options?: RequestInit): Promise<listChatsResponse> => {
+export const listChats = async ( options?: RequestInit): Promise<ChatSummary[] | null> => {
 
   const res = await fetch(getListChatsUrl(),
   {
@@ -110,52 +105,92 @@ export const listChats = async ( options?: RequestInit): Promise<listChatsRespon
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listChatsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listChatsResponse
+    const err: globalThis.Error & {info?: ChatSummary[] | null, status?: number} = new globalThis.Error();
+    const data : ChatSummary[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ChatSummary[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListChatsKey = () => [`/api/chats`] as const;
+
+export const getListChatsQueryKey = () => {
+    return [
+    `/api/chats`
+    ] as const;
+    }
+
+
+export const getListChatsQueryOptions = <TData = Awaited<ReturnType<typeof listChats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChats>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListChatsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChats>>> = ({ signal }) => listChats({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListChatsQueryResult = NonNullable<Awaited<ReturnType<typeof listChats>>>
+export type ListChatsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListChats = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listChats>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListChatsKey() : null);
-  const swrFn = () => listChats(fetchOptions)
+export function useListChats<TData = Awaited<ReturnType<typeof listChats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listChats>>,
+          TError,
+          Awaited<ReturnType<typeof listChats>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListChats<TData = Awaited<ReturnType<typeof listChats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listChats>>,
+          TError,
+          Awaited<ReturnType<typeof listChats>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListChats<TData = Awaited<ReturnType<typeof listChats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChats>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListChats<TData = Awaited<ReturnType<typeof listChats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChats>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListChatsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type listChatMessagesResponse200 = {
-  data: ChatMessagePage
-  status: 200
-}
 
-export type listChatMessagesResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type listChatMessagesResponseSuccess = (listChatMessagesResponse200) & {
-  headers: Headers;
-};
-export type listChatMessagesResponseError = (listChatMessagesResponseDefault) & {
-  headers: Headers;
-};
 
-export type listChatMessagesResponse = (listChatMessagesResponseSuccess | listChatMessagesResponseError)
+
+
 
 export const getListChatMessagesUrl = (userId: string,
     params?: ListChatMessagesParams,) => {
@@ -177,7 +212,7 @@ export const getListChatMessagesUrl = (userId: string,
  * Get a page of messages between the current user and another user, newest first.
  */
 export const listChatMessages = async (userId: string,
-    params?: ListChatMessagesParams, options?: RequestInit): Promise<listChatMessagesResponse> => {
+    params?: ListChatMessagesParams, options?: RequestInit): Promise<ChatMessagePage> => {
 
   const res = await fetch(getListChatMessagesUrl(userId,params),
   {
@@ -190,54 +225,98 @@ export const listChatMessages = async (userId: string,
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listChatMessagesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listChatMessagesResponse
+    const err: globalThis.Error & {info?: ChatMessagePage, status?: number} = new globalThis.Error();
+    const data : ChatMessagePage = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ChatMessagePage = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListChatMessagesKey = (userId: string,
-    params?: ListChatMessagesParams,) => [`/api/chats/${userId}/messages`, ...(params ? [params]: [])] as const;
+
+export const getListChatMessagesQueryKey = (userId: string,
+    params?: ListChatMessagesParams,) => {
+    return [
+    `/api/chats/${userId}/messages`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListChatMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listChatMessages>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(userId: string,
+    params?: ListChatMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChatMessages>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListChatMessagesQueryKey(userId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChatMessages>>> = ({ signal }) => listChatMessages(userId,params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChatMessages>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListChatMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listChatMessages>>>
+export type ListChatMessagesQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListChatMessages = <TError = Promise<ErrorModel>>(
-  userId: string,
-    params?: ListChatMessagesParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listChatMessages>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false && userId !== null && userId !== undefined
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListChatMessagesKey(userId,params) : null);
-  const swrFn = () => listChatMessages(userId,params, fetchOptions)
+export function useListChatMessages<TData = Awaited<ReturnType<typeof listChatMessages>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ userId: string,
+    params: undefined |  ListChatMessagesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChatMessages>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listChatMessages>>,
+          TError,
+          Awaited<ReturnType<typeof listChatMessages>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListChatMessages<TData = Awaited<ReturnType<typeof listChatMessages>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ userId: string,
+    params?: ListChatMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChatMessages>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listChatMessages>>,
+          TError,
+          Awaited<ReturnType<typeof listChatMessages>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListChatMessages<TData = Awaited<ReturnType<typeof listChatMessages>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ userId: string,
+    params?: ListChatMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChatMessages>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListChatMessages<TData = Awaited<ReturnType<typeof listChatMessages>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ userId: string,
+    params?: ListChatMessagesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listChatMessages>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListChatMessagesQueryOptions(userId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type markChatReadResponse204 = {
-  data: void
-  status: 204
-}
 
-export type markChatReadResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 204>
-}
 
-export type markChatReadResponseSuccess = (markChatReadResponse204) & {
-  headers: Headers;
-};
-export type markChatReadResponseError = (markChatReadResponseDefault) & {
-  headers: Headers;
-};
 
-export type markChatReadResponse = (markChatReadResponseSuccess | markChatReadResponseError)
+
+
 
 export const getMarkChatReadUrl = (userId: string,) => {
 
@@ -250,7 +329,7 @@ export const getMarkChatReadUrl = (userId: string,) => {
 /**
  * Mark every message the other user sent to the current user as read.
  */
-export const markChatRead = async (userId: string, options?: RequestInit): Promise<markChatReadResponse> => {
+export const markChatRead = async (userId: string, options?: RequestInit): Promise<void> => {
 
   const res = await fetch(getMarkChatReadUrl(userId),
   {
@@ -263,59 +342,67 @@ export const markChatRead = async (userId: string, options?: RequestInit): Promi
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: markChatReadResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as markChatReadResponse
-}
-
-
-
-
-export const getMarkChatReadMutationFetcher = (userId: string, options?: RequestInit) => {
-  return (_: Key, __: { arg: Arguments }) => {
-    return markChatRead(userId, options);
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getMarkChatReadMutationKey = (userId: string,) => [`/api/chats/${userId}/read`] as const;
-
-export type MarkChatReadMutationResult = NonNullable<Awaited<ReturnType<typeof markChatRead>>>
-
-export const useMarkChatRead = <TError = Promise<ErrorModel>>(
-  userId: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof markChatRead>>, TError, Key, Arguments, Awaited<ReturnType<typeof markChatRead>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getMarkChatReadMutationKey(userId);
-  const swrFn = getMarkChatReadMutationFetcher(userId, fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type createChatMessageResponse200 = {
-  data: ChatMessage
-  status: 200
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
 }
 
-export type createChatMessageResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type createChatMessageResponseSuccess = (createChatMessageResponse200) & {
-  headers: Headers;
-};
-export type createChatMessageResponseError = (createChatMessageResponseDefault) & {
-  headers: Headers;
-};
 
-export type createChatMessageResponse = (createChatMessageResponseSuccess | createChatMessageResponseError)
 
-export const getCreateChatMessageUrl = () => {
+
+export const getMarkChatReadMutationKey = () => ['markChatRead'] as const;
+
+export const getMarkChatReadMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markChatRead>>, TError,MarkChatReadMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof markChatRead>>, TError,MarkChatReadMutationVariables, TContext> => {
+
+const mutationKey = getMarkChatReadMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markChatRead>>, MarkChatReadMutationVariables> = (props) => {
+          const {userId} = props ?? {};
+
+          return  markChatRead(userId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkChatReadMutationResult = NonNullable<Awaited<ReturnType<typeof markChatRead>>>
+
+    export type MarkChatReadMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type MarkChatReadMutationVariables = {userId: string}
+
+    export const useMarkChatRead = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markChatRead>>, TError,MarkChatReadMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof markChatRead>>,
+        TError,
+        MarkChatReadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkChatReadMutationOptions(options), queryClient);
+    }
+    export const getCreateChatMessageUrl = () => {
 
 
 
@@ -326,7 +413,7 @@ export const getCreateChatMessageUrl = () => {
 /**
  * Send a message from the current user to another user.
  */
-export const createChatMessage = async (createChatMessageRequestBody: NonReadonly<CreateChatMessageRequestBody>, options?: RequestInit): Promise<createChatMessageResponse> => {
+export const createChatMessage = async (createChatMessageRequestBody: NonReadonly<CreateChatMessageRequestBody>, options?: RequestInit): Promise<ChatMessage> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -353,59 +440,67 @@ const res = await fetch(getCreateChatMessageUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createChatMessageResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createChatMessageResponse
-}
-
-
-
-
-export const getCreateChatMessageMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<CreateChatMessageRequestBody> }) => {
-    return createChatMessage(arg, options);
+    const err: globalThis.Error & {info?: ChatMessage, status?: number} = new globalThis.Error();
+    const data : ChatMessage = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getCreateChatMessageMutationKey = () => [`/api/messages`] as const;
-
-export type CreateChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof createChatMessage>>>
-
-export const useCreateChatMessage = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createChatMessage>>, TError, Key, NonReadonly<CreateChatMessageRequestBody>, Awaited<ReturnType<typeof createChatMessage>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getCreateChatMessageMutationKey();
-  const swrFn = getCreateChatMessageMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type editChatMessageResponse200 = {
-  data: ChatMessage
-  status: 200
+  const data: ChatMessage = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type editChatMessageResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type editChatMessageResponseSuccess = (editChatMessageResponse200) & {
-  headers: Headers;
-};
-export type editChatMessageResponseError = (editChatMessageResponseDefault) & {
-  headers: Headers;
-};
 
-export type editChatMessageResponse = (editChatMessageResponseSuccess | editChatMessageResponseError)
 
-export const getEditChatMessageUrl = (id: string,) => {
+
+export const getCreateChatMessageMutationKey = () => ['createChatMessage'] as const;
+
+export const getCreateChatMessageMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChatMessage>>, TError,CreateChatMessageMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createChatMessage>>, TError,CreateChatMessageMutationVariables, TContext> => {
+
+const mutationKey = getCreateChatMessageMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createChatMessage>>, CreateChatMessageMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createChatMessage(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof createChatMessage>>>
+    export type CreateChatMessageMutationBody = NonReadonly<CreateChatMessageRequestBody>
+    export type CreateChatMessageMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateChatMessageMutationVariables = {data: NonReadonly<CreateChatMessageRequestBody>}
+
+    export const useCreateChatMessage = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChatMessage>>, TError,CreateChatMessageMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createChatMessage>>,
+        TError,
+        CreateChatMessageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateChatMessageMutationOptions(options), queryClient);
+    }
+    export const getEditChatMessageUrl = (id: string,) => {
 
 
 
@@ -417,7 +512,7 @@ export const getEditChatMessageUrl = (id: string,) => {
  * Edit the text of a message the current user sent.
  */
 export const editChatMessage = async (id: string,
-    editChatMessageRequestBody: NonReadonly<EditChatMessageRequestBody>, options?: RequestInit): Promise<editChatMessageResponse> => {
+    editChatMessageRequestBody: NonReadonly<EditChatMessageRequestBody>, options?: RequestInit): Promise<ChatMessage> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -444,59 +539,67 @@ const res = await fetch(getEditChatMessageUrl(id),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: editChatMessageResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as editChatMessageResponse
-}
-
-
-
-
-export const getEditChatMessageMutationFetcher = (id: string, options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<EditChatMessageRequestBody> }) => {
-    return editChatMessage(id, arg, options);
+    const err: globalThis.Error & {info?: ChatMessage, status?: number} = new globalThis.Error();
+    const data : ChatMessage = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getEditChatMessageMutationKey = (id: string,) => [`/api/messages/${id}`] as const;
-
-export type EditChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof editChatMessage>>>
-
-export const useEditChatMessage = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof editChatMessage>>, TError, Key, NonReadonly<EditChatMessageRequestBody>, Awaited<ReturnType<typeof editChatMessage>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getEditChatMessageMutationKey(id);
-  const swrFn = getEditChatMessageMutationFetcher(id, fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type updateChatMessageReadResponse200 = {
-  data: ChatMessage
-  status: 200
+  const data: ChatMessage = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type updateChatMessageReadResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type updateChatMessageReadResponseSuccess = (updateChatMessageReadResponse200) & {
-  headers: Headers;
-};
-export type updateChatMessageReadResponseError = (updateChatMessageReadResponseDefault) & {
-  headers: Headers;
-};
 
-export type updateChatMessageReadResponse = (updateChatMessageReadResponseSuccess | updateChatMessageReadResponseError)
 
-export const getUpdateChatMessageReadUrl = (id: string,) => {
+
+export const getEditChatMessageMutationKey = () => ['editChatMessage'] as const;
+
+export const getEditChatMessageMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof editChatMessage>>, TError,EditChatMessageMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof editChatMessage>>, TError,EditChatMessageMutationVariables, TContext> => {
+
+const mutationKey = getEditChatMessageMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof editChatMessage>>, EditChatMessageMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  editChatMessage(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EditChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof editChatMessage>>>
+    export type EditChatMessageMutationBody = NonReadonly<EditChatMessageRequestBody>
+    export type EditChatMessageMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type EditChatMessageMutationVariables = {id: string;data: NonReadonly<EditChatMessageRequestBody>}
+
+    export const useEditChatMessage = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof editChatMessage>>, TError,EditChatMessageMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof editChatMessage>>,
+        TError,
+        EditChatMessageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getEditChatMessageMutationOptions(options), queryClient);
+    }
+    export const getUpdateChatMessageReadUrl = (id: string,) => {
 
 
 
@@ -508,7 +611,7 @@ export const getUpdateChatMessageReadUrl = (id: string,) => {
  * Mark a message the current user received as read or unread.
  */
 export const updateChatMessageRead = async (id: string,
-    updateChatMessageReadInputBody: NonReadonly<UpdateChatMessageReadInputBody>, options?: RequestInit): Promise<updateChatMessageReadResponse> => {
+    updateChatMessageReadInputBody: NonReadonly<UpdateChatMessageReadInputBody>, options?: RequestInit): Promise<ChatMessage> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -535,36 +638,63 @@ const res = await fetch(getUpdateChatMessageReadUrl(id),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: updateChatMessageReadResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateChatMessageReadResponse
-}
-
-
-
-
-export const getUpdateChatMessageReadMutationFetcher = (id: string, options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<UpdateChatMessageReadInputBody> }) => {
-    return updateChatMessageRead(id, arg, options);
+    const err: globalThis.Error & {info?: ChatMessage, status?: number} = new globalThis.Error();
+    const data : ChatMessage = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: ChatMessage = body ? JSON.parse(body) : {}
+  return data
 }
-export const getUpdateChatMessageReadMutationKey = (id: string,) => [`/api/messages/${id}/read`] as const;
 
-export type UpdateChatMessageReadMutationResult = NonNullable<Awaited<ReturnType<typeof updateChatMessageRead>>>
 
-export const useUpdateChatMessageRead = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updateChatMessageRead>>, TError, Key, NonReadonly<UpdateChatMessageReadInputBody>, Awaited<ReturnType<typeof updateChatMessageRead>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getUpdateChatMessageReadMutationKey(id);
-  const swrFn = getUpdateChatMessageReadMutationFetcher(id, fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getUpdateChatMessageReadMutationKey = () => ['updateChatMessageRead'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getUpdateChatMessageReadMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChatMessageRead>>, TError,UpdateChatMessageReadMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateChatMessageRead>>, TError,UpdateChatMessageReadMutationVariables, TContext> => {
+
+const mutationKey = getUpdateChatMessageReadMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChatMessageRead>>, UpdateChatMessageReadMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateChatMessageRead(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateChatMessageReadMutationResult = NonNullable<Awaited<ReturnType<typeof updateChatMessageRead>>>
+    export type UpdateChatMessageReadMutationBody = NonReadonly<UpdateChatMessageReadInputBody>
+    export type UpdateChatMessageReadMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateChatMessageReadMutationVariables = {id: string;data: NonReadonly<UpdateChatMessageReadInputBody>}
+
+    export const useUpdateChatMessageRead = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChatMessageRead>>, TError,UpdateChatMessageReadMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateChatMessageRead>>,
+        TError,
+        UpdateChatMessageReadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateChatMessageReadMutationOptions(options), queryClient);
+    }

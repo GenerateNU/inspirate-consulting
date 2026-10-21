@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { errorMessage } from "../api/client";
 import {
   useGetNotificationPreferences,
   useUpdateNotificationPreferences,
 } from "../api/endpoints";
 
 export default function UpdateNotificationPreferences() {
-  const { data: response, error, isLoading } = useGetNotificationPreferences();
-  const { trigger, isMutating } = useUpdateNotificationPreferences();
+  const { data: prefs, error, isLoading } = useGetNotificationPreferences();
+  const update = useUpdateNotificationPreferences();
 
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [weeklySummaryEnabled, setWeeklySummaryEnabled] = useState(true);
@@ -18,36 +19,30 @@ export default function UpdateNotificationPreferences() {
 
   // Pre-fill the form with GET request (current preferences).
   useEffect(() => {
-    if (response?.status === 200) {
-      const prefs = response.data;
+    if (prefs) {
       setEmailEnabled(prefs.email_enabled);
       setWeeklySummaryEnabled(prefs.weekly_summary_enabled);
       setDueDateNotificationsEnabled(prefs.due_date_notifications_enabled);
       setDaysBeforeDue(prefs.days_before_due);
       setNotifyPastDue(prefs.notify_past_due);
     }
-  }, [response]);
+  }, [prefs]);
 
-  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const result = await trigger({
-        email_enabled: emailEnabled,
-        weekly_summary_enabled: weeklySummaryEnabled,
-        due_date_notifications_enabled: dueDateNotificationsEnabled,
-        days_before_due: daysBeforeDue,
-        notify_past_due: notifyPastDue,
-      });
-
-      if (result.status === 200) {
-        setStatus("Saved.");
-      } else {
-        setStatus("Could not save preferences.");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
-    }
+    setStatus("");
+    update.mutate(
+      {
+        data: {
+          email_enabled: emailEnabled,
+          weekly_summary_enabled: weeklySummaryEnabled,
+          due_date_notifications_enabled: dueDateNotificationsEnabled,
+          days_before_due: daysBeforeDue,
+          notify_past_due: notifyPastDue,
+        },
+      },
+      { onSuccess: () => setStatus("Saved.") },
+    );
   };
 
   if (isLoading) {
@@ -59,7 +54,7 @@ export default function UpdateNotificationPreferences() {
     );
   }
 
-  if (error || !response || response.status !== 200) {
+  if (error || !prefs) {
     return (
       <div className="form-container">
         <h2>Notification Preferences</h2>
@@ -127,11 +122,12 @@ export default function UpdateNotificationPreferences() {
           </label>
         </div>
 
-        <button type="submit" disabled={isMutating}>
-          {isMutating ? "Saving..." : "Save Preferences"}
+        <button type="submit" disabled={update.isPending}>
+          {update.isPending ? "Saving..." : "Save Preferences"}
         </button>
       </form>
       {status && <p>{status}</p>}
+      {update.error && <p>Error: {errorMessage(update.error)}</p>}
     </div>
   );
 }

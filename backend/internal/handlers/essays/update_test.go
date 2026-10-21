@@ -43,7 +43,7 @@ func TestHandler_UpdateStatus(t *testing.T) {
 			models.Submitted,
 		).Return(updatedEssay, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateStatus(ctx, input)
 
 		assert.NoError(t, err)
@@ -63,7 +63,7 @@ func TestHandler_UpdateStatus(t *testing.T) {
 			models.Submitted,
 		).Return((*models.Essays)(nil), errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UpdateStatus(ctx, input)
 
 		assert.Error(t, err)

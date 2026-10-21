@@ -5,14 +5,15 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
-  Key
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  MutationFunction,
+  QueryClient,
+  UseMutationOptions,
+  UseMutationResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -48,35 +49,8 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
-
-
-
- export type createGreetingResponse200 = {
-  data: GreetingMessageBody
-  status: 200
-}
-
-export type createGreetingResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type createGreetingResponseSuccess = (createGreetingResponse200) & {
-  headers: Headers;
-};
-export type createGreetingResponseError = (createGreetingResponseDefault) & {
-  headers: Headers;
-};
-
-export type createGreetingResponse = (createGreetingResponseSuccess | createGreetingResponseError)
 
 export const getCreateGreetingUrl = () => {
 
@@ -89,7 +63,7 @@ export const getCreateGreetingUrl = () => {
 /**
  * Create a greeting for a person by name.
  */
-export const createGreeting = async (greetingRequestBody: NonReadonly<GreetingRequestBody>, options?: RequestInit): Promise<createGreetingResponse> => {
+export const createGreeting = async (greetingRequestBody: NonReadonly<GreetingRequestBody>, options?: RequestInit): Promise<GreetingMessageBody> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -116,36 +90,63 @@ const res = await fetch(getCreateGreetingUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createGreetingResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createGreetingResponse
-}
-
-
-
-
-export const getCreateGreetingMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<GreetingRequestBody> }) => {
-    return createGreeting(arg, options);
+    const err: globalThis.Error & {info?: GreetingMessageBody, status?: number} = new globalThis.Error();
+    const data : GreetingMessageBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: GreetingMessageBody = body ? JSON.parse(body) : {}
+  return data
 }
-export const getCreateGreetingMutationKey = () => [`/api/greeting`] as const;
 
-export type CreateGreetingMutationResult = NonNullable<Awaited<ReturnType<typeof createGreeting>>>
 
-export const useCreateGreeting = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createGreeting>>, TError, Key, NonReadonly<GreetingRequestBody>, Awaited<ReturnType<typeof createGreeting>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getCreateGreetingMutationKey();
-  const swrFn = getCreateGreetingMutationFetcher(fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getCreateGreetingMutationKey = () => ['createGreeting'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getCreateGreetingMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGreeting>>, TError,CreateGreetingMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createGreeting>>, TError,CreateGreetingMutationVariables, TContext> => {
+
+const mutationKey = getCreateGreetingMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createGreeting>>, CreateGreetingMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createGreeting(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateGreetingMutationResult = NonNullable<Awaited<ReturnType<typeof createGreeting>>>
+    export type CreateGreetingMutationBody = NonReadonly<GreetingRequestBody>
+    export type CreateGreetingMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateGreetingMutationVariables = {data: NonReadonly<GreetingRequestBody>}
+
+    export const useCreateGreeting = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGreeting>>, TError,CreateGreetingMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createGreeting>>,
+        TError,
+        CreateGreetingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateGreetingMutationOptions(options), queryClient);
+    }

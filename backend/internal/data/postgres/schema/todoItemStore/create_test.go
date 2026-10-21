@@ -21,14 +21,14 @@ func TestCreateTodoItem(t *testing.T) {
 
 	deadline := time.Now().Add(7 * 24 * time.Hour).UTC().Truncate(time.Second)
 
-	input := &models.CreateTodoItemRequestBody{
-		StudentID:       uuid.NewString(),
-		UserID:          uuid.NewString(),
+	studentID := uuid.NewString()
+	userID := uuid.NewString()
+	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Finish the Common App essay",
 		Deadline:        &deadline,
 	}
 
-	created, err := repo.CreateTodoItem(ctx, input)
+	created, err := repo.CreateTodoItem(ctx, studentID, userID, input)
 	if err != nil {
 		t.Fatalf("CreateTodoItem failed: %v", err)
 	}
@@ -36,11 +36,11 @@ func TestCreateTodoItem(t *testing.T) {
 	if created.ID == "" {
 		t.Error("expected a generated ID, got empty string")
 	}
-	if created.StudentID != input.StudentID {
-		t.Errorf("expected StudentID %q, got %q", input.StudentID, created.StudentID)
+	if created.StudentID != studentID {
+		t.Errorf("expected StudentID %q, got %q", studentID, created.StudentID)
 	}
-	if created.UserID != input.UserID {
-		t.Errorf("expected UserID %q, got %q", input.UserID, created.UserID)
+	if created.UserID != userID {
+		t.Errorf("expected UserID %q, got %q", userID, created.UserID)
 	}
 	if created.TodoDescription != input.TodoDescription {
 		t.Errorf("expected TodoDescription %q, got %q", input.TodoDescription, created.TodoDescription)
@@ -72,13 +72,11 @@ func TestCreateTodoItem_NilDeadline(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := &models.CreateTodoItemRequestBody{
-		StudentID:       uuid.NewString(),
-		UserID:          uuid.NewString(),
+	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Someday task with no deadline",
 	}
 
-	created, err := repo.CreateTodoItem(ctx, input)
+	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
 	if err != nil {
 		t.Fatalf("expected create with a nil deadline to succeed, got error: %v", err)
 	}
@@ -101,13 +99,11 @@ func TestCreateTodoItem_InvalidStudentID(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	input := &models.CreateTodoItemRequestBody{
-		StudentID:       "not-a-uuid",
-		UserID:          uuid.NewString(),
+	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Should never be inserted",
 	}
 
-	_, err := repo.CreateTodoItem(ctx, input)
+	_, err := repo.CreateTodoItem(ctx, "not-a-uuid", uuid.NewString(), input)
 	if err == nil {
 		t.Fatal("expected an error creating a todo item with a non-uuid student_id, got nil")
 	}

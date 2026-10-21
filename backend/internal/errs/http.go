@@ -42,6 +42,10 @@ func Unauthorized() HTTPError {
 	return NewHTTPError(http.StatusUnauthorized, errors.New("unauthorized"))
 }
 
+func Forbidden(msg string) HTTPError {
+	return NewHTTPError(http.StatusForbidden, errors.New(msg))
+}
+
 func NotFound(title string, withKey string, withValue any) HTTPError {
 	return NewHTTPError(http.StatusNotFound, fmt.Errorf("%s with %s='%v' not found", title, withKey, withValue))
 }

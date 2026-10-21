@@ -26,6 +26,7 @@ export const ListPersonalCollegeApplicationsResponseItem = /*#__PURE__*/ zod.obj
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
 })
@@ -48,9 +49,71 @@ export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
 })
+
+
+/**
+ * Delete a personal college application for the authenticated student.
+ */
+export const DeletePersonalCollegeApplicationParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to delete'))
+})
+
+export const DeletePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Update a personal college application for the authenticated student.
+ */
+export const UpdatePersonalCollegeApplicationParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to update'))
+})
+
+export const UpdatePersonalCollegeApplicationBody = /*#__PURE__*/ zod.object({
+  "application_type": /*#__PURE__*/ zod.enum(['EA', 'ED', 'RD']).check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by')),
+  "category": /*#__PURE__*/ zod.enum(['safety', 'target', 'reach']).check(/*#__PURE__*/ zod.describe('How the student categorizes this school')),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to'))
+})
+
+export const UpdatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Update the rank of a personal college application for the authenticated student.
+ */
+export const UpdatePersonalCollegeApplicationRankParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to re-rank'))
+})
+
+export const UpdatePersonalCollegeApplicationRankBody = /*#__PURE__*/ zod.object({
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('The new 1-based rank, or null to un-rank this application'))
+})
+
+export const UpdatePersonalCollegeApplicationRankResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
+  "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+export const UpdatePersonalCollegeApplicationRankResponse = /*#__PURE__*/ zod.array(UpdatePersonalCollegeApplicationRankResponseItem)
 
 
 /**
@@ -175,6 +238,44 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * List the open essay reviews the authenticated counselor needs to complete, oldest first.
+ */
+export const ListCounselorPendingReviewsResponseItem = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the essay to review')),
+  "essay_link": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Link to the essay\'s content, so the counselor can open it to review')),
+  "essay_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Type of the essay to review')),
+  "requested_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('When the review was requested')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who requested the review')),
+  "student_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the student who requested the review')),
+  "transaction_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the review transaction, used to complete or refund the review'))
+})
+export const ListCounselorPendingReviewsResponse = /*#__PURE__*/ zod.array(ListCounselorPendingReviewsResponseItem)
+
+
+/**
+ * List the authenticated counselor's students, flagged for falling behind and pending essay reviews.
+ */
+export const listCounselorStudentsQuerySortByDefault = `name`;
+export const listCounselorStudentsQuerySortOrderDefault = `asc`;
+
+export const ListCounselorStudentsQueryParams = /*#__PURE__*/ zod.object({
+  "year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['freshman', 'sophomore', 'junior', 'senior'])).check(/*#__PURE__*/ zod.describe('Only return students in this school year')),
+  "has_pending_review": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()).check(/*#__PURE__*/ zod.describe('Only return students with an open essay review')),
+  "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['name', 'year']), listCounselorStudentsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
+  "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), listCounselorStudentsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction'))
+})
+
+export const ListCounselorStudentsResponseItem = /*#__PURE__*/ zod.object({
+  "has_pending_review": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an essay review that is still open')),
+  "is_falling_behind": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an incomplete to-do item past its deadline')),
+  "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the student')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The student\'s unique ID')),
+  "year": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('School year of the student'))
+})
+export const ListCounselorStudentsResponse = /*#__PURE__*/ zod.array(ListCounselorStudentsResponseItem)
+
+
+/**
  * Creates an essay group for a student
  */
 export const createEssayGroupBodyNameMax = 100;
@@ -184,7 +285,7 @@ export const createEssayGroupBodyNameMax = 100;
 export const CreateEssayGroupBody = /*#__PURE__*/ zod.object({
   "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Optional description of the group')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createEssayGroupBodyNameMax)).check(/*#__PURE__*/ zod.describe('Unique name for the group')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the group belongs to'))
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Student the group is for; required for counselors, defaults to the authenticated student'))
 })
 
 export const CreateEssayGroupResponse = /*#__PURE__*/ zod.object({
@@ -230,7 +331,6 @@ export const CreateEssayBody = /*#__PURE__*/ zod.object({
   "college_id": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Optional college this essay targets')),
   "essay_group_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('optional group this essay belongs to')),
   "link_to_content": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(createEssayBodyLinkToContentMin)),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student the essay belongs to')),
   "type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.maxLength(createEssayBodyTypeMax))
 })
 
@@ -687,8 +787,7 @@ export const requestEssayReviewBodyAmountDefault = 1;
 
 export const RequestEssayReviewBody = /*#__PURE__*/ zod.object({
   "amount": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)), requestEssayReviewBodyAmountDefault).check(/*#__PURE__*/ zod.describe('Number of review credits to spend. Positive; recorded on the ledger as a negative subtotal.')),
-  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review')),
-  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student requesting the review'))
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to review'))
 })
 
 export const RequestEssayReviewResponse = /*#__PURE__*/ zod.object({
@@ -890,9 +989,8 @@ export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Essay this task is for; at most one of essay_id, media_id, global_college_id')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College this task is for; at most one of essay_id, media_id, global_college_id')),
   "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Media this task is for; at most one of essay_id, media_id, global_college_id')),
-  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "todo_description": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student the task is for; required for counselors, defaults to the authenticated student')),
+  "todo_description": /*#__PURE__*/ zod.string()
 })
 
 export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({

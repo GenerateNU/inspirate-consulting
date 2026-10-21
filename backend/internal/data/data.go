@@ -6,6 +6,7 @@ import (
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
+	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
@@ -43,18 +44,18 @@ type EssayRepository interface {
 	UpdateEssayGroup(ctx context.Context, essayID uuid.UUID, essayGroupID *uuid.UUID) (*models.Essays, error)
 	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
 	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
-	CreateEssay(ctx context.Context, essay models.Essays) error
+	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
 }
 
 // Essay Group Repository
 type EssayGroupRepository interface {
-	CreateEssayGroup(ctx context.Context, group models.CreateEssayGroupBody) (*models.EssayGroups, error)
+	CreateEssayGroup(ctx context.Context, studentID uuid.UUID, group models.CreateEssayGroupBody) (*models.EssayGroups, error)
 	ListEssayGroups(ctx context.Context, studentID uuid.UUID) ([]models.EssayGroups, error)
 }
 
 // To represent Todo Item schema
 type TodoItemRepository interface {
-	CreateTodoItem(ctx context.Context, item *models.CreateTodoItemRequestBody) (*models.TodoItem, error)
+	CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error)
 	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
 }
@@ -75,8 +76,18 @@ type GlobalCollegeRepository interface {
 
 // To represent the Personal College Application schema
 type PersonalCollegeApplicationRepository interface {
-	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
-	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
+	CreatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID uuid.UUID) ([]models.PersonalCollegeApplication, error)
+	UpdateApplicationRank(ctx context.Context, studentID uuid.UUID, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error)
+	UpdatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error
+}
+
+// To represent the Counselor's view of their students and pending essay reviews
+type CounselorRepository interface {
+	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
+	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
+	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
 }
 
 type UserRepository interface {
@@ -120,6 +131,7 @@ type EssayReviewRepository interface {
 	LockTransaction(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 	FindOpenReviewForEssay(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*uuid.UUID, error)
 	FindEssayReviewStatus(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (*models.EssayReviewStatus, error)
+	FindEssayStudentID(ctx context.Context, db dbinterface.QueryInterface, essayID uuid.UUID) (uuid.UUID, error)
 	InsertSpend(ctx context.Context, db dbinterface.QueryInterface, studentID, essayID uuid.UUID, amount int) (*models.EssayReviewTransaction, error)
 	InsertRefund(ctx context.Context, db dbinterface.QueryInterface, charge *models.EssayReviewTransaction) (*models.EssayReviewTransaction, error)
 	InsertAdjustment(ctx context.Context, db dbinterface.QueryInterface, studentID uuid.UUID, delta int) error
@@ -154,6 +166,7 @@ type Repository struct {
 	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	Counselor                  CounselorRepository
 	Media                      MediaRepository
 	MediaAccess                MediaAccessRepository
 	User                       UserRepository
@@ -192,5 +205,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		EssayReview:                essayReviewRepository.NewEssayReviewRepository(db),
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
+		Counselor:                  counselorRepository.NewCounselorRepository(db),
 	}
 }

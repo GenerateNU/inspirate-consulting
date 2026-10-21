@@ -30,15 +30,15 @@ func insertEssayGroup(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID, name 
 }
 
 // createEssay inserts an essay and returns it, since CreateEssay itself returns only an error.
-func createEssay(t *testing.T, repo *EssayRepository, essay models.Essays) models.Essays {
+func createEssay(t *testing.T, repo *EssayRepository, studentID uuid.UUID, body models.CreateEssayBody) models.Essays {
 	t.Helper()
 
 	ctx := context.Background()
-	if err := repo.CreateEssay(ctx, essay); err != nil {
+	if err := repo.CreateEssay(ctx, studentID, body); err != nil {
 		t.Fatalf("setup CreateEssay failed: %v", err)
 	}
 
-	essays, err := repo.GetEssaysFromStudent(ctx, essay.StudentID)
+	essays, err := repo.GetEssaysFromStudent(ctx, studentID)
 	if err != nil {
 		t.Fatalf("setup GetEssaysFromStudent failed: %v", err)
 	}

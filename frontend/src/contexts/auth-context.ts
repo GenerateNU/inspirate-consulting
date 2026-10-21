@@ -1,10 +1,6 @@
 import { createContext } from "react";
 
-import type {
-  loginUserResponse,
-  logoutUserResponse,
-  resetUserPasswordResponse,
-} from "../api/endpoints";
+import type { User } from "../api/models";
 
 export interface AuthContextType {
   resetTime: string | null;

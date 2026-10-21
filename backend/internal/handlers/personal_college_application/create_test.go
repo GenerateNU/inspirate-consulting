@@ -6,9 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/models"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -18,7 +20,8 @@ import (
 func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
+	studentID := uuid.New()
+	ctx := auth.WithStudentID(context.Background(), studentID)
 	edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	t.Run("success", func(t *testing.T) {
@@ -45,7 +48,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
 
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, mock.Anything, input).
+		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, studentID, input).
 			Return(expectedApplication, nil)
 
 		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
@@ -142,7 +145,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
 
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, mock.Anything, input).
+		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, studentID, input).
 			Return(nil, errors.New("database error"))
 
 		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
@@ -151,5 +154,28 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")
+	})
+
+	t.Run("missing student id returns error", func(t *testing.T) {
+		t.Parallel()
+
+		input := models.CreatePersonalCollegeApplicationRequestBody{
+			GlobalCollegeID: 1,
+			ApplicationType: "ED",
+			Category:        "reach",
+		}
+		college := &models.GlobalCollege{ID: 1, EDDeadline: &edDeadline}
+
+		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
+		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
+
+		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		// CreatePersonalCollegeApplication is not called without a student id
+
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
+		res, err := handler.CreatePersonalCollegeApplication(context.Background(), input)
+
+		assert.ErrorIs(t, err, auth.ErrNoStudentID)
+		assert.Nil(t, res)
 	})
 }

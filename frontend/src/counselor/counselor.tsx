@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { completeEssayReview, setStudentReviewBalance } from "../api/endpoints";
+import { errorMessage } from "../api/client";
+import {
+  useCompleteEssayReview,
+  useSetStudentReviewBalance,
+} from "../api/endpoints";
 
 export default function Counselor() {
   // Complete a review
@@ -11,46 +15,31 @@ export default function Counselor() {
   const [balance, setBalance] = useState("0");
   const [balanceResult, setBalanceResult] = useState("");
 
-  const handleComplete = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const completeReview = useCompleteEssayReview();
+  const assignBalance = useSetStudentReviewBalance();
+
+  const handleComplete = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setCompleteResult("");
-    try {
-      const response = await completeEssayReview(reviewId);
-
-      if (response.status === 200) {
-        setCompleteResult(`Completed at ${response.data.completed_at}`);
-      } else {
-        setCompleteResult(
-          `Error ${response.status}: ${JSON.stringify(response.data)}`,
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      setCompleteResult("Something went wrong.");
-    }
+    completeReview.mutate(
+      { id: reviewId },
+      {
+        onSuccess: (review) =>
+          setCompleteResult(`Completed at ${review.completed_at}`),
+      },
+    );
   };
 
-  const handleAssignBalance = async (
-    event: React.SubmitEvent<HTMLFormElement>,
-  ) => {
+  const handleAssignBalance = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setBalanceResult("");
-    try {
-      const response = await setStudentReviewBalance(studentId, {
-        review_balance: Number(balance),
-      });
-
-      if (response.status === 200) {
-        setBalanceResult(`Balance is now ${response.data.review_balance}`);
-      } else {
-        setBalanceResult(
-          `Error ${response.status}: ${JSON.stringify(response.data)}`,
-        );
-      }
-    } catch (err) {
-      console.error(err);
-      setBalanceResult("Something went wrong.");
-    }
+    assignBalance.mutate(
+      { id: studentId, data: { review_balance: Number(balance) } },
+      {
+        onSuccess: (student) =>
+          setBalanceResult(`Balance is now ${student.review_balance}`),
+      },
+    );
   };
 
   return (
@@ -69,6 +58,9 @@ export default function Counselor() {
         <button type="submit">Complete Review</button>
       </form>
       {completeResult && <p>{completeResult}</p>}
+      {completeReview.error && (
+        <p>Error: {errorMessage(completeReview.error)}</p>
+      )}
 
       <h2>Assign Review Balance</h2>
       <form onSubmit={handleAssignBalance}>
@@ -94,6 +86,7 @@ export default function Counselor() {
         <button type="submit">Assign Balance</button>
       </form>
       {balanceResult && <p>{balanceResult}</p>}
+      {assignBalance.error && <p>Error: {errorMessage(assignBalance.error)}</p>}
     </div>
   );
 }

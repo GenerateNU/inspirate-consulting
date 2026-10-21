@@ -1,10 +1,5 @@
-export type { HTTPStatusCode1xx } from './chat/chat';
-export type { HTTPStatusCode2xx } from './chat/chat';
-export type { HTTPStatusCode3xx } from './chat/chat';
-export type { HTTPStatusCode4xx } from './chat/chat';
-export type { HTTPStatusCode5xx } from './chat/chat';
-export type { HTTPStatusCodes } from './chat/chat';
 export * from './chat/chat';
+export * from './counselors/counselors';
 export * from './essay-groups/essay-groups';
 export * from './essay-reviews/essay-reviews';
 export * from './essays/essays';

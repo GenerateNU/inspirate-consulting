@@ -5,7 +5,6 @@ import {
   useLoginUser,
   useLogoutUser,
   useResetUserPassword,
-  type loginUserResponse,
 } from "../api/endpoints";
 import type { ErrorModel } from "../api/models";
 
@@ -18,13 +17,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [studentID, setStudentID] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { trigger: loginFunc } = useLoginUser();
-  const { trigger: logoutFunc } = useLogoutUser();
-  const { trigger: passFunc } = useResetUserPassword();
+  const { mutateAsync: loginFunc } = useLoginUser();
+  const { mutateAsync: logoutFunc } = useLogoutUser();
+  const { mutateAsync: passFunc } = useResetUserPassword();
 
   const login = (email: string, password: string) => {
     return loginFunc(
-      { email, password },
+      { data: { email, password } },
       {
         onSuccess: (resp: loginUserResponse) => {
           if (resp.status != 200) {
@@ -60,12 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setError(err);
         },
       },
-    );
+    });
   };
 
   const new_password = (new_password: string) => {
     return passFunc(
-      { new_password },
+      { data: { new_password } },
       {
         onSuccess: () => {
           void navigate(path);

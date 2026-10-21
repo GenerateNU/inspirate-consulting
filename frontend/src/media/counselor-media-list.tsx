@@ -7,15 +7,11 @@ export default function CounselorMediaList() {
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong.</p>;
 
-  if (!data || !Array.isArray(data.data)) {
-    return <p>Something went wrong.</p>;
-  }
-
   return (
     <div>
       <h2>Counselor: All Videos</h2>
       <ul>
-        {data.data.map((media: Media) => (
+        {(data ?? []).map((media: Media) => (
           <li key={media.id}>{media.title}</li>
         ))}
       </ul>

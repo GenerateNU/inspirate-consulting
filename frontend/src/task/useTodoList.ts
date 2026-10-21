@@ -1,15 +1,19 @@
 import { useSearchParams } from "react-router-dom";
-import useSWRInfinite from "swr/infinite";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { getTodoItems, searchTodoItems } from "../api/endpoints";
+import {
+  getGetTodoItemsQueryKey,
+  getSearchTodoItemsQueryKey,
+  getTodoItems,
+  searchTodoItems,
+} from "../api/endpoints";
 import {
   GetTodoItemsSortBy,
   GetTodoItemsSortOrder,
   GetTodoItemsStatus,
   type GetTodoItemsParams,
-  type TodoItemPage,
 } from "../api/models";
-import { LINK_TYPES, errorMessage, type LinkType } from "./todoShared";
+import { LINK_TYPES, type LinkType } from "./todoShared";
 
 const PAGE_SIZE = 5;
 
@@ -86,40 +90,39 @@ export function useTaskFilterParams() {
 export function useTodoPages(filters: TodoFilters, q: string) {
   const search = q.trim();
 
-  const { data, error, isLoading, isValidating, size, setSize, mutate } =
-    useSWRInfinite<TodoItemPage, Error>(
-      (pageIndex, previous: TodoItemPage | null) => {
-        if (previous && !previous.next_cursor) return null;
-        const cursor =
-          pageIndex === 0 ? undefined : (previous?.next_cursor ?? undefined);
-        return ["todo-items", search, filters, cursor] as const;
-      },
-      async ([, search, filters, cursor]: readonly [
-        string,
-        string,
-        TodoFilters,
-        string | undefined,
-      ]) => {
-        const res = search
-          ? await searchTodoItems({
-              ...filters,
-              q: search,
-              cursor,
-              limit: PAGE_SIZE,
-            })
-          : await getTodoItems({ ...filters, cursor, limit: PAGE_SIZE });
-        if (res.status !== 200) throw new Error(errorMessage(res.data));
-        return res.data;
-      },
-    );
-
-  return {
-    items: data?.flatMap((page) => page.items ?? []) ?? [],
+  const {
+    data,
     error,
     isLoading,
-    hasMore: !!data?.[data.length - 1]?.next_cursor,
-    isLoadingMore: isValidating && !!data && size > data.length,
-    loadMore: () => setSize(size + 1),
-    refresh: () => mutate(),
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: search
+      ? getSearchTodoItemsQueryKey({ ...filters, q: search })
+      : getGetTodoItemsQueryKey(filters),
+    queryFn: ({ pageParam, signal }) =>
+      search
+        ? searchTodoItems(
+            { ...filters, q: search, cursor: pageParam, limit: PAGE_SIZE },
+            { signal },
+          )
+        : getTodoItems(
+            { ...filters, cursor: pageParam, limit: PAGE_SIZE },
+            { signal },
+          ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.next_cursor ?? undefined,
+  });
+
+  return {
+    items: data?.pages.flatMap((page) => page.items ?? []) ?? [],
+    error,
+    isLoading,
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+    loadMore: () => fetchNextPage(),
+    refresh: () => refetch(),
   };
 }

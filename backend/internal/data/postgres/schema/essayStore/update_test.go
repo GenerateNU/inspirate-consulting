@@ -28,8 +28,7 @@ func TestUpdateStatus(t *testing.T) {
 	studentID := uuid.New()
 	groupID := insertEssayGroup(t, db, studentID, "Common App")
 
-	created := createEssay(t, repo, models.Essays{
-		StudentID:     studentID,
+	created := createEssay(t, repo, studentID, models.CreateEssayBody{
 		Type:          "personal-statement",
 		LinkToContent: "https://docs.google.com/document/d/abc123",
 		EssayGroupID:  &groupID,
@@ -92,8 +91,7 @@ func TestUpdateEssayGroup(t *testing.T) {
 	otherGroupID := insertEssayGroup(t, db, studentID, "Supplementals")
 
 	// Starts with no group.
-	created := createEssay(t, repo, models.Essays{
-		StudentID:     studentID,
+	created := createEssay(t, repo, studentID, models.CreateEssayBody{
 		Type:          "personal-statement",
 		LinkToContent: "https://docs.google.com/document/d/abc123",
 	})
@@ -176,8 +174,7 @@ func TestUpdateEssayGroup_GroupNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := uuid.New()
-	created := createEssay(t, repo, models.Essays{
-		StudentID:     studentID,
+	created := createEssay(t, repo, studentID, models.CreateEssayBody{
 		Type:          "personal-statement",
 		LinkToContent: "https://docs.google.com/document/d/abc123",
 	})

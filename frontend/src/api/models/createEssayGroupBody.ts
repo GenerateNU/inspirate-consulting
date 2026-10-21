@@ -20,6 +20,6 @@ export interface CreateEssayGroupBody {
      * @maxLength 100
      */
   name: string;
-  /** Student the group belongs to */
-  student_id: string;
+  /** Student the group is for; required for counselors, defaults to the authenticated student */
+  student_id?: string;
 }

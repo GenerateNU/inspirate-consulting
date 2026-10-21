@@ -17,7 +17,7 @@ export interface CreateTodoItemRequestBody {
   global_college_id?: number;
   /** Media this task is for; at most one of essay_id, media_id, global_college_id */
   media_id?: string;
+  /** Student the task is for; required for counselors, defaults to the authenticated student */
   student_id?: string;
   todo_description: string;
-  user_id?: string;
 }

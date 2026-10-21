@@ -5,11 +5,11 @@ import {
 
 export default function CollegeApplicationList() {
   const {
-    data: applicationsResponse,
+    data: applicationsData,
     error: applicationsError,
     isLoading: applicationsLoading,
   } = useListPersonalCollegeApplications();
-  const { data: collegesResponse } = useListGlobalColleges();
+  const { data: collegesData } = useListGlobalColleges();
 
   if (applicationsLoading) {
     return (
@@ -20,11 +20,7 @@ export default function CollegeApplicationList() {
     );
   }
 
-  if (
-    applicationsError ||
-    !applicationsResponse ||
-    applicationsResponse.status !== 200
-  ) {
+  if (applicationsError) {
     return (
       <div className="form-container">
         <h2>My College Applications</h2>
@@ -33,9 +29,8 @@ export default function CollegeApplicationList() {
     );
   }
 
-  const applications = applicationsResponse.data ?? [];
-  const colleges =
-    collegesResponse?.status === 200 ? (collegesResponse.data ?? []) : [];
+  const applications = applicationsData ?? [];
+  const colleges = collegesData ?? [];
 
   // PersonalCollegeApplication only stores global_college_id, so have to pull full list of colleges to get the school_name and school_location
   const collegeById = new Map(colleges.map((college) => [college.id, college]));

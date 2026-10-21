@@ -34,7 +34,7 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewEssayReviewRepository(t)
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 
 		res, err := handler.SetReviewBalance(ctx, uuid.New(), models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: -1,
@@ -58,7 +58,7 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		mockRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 7).Return(nil)
 		mockRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, 5).Return(nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 7,
 		})
@@ -79,7 +79,7 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		mockRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 1).Return(nil)
 		mockRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, -4).Return(nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 1,
 		})
@@ -98,7 +98,7 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(&models.Student{ID: studentID, ReviewBalance: 4}, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 4,
 		})
@@ -120,7 +120,7 @@ func TestHandler_SetReviewBalance(t *testing.T) {
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
 			Return(nil, errs.NotFound("student", "id", studentID.String()))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.SetReviewBalance(ctx, studentID, models.SetStudentReviewBalanceRequestBody{
 			ReviewBalance: 3,
 		})

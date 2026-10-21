@@ -1,7 +1,7 @@
 import { useListVideos } from "../api/endpoints";
 
 export default function VideoList() {
-  const { data: response, error, isLoading, mutate } = useListVideos();
+  const { data, error, isLoading, refetch } = useListVideos();
 
   if (isLoading) {
     return (
@@ -12,7 +12,7 @@ export default function VideoList() {
     );
   }
 
-  if (error || !response || response.status !== 200) {
+  if (error) {
     return (
       <div className="form-container">
         <h2>Videos </h2>
@@ -21,7 +21,7 @@ export default function VideoList() {
     );
   }
 
-  const videos = response.data ?? [];
+  const videos = data ?? [];
 
   return (
     <div className="form-container">
@@ -38,7 +38,7 @@ export default function VideoList() {
               onError={async () => {
                 // The presigned URL likely expired —> refetch to get a fresh one.
                 // just calling the same list endpoint again gives a new URL
-                await mutate();
+                await refetch();
               }}
             />
           </li>
