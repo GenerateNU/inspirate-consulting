@@ -4,7 +4,7 @@ const links = [
   { to: "/essay", label: "Essays" },
   { to: "/college-list", label: "Colleges" },
   { to: "/create-college", label: "Add College" },
-  { to: "/colleges", label: "Applications" },
+  { to: "/college-applications", label: "Applications" },
   { to: "/create-application", label: "New Application" },
   { to: "/tasks", label: "Tasks" },
   { to: "/create-task", label: "New Task" },
