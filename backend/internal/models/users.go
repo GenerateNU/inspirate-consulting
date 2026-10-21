@@ -27,6 +27,7 @@ const (
 type User struct {
 	ID         uuid.UUID  `json:"id"`
 	Name       string     `json:"name"`
+	Email      string     `json:"email"`
 	SupabaseID uuid.UUID  `json:"supabase_id"`
 	PfpKey     *string    `json:"pfp_key"`
 	ResetTime  *time.Time `json:"reset_time"`
@@ -38,6 +39,7 @@ type Student struct {
 	ID            uuid.UUID  `json:"id"`
 	UserID        uuid.UUID  `json:"user_id"`
 	Year          Year       `json:"year"`
+	Interest      *string    `json:"student_interest"`
 	Organization  *string    `json:"organization"`
 	GPA           int        `json:"gpa"`
 	ReviewBalance int        `json:"review_balance"`
