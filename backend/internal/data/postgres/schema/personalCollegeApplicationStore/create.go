@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"inspirate-consulting/internal/data/postgres/schema"
@@ -19,7 +20,7 @@ const (
 
 func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 	ctx context.Context,
-	studentID string,
+	studentID uuid.UUID,
 	application models.CreatePersonalCollegeApplicationRequestBody,
 ) (*models.PersonalCollegeApplication, error) {
 	createdApplication := &models.PersonalCollegeApplication{}
@@ -44,6 +45,7 @@ func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 		&createdApplication.Category,
 		&createdApplication.CreatedAt,
 		&createdApplication.UpdatedAt,
+		&createdApplication.Rank,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError

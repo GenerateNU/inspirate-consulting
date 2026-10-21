@@ -17,7 +17,8 @@ import (
 func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 	t.Parallel()
 
-	ctx := auth.WithStudentID(context.Background(), uuid.New())
+	studentID := uuid.New()
+	ctx := auth.WithStudentID(context.Background(), studentID)
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
@@ -29,7 +30,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, mock.Anything).
+		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return(expectedApplications, nil)
 
 		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
@@ -44,7 +45,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, mock.Anything).
+		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return([]models.PersonalCollegeApplication{}, nil)
 
 		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
@@ -59,7 +60,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, mock.Anything).
+		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return(nil, errors.New("database error"))
 
 		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
@@ -68,5 +69,19 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")
+	})
+
+	t.Run("missing student id returns error", func(t *testing.T) {
+		t.Parallel()
+
+		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
+		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		// ListPersonalCollegeApplicationsByStudentID is not called without a student id
+
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo)
+		res, err := handler.ListPersonalCollegeApplicationsByStudentID(context.Background())
+
+		assert.ErrorIs(t, err, auth.ErrNoStudentID)
+		assert.Nil(t, res)
 	})
 }

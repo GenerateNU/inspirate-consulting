@@ -4,11 +4,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
+
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/models"
 )
 
-const testStudentID = "00000000-0000-0000-0000-000000000002"
+var testStudentID = uuid.MustParse("00000000-0000-0000-0000-000000000002")
 
 // test normal application creation with valid input
 func TestCreatePersonalCollegeApplication(t *testing.T) {
@@ -38,7 +40,7 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 		t.Error("expected a generated ID, got 0")
 	}
 	if created.StudentID != testStudentID {
-		t.Errorf("expected StudentID %q, got %q", testStudentID, created.StudentID)
+		t.Errorf("expected StudentID %v, got %v", testStudentID, created.StudentID)
 	}
 	if created.GlobalCollegeID != collegeID {
 		t.Errorf("expected GlobalCollegeID %d, got %d", collegeID, created.GlobalCollegeID)
@@ -54,6 +56,10 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	}
 	if created.UpdatedAt.IsZero() {
 		t.Error("expected UpdatedAt to be set")
+	}
+
+	if created.Rank != nil {
+		t.Error("expected Rank to be null")
 	}
 }
 
