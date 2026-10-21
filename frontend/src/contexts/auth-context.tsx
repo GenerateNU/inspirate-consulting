@@ -5,7 +5,6 @@ import {
   useLoginUser,
   useLogoutUser,
   useResetUserPassword,
-  type loginUserResponse,
 } from "../api/endpoints";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -13,21 +12,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userID, setUserID] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { trigger: loginFunc } = useLoginUser();
-  const { trigger: logoutFunc } = useLogoutUser();
-  const { trigger: passFunc } = useResetUserPassword();
+  const { mutateAsync: loginFunc } = useLoginUser();
+  const { mutateAsync: logoutFunc } = useLogoutUser();
+  const { mutateAsync: passFunc } = useResetUserPassword();
 
   const login = (email: string, password: string) => {
     return loginFunc(
-      { email, password },
+      { data: { email, password } },
       {
-        onSuccess: (resp: loginUserResponse) => {
-          if (resp.status != 200) {
-            return;
-          }
-          setResetTime(resp.data.reset_time);
-          setUserID(resp.data.id);
-          console.log(resp.data.id);
+        onSuccess: (user) => {
+          setResetTime(user.reset_time);
+          setUserID(user.id);
           void navigate("/");
         },
         onError: () => {
@@ -39,21 +34,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    return logoutFunc(
-      {},
-      {
-        onSuccess: () => {
-          setResetTime(null);
-          setUserID(null);
-          void navigate("/");
-        },
+    return logoutFunc(undefined, {
+      onSuccess: () => {
+        setResetTime(null);
+        setUserID(null);
+        void navigate("/");
       },
-    );
+    });
   };
 
   const new_password = (new_password: string) => {
     return passFunc(
-      { new_password },
+      { data: { new_password } },
       {
         onSuccess: () => {
           void navigate("/");

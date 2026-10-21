@@ -1,30 +1,20 @@
 import { useState } from "react";
-import { useUploadVideo } from "../api/endpoints";
+import { useMutation } from "@tanstack/react-query";
+import { uploadVideo } from "../api/endpoints";
+import { errorMessage } from "../api/client";
 
 export default function UploadVideo() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
 
-  const { trigger, isMutating } = useUploadVideo();
-
-  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!file) {
-      setStatus("Please choose a file.");
-      return;
-    }
-
-    try {
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: async (file: File) => {
       // 1. get a presigned upload URL from backend
-      const presignResult = await trigger({ original_filename: file.name });
-      if (presignResult.status !== 200) {
-        setStatus("Could not get an upload URL.");
-        return;
-      }
-
       // will need s3 key to store in database
-      // const { s3_key, upload_url } = presignResult.data;
-      const { upload_url } = presignResult.data;
+      // const { s3_key, upload_url } = await uploadVideo(...);
+      const { upload_url } = await uploadVideo({
+        original_filename: file.name,
+      });
 
       // 2. PUT the file to the fetched presigned URL (S3)
       const uploadResponse = await fetch(upload_url, {
@@ -32,17 +22,19 @@ export default function UploadVideo() {
         body: file,
         headers: { "Content-Type": file.type },
       });
+      if (!uploadResponse.ok) throw new Error("Upload to S3 failed.");
+    },
+    onSuccess: (_, file) => setStatus(`Uploaded: ${file.name}`),
+  });
 
-      if (!uploadResponse.ok) {
-        setStatus("Upload to S3 failed.");
-        return;
-      }
-
-      setStatus(`Uploaded: ${file.name}`);
-    } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!file) {
+      setStatus("Please choose a file.");
+      return;
     }
+    setStatus("");
+    mutate(file);
   };
 
   return (
@@ -58,11 +50,12 @@ export default function UploadVideo() {
             required
           />
         </div>
-        <button type="submit" disabled={isMutating}>
-          {isMutating ? "Uploading..." : "Upload"}
+        <button type="submit" disabled={isPending}>
+          {isPending ? "Uploading..." : "Upload"}
         </button>
       </form>
       {status && <p>{status}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

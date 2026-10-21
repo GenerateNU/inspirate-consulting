@@ -5,17 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Arguments,
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -53,35 +60,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type getMediaAccessResponse200 = {
-  data: Media[] | null
-  status: 200
-}
-
-export type getMediaAccessResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type getMediaAccessResponseSuccess = (getMediaAccessResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type getMediaAccessResponseError = (getMediaAccessResponseDefault) & {
-  headers: Headers;
-};
-
-export type getMediaAccessResponse = (getMediaAccessResponseSuccess | getMediaAccessResponseError)
 
 export const getGetMediaAccessUrl = (params?: GetMediaAccessParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -101,7 +96,7 @@ export const getGetMediaAccessUrl = (params?: GetMediaAccessParams,) => {
 /**
  * Allow students to fetch only videos they have access to
  */
-export const getMediaAccess = async (params?: GetMediaAccessParams, options?: RequestInit): Promise<getMediaAccessResponse> => {
+export const getMediaAccess = async (params?: GetMediaAccessParams, options?: RequestInit): Promise<Media[] | null> => {
 
   const res = await fetch(getGetMediaAccessUrl(params),
   {
@@ -114,52 +109,92 @@ export const getMediaAccess = async (params?: GetMediaAccessParams, options?: Re
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getMediaAccessResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getMediaAccessResponse
+    const err: globalThis.Error & {info?: Media[] | null, status?: number} = new globalThis.Error();
+    const data : Media[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Media[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetMediaAccessKey = (params?: GetMediaAccessParams,) => [`/api/media-access`, ...(params ? [params]: [])] as const;
+
+export const getGetMediaAccessQueryKey = (params?: GetMediaAccessParams,) => {
+    return [
+    `/api/media-access`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMediaAccessQueryOptions = <TData = Awaited<ReturnType<typeof getMediaAccess>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: GetMediaAccessParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMediaAccess>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMediaAccessQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMediaAccess>>> = ({ signal }) => getMediaAccess(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMediaAccess>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetMediaAccessQueryResult = NonNullable<Awaited<ReturnType<typeof getMediaAccess>>>
+export type GetMediaAccessQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetMediaAccess = <TError = Promise<ErrorModel>>(
-  params?: GetMediaAccessParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getMediaAccess>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetMediaAccessKey(params) : null);
-  const swrFn = () => getMediaAccess(params, fetchOptions)
+export function useGetMediaAccess<TData = Awaited<ReturnType<typeof getMediaAccess>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  GetMediaAccessParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMediaAccess>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMediaAccess>>,
+          TError,
+          Awaited<ReturnType<typeof getMediaAccess>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMediaAccess<TData = Awaited<ReturnType<typeof getMediaAccess>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetMediaAccessParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMediaAccess>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMediaAccess>>,
+          TError,
+          Awaited<ReturnType<typeof getMediaAccess>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMediaAccess<TData = Awaited<ReturnType<typeof getMediaAccess>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetMediaAccessParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMediaAccess>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetMediaAccess<TData = Awaited<ReturnType<typeof getMediaAccess>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetMediaAccessParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMediaAccess>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetMediaAccessQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type createMediaAccessResponse200 = {
-  data: MediaAccess
-  status: 200
-}
 
-export type createMediaAccessResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type createMediaAccessResponseSuccess = (createMediaAccessResponse200) & {
-  headers: Headers;
-};
-export type createMediaAccessResponseError = (createMediaAccessResponseDefault) & {
-  headers: Headers;
-};
 
-export type createMediaAccessResponse = (createMediaAccessResponseSuccess | createMediaAccessResponseError)
+
+
 
 export const getCreateMediaAccessUrl = () => {
 
@@ -172,7 +207,7 @@ export const getCreateMediaAccessUrl = () => {
 /**
  * Allow a counselor to give a student access to a video
  */
-export const createMediaAccess = async (grantMediaAccessRequestBody: NonReadonly<GrantMediaAccessRequestBody>, options?: RequestInit): Promise<createMediaAccessResponse> => {
+export const createMediaAccess = async (grantMediaAccessRequestBody: NonReadonly<GrantMediaAccessRequestBody>, options?: RequestInit): Promise<MediaAccess> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -199,59 +234,67 @@ const res = await fetch(getCreateMediaAccessUrl(),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createMediaAccessResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createMediaAccessResponse
-}
-
-
-
-
-export const getCreateMediaAccessMutationFetcher = ( options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<GrantMediaAccessRequestBody> }) => {
-    return createMediaAccess(arg, options);
+    const err: globalThis.Error & {info?: MediaAccess, status?: number} = new globalThis.Error();
+    const data : MediaAccess = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getCreateMediaAccessMutationKey = () => [`/api/media-access`] as const;
-
-export type CreateMediaAccessMutationResult = NonNullable<Awaited<ReturnType<typeof createMediaAccess>>>
-
-export const useCreateMediaAccess = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createMediaAccess>>, TError, Key, NonReadonly<GrantMediaAccessRequestBody>, Awaited<ReturnType<typeof createMediaAccess>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getCreateMediaAccessMutationKey();
-  const swrFn = getCreateMediaAccessMutationFetcher(fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type deleteMediaAccessResponse204 = {
-  data: void
-  status: 204
+  const data: MediaAccess = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type deleteMediaAccessResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 204>
-}
 
-export type deleteMediaAccessResponseSuccess = (deleteMediaAccessResponse204) & {
-  headers: Headers;
-};
-export type deleteMediaAccessResponseError = (deleteMediaAccessResponseDefault) & {
-  headers: Headers;
-};
 
-export type deleteMediaAccessResponse = (deleteMediaAccessResponseSuccess | deleteMediaAccessResponseError)
 
-export const getDeleteMediaAccessUrl = (id: string,) => {
+
+export const getCreateMediaAccessMutationKey = () => ['createMediaAccess'] as const;
+
+export const getCreateMediaAccessMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMediaAccess>>, TError,CreateMediaAccessMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createMediaAccess>>, TError,CreateMediaAccessMutationVariables, TContext> => {
+
+const mutationKey = getCreateMediaAccessMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMediaAccess>>, CreateMediaAccessMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createMediaAccess(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMediaAccessMutationResult = NonNullable<Awaited<ReturnType<typeof createMediaAccess>>>
+    export type CreateMediaAccessMutationBody = NonReadonly<GrantMediaAccessRequestBody>
+    export type CreateMediaAccessMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateMediaAccessMutationVariables = {data: NonReadonly<GrantMediaAccessRequestBody>}
+
+    export const useCreateMediaAccess = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMediaAccess>>, TError,CreateMediaAccessMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createMediaAccess>>,
+        TError,
+        CreateMediaAccessMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateMediaAccessMutationOptions(options), queryClient);
+    }
+    export const getDeleteMediaAccessUrl = (id: string,) => {
 
 
 
@@ -262,7 +305,7 @@ export const getDeleteMediaAccessUrl = (id: string,) => {
 /**
  * Allow a counselor to revoke a student access to a video
  */
-export const deleteMediaAccess = async (id: string, options?: RequestInit): Promise<deleteMediaAccessResponse> => {
+export const deleteMediaAccess = async (id: string, options?: RequestInit): Promise<void> => {
 
   const res = await fetch(getDeleteMediaAccessUrl(id),
   {
@@ -275,36 +318,63 @@ export const deleteMediaAccess = async (id: string, options?: RequestInit): Prom
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: deleteMediaAccessResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deleteMediaAccessResponse
-}
-
-
-
-
-export const getDeleteMediaAccessMutationFetcher = (id: string, options?: RequestInit) => {
-  return (_: Key, __: { arg: Arguments }) => {
-    return deleteMediaAccess(id, options);
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
 }
-export const getDeleteMediaAccessMutationKey = (id: string,) => [`/api/media-access/${id}`] as const;
 
-export type DeleteMediaAccessMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMediaAccess>>>
 
-export const useDeleteMediaAccess = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof deleteMediaAccess>>, TError, Key, Arguments, Awaited<ReturnType<typeof deleteMediaAccess>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getDeleteMediaAccessMutationKey(id);
-  const swrFn = getDeleteMediaAccessMutationFetcher(id, fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getDeleteMediaAccessMutationKey = () => ['deleteMediaAccess'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getDeleteMediaAccessMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMediaAccess>>, TError,DeleteMediaAccessMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteMediaAccess>>, TError,DeleteMediaAccessMutationVariables, TContext> => {
+
+const mutationKey = getDeleteMediaAccessMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteMediaAccess>>, DeleteMediaAccessMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteMediaAccess(id,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteMediaAccessMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMediaAccess>>>
+
+    export type DeleteMediaAccessMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeleteMediaAccessMutationVariables = {id: string}
+
+    export const useDeleteMediaAccess = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMediaAccess>>, TError,DeleteMediaAccessMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteMediaAccess>>,
+        TError,
+        DeleteMediaAccessMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteMediaAccessMutationOptions(options), queryClient);
+    }

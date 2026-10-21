@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   ErrorModel,
@@ -50,35 +58,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type getStudentResponse200 = {
-  data: Student
-  status: 200
-}
-
-export type getStudentResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type getStudentResponseSuccess = (getStudentResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type getStudentResponseError = (getStudentResponseDefault) & {
-  headers: Headers;
-};
-
-export type getStudentResponse = (getStudentResponseSuccess | getStudentResponseError)
 
 export const getGetStudentUrl = (id: string,) => {
 
@@ -91,7 +87,7 @@ export const getGetStudentUrl = (id: string,) => {
 /**
  * Get a student
  */
-export const getStudent = async (id: string, options?: RequestInit): Promise<getStudentResponse> => {
+export const getStudent = async (id: string, options?: RequestInit): Promise<Student> => {
 
   const res = await fetch(getGetStudentUrl(id),
   {
@@ -104,52 +100,92 @@ export const getStudent = async (id: string, options?: RequestInit): Promise<get
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: getStudentResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getStudentResponse
+    const err: globalThis.Error & {info?: Student, status?: number} = new globalThis.Error();
+    const data : Student = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Student = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getGetStudentKey = (id: string,) => [`/api/students/${id}`] as const;
+
+export const getGetStudentQueryKey = (id: string,) => {
+    return [
+    `/api/students/${id}`
+    ] as const;
+    }
+
+
+export const getGetStudentQueryOptions = <TData = Awaited<ReturnType<typeof getStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudent>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudent>>> = ({ signal }) => getStudent(id, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudent>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type GetStudentQueryResult = NonNullable<Awaited<ReturnType<typeof getStudent>>>
+export type GetStudentQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useGetStudent = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getStudent>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false && id !== null && id !== undefined
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetStudentKey(id) : null);
-  const swrFn = () => getStudent(id, fetchOptions)
+export function useGetStudent<TData = Awaited<ReturnType<typeof getStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudent>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudent>>,
+          TError,
+          Awaited<ReturnType<typeof getStudent>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudent<TData = Awaited<ReturnType<typeof getStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudent>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudent>>,
+          TError,
+          Awaited<ReturnType<typeof getStudent>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudent<TData = Awaited<ReturnType<typeof getStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudent>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useGetStudent<TData = Awaited<ReturnType<typeof getStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudent>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getGetStudentQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type setStudentReviewBalanceResponse200 = {
-  data: Student
-  status: 200
-}
 
-export type setStudentReviewBalanceResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type setStudentReviewBalanceResponseSuccess = (setStudentReviewBalanceResponse200) & {
-  headers: Headers;
-};
-export type setStudentReviewBalanceResponseError = (setStudentReviewBalanceResponseDefault) & {
-  headers: Headers;
-};
 
-export type setStudentReviewBalanceResponse = (setStudentReviewBalanceResponseSuccess | setStudentReviewBalanceResponseError)
+
+
 
 export const getSetStudentReviewBalanceUrl = (id: string,) => {
 
@@ -163,7 +199,7 @@ export const getSetStudentReviewBalanceUrl = (id: string,) => {
  * Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
  */
 export const setStudentReviewBalance = async (id: string,
-    setStudentReviewBalanceRequestBody: NonReadonly<SetStudentReviewBalanceRequestBody>, options?: RequestInit): Promise<setStudentReviewBalanceResponse> => {
+    setStudentReviewBalanceRequestBody: NonReadonly<SetStudentReviewBalanceRequestBody>, options?: RequestInit): Promise<Student> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -190,36 +226,63 @@ const res = await fetch(getSetStudentReviewBalanceUrl(id),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: setStudentReviewBalanceResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as setStudentReviewBalanceResponse
-}
-
-
-
-
-export const getSetStudentReviewBalanceMutationFetcher = (id: string, options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<SetStudentReviewBalanceRequestBody> }) => {
-    return setStudentReviewBalance(id, arg, options);
+    const err: globalThis.Error & {info?: Student, status?: number} = new globalThis.Error();
+    const data : Student = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: Student = body ? JSON.parse(body) : {}
+  return data
 }
-export const getSetStudentReviewBalanceMutationKey = (id: string,) => [`/api/students/${id}/review-balance`] as const;
 
-export type SetStudentReviewBalanceMutationResult = NonNullable<Awaited<ReturnType<typeof setStudentReviewBalance>>>
 
-export const useSetStudentReviewBalance = <TError = Promise<ErrorModel>>(
-  id: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof setStudentReviewBalance>>, TError, Key, NonReadonly<SetStudentReviewBalanceRequestBody>, Awaited<ReturnType<typeof setStudentReviewBalance>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getSetStudentReviewBalanceMutationKey(id);
-  const swrFn = getSetStudentReviewBalanceMutationFetcher(id, fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getSetStudentReviewBalanceMutationKey = () => ['setStudentReviewBalance'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getSetStudentReviewBalanceMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setStudentReviewBalance>>, TError,SetStudentReviewBalanceMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof setStudentReviewBalance>>, TError,SetStudentReviewBalanceMutationVariables, TContext> => {
+
+const mutationKey = getSetStudentReviewBalanceMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setStudentReviewBalance>>, SetStudentReviewBalanceMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  setStudentReviewBalance(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetStudentReviewBalanceMutationResult = NonNullable<Awaited<ReturnType<typeof setStudentReviewBalance>>>
+    export type SetStudentReviewBalanceMutationBody = NonReadonly<SetStudentReviewBalanceRequestBody>
+    export type SetStudentReviewBalanceMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type SetStudentReviewBalanceMutationVariables = {id: string;data: NonReadonly<SetStudentReviewBalanceRequestBody>}
+
+    export const useSetStudentReviewBalance = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setStudentReviewBalance>>, TError,SetStudentReviewBalanceMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setStudentReviewBalance>>,
+        TError,
+        SetStudentReviewBalanceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetStudentReviewBalanceMutationOptions(options), queryClient);
+    }

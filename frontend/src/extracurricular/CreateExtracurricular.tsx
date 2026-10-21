@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { errorMessage } from "../api/client";
 import { useCreateExtracurricular } from "../api/endpoints/extracurriculars/extracurriculars";
 import {
   CreateExtracurricularRequestStatus,
@@ -24,7 +25,7 @@ const emptyForm: CreateExtracurricularRequest = {
 export default function CreateExtracurricular() {
   const [form, setForm] = useState<CreateExtracurricularRequest>(emptyForm);
   const [msg, setMsg] = useState<string | null>(null);
-  const { trigger, isMutating } = useCreateExtracurricular(TEST_STUDENT_ID);
+  const { mutate, isPending, error } = useCreateExtracurricular();
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -35,7 +36,7 @@ export default function CreateExtracurricular() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
 
@@ -46,17 +47,15 @@ export default function CreateExtracurricular() {
       end_date: form.end_date || undefined,
     };
 
-    try {
-      const res = await trigger(payload);
-      if (res.status === 200) {
-        setMsg("Created id: " + res.data.id);
-        setForm(emptyForm);
-      } else {
-        setMsg("Error: " + JSON.stringify(res.data));
-      }
-    } catch (err) {
-      setMsg("Error: " + (err instanceof Error ? err.message : String(err)));
-    }
+    mutate(
+      { studentID: TEST_STUDENT_ID, data: payload },
+      {
+        onSuccess: (created) => {
+          setMsg("Created id: " + created.id);
+          setForm(emptyForm);
+        },
+      },
+    );
   };
 
   return (
@@ -149,12 +148,13 @@ export default function CreateExtracurricular() {
           </label>
         </div>
         <div>
-          <button type="submit" disabled={isMutating}>
-            {isMutating ? "Creating..." : "Create"}
+          <button type="submit" disabled={isPending}>
+            {isPending ? "Creating..." : "Create"}
           </button>
         </div>
       </form>
       {msg && <p>{msg}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

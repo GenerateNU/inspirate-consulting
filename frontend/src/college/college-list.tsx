@@ -1,7 +1,7 @@
 import { useListGlobalColleges } from "../api/endpoints";
 
 export default function CollegeList() {
-  const { data: response, error, isLoading } = useListGlobalColleges();
+  const { data, error, isLoading } = useListGlobalColleges();
 
   if (isLoading) {
     return (
@@ -12,7 +12,7 @@ export default function CollegeList() {
     );
   }
 
-  if (error || !response || response.status !== 200) {
+  if (error) {
     return (
       <div className="form-container">
         <h2>Global Colleges</h2>
@@ -21,8 +21,7 @@ export default function CollegeList() {
     );
   }
 
-  // response is { data: GlobalCollege[] | null, status, headers }
-  const colleges = response.data ?? [];
+  const colleges = data ?? [];
 
   return (
     <div className="form-container">

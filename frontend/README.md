@@ -31,7 +31,7 @@ The backend OpenAPI document is the API contract. After changing a backend route
 
 `orval.config.ts` reads `../backend/internal/api/openapi.yaml` and generates these files:
 
-- `src/api/endpoints/`: typed request functions and SWR hooks, split by OpenAPI tag.
+- `src/api/endpoints/`: typed request functions and TanStack Query hooks, split by OpenAPI tag.
 - `src/api/models/`: TypeScript request, response, and error types.
 - `src/api/endpoints/**/*.msw.ts` and `*.faker.ts`: MSW handlers and realistic mock data.
 - `src/api/schemas/`: Zod schemas for runtime validation.
@@ -46,20 +46,25 @@ Import endpoint functions and types from `src/api/endpoints`. The generated clie
 import { createGreeting, type GreetingRequestBody } from "../api/endpoints";
 
 const request: GreetingRequestBody = { name: "Ada" };
-const response = await createGreeting(request);
-
-if (response.status === 200) {
-  console.log(response.data.greeting);
-}
+const greeting = await createGreeting(request); // resolves to the response body
 ```
 
-For React mutation state, use the generated SWR hook:
+Request functions return the response body and throw on non-2xx responses. The thrown error carries the parsed `ErrorModel` on `info` and the HTTP status on `status`; `errorMessage` in `src/api/client.ts` turns it into display text.
+
+In components, use the generated TanStack Query hooks. The app is wrapped in a `QueryClientProvider` in `src/main.tsx`, and failures show up in the hook's `error` state, so there's no need for `try`/`catch` or status checks:
 
 ```tsx
-import { useCreateGreeting } from "../api/endpoints";
+import { errorMessage } from "../api/client";
+import { useCreateGreeting, useListGlobalColleges } from "../api/endpoints";
 
-const { trigger, isMutating, error } = useCreateGreeting();
-await trigger({ name: "Bob" });
+const { data: colleges, isLoading } = useListGlobalColleges();
+
+const { mutate, isPending, error } = useCreateGreeting();
+mutate(
+  { data: { name: "Bob" } },
+  { onSuccess: (greeting) => console.log(greeting.greeting) },
+);
+// render: {error && <p>Error: {errorMessage(error)}</p>}
 ```
 
 Run `bun run lint` and `bun run build` before opening a pull request.

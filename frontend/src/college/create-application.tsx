@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { errorMessage } from "../api/client";
 import {
   useListGlobalColleges,
   useCreateGlobalCollege,
   useCreatePersonalCollegeApplication,
 } from "../api/endpoints";
+import {
+  CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
+  CreatePersonalCollegeApplicationRequestBodyCategory as Category,
+} from "../api/models";
 
 type CollegeMode = "select" | "create";
 
@@ -14,9 +19,8 @@ export default function CreateCollegeApplication() {
   const [mode, setMode] = useState<CollegeMode>("select");
 
   // If selecting an existing college (select from list of global)
-  const { data: collegesResponse } = useListGlobalColleges();
-  const colleges =
-    collegesResponse?.status === 200 ? (collegesResponse.data ?? []) : [];
+  const { data: collegesData } = useListGlobalColleges();
+  const colleges = collegesData ?? [];
   const [selectedCollegeId, setSelectedCollegeId] = useState<number | null>(
     null,
   );
@@ -29,78 +33,88 @@ export default function CreateCollegeApplication() {
   const [newRdDeadline, setNewRdDeadline] = useState("");
 
   // Application-specific fields
-  const [applicationType, setApplicationType] = useState<
-    "EA" | "ED" | "RD" | ""
-  >("");
-  const [category, setCategory] = useState<"safety" | "target" | "reach" | "">(
+  const [applicationType, setApplicationType] = useState<ApplicationType | "">(
     "",
   );
+  const [category, setCategory] = useState<Category | "">("");
 
   const [status, setStatus] = useState("");
 
-  const { trigger: createCollege, isMutating: isCreatingCollege } =
-    useCreateGlobalCollege();
-  const { trigger: createApplication, isMutating: isCreatingApplication } =
-    useCreatePersonalCollegeApplication();
+  const createCollege = useCreateGlobalCollege();
+  const createApplication = useCreatePersonalCollegeApplication();
 
-  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
+  const submitApplication = (
+    globalCollegeId: number,
+    collegeName: string,
+    applicationType: ApplicationType,
+    category: Category,
+  ) =>
+    createApplication.mutate(
+      {
+        data: {
+          global_college_id: globalCollegeId,
+          application_type: applicationType,
+          category,
+        },
+      },
+      {
+        onSuccess: () => setStatus(`Application submitted for ${collegeName}.`),
+      },
+    );
+
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setStatus("");
+    createCollege.reset();
+    createApplication.reset();
 
     if (!applicationType || !category) {
       setStatus("Please choose a deadline type and a category.");
       return;
     }
 
-    try {
-      let globalCollegeId = selectedCollegeId;
-
-      if (mode === "create") {
-        const collegeResult = await createCollege({
-          school_name: newSchoolName,
-          school_location: newSchoolLocation,
-          ea_deadline: toISODateTime(newEaDeadline),
-          ed_deadline: toISODateTime(newEdDeadline),
-          rd_deadline: toISODateTime(newRdDeadline),
-        });
-
-        if (collegeResult.status !== 200) {
-          setStatus("Could not create the college.");
-          return;
-        }
-        globalCollegeId = collegeResult.data.id;
-      }
-
-      if (globalCollegeId === null) {
-        setStatus("Please select or create a college first.");
-        return;
-      }
-
-      const applicationResult = await createApplication({
-        global_college_id: globalCollegeId,
-        application_type: applicationType,
-        category,
-      });
-
-      if (applicationResult.status === 200) {
-        const submittedCollege = colleges.find(
-          (college) => college.id === globalCollegeId,
-        );
-        const collegeName =
-          mode === "create"
-            ? newSchoolName
-            : (submittedCollege?.school_name ?? `College #${globalCollegeId}`);
-
-        setStatus(`Application submitted for ${collegeName}.`);
-      } else {
-        setStatus("Something went wrong submitting the application.");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
+    if (mode === "create") {
+      createCollege.mutate(
+        {
+          data: {
+            school_name: newSchoolName,
+            school_location: newSchoolLocation,
+            ea_deadline: toISODateTime(newEaDeadline),
+            ed_deadline: toISODateTime(newEdDeadline),
+            rd_deadline: toISODateTime(newRdDeadline),
+          },
+        },
+        {
+          onSuccess: (college) =>
+            submitApplication(
+              college.id,
+              newSchoolName,
+              applicationType,
+              category,
+            ),
+        },
+      );
+      return;
     }
+
+    if (selectedCollegeId === null) {
+      setStatus("Please select or create a college first.");
+      return;
+    }
+
+    const submittedCollege = colleges.find(
+      (college) => college.id === selectedCollegeId,
+    );
+    submitApplication(
+      selectedCollegeId,
+      submittedCollege?.school_name ?? `College #${selectedCollegeId}`,
+      applicationType,
+      category,
+    );
   };
 
-  const isSubmitting = isCreatingCollege || isCreatingApplication;
+  const isSubmitting = createCollege.isPending || createApplication.isPending;
+  const error = createCollege.error ?? createApplication.error;
 
   return (
     <div className="form-container">
@@ -202,9 +216,9 @@ export default function CreateCollegeApplication() {
             required
           >
             <option value="">-- Select a deadline type --</option>
-            <option value="EA">Early Action (EA)</option>
-            <option value="ED">Early Decision (ED)</option>
-            <option value="RD">Regular Decision (RD)</option>
+            <option value={ApplicationType.EA}>Early Action (EA)</option>
+            <option value={ApplicationType.ED}>Early Decision (ED)</option>
+            <option value={ApplicationType.RD}>Regular Decision (RD)</option>
           </select>
         </div>
 
@@ -216,9 +230,9 @@ export default function CreateCollegeApplication() {
             required
           >
             <option value="">-- Select a category --</option>
-            <option value="safety">Safety</option>
-            <option value="target">Target</option>
-            <option value="reach">Reach</option>
+            <option value={Category.safety}>Safety</option>
+            <option value={Category.target}>Target</option>
+            <option value={Category.reach}>Reach</option>
           </select>
         </div>
 
@@ -227,6 +241,7 @@ export default function CreateCollegeApplication() {
         </button>
       </form>
       {status && <p>{status}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

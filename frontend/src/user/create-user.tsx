@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { errorMessage } from "../api/client";
 import { useCreateUser } from "../api/endpoints";
 import { CreateUserInputBodyRole } from "../api/models";
 
@@ -10,27 +11,20 @@ export default function CreateUser() {
   );
   const [Status, setStatus] = useState("");
 
-  const { trigger, isMutating, error } = useCreateUser<Error>();
+  const { mutate, isPending, error } = useCreateUser();
 
-  const handleSubmit = async (event: React.SubmitEvent<HTMLElement>) => {
+  const handleSubmit = (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
-    try {
-      const response = await trigger({
-        name: Name,
-        email: Email,
-        role: Role,
-        pfp_key: null,
-      });
-      if (response.status === 200) {
-        setStatus(
-          `Created user ${Name}. Temporary password: ${response.data.temp_password}`,
-        );
-      } else {
-        setStatus("Something went wrong.");
-      }
-    } catch (err) {
-      setStatus("Something went wrong." + err);
-    }
+    setStatus("");
+    mutate(
+      { data: { name: Name, email: Email, role: Role, pfp_key: null } },
+      {
+        onSuccess: (user) =>
+          setStatus(
+            `Created user ${Name}. Temporary password: ${user.temp_password}`,
+          ),
+      },
+    );
   };
 
   return (
@@ -65,12 +59,12 @@ export default function CreateUser() {
             <option value={CreateUserInputBodyRole.counselor}>Counselor</option>
           </select>
         </div>
-        <button type="submit" disabled={isMutating}>
-          {isMutating ? "Creating User..." : "Create User"}
+        <button type="submit" disabled={isPending}>
+          {isPending ? "Creating User..." : "Create User"}
         </button>
       </form>
       {Status && <p>{Status}</p>}
-      {error && <p>Error: {String(error)}</p>}
+      {error && <p>Error: {errorMessage(error)}</p>}
     </div>
   );
 }

@@ -5,16 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
-
-import useSWRMutation from 'swr/mutation';
-import type {
-  SWRMutationConfiguration
-} from 'swr/mutation';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CreateExtracurricularRequest,
@@ -51,35 +59,23 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 } : DistributeReadOnlyOverUnions<T>;
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type listExtracurricularsResponse200 = {
-  data: Extracurricular[] | null
-  status: 200
-}
-
-export type listExtracurricularsResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type listExtracurricularsResponseSuccess = (listExtracurricularsResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type listExtracurricularsResponseError = (listExtracurricularsResponseDefault) & {
-  headers: Headers;
-};
-
-export type listExtracurricularsResponse = (listExtracurricularsResponseSuccess | listExtracurricularsResponseError)
 
 export const getListExtracurricularsUrl = () => {
 
@@ -92,7 +88,7 @@ export const getListExtracurricularsUrl = () => {
 /**
  * List extracurriculars for the authenticated student.
  */
-export const listExtracurriculars = async ( options?: RequestInit): Promise<listExtracurricularsResponse> => {
+export const listExtracurriculars = async ( options?: RequestInit): Promise<Extracurricular[] | null> => {
 
   const res = await fetch(getListExtracurricularsUrl(),
   {
@@ -105,52 +101,92 @@ export const listExtracurriculars = async ( options?: RequestInit): Promise<list
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listExtracurricularsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listExtracurricularsResponse
+    const err: globalThis.Error & {info?: Extracurricular[] | null, status?: number} = new globalThis.Error();
+    const data : Extracurricular[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Extracurricular[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListExtracurricularsKey = () => [`/api/extracurriculars`] as const;
+
+export const getListExtracurricularsQueryKey = () => {
+    return [
+    `/api/extracurriculars`
+    ] as const;
+    }
+
+
+export const getListExtracurricularsQueryOptions = <TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListExtracurricularsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExtracurriculars>>> = ({ signal }) => listExtracurriculars({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListExtracurricularsQueryResult = NonNullable<Awaited<ReturnType<typeof listExtracurriculars>>>
+export type ListExtracurricularsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListExtracurriculars = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listExtracurriculars>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListExtracurricularsKey() : null);
-  const swrFn = () => listExtracurriculars(fetchOptions)
+export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExtracurriculars>>,
+          TError,
+          Awaited<ReturnType<typeof listExtracurriculars>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExtracurriculars>>,
+          TError,
+          Awaited<ReturnType<typeof listExtracurriculars>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListExtracurricularsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type updateExtracurricularResponse200 = {
-  data: Extracurricular
-  status: 200
-}
 
-export type updateExtracurricularResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type updateExtracurricularResponseSuccess = (updateExtracurricularResponse200) & {
-  headers: Headers;
-};
-export type updateExtracurricularResponseError = (updateExtracurricularResponseDefault) & {
-  headers: Headers;
-};
 
-export type updateExtracurricularResponse = (updateExtracurricularResponseSuccess | updateExtracurricularResponseError)
+
+
 
 export const getUpdateExtracurricularUrl = (id: number,) => {
 
@@ -164,7 +200,7 @@ export const getUpdateExtracurricularUrl = (id: number,) => {
  * Update fields on an extracurricular for the authenticated student.
  */
 export const updateExtracurricular = async (id: number,
-    updateExtracurricularRequest: NonReadonly<UpdateExtracurricularRequest>, options?: RequestInit): Promise<updateExtracurricularResponse> => {
+    updateExtracurricularRequest: NonReadonly<UpdateExtracurricularRequest>, options?: RequestInit): Promise<Extracurricular> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -191,59 +227,67 @@ const res = await fetch(getUpdateExtracurricularUrl(id),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: updateExtracurricularResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateExtracurricularResponse
-}
-
-
-
-
-export const getUpdateExtracurricularMutationFetcher = (id: number, options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<UpdateExtracurricularRequest> }) => {
-    return updateExtracurricular(id, arg, options);
+    const err: globalThis.Error & {info?: Extracurricular, status?: number} = new globalThis.Error();
+    const data : Extracurricular = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
-}
-export const getUpdateExtracurricularMutationKey = (id: number,) => [`/api/extracurriculars/${id}`] as const;
-
-export type UpdateExtracurricularMutationResult = NonNullable<Awaited<ReturnType<typeof updateExtracurricular>>>
-
-export const useUpdateExtracurricular = <TError = Promise<ErrorModel>>(
-  id: number, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof updateExtracurricular>>, TError, Key, NonReadonly<UpdateExtracurricularRequest>, Awaited<ReturnType<typeof updateExtracurricular>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
-
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getUpdateExtracurricularMutationKey(id);
-  const swrFn = getUpdateExtracurricularMutationFetcher(id, fetchOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-export type createExtracurricularResponse200 = {
-  data: Extracurricular
-  status: 200
+  const data: Extracurricular = body ? JSON.parse(body) : {}
+  return data
 }
 
-export type createExtracurricularResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type createExtracurricularResponseSuccess = (createExtracurricularResponse200) & {
-  headers: Headers;
-};
-export type createExtracurricularResponseError = (createExtracurricularResponseDefault) & {
-  headers: Headers;
-};
 
-export type createExtracurricularResponse = (createExtracurricularResponseSuccess | createExtracurricularResponseError)
 
-export const getCreateExtracurricularUrl = (studentID: string,) => {
+
+export const getUpdateExtracurricularMutationKey = () => ['updateExtracurricular'] as const;
+
+export const getUpdateExtracurricularMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricular>>, TError,UpdateExtracurricularMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricular>>, TError,UpdateExtracurricularMutationVariables, TContext> => {
+
+const mutationKey = getUpdateExtracurricularMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateExtracurricular>>, UpdateExtracurricularMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateExtracurricular(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateExtracurricularMutationResult = NonNullable<Awaited<ReturnType<typeof updateExtracurricular>>>
+    export type UpdateExtracurricularMutationBody = NonReadonly<UpdateExtracurricularRequest>
+    export type UpdateExtracurricularMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateExtracurricularMutationVariables = {id: number;data: NonReadonly<UpdateExtracurricularRequest>}
+
+    export const useUpdateExtracurricular = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricular>>, TError,UpdateExtracurricularMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateExtracurricular>>,
+        TError,
+        UpdateExtracurricularMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateExtracurricularMutationOptions(options), queryClient);
+    }
+    export const getCreateExtracurricularUrl = (studentID: string,) => {
 
 
 
@@ -255,7 +299,7 @@ export const getCreateExtracurricularUrl = (studentID: string,) => {
  * Create a new extracurricular for the given student.
  */
 export const createExtracurricular = async (studentID: string,
-    createExtracurricularRequest: NonReadonly<CreateExtracurricularRequest>, options?: RequestInit): Promise<createExtracurricularResponse> => {
+    createExtracurricularRequest: NonReadonly<CreateExtracurricularRequest>, options?: RequestInit): Promise<Extracurricular> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -282,36 +326,63 @@ const res = await fetch(getCreateExtracurricularUrl(studentID),
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: createExtracurricularResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createExtracurricularResponse
-}
-
-
-
-
-export const getCreateExtracurricularMutationFetcher = (studentID: string, options?: RequestInit) => {
-  return (_: Key, { arg }: { arg: NonReadonly<CreateExtracurricularRequest> }) => {
-    return createExtracurricular(studentID, arg, options);
+    const err: globalThis.Error & {info?: Extracurricular, status?: number} = new globalThis.Error();
+    const data : Extracurricular = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
   }
+  const data: Extracurricular = body ? JSON.parse(body) : {}
+  return data
 }
-export const getCreateExtracurricularMutationKey = (studentID: string,) => [`/api/extracurriculars/${studentID}`] as const;
 
-export type CreateExtracurricularMutationResult = NonNullable<Awaited<ReturnType<typeof createExtracurricular>>>
 
-export const useCreateExtracurricular = <TError = Promise<ErrorModel>>(
-  studentID: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof createExtracurricular>>, TError, Key, NonReadonly<CreateExtracurricularRequest>, Awaited<ReturnType<typeof createExtracurricular>>> & { swrKey?: string }, fetch?: RequestInit}
-) => {
 
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getCreateExtracurricularMutationKey(studentID);
-  const swrFn = getCreateExtracurricularMutationFetcher(studentID, fetchOptions);
 
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+export const getCreateExtracurricularMutationKey = () => ['createExtracurricular'] as const;
 
-  return {
-    swrKey,
-    ...query
-  }
-}
+export const getCreateExtracurricularMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExtracurricular>>, TError,CreateExtracurricularMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createExtracurricular>>, TError,CreateExtracurricularMutationVariables, TContext> => {
+
+const mutationKey = getCreateExtracurricularMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createExtracurricular>>, CreateExtracurricularMutationVariables> = (props) => {
+          const {studentID,data} = props ?? {};
+
+          return  createExtracurricular(studentID,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateExtracurricularMutationResult = NonNullable<Awaited<ReturnType<typeof createExtracurricular>>>
+    export type CreateExtracurricularMutationBody = NonReadonly<CreateExtracurricularRequest>
+    export type CreateExtracurricularMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateExtracurricularMutationVariables = {studentID: string;data: NonReadonly<CreateExtracurricularRequest>}
+
+    export const useCreateExtracurricular = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExtracurricular>>, TError,CreateExtracurricularMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createExtracurricular>>,
+        TError,
+        CreateExtracurricularMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateExtracurricularMutationOptions(options), queryClient);
+    }
