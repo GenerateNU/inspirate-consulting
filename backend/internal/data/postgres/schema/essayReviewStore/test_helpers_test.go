@@ -2,6 +2,7 @@ package essayReviewRepository
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -24,7 +25,7 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, reviewBalance int) uuid.U
 
 	var userID, counselorID, studentID uuid.UUID
 	if err := db.QueryRow(ctx,
-		`INSERT INTO public.users (name) VALUES ('essay review test') RETURNING id`).Scan(&userID); err != nil {
+		`INSERT INTO public.users (name, email) VALUES ('essay review test', $1) RETURNING id`, fmt.Sprintf("student-%s@example.com", uuid.NewString())).Scan(&userID); err != nil {
 		t.Fatalf("failed to create test user: %v", err)
 	}
 	if err := db.QueryRow(ctx,
