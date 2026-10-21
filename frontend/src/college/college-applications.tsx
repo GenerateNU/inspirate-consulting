@@ -16,8 +16,14 @@ import {
 } from "../api/models";
 
 export default function CollegeApplications() {
-  const { data: applicationsData, error, isLoading, refetch } = useListPersonalCollegeApplications();
-  const { data: collegesData, isLoading: collegesLoading } = useListGlobalColleges();
+  const {
+    data: applicationsData,
+    error,
+    isLoading,
+    refetch,
+  } = useListPersonalCollegeApplications();
+  const { data: collegesData, isLoading: collegesLoading } =
+    useListGlobalColleges();
 
   // One hook per kind of change, the row's id is passed when calling mutate
   const updateApplication = useUpdatePersonalCollegeApplication();
@@ -29,11 +35,12 @@ export default function CollegeApplications() {
     updateRank.isPending ||
     deleteApplication.isPending;
 
-  const mutationError = updateApplication.error ?? updateRank.error ?? deleteApplication.error;
+  const mutationError =
+    updateApplication.error ?? updateRank.error ?? deleteApplication.error;
 
   const [draggedId, setDraggedId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editType, setEditType] = useState<ApplicationType>( ApplicationType.RD );
+  const [editType, setEditType] = useState<ApplicationType>(ApplicationType.RD);
   const [editCategory, setEditCategory] = useState<Category>(Category.target);
 
   if (isLoading || collegesLoading) {
@@ -59,14 +66,17 @@ export default function CollegeApplications() {
 
   const collegeById = new Map(colleges.map((college) => [college.id, college]));
 
-  const collegeName = (app: PersonalCollegeApplication) => collegeById.get(app.global_college_id)?.school_name ?? "Unknown college";
+  const collegeName = (app: PersonalCollegeApplication) =>
+    collegeById.get(app.global_college_id)?.school_name ?? "Unknown college";
 
   // Ranked applications (non null) are shown in order, unranked (null) are shown below.
   const ranked = applications
     .filter((application) => application.rank != null)
     .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
 
-  const unranked = applications.filter((application) => application.rank == null);
+  const unranked = applications.filter(
+    (application) => application.rank == null,
+  );
 
   // Clears the last mutation's error so it doesn't linger once a new change starts
   const resetMutations = () => {
@@ -74,7 +84,6 @@ export default function CollegeApplications() {
     updateRank.reset();
     deleteApplication.reset();
   };
-
 
   // refetch full list after rank change, since the backend shifts other applications too
   const setRank = (id: number, rank: number | null) => {
@@ -96,7 +105,9 @@ export default function CollegeApplications() {
   const handleDropAtEnd = () => {
     if (draggedId == null) return;
 
-    const dragged = applications.find((application) => application.id === draggedId);
+    const dragged = applications.find(
+      (application) => application.id === draggedId,
+    );
 
     if (!dragged) return;
 
@@ -110,7 +121,9 @@ export default function CollegeApplications() {
   const handleDropOnUnranked = () => {
     if (draggedId == null) return;
 
-    const dragged = applications.find((application) => application.id === draggedId);
+    const dragged = applications.find(
+      (application) => application.id === draggedId,
+    );
 
     if (!dragged || dragged.rank == null) return;
 
@@ -154,11 +167,8 @@ export default function CollegeApplications() {
     if (!window.confirm(`Remove ${collegeName(app)} from your list?`)) return;
 
     resetMutations();
-    
-    deleteApplication.mutate(
-      { id: app.id },
-      { onSuccess: () => refetch() },
-    );
+
+    deleteApplication.mutate({ id: app.id }, { onSuccess: () => refetch() });
   };
 
   const renderDetails = (app: PersonalCollegeApplication) => {
@@ -222,12 +232,16 @@ export default function CollegeApplications() {
   return (
     <div className="form-container">
       <h2>My Colleges</h2>
-      {mutationError && <p role="alert">Error: {errorMessage(mutationError)}</p>}
+      {mutationError && (
+        <p role="alert">Error: {errorMessage(mutationError)}</p>
+      )}
 
       <h3>Ranked</h3>
       <p>Drag colleges to reorder them, or use the arrow buttons.</p>
       {ranked.length === 0 && (
-        <p>Nothing ranked yet. Drag a college here or choose "Add to ranking".</p>
+        <p>
+          Nothing ranked yet. Drag a college here or choose "Add to ranking".
+        </p>
       )}
       <ol>
         {ranked.map((app, index) => (
@@ -270,7 +284,11 @@ export default function CollegeApplications() {
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDropAtEnd}
-        style={{ border: "1px dashed", padding: "0.5rem", marginBottom: "1rem" }}
+        style={{
+          border: "1px dashed",
+          padding: "0.5rem",
+          marginBottom: "1rem",
+        }}
       >
         Drop here to move to the bottom of your ranking
       </div>
@@ -282,7 +300,9 @@ export default function CollegeApplications() {
         style={{ border: "1px dashed", padding: "0.5rem" }}
       >
         {unranked.length === 0 && (
-          <p>Every college on your list is ranked. Drop one here to unrank it.</p>
+          <p>
+            Every college on your list is ranked. Drop one here to unrank it.
+          </p>
         )}
         <ul>
           {unranked.map((app) => (
@@ -291,7 +311,10 @@ export default function CollegeApplications() {
               draggable={!busy}
               onDragStart={() => setDraggedId(app.id)}
               onDragEnd={() => setDraggedId(null)}
-              style={{ cursor: "grab", opacity: draggedId === app.id ? 0.5 : 1 }}
+              style={{
+                cursor: "grab",
+                opacity: draggedId === app.id ? 0.5 : 1,
+              }}
             >
               {renderDetails(app)}{" "}
               <button
