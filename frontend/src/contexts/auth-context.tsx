@@ -6,10 +6,15 @@ import {
   useLogoutUser,
   useResetUserPassword,
 } from "../api/endpoints";
+import type { ErrorModel } from "../api/models";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [resetTime, setResetTime] = useState<string | null>(null);
   const [userID, setUserID] = useState<string | null>(null);
+  const [counselorID, setCounselorID] = useState<string | null>(null);
+  const [error, setError] = useState<Promise<ErrorModel> | null>(null);
+  const [path, setPath] = useState("/");
+  const [studentID, setStudentID] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const { mutateAsync: loginFunc } = useLoginUser();
@@ -20,13 +25,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return loginFunc(
       { data: { email, password } },
       {
-        onSuccess: (user) => {
-          setResetTime(user.reset_time);
-          setUserID(user.id);
-          void navigate("/");
+        onSuccess: (resp: loginUserResponse) => {
+          if (resp.status != 200) {
+            return;
+          }
+          setResetTime(resp.data.reset_time);
+          setUserID(resp.data.id);
+          void navigate(path);
         },
-        onError: () => {
-          console.log("login did not work");
+        onError: (err) => {
+          setError(err);
+          console.log("login did not work", error);
           return;
         },
       },
@@ -34,11 +43,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    return logoutFunc(undefined, {
-      onSuccess: () => {
-        setResetTime(null);
-        setUserID(null);
-        void navigate("/");
+    return logoutFunc(
+      {},
+      {
+        onSuccess: () => {
+          setResetTime(null);
+          setUserID(null);
+          setCounselorID(null);
+          setStudentID(null);
+          void navigate(path);
+          setPath("/");
+        },
+
+        onError: (err) => {
+          setError(err);
+        },
       },
     });
   };
@@ -48,10 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { data: { new_password } },
       {
         onSuccess: () => {
-          void navigate("/");
+          void navigate(path);
         },
-        onError: () => {
-          console.log("resetting password did not work");
+        onError: (err) => {
+          setError(err);
+          console.log("resetting password did not work", error);
         },
       },
     );
@@ -62,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         resetTime: resetTime,
         userID: userID,
+        counselorID: counselorID,
+        studentID: studentID,
         login: login,
         logout: logout,
         reset_password: new_password,

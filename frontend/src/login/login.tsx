@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuthContext } from "../contexts/use-auth-context";
 
 export default function LogIn() {
-  const [Email, setEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
   const [Status, setStatus] = useState("");
 
@@ -11,8 +11,14 @@ export default function LogIn() {
   const handleSubmit = async (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
     try {
-      await login(Email, Password);
-      setStatus("Logged in");
+      {
+        const response = await login(email, Password);
+        if (response.status != 200) {
+          setStatus("Something went wrong");
+        } else {
+          setStatus("Logged in");
+        }
+      }
     } catch (err) {
       console.error(err);
       setStatus("Something went wrong");
@@ -27,7 +33,7 @@ export default function LogIn() {
           <label>Email:</label>
           <input
             type="email"
-            value={Email}
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />

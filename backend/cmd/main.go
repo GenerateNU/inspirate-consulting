@@ -67,26 +67,20 @@ func main() {
 func LoadConfig() (*config.Config, error) {
 	testMode := os.Getenv("TEST_MODE")
 
-	// Use a concrete struct for envconfig since SupabaseInterface can't be loaded from env vars
-	type envConf struct {
-		Application config.Application
-		DB          config.DB
-		Supabase    supabase.Supabase
-		S3          config.S3
-		SQS         config.SQS
+	supa := &supabase.Supabase{}
+	if err := envconfig.Process(context.Background(), supa); err != nil {
+		log.Fatalln("Error processing supabase environment variables: ", err)
 	}
-	var env envConf
-	err := envconfig.Process(context.Background(), &env)
+
+	var cfg config.Config
+	cfg.Supabase = supa
+	// Load configuration from environment variables for production
+	err := envconfig.Process(context.Background(), &cfg)
 	if err != nil {
 		log.Fatalln("Error processing environment variables: ", err)
 	}
 
-	return &config.Config{
-		Application: env.Application,
-		DB:          env.DB,
-		Supabase:    &env.Supabase,
-		S3:          env.S3,
-		SQS:         env.SQS,
-		TestMode:    testMode == "true",
-	}, nil
+	cfg.TestMode = testMode == "true"
+
+	return &cfg, nil
 }

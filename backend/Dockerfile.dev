@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine
+FROM golang:1.26-alpine
 
 # air watches the source tree and rebuilds/restarts on change
 RUN go install github.com/air-verse/air@v1.67.0

@@ -8,8 +8,12 @@ export default function LogOut() {
 
   const handleSubmit = async () => {
     try {
-      await logout();
-      setStatus(`Logged out`);
+      const response = await logout();
+      if (response.status === 204) {
+        setStatus(`Logged out`);
+      } else {
+        setStatus(`Logout went wrong: ${response.status}`);
+      }
     } catch (err) {
       console.error(err);
       setStatus("Something went wrong.");
