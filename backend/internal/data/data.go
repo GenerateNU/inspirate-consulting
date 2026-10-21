@@ -6,6 +6,7 @@ import (
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
+	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
 	essayReviewRepository "inspirate-consulting/internal/data/postgres/schema/essayReviewStore"
 	essayRepository "inspirate-consulting/internal/data/postgres/schema/essayStore"
@@ -76,8 +77,18 @@ type GlobalCollegeRepository interface {
 
 // To represent the Personal College Application schema
 type PersonalCollegeApplicationRepository interface {
-	CreatePersonalCollegeApplication(ctx context.Context, studentID string, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
-	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID string) ([]models.PersonalCollegeApplication, error)
+	CreatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, application models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID uuid.UUID) ([]models.PersonalCollegeApplication, error)
+	UpdateApplicationRank(ctx context.Context, studentID uuid.UUID, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error)
+	UpdatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
+	DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error
+}
+
+// To represent the Counselor's view of their students and pending essay reviews
+type CounselorRepository interface {
+	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
+	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
+	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
 }
 
 type UserRepository interface {
@@ -160,6 +171,7 @@ type Repository struct {
 	TodoItem                   TodoItemRepository
 	GlobalCollege              GlobalCollegeRepository
 	PersonalCollegeApplication PersonalCollegeApplicationRepository
+	Counselor                  CounselorRepository
 	Media                      MediaRepository
 	MediaAccess                MediaAccessRepository
 	User                       UserRepository
@@ -200,5 +212,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
 		Student:                    studentRepository.NewStudentRepository(db),
+		Counselor:                  counselorRepository.NewCounselorRepository(db),
 	}
 }

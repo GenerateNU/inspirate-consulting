@@ -27,7 +27,9 @@ import type {
 import type {
   CreatePersonalCollegeApplicationRequestBody,
   ErrorModel,
-  PersonalCollegeApplication
+  PersonalCollegeApplication,
+  UpdatePersonalCollegeApplicationRankRequestBody,
+  UpdatePersonalCollegeApplicationRequestBody
 } from '../../models';
 
 
@@ -284,4 +286,286 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getCreatePersonalCollegeApplicationMutationOptions(options), queryClient);
+    }
+    export const getDeletePersonalCollegeApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/applications/${id}`
+}
+
+/**
+ * Delete a personal college application for the authenticated student.
+ */
+export const deletePersonalCollegeApplication = async (id: number, options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeletePersonalCollegeApplicationUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeletePersonalCollegeApplicationMutationKey = () => ['deletePersonalCollegeApplication'] as const;
+
+export const getDeletePersonalCollegeApplicationMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>, TError,DeletePersonalCollegeApplicationMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>, TError,DeletePersonalCollegeApplicationMutationVariables, TContext> => {
+
+const mutationKey = getDeletePersonalCollegeApplicationMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>, DeletePersonalCollegeApplicationMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deletePersonalCollegeApplication(id,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>>
+
+    export type DeletePersonalCollegeApplicationMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeletePersonalCollegeApplicationMutationVariables = {id: number}
+
+    export const useDeletePersonalCollegeApplication = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePersonalCollegeApplication>>, TError,DeletePersonalCollegeApplicationMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePersonalCollegeApplication>>,
+        TError,
+        DeletePersonalCollegeApplicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeletePersonalCollegeApplicationMutationOptions(options), queryClient);
+    }
+    export const getUpdatePersonalCollegeApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/applications/${id}`
+}
+
+/**
+ * Update a personal college application for the authenticated student.
+ */
+export const updatePersonalCollegeApplication = async (id: number,
+    updatePersonalCollegeApplicationRequestBody: NonReadonly<UpdatePersonalCollegeApplicationRequestBody>, options?: RequestInit): Promise<PersonalCollegeApplication> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdatePersonalCollegeApplicationUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updatePersonalCollegeApplicationRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: PersonalCollegeApplication, status?: number} = new globalThis.Error();
+    const data : PersonalCollegeApplication = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: PersonalCollegeApplication = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdatePersonalCollegeApplicationMutationKey = () => ['updatePersonalCollegeApplication'] as const;
+
+export const getUpdatePersonalCollegeApplicationMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>, TError,UpdatePersonalCollegeApplicationMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>, TError,UpdatePersonalCollegeApplicationMutationVariables, TContext> => {
+
+const mutationKey = getUpdatePersonalCollegeApplicationMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>, UpdatePersonalCollegeApplicationMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updatePersonalCollegeApplication(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePersonalCollegeApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>>
+    export type UpdatePersonalCollegeApplicationMutationBody = NonReadonly<UpdatePersonalCollegeApplicationRequestBody>
+    export type UpdatePersonalCollegeApplicationMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdatePersonalCollegeApplicationMutationVariables = {id: number;data: NonReadonly<UpdatePersonalCollegeApplicationRequestBody>}
+
+    export const useUpdatePersonalCollegeApplication = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePersonalCollegeApplication>>, TError,UpdatePersonalCollegeApplicationMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePersonalCollegeApplication>>,
+        TError,
+        UpdatePersonalCollegeApplicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdatePersonalCollegeApplicationMutationOptions(options), queryClient);
+    }
+    export const getUpdatePersonalCollegeApplicationRankUrl = (id: number,) => {
+
+
+
+
+  return `/api/applications/${id}/rank`
+}
+
+/**
+ * Update the rank of a personal college application for the authenticated student.
+ */
+export const updatePersonalCollegeApplicationRank = async (id: number,
+    updatePersonalCollegeApplicationRankRequestBody: NonReadonly<UpdatePersonalCollegeApplicationRankRequestBody>, options?: RequestInit): Promise<PersonalCollegeApplication[] | null> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdatePersonalCollegeApplicationRankUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updatePersonalCollegeApplicationRankRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: PersonalCollegeApplication[] | null, status?: number} = new globalThis.Error();
+    const data : PersonalCollegeApplication[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: PersonalCollegeApplication[] | null = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdatePersonalCollegeApplicationRankMutationKey = () => ['updatePersonalCollegeApplicationRank'] as const;
+
+export const getUpdatePersonalCollegeApplicationRankMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>, TError,UpdatePersonalCollegeApplicationRankMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>, TError,UpdatePersonalCollegeApplicationRankMutationVariables, TContext> => {
+
+const mutationKey = getUpdatePersonalCollegeApplicationRankMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>, UpdatePersonalCollegeApplicationRankMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updatePersonalCollegeApplicationRank(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePersonalCollegeApplicationRankMutationResult = NonNullable<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>>
+    export type UpdatePersonalCollegeApplicationRankMutationBody = NonReadonly<UpdatePersonalCollegeApplicationRankRequestBody>
+    export type UpdatePersonalCollegeApplicationRankMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdatePersonalCollegeApplicationRankMutationVariables = {id: number;data: NonReadonly<UpdatePersonalCollegeApplicationRankRequestBody>}
+
+    export const useUpdatePersonalCollegeApplicationRank = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>, TError,UpdatePersonalCollegeApplicationRankMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePersonalCollegeApplicationRank>>,
+        TError,
+        UpdatePersonalCollegeApplicationRankMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdatePersonalCollegeApplicationRankMutationOptions(options), queryClient);
     }

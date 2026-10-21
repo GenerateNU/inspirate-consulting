@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"inspirate-consulting/internal/auth"
-	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 )
 
@@ -15,21 +14,9 @@ func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input mo
 	if err != nil {
 		return nil, err
 	}
-	switch input.ApplicationType {
-	case "ED":
-		if college.EDDeadline == nil {
-			return nil, errs.BadRequest("this college does not offer ED")
-		}
-	case "EA":
-		if college.EADeadline == nil {
-			return nil, errs.BadRequest("this college does not offer EA")
-		}
-	case "RD":
-		if college.RDDeadline == nil {
-			return nil, errs.BadRequest("this college does not offer RD")
-		}
-	default:
-		return nil, errs.BadRequest("invalid application_type")
+	err = ValidateApplicationDeadline(college, input.ApplicationType)
+	if err != nil {
+		return nil, err
 	}
 
 	studentID, err := auth.GetStudentID(ctx)
@@ -37,7 +24,7 @@ func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input mo
 		return nil, err
 	}
 
-	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID.String(), input)
+	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID, input)
 	if err != nil {
 		return nil, err
 	}

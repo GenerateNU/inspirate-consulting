@@ -18,6 +18,11 @@ export interface PersonalCollegeApplication {
   global_college_id: number;
   /** Unique identifier for the application */
   id: number;
+  /**
+     * Student's ranking of this application relative to others, or null if unranked
+     * @nullable
+     */
+  rank: number | null;
   /** ID of the student who owns this application */
   student_id: string;
   updated_at: string;
