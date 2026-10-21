@@ -2,6 +2,7 @@ package counselorRepository
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,6 +21,7 @@ func createTestCounselor(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 		context.Background(),
 		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ('Test Counselor', gen_random_uuid()::text || '@test.com') RETURNING id)
 		INSERT INTO public.counselor (user_id) SELECT id FROM new_user RETURNING id`,
+		fmt.Sprintf("counselor-%s@example.com", uuid.NewString()),
 	).Scan(&id)
 	if err != nil {
 		t.Fatalf("failed to create test counselor: %v", err)
@@ -41,6 +43,7 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, na
 		name,
 		year,
 		counselorID,
+		fmt.Sprintf("student-%s@example.com", uuid.NewString()),
 	).Scan(&id)
 	if err != nil {
 		t.Fatalf("failed to create test student: %v", err)
