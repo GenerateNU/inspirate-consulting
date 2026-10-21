@@ -57,7 +57,6 @@ type CreateUserInput struct {
 		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
 		Email    string  `json:"email" doc:"email of user for supabase signup"`
 		Role     Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
-		Interest *string `json:"student_interest,omitempty" doc:"student's area of interest; only used when role is student"`
 	}
 }
 
