@@ -12,6 +12,8 @@ const links = [
   { to: "/upload-video", label: "Upload Video" },
   { to: "/student", label: "Student" },
   { to: "/counselor", label: "Counselor" },
+  { to: "/counselor-students", label: "Counselor Students" },
+  { to: "/pending-reviews", label: "Counselor Pending Reviews" },
 ];
 
 export default function NavBar() {

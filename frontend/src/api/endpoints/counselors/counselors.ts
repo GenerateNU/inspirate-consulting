@@ -5,11 +5,20 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import useSwr from 'swr';
+import {
+  useQuery
+} from '@tanstack/react-query';
 import type {
-  Key,
-  SWRConfiguration
-} from 'swr';
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CounselorStudent,
@@ -19,35 +28,23 @@ import type {
 } from '../../models';
 
 
-export type HTTPStatusCode1xx = 100 | 101 | 102 | 103;
-export type HTTPStatusCode2xx = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207;
-export type HTTPStatusCode3xx = 300 | 301 | 302 | 303 | 304 | 305 | 307 | 308;
-export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 419 | 420 | 421 | 422 | 423 | 424 | 426 | 428 | 429 | 431 | 451;
-export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
-export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
 
 
-
-
- export type listCounselorPendingReviewsResponse200 = {
-  data: PendingReview[] | null
-  status: 200
-}
-
-export type listCounselorPendingReviewsResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
-
-export type listCounselorPendingReviewsResponseSuccess = (listCounselorPendingReviewsResponse200) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
-export type listCounselorPendingReviewsResponseError = (listCounselorPendingReviewsResponseDefault) & {
-  headers: Headers;
-};
-
-export type listCounselorPendingReviewsResponse = (listCounselorPendingReviewsResponseSuccess | listCounselorPendingReviewsResponseError)
 
 export const getListCounselorPendingReviewsUrl = () => {
 
@@ -60,7 +57,7 @@ export const getListCounselorPendingReviewsUrl = () => {
 /**
  * List the open essay reviews the authenticated counselor needs to complete, oldest first.
  */
-export const listCounselorPendingReviews = async ( options?: RequestInit): Promise<listCounselorPendingReviewsResponse> => {
+export const listCounselorPendingReviews = async ( options?: RequestInit): Promise<PendingReview[] | null> => {
 
   const res = await fetch(getListCounselorPendingReviewsUrl(),
   {
@@ -73,52 +70,92 @@ export const listCounselorPendingReviews = async ( options?: RequestInit): Promi
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listCounselorPendingReviewsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listCounselorPendingReviewsResponse
+    const err: globalThis.Error & {info?: PendingReview[] | null, status?: number} = new globalThis.Error();
+    const data : PendingReview[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: PendingReview[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListCounselorPendingReviewsKey = () => [`/api/counselors/reviews`] as const;
+
+export const getListCounselorPendingReviewsQueryKey = () => {
+    return [
+    `/api/counselors/reviews`
+    ] as const;
+    }
+
+
+export const getListCounselorPendingReviewsQueryOptions = <TData = Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCounselorPendingReviewsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCounselorPendingReviews>>> = ({ signal }) => listCounselorPendingReviews({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListCounselorPendingReviewsQueryResult = NonNullable<Awaited<ReturnType<typeof listCounselorPendingReviews>>>
+export type ListCounselorPendingReviewsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListCounselorPendingReviews = <TError = Promise<ErrorModel>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListCounselorPendingReviewsKey() : null);
-  const swrFn = () => listCounselorPendingReviews(fetchOptions)
+export function useListCounselorPendingReviews<TData = Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCounselorPendingReviews>>,
+          TError,
+          Awaited<ReturnType<typeof listCounselorPendingReviews>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCounselorPendingReviews<TData = Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCounselorPendingReviews>>,
+          TError,
+          Awaited<ReturnType<typeof listCounselorPendingReviews>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCounselorPendingReviews<TData = Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListCounselorPendingReviews<TData = Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorPendingReviews>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListCounselorPendingReviewsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
-export type listCounselorStudentsResponse200 = {
-  data: CounselorStudent[] | null
-  status: 200
-}
 
-export type listCounselorStudentsResponseDefault = {
-  data: ErrorModel
-  status: Exclude<HTTPStatusCodes, 200>
-}
 
-export type listCounselorStudentsResponseSuccess = (listCounselorStudentsResponse200) & {
-  headers: Headers;
-};
-export type listCounselorStudentsResponseError = (listCounselorStudentsResponseDefault) & {
-  headers: Headers;
-};
 
-export type listCounselorStudentsResponse = (listCounselorStudentsResponseSuccess | listCounselorStudentsResponseError)
+
+
 
 export const getListCounselorStudentsUrl = (params?: ListCounselorStudentsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -138,7 +175,7 @@ export const getListCounselorStudentsUrl = (params?: ListCounselorStudentsParams
 /**
  * List the authenticated counselor's students, flagged for falling behind and pending essay reviews.
  */
-export const listCounselorStudents = async (params?: ListCounselorStudentsParams, options?: RequestInit): Promise<listCounselorStudentsResponse> => {
+export const listCounselorStudents = async (params?: ListCounselorStudentsParams, options?: RequestInit): Promise<CounselorStudent[] | null> => {
 
   const res = await fetch(getListCounselorStudentsUrl(params),
   {
@@ -151,31 +188,90 @@ export const listCounselorStudents = async (params?: ListCounselorStudentsParams
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
 
-  const data: listCounselorStudentsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listCounselorStudentsResponse
+    const err: globalThis.Error & {info?: CounselorStudent[] | null, status?: number} = new globalThis.Error();
+    const data : CounselorStudent[] | null = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: CounselorStudent[] | null = body ? JSON.parse(body) : {}
+  return data
 }
 
 
 
 
-export const getListCounselorStudentsKey = (params?: ListCounselorStudentsParams,) => [`/api/counselors/students`, ...(params ? [params]: [])] as const;
+
+export const getListCounselorStudentsQueryKey = (params?: ListCounselorStudentsParams,) => {
+    return [
+    `/api/counselors/students`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListCounselorStudentsQueryOptions = <TData = Awaited<ReturnType<typeof listCounselorStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: ListCounselorStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorStudents>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCounselorStudentsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCounselorStudents>>> = ({ signal }) => listCounselorStudents(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCounselorStudents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
 export type ListCounselorStudentsQueryResult = NonNullable<Awaited<ReturnType<typeof listCounselorStudents>>>
+export type ListCounselorStudentsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
 
-export const useListCounselorStudents = <TError = Promise<ErrorModel>>(
-  params?: ListCounselorStudentsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof listCounselorStudents>>, TError> & { swrKey?: Key, enabled?: boolean }, fetch?: RequestInit }
-) => {
-  const {swr: swrOptions, fetch: fetchOptions} = options ?? {}
 
-  const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getListCounselorStudentsKey(params) : null);
-  const swrFn = () => listCounselorStudents(params, fetchOptions)
+export function useListCounselorStudents<TData = Awaited<ReturnType<typeof listCounselorStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  ListCounselorStudentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorStudents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCounselorStudents>>,
+          TError,
+          Awaited<ReturnType<typeof listCounselorStudents>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCounselorStudents<TData = Awaited<ReturnType<typeof listCounselorStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: ListCounselorStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorStudents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCounselorStudents>>,
+          TError,
+          Awaited<ReturnType<typeof listCounselorStudents>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCounselorStudents<TData = Awaited<ReturnType<typeof listCounselorStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: ListCounselorStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorStudents>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+export function useListCounselorStudents<TData = Awaited<ReturnType<typeof listCounselorStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: ListCounselorStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCounselorStudents>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  return {
-    swrKey,
-    ...query
-  }
+  const queryOptions = getListCounselorStudentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+
