@@ -18,7 +18,7 @@ func createTestCounselor(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 	var id uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-		`WITH new_user AS (INSERT INTO public.users (name) VALUES ('Test Counselor') RETURNING id)
+		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ('Test Counselor', gen_random_uuid()::text || '@test.invalid') RETURNING id)
 		INSERT INTO public.counselor (user_id) SELECT id FROM new_user RETURNING id`,
 	).Scan(&id)
 	if err != nil {
@@ -35,7 +35,7 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, na
 	var id uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-		`WITH new_user AS (INSERT INTO public.users (name) VALUES ($1) RETURNING id)
+		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ($1, gen_random_uuid()::text || '@test.invalid') RETURNING id)
 		INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
 		SELECT id, $2, 4, 5, $3 FROM new_user RETURNING id`,
 		name,
