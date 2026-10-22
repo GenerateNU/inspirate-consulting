@@ -10,7 +10,6 @@ import {
 } from "../api/models";
 
 export default function CounselorStudents() {
-  
   // Filters and sorting are sent as query params, so changing them refetches the list
   const [year, setYear] = useState<Year | "">("");
   const [pendingReviewOnly, setPendingReviewOnly] = useState(false);
