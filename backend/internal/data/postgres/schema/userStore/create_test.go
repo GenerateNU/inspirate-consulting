@@ -93,7 +93,7 @@ func TestCreateUser_Duplicate(t *testing.T) {
 	}
 
 	_, err = repo.CreateUser(ctx, input, supabaseID)
-	if err != nil {
-		t.Fatal("expected error creating duplicate user with same supabase_id, got nil")
+	if err == nil {
+		t.Fatal("expected error creating duplicate user with same email, got nil")
 	}
 }

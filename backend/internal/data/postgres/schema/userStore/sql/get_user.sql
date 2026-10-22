@@ -1,3 +1,3 @@
-SELECT u.id, u.name, u.supabase_id, u.pfp_key, u.reset_time
+SELECT u.id, u.name, u.supabase_id, u.pfp_key, u.reset_time, u.expires_at
 FROM users u
 WHERE u.id = $1;
