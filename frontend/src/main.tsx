@@ -17,6 +17,8 @@ import UploadVideo from "./video/upload-video";
 import VideoList from "./video/videos";
 import Student from "./student/student";
 import Counselor from "./counselor/counselor";
+import CounselorStudents from "./counselor/counselor-students";
+import PendingReviews from "./counselor/pending-reviews";
 import CreateTask from "./task/CreateTask";
 import TaskList from "./task/TaskList";
 import Layout from "./layout/layout";
@@ -55,6 +57,11 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/videos" element={<VideoList />} />
               <Route path="/student" element={<Student />} />
               <Route path="/counselor" element={<Counselor />} />
+              <Route
+                path="/counselor-students"
+                element={<CounselorStudents />}
+              />
+              <Route path="/pending-reviews" element={<PendingReviews />} />
               <Route path="/create-task" element={<CreateTask />} />
               <Route path="/tasks" element={<TaskList />} />
               <Route path="/upload-media" element={<UploadMedia />} />
