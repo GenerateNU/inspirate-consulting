@@ -30,6 +30,8 @@ import LogOut from "./logout/logout";
 import LogIn from "./login/login";
 import { AuthProvider } from "./contexts/auth-context.tsx";
 import CollegeApplications from "./college/college-applications.tsx";
+import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
+import AccountExpired from "./account-expiration/account-expired";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -37,6 +39,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path={ACCOUNT_EXPIRED_PATH} element={<AccountExpired />} />
             <Route element={<Layout />}>
               <Route path="/" element={<App />} />
               <Route path="/greeting" element={<Greeting />} />
