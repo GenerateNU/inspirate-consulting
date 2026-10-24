@@ -1697,6 +1697,11 @@ components:
           type: string
         email:
           type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
         id:
           type: string
         name:

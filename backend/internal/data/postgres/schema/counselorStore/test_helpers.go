@@ -18,11 +18,7 @@ func createTestCounselor(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 	var id uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
-<<<<<<< HEAD
 		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ('Test Counselor', gen_random_uuid()::text || '@test.com') RETURNING id)
-=======
-		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ('Test Counselor', gen_random_uuid()::text || '@test.invalid') RETURNING id)
->>>>>>> 6f50d7a (fix failing tests (#162))
 		INSERT INTO public.counselor (user_id) SELECT id FROM new_user RETURNING id`,
 	).Scan(&id)
 	if err != nil {
