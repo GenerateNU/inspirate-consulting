@@ -2,7 +2,6 @@ package notificationPreferencesRepository
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
