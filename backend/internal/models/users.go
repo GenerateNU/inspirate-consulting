@@ -53,11 +53,10 @@ type Counselor struct {
 
 type CreateUserInput struct {
 	Body struct {
-		Name     string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey   *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
-		Email    string  `json:"email" doc:"email of user for supabase signup"`
-		Role     Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
-		Interest *string `json:"student_interest,omitempty" doc:"student's area of interest; only used when role is student"`
+		Name   string  `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
+		PfpKey *string `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
+		Email  string  `json:"email" doc:"email of user for supabase signup"`
+		Role   Role    `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
 	}
 }
 
