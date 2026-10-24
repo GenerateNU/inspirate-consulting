@@ -20,11 +20,25 @@ import type {
 import {
   getCreateGlobalCollegeResponseMock,
   getGetGlobalCollegeResponseMock,
-  getListGlobalCollegesResponseMock
+  getListGlobalCollegesResponseMock,
+  getSearchGlobalCollegesResponseMock,
+  getUpdateGlobalCollegeResponseMock
 } from './global-colleges.faker';
 
-export { getListGlobalCollegesResponseMock, getCreateGlobalCollegeResponseMock, getGetGlobalCollegeResponseMock } from './global-colleges.faker';
+export { getSearchGlobalCollegesResponseMock, getListGlobalCollegesResponseMock, getCreateGlobalCollegeResponseMock, getGetGlobalCollegeResponseMock, getUpdateGlobalCollegeResponseMock } from './global-colleges.faker';
 
+
+export const getSearchGlobalCollegesMockHandler = (overrideResponse?: GlobalCollege[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GlobalCollege[] | null> | GlobalCollege[] | null), options?: RequestHandlerOptions) => {
+  return http.get('*/college-search', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getSearchGlobalCollegesResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getListGlobalCollegesMockHandler = (overrideResponse?: GlobalCollege[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GlobalCollege[] | null> | GlobalCollege[] | null), options?: RequestHandlerOptions) => {
   return http.get('*/colleges', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
@@ -50,6 +64,16 @@ export const getCreateGlobalCollegeMockHandler = (overrideResponse?: GlobalColle
   }, options)
 }
 
+export const getDeleteGlobalCollegeMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/colleges/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
 export const getGetGlobalCollegeMockHandler = (overrideResponse?: GlobalCollege | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GlobalCollege> | GlobalCollege), options?: RequestHandlerOptions) => {
   return http.get('*/colleges/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
@@ -61,8 +85,23 @@ export const getGetGlobalCollegeMockHandler = (overrideResponse?: GlobalCollege 
       })
   }, options)
 }
+
+export const getUpdateGlobalCollegeMockHandler = (overrideResponse?: GlobalCollege | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<GlobalCollege> | GlobalCollege), options?: RequestHandlerOptions) => {
+  return http.put('*/colleges/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateGlobalCollegeResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getGlobalCollegesMock = () => [
+  getSearchGlobalCollegesMockHandler(),
   getListGlobalCollegesMockHandler(),
   getCreateGlobalCollegeMockHandler(),
-  getGetGlobalCollegeMockHandler()
+  getDeleteGlobalCollegeMockHandler(),
+  getGetGlobalCollegeMockHandler(),
+  getUpdateGlobalCollegeMockHandler()
 ]

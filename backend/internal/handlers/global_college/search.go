@@ -1,0 +1,23 @@
+package globalcollege
+
+import (
+	"context"
+
+	"inspirate-consulting/internal/models"
+)
+
+// range from 0.0 to 1.0, inclusive, where 0.0 is a complete mismatch and 1.0 is a perfect match
+const searchThreshold = 0.2
+
+// the maximum number of results to return from a search query
+const searchResultLimit = 7
+
+// finds colleges whose name OR location loosely matches the given query, ordered most-relevant first.
+func (h *Handler) SearchGlobalColleges(ctx context.Context, query string) ([]models.GlobalCollege, error) {
+	results, err := h.GlobalCollegeRepository.SearchGlobalColleges(ctx, query, searchThreshold, searchResultLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
