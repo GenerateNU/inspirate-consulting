@@ -1174,6 +1174,7 @@ export const createUserBodyNameMax = 200;
 
 export const CreateUserBody = /*#__PURE__*/ zod.object({
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
+  "expires_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('when the account expires; omit for no expiration')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
   "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create'))
@@ -1185,6 +1186,7 @@ export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "user": /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "email": /*#__PURE__*/ zod.string(),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
@@ -1205,6 +1207,7 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
 export const LoginUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "email": /*#__PURE__*/ zod.string(),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
@@ -1239,6 +1242,7 @@ export const FetchUserParams = /*#__PURE__*/ zod.object({
 export const FetchUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "email": /*#__PURE__*/ zod.string(),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
