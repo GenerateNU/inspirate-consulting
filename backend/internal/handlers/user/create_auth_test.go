@@ -32,14 +32,16 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 			in := createInput("New User", "new@example.com", role)
 
 			var gotEmail, gotPassword, gotRole string
+			supabaseID := uuid.New()
 			sb := &supabase.MockSupabase{
 				SignupFunc: func(email, password, role string) (models.SignupResponse, error) {
 					gotEmail, gotPassword, gotRole = email, password, role
-					return models.SignupResponse{User: models.UserSignupResponse{ID: uuid.New()}}, nil
+					return models.SignupResponse{User: models.UserSignupResponse{ID: supabaseID}}, nil
 				},
 			}
 			repo := mocks.NewUserRepository(t)
-			repo.On("CreateUser", mock.Anything, *in).
+			// the users row is linked to the Supabase account just created
+			repo.On("CreateUser", mock.Anything, *in, supabaseID).
 				Return(&models.CreateUserOutput{Body: &models.CreateUserBody{User: &models.User{Name: "New User"}}}, nil).Once()
 
 			out, err := NewHandler(repo).CreateUser(ctx, in, sb)
@@ -69,7 +71,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 	t.Run("database failure does not return a temp password", func(t *testing.T) {
 		t.Parallel()
 		repo := mocks.NewUserRepository(t)
-		repo.On("CreateUser", mock.Anything, mock.Anything).Return(nil, errors.New("db down"))
+		repo.On("CreateUser", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("db down"))
 
 		out, err := NewHandler(repo).CreateUser(ctx, createInput("X", "x@example.com", models.StudentRole), &supabase.MockSupabase{})
 		assert.Nil(t, out)

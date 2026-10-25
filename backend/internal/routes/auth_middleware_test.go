@@ -28,7 +28,7 @@ func newMiddlewareApp(t *testing.T) (*authApp, string) {
 	repo := mocks.NewUserRepository(t)
 	repo.On("FetchUser", mock.Anything, models.FetchUserInput{ID: user.ID}).
 		Return(&models.FetchUserOutput{Body: user}, nil).Maybe()
-	return newAuthApp(t, &data.Repository{User: repo}), "/user/" + user.ID.String()
+	return newAuthApp(t, func(r *data.Repository) { r.User = repo }), "/user/" + user.ID.String()
 }
 
 func TestAuthMiddleware_MissingCredentials(t *testing.T) {

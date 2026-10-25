@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
@@ -10,6 +11,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/aws/sqsclient"
+	testutils "inspirate-consulting/internal/data/postgres/testUtils"
 	"inspirate-consulting/internal/supabase"
 	"io"
 	"math/big"
@@ -23,6 +25,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 )
 
@@ -117,7 +120,12 @@ func sign(claims jwt.MapClaims) string {
 
 // tokenFor returns a valid session token for the given role.
 func tokenFor(role string) string {
-	return sign(claimsFor("00000000-0000-0000-0000-00000000000"+roleDigit(role), role))
+	return sign(claimsFor(subFor(role), role))
+}
+
+// subFor is the Supabase ID of the seeded user that holds the given role.
+func subFor(role string) string {
+	return "00000000-0000-0000-0000-00000000000" + roleDigit(role)
 }
 
 func roleDigit(role string) string {
@@ -131,8 +139,8 @@ func roleDigit(role string) string {
 	}
 }
 
-// authApp is the real app with auth enabled. Every signed token counts as a
-// live Supabase session unless it was revoked.
+// authApp is the real app with auth enabled, backed by a fresh test database.
+// Every signed token counts as a live Supabase session unless it was revoked.
 type authApp struct {
 	t       *testing.T
 	app     *fiber.App
@@ -140,9 +148,17 @@ type authApp struct {
 	revoked map[string]bool
 }
 
-func newAuthApp(t *testing.T, repo *data.Repository) *authApp {
+// newAuthApp seeds one user per role (see subFor) so ResolveIdentityMiddleware
+// finds them; override swaps in mocked repositories where a test needs them.
+func newAuthApp(t *testing.T, override func(*data.Repository)) *authApp {
 	t.Helper()
 	signingKey()
+	db := testutils.SetupTestDB(t)
+	seedIdentities(t, db)
+	repo := data.NewRepository(db)
+	if override != nil {
+		override(repo)
+	}
 	a := &authApp{t: t, revoked: map[string]bool{}}
 	sb := &supabase.MockSupabase{
 		ValidateSessionFunc: func(tok string) error {
@@ -154,13 +170,37 @@ func newAuthApp(t *testing.T, repo *data.Repository) *authApp {
 			return nil
 		},
 	}
-	if repo == nil {
-		repo = &data.Repository{}
-	}
 	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo, &sqsclient.SQSClient{})
 	require.NoError(t, err)
 	a.app = app
 	return a
+}
+
+// seedIdentities inserts a student, a counselor, and a user with no profile
+// (for roles the app doesn't know), each linked to subFor(role).
+func seedIdentities(t *testing.T, db *pgxpool.Pool) {
+	t.Helper()
+	ctx := context.Background()
+	insertUser := func(role string) string {
+		var id string
+		err := db.QueryRow(ctx,
+			`INSERT INTO users (name, email, supabase_id) VALUES ($1, $2, $3) RETURNING id`,
+			role, role+"@example.com", subFor(role)).Scan(&id)
+		require.NoError(t, err)
+		return id
+	}
+
+	var counselorID string
+	err := db.QueryRow(ctx, `INSERT INTO counselor (user_id) VALUES ($1) RETURNING id`,
+		insertUser(roleCounselor)).Scan(&counselorID)
+	require.NoError(t, err)
+
+	_, err = db.Exec(ctx,
+		`INSERT INTO student (user_id, year, gpa, review_balance, counselor_id) VALUES ($1, 'senior', 4, 0, $2)`,
+		insertUser(roleStudent), counselorID)
+	require.NoError(t, err)
+
+	insertUser("admin")
 }
 
 // revoke ends a session on the Supabase side, as sign-out or an admin would.

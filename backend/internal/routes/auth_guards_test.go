@@ -71,19 +71,30 @@ var routeTable = []routeAccess{
 
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/students/{id}", anyRole, nil},
+
+	// counselors
+	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
 
 	// colleges & applications
 	{http.MethodPost, "/colleges", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/colleges/{id}", anyRole, nil},
 	{http.MethodGet, "/colleges", anyRole, nil},
+	{http.MethodPut, "/colleges/{id}", anyRole, nil},
+	{http.MethodDelete, "/colleges/{id}", anyRole, nil},
+	{http.MethodGet, "/college-search", anyRole, nil},
 	{http.MethodPost, "/applications", guarded, []string{roleStudent}},
 	{http.MethodGet, "/applications", guarded, []string{roleStudent}},
+	{http.MethodDelete, "/applications/{id}", guarded, []string{roleStudent}},
+	{http.MethodPut, "/applications/{id}", guarded, []string{roleStudent}},
+	{http.MethodPut, "/applications/{id}/rank", guarded, []string{roleStudent}},
 
 	// to-do items
 	{http.MethodPost, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
-	{http.MethodGet, "/todo-items", guarded, []string{roleStudent}},
-	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent}},
-	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent}},
+	{http.MethodGet, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
@@ -138,9 +149,11 @@ func (r routeAccess) allows(role string) bool {
 
 // deniedByGuard reports whether a response is the auth layer turning the
 // request away, as opposed to the handler running (whatever it then returns:
-// 2xx, 404, 422 for an empty body, or 500 from the stub repository).
+// 2xx, 404, 422 for an empty body, or an error from the empty test database).
+// Handlers report their own 401s as {"code","message"}, so only huma's error
+// model (which carries a detail) counts as the auth layer.
 func deniedByGuard(resp apiResponse) bool {
-	return resp.Status == http.StatusUnauthorized ||
+	return (resp.Status == http.StatusUnauthorized && resp.Detail() != "") ||
 		(resp.Status == http.StatusForbidden && resp.Detail() == "Insufficient role")
 }
 
@@ -226,18 +239,13 @@ func TestGuards_RoleMatrix(t *testing.T) {
 	t.Parallel()
 
 	a := newAuthApp(t, nil)
-	subs := map[string]string{
-		roleStudent:   "66666666-6666-6666-6666-666666666666",
-		roleCounselor: "77777777-7777-7777-7777-777777777777",
-		// a role the app doesn't know must get no more than authentication alone gives
-		"admin": "88888888-8888-8888-8888-888888888888",
-	}
 
 	for _, r := range routeTable {
+		// a role the app doesn't know must get no more than authentication alone gives
 		for _, role := range []string{roleStudent, roleCounselor, "admin"} {
 			t.Run(r.String()+" as "+role, func(t *testing.T) {
 				// fresh session per request: allowed calls like logout really end the session
-				tok := sign(claimsFor(subs[role], role))
+				tok := tokenFor(role)
 				resp := a.do(r.method, r.concrete(), tok, map[string]any{})
 				if r.allows(role) {
 					assert.False(t, deniedByGuard(resp),
@@ -279,14 +287,16 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"PATCH /students/{id}/review-balance",
 		"POST /colleges",
 		"POST /videos",
+		"GET /counselors/reviews",
+		"GET /counselors/students",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",
 		"POST /reviews",
 		"POST /applications",
 		"GET /applications",
-		"GET /todo-items",
-		"GET /todo-items/search",
-		"PATCH /todo-items/{id}",
+		"DELETE /applications/{id}",
+		"PUT /applications/{id}",
+		"PUT /applications/{id}/rank",
 	}, studentOnly)
 }
