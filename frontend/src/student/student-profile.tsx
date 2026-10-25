@@ -1,10 +1,6 @@
 // name, grade, highschool, major of interest, tasks completed
-import { useParams } from 'react-router-dom';
-import {
-  useGetStudent,
-  useFetchUser,
-  useGetTodoItems,
-} from '../api/endpoints';
+import { useParams } from "react-router-dom";
+import { useGetStudent, useFetchUser, useGetTodoItems } from "../api/endpoints";
 
 const gradeByYear: Record<string, number> = {
   freshman: 9,
@@ -14,18 +10,18 @@ const gradeByYear: Record<string, number> = {
 };
 
 export default function StudentProfile() {
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
 
   // Fetch the student using the ID from the URL
   const studentQuery = useGetStudent(id, {
-    query: { enabled: id !== '' },
+    query: { enabled: id !== "" },
   });
   const student = studentQuery.data;
 
   // Fetch the user once the student's user_id is known
-  const userId = student?.user_id ?? '';
+  const userId = student?.user_id ?? "";
   const userQuery = useFetchUser(userId, {
-    query: { enabled: userId !== '' },
+    query: { enabled: userId !== "" },
   });
   const user = userQuery.data;
 
@@ -53,10 +49,10 @@ export default function StudentProfile() {
     <div>
       <h2>Student Profile</h2>
       <ul>
-        <li>Name: {user?.name ?? 'Unknown'}</li>
+        <li>Name: {user?.name ?? "Unknown"}</li>
         <li>Grade: {gradeByYear[student.year] ?? student.year}</li>
-        <li>High School: {student.organization ?? 'Not set'}</li>
-        <li>Major of Interest: {student.student_interest ?? 'Not set'}</li>
+        <li>High School: {student.organization ?? "Not set"}</li>
+        <li>Major of Interest: {student.student_interest ?? "Not set"}</li>
         <li>
           Tasks Completed: {completedCount} / {todos.length}
         </li>
