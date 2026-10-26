@@ -5,7 +5,7 @@ import { CreateUserInputBodyRole } from "../api/models";
 
 export default function CreateUser() {
   const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [Role, setRole] = useState<CreateUserInputBodyRole>(
     CreateUserInputBodyRole.student,
   );
@@ -17,7 +17,7 @@ export default function CreateUser() {
     event.preventDefault();
     setStatus("");
     mutate(
-      { data: { name: Name, email: Email, role: Role, pfp_key: null } },
+      { data: { name: Name, email: email, role: Role, pfp_key: null } },
       {
         onSuccess: (user) =>
           setStatus(
@@ -44,7 +44,7 @@ export default function CreateUser() {
           <label>Email:</label>
           <input
             type="text"
-            value={Email}
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
