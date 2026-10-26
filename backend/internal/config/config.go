@@ -9,6 +9,7 @@ type Config struct {
 	Supabase    supabase.SupabaseInterface
 	S3          S3
 	SQS         SQS
+	ClaimToken  ClaimToken
 	// TestMode=true will skip the auth middleware
 	TestMode bool
 }

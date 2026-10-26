@@ -74,6 +74,7 @@ func LoadConfig() (*config.Config, error) {
 		Supabase    supabase.Supabase
 		S3          config.S3
 		SQS         config.SQS
+		ClaimToken  config.ClaimToken
 	}
 	var env envConf
 	err := envconfig.Process(context.Background(), &env)
@@ -87,6 +88,7 @@ func LoadConfig() (*config.Config, error) {
 		Supabase:    &env.Supabase,
 		S3:          env.S3,
 		SQS:         env.SQS,
+		ClaimToken:  env.ClaimToken,
 		TestMode:    testMode == "true",
 	}, nil
 }
