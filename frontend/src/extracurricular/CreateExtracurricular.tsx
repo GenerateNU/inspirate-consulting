@@ -23,10 +23,10 @@ export default function CreateExtracurricular() {
       { studentID: TEST_STUDENT_ID, data: toRequestBody(values) },
       {
         onSuccess: (created) => {
-          queryClient.invalidateQueries({
+          void queryClient.invalidateQueries({
             queryKey: getListExtracurricularsQueryKey(),
           });
-          navigate(`/extracurriculars/${created.id}`);
+          void navigate(`/extracurriculars/${created.id}`);
         },
       },
     );
@@ -35,7 +35,11 @@ export default function CreateExtracurricular() {
   return (
     <div className="ec-page ec-box">
       <div className="ec-header">
-        <Link to="/extracurriculars" className="ec-back" aria-label="Back to extracurriculars">
+        <Link
+          to="/extracurriculars"
+          className="ec-back"
+          aria-label="Back to extracurriculars"
+        >
           ←
         </Link>
         <h2 className="ec-title">Add Extracurricular</h2>

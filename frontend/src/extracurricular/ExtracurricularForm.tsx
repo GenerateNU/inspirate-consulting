@@ -11,7 +11,7 @@ type Props = {
   submitLabel: string;
   pendingLabel: string;
   isPending: boolean;
-  error: Parameters<typeof errorMessage>[0] | null;
+  error: Error | null;
   onSubmit: (values: ExtracurricularFormValues) => void;
 };
 
@@ -76,7 +76,10 @@ export default function ExtracurricularForm({
             <select
               value={values.type}
               onChange={(e) =>
-                update("type", e.target.value as ExtracurricularFormValues["type"])
+                update(
+                  "type",
+                  e.target.value as ExtracurricularFormValues["type"],
+                )
               }
             >
               {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
@@ -97,7 +100,10 @@ export default function ExtracurricularForm({
             <select
               value={values.status}
               onChange={(e) =>
-                update("status", e.target.value as ExtracurricularFormValues["status"])
+                update(
+                  "status",
+                  e.target.value as ExtracurricularFormValues["status"],
+                )
               }
             >
               {Object.entries(STATUS_LABELS).map(([value, label]) => (

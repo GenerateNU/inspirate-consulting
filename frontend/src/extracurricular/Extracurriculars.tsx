@@ -13,7 +13,10 @@ export default function Extracurriculars() {
     <div className="ec-page">
       <div className="ec-header">
         <h2 className="ec-title">Extracurriculars</h2>
-        <Link to="/extracurriculars/new" className="ec-link-button ec-header-push">
+        <Link
+          to="/extracurriculars/new"
+          className="ec-link-button ec-header-push"
+        >
           Add extracurricular
         </Link>
       </div>
