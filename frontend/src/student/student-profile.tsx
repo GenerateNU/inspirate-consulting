@@ -37,6 +37,14 @@ export default function StudentProfile() {
     return <p>Could not load student: {studentQuery.error.message}</p>;
   }
 
+  if (userQuery.error) {
+    return <p>Could not load user: {userQuery.error.message}</p>;
+  }
+
+  if (todosQuery.error) {
+    return <p>Could not load tasks: {todosQuery.error.message}</p>;
+  }
+
   if (!student) {
     return <p>Student not found.</p>;
   }
