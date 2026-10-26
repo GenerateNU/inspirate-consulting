@@ -19,7 +19,6 @@ export default function EditExtracurricular() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // There is no "get one" endpoint yet, so find the entry in the student's list.
   const { data, isLoading, error: loadError } = useListExtracurriculars();
   const { mutate, isPending, error } = useUpdateExtracurricular();
 
