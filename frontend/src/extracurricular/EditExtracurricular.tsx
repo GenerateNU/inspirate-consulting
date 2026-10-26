@@ -18,14 +18,14 @@ export default function EditExtracurricular() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
   const { data, isLoading, error: loadError } = useListExtracurriculars();
   const { mutate, isPending, error } = useUpdateExtracurricular();
 
   const item = (data ?? []).find((entry) => String(entry.id) === id);
 
   if (isLoading) return <p className="ec-page">Loading...</p>;
-  if (loadError) return <p className="ec-page">Error: {errorMessage(loadError)}</p>;
+  if (loadError)
+    return <p className="ec-page">Error: {errorMessage(loadError)}</p>;
   if (!item) {
     return (
       <div className="ec-page">
@@ -40,10 +40,10 @@ export default function EditExtracurricular() {
       { id: item.id, data: toRequestBody(values) },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({
+          void queryClient.invalidateQueries({
             queryKey: getListExtracurricularsQueryKey(),
           });
-          navigate(`/extracurriculars/${item.id}`);
+          void navigate(`/extracurriculars/${item.id}`);
         },
       },
     );

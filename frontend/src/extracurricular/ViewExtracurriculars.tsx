@@ -30,7 +30,9 @@ export default function ViewExtracurricular() {
                 <span className="ec-card-text">
                   <span className="ec-card-title">{entry.name}</span>
                   {entry.leadership_role && (
-                    <span className="ec-card-subtitle">{entry.leadership_role}</span>
+                    <span className="ec-card-subtitle">
+                      {entry.leadership_role}
+                    </span>
                   )}
                 </span>
               </NavLink>
@@ -52,7 +54,11 @@ export default function ViewExtracurricular() {
         {item && (
           <>
             <div className="ec-header">
-              <Link to="/extracurriculars" className="ec-back" aria-label="Back to extracurriculars">
+              <Link
+                to="/extracurriculars"
+                className="ec-back"
+                aria-label="Back to extracurriculars"
+              >
                 ←
               </Link>
               <h2 className="ec-title">{item.name} - View Only</h2>
@@ -79,15 +85,17 @@ export default function ViewExtracurricular() {
                 <div>
                   <dt>Category</dt>
                   <dd>
-                    {CATEGORY_LABELS[item.type as ExtracurricularFormValues["type"]] ??
-                      item.type}
+                    {CATEGORY_LABELS[
+                      item.type as ExtracurricularFormValues["type"]
+                    ] ?? item.type}
                   </dd>
                 </div>
                 <div>
                   <dt>Status</dt>
                   <dd>
-                    {STATUS_LABELS[item.status as ExtracurricularFormValues["status"]] ??
-                      item.status}
+                    {STATUS_LABELS[
+                      item.status as ExtracurricularFormValues["status"]
+                    ] ?? item.status}
                   </dd>
                 </div>
                 <div>

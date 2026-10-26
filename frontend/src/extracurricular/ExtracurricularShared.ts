@@ -5,12 +5,18 @@ import type {
 
 export const TEST_STUDENT_ID = "00000000-0000-0000-0000-000000000002";
 
-export const CATEGORY_LABELS: Record<CreateExtracurricularRequest["type"], string> = {
+export const CATEGORY_LABELS: Record<
+  CreateExtracurricularRequest["type"],
+  string
+> = {
   maintenance: "Maintenance",
   investment: "Investment",
 };
 
-export const STATUS_LABELS: Record<CreateExtracurricularRequest["status"], string> = {
+export const STATUS_LABELS: Record<
+  CreateExtracurricularRequest["status"],
+  string
+> = {
   doing: "Currently doing",
   have_done: "Completed",
 };
@@ -65,7 +71,8 @@ export function toRequestBody(
 
 export function cardSubtitle(item: Extracurricular) {
   const category =
-    CATEGORY_LABELS[item.type as ExtracurricularFormValues["type"]] ?? item.type;
+    CATEGORY_LABELS[item.type as ExtracurricularFormValues["type"]] ??
+    item.type;
   return [item.leadership_role, item.organization, category]
     .filter(Boolean)
     .join(", ");
