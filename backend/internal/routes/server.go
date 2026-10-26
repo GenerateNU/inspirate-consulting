@@ -37,11 +37,12 @@ func InitApp(config config.Config) (*App, error) {
 	repo := postgres.NewRepository(ctx, config.DB)
 	awsRepo := aws.NewRepository(ctx, config.S3)
 	sqsClient := sqsclient.NewSQSConnection(ctx, config.SQS)
+	accountSQSClient := sqsclient.NewAccountSQSConnection(ctx, config.SQS)
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video
 
-	app, humaAPI, err := SetupApp(config, repo, sqsClient)
+	app, humaAPI, err := SetupApp(config, repo, sqsClient, accountSQSClient)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func InitApp(config config.Config) (*App, error) {
 }
 
 // Setup the fiber app with the specified configuration and database.
-func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.SQSClient) (*fiber.App, huma.API, error) {
+func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.SQSClient, accountSQSClient *sqsclient.SQSClient) (*fiber.App, huma.API, error) {
 	app := fiber.New(fiber.Config{
 		JSONEncoder:  go_json.Marshal,
 		JSONDecoder:  go_json.Unmarshal,
@@ -131,7 +132,7 @@ func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.
 	})
 
 	// Register protected Huma endpoints
-	if err := setupProtectedHumaRoutes(humaAPI, repo, sqsClient, config, verifyRole); err != nil {
+	if err := setupProtectedHumaRoutes(humaAPI, repo, sqsClient, accountSQSClient, config, verifyRole); err != nil {
 		return nil, nil, err
 	}
 
@@ -139,7 +140,7 @@ func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.
 }
 
 // Setup protected Huma routes (behind auth middleware)
-func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sqsclient.SQSClient, config config.Config, verifyRole auth.RoleVerifier) error {
+func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sqsclient.SQSClient, accountSQSClient *sqsclient.SQSClient, config config.Config, verifyRole auth.RoleVerifier) error {
 	var authorizer *auth.Authorizer
 	if !config.TestMode {
 		authorizer = auth.NewAuthorizer(repo.GetDB())
@@ -152,7 +153,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetUpGlobalCollegeRoutes(api, repo, verifyRole)
 	SetUpTodoItemRoutes(api, repo, verifyRole, authorizer)
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole)
-	SetupUserRoutes(api, repo, &config, verifyRole)
+	SetupUserRoutes(api, repo, &config, verifyRole, accountSQSClient)
 	SetUpVideoRoutes(api, repo, verifyRole)
 	SetUpMediaRoutes(api, repo)
 	SetUpMediaAccessRoutes(api, repo, authorizer)

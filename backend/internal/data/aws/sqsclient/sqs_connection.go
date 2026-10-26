@@ -15,3 +15,12 @@ func NewSQSConnection(ctx context.Context, sqsConfig config.SQS) *SQSClient {
 	return client
 
 }
+
+func NewAccountSQSConnection(ctx context.Context, sqsConfig config.SQS) *SQSClient {
+	client, err := NewSQSClient(ctx, sqsConfig.AccountQueueURL)
+	if err != nil {
+		log.Fatalf("Failed to create new account sqs client: %v", err)
+	}
+
+	return client
+}

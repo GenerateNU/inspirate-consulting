@@ -1196,7 +1196,6 @@ export const CreateUserBody = /*#__PURE__*/ zod.object({
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
-  "temp_password": /*#__PURE__*/ zod.string(),
   "user": /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "email": /*#__PURE__*/ zod.string(),

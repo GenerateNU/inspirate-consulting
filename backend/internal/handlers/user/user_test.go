@@ -62,7 +62,7 @@ func TestHandler_CreateUser(t *testing.T) {
 		mockRepo.On("CreateUser", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateUser(context.Background(), input, &supabase.MockSupabase{})
 
 		assert.Error(t, err)

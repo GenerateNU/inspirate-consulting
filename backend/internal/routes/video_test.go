@@ -26,7 +26,7 @@ func setupTestAppWithVideo(mockVideo data.VideoRepository) (*fiber.App, error) {
 	repo := &data.Repository{
 		Video: mockVideo,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

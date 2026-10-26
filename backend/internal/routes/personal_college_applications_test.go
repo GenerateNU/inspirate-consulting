@@ -37,7 +37,7 @@ func setupTestAppWithPersonalCollegeApplication(
 		PersonalCollegeApplication: mockPersonalRepo,
 		GlobalCollege:              mockGlobalCollegeRepo,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

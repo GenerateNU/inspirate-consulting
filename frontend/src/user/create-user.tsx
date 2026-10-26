@@ -19,9 +19,9 @@ export default function CreateUser() {
     mutate(
       { data: { name: Name, email: Email, role: Role, pfp_key: null } },
       {
-        onSuccess: (user) =>
+        onSuccess: () =>
           setStatus(
-            `Created user ${Name}. Temporary password: ${user.temp_password}`,
+            `Created user ${Name}. An email with sign-in instructions has been sent to ${Email}.`,
           ),
       },
     );

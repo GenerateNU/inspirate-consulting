@@ -436,13 +436,10 @@ components:
           format: uri
           readOnly: true
           type: string
-        temp_password:
-          type: string
         user:
           $ref: "#/components/schemas/User"
       required:
         - user
-        - temp_password
       type: object
     CreateUserInputBody:
       additionalProperties: false

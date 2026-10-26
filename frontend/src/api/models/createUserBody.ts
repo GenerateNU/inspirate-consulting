@@ -10,6 +10,5 @@ import type { User } from './user';
 export interface CreateUserBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  temp_password: string;
   user: User;
 }

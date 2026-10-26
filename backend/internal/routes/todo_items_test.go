@@ -29,7 +29,7 @@ func setupTodoItemTestApp(mockTodoItem data.TodoItemRepository) (*fiber.App, err
 	repo := &data.Repository{
 		TodoItem: mockTodoItem,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

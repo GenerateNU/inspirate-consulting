@@ -26,7 +26,7 @@ func setupTestAppWithNotificationPreferences(mockRepo data.NotificationPreferenc
 	repo := &data.Repository{
 		NotificationPreferences: mockRepo,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

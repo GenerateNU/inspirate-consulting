@@ -27,7 +27,7 @@ func setupTestApp(mockGreeting data.GreetingRepository) (*fiber.App, error) {
 	repo := &data.Repository{
 		Greeting: mockGreeting,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

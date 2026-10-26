@@ -41,7 +41,7 @@ func setupTestAppWithNotifications(fake *fakeSQS) (*fiber.App, error) {
 		TestMode: true,
 	}
 	sqsClient := sqsclient.NewSQSClientWithAPI(fake, "test-queue-url")
-	app, _, err := SetupApp(cfg, &data.Repository{}, sqsClient)
+	app, _, err := SetupApp(cfg, &data.Repository{}, sqsClient, nil)
 	return app, err
 }
 
