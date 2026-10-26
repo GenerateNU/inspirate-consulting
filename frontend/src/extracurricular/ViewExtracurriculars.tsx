@@ -12,7 +12,6 @@ import "./Extracurriculars.css";
 
 export default function ViewExtracurricular() {
   const { id } = useParams();
-  // There is no "get one" endpoint yet, so find the entry in the student's list.
   const { data, isLoading, error } = useListExtracurriculars();
   const list = data ?? [];
   const item = list.find((entry) => String(entry.id) === id);

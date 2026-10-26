@@ -1,4 +1,4 @@
-// Small inline icons used by the extracurricular pages (lo-fi eye and pencil).
+// Small inline icons used on extracurric pages
 
 export function EyeIcon() {
   return (
