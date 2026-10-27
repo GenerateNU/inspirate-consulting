@@ -107,8 +107,20 @@ jobs:
           scp deploy/app/docker-compose.yml "$DROPLET:/opt/inspirate-consulting/docker-compose.yml"
           ssh "$DROPLET" \
             "cd /opt/inspirate-consulting \
-             && BACKEND_IMAGE='$IMAGE' API_DOMAIN='$API_DOMAIN' docker compose up -d --pull always \
-             && docker image prune -f"
+             && BACKEND_IMAGE='$IMAGE' API_DOMAIN='$API_DOMAIN' docker compose up -d --pull always"
+
+          # Old <sha> tags are not dangling, so `docker image prune` keeps every
+          # release's image forever -- that filled the shared disk on
+          # 2026-10-26. Remove this project's older release images by name
+          # instead of with `prune -a`, which acts on every project's images.
+          # Previews' pr-* tags are preview-up.sh's to clean up.
+          ssh "$DROPLET" bash -s -- "$IMAGE" <<'EOF'
+          docker images --format '{{.Repository}}:{{.Tag}}' \
+            | grep -E "^${1%:*}:" \
+            | grep -v ':pr-' \
+            | grep -vxF "$1" \
+            | xargs -r docker rmi >/dev/null 2>&1 || true
+          EOF
 
       # Gate the frontend on a healthy API: it should never go live against a
       # backend that failed to start.

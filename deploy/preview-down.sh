@@ -32,4 +32,11 @@ if [ -r "$ENV_FILE" ]; then
   fi
 fi
 
+# Removed by name rather than with `prune -a`, which would act on every
+# project's images on the shared droplet.
+echo "    removing images for PR #${PR_NUMBER}"
+docker images --format '{{.Repository}}:{{.Tag}}' \
+  | grep -E "^ghcr\.io/generatenu/${PROJECT}/(backend|migrate):pr-${PR_NUMBER}-" \
+  | xargs -r docker rmi >/dev/null 2>&1 || true
+
 echo "==> done"

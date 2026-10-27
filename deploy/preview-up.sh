@@ -61,9 +61,21 @@ docker run -d \
   --env-file "$ENV_FILE" \
   -e DB_NAME="$DB_NAME" \
   -e PUBLIC_API_URL="https://${HOST}" \
+  --log-opt max-size=10m --log-opt max-file=3 \
   --label "caddy=${HOST}" \
   --label "caddy.reverse_proxy={{upstreams 8080}}" \
   "$BACKEND_IMAGE" >/dev/null
+
+# Every push pulls a new pr-<n>-<sha> backend and migrate image, and old tags
+# are not dangling, so `docker image prune` keeps them -- that filled the
+# shared disk on 2026-10-26. Remove this PR's older images by name rather than
+# with `prune -a`, which acts on every project's images on the droplet. Done
+# before the health check so a failing deploy still cleans up.
+echo "    removing older images for PR #${PR_NUMBER}"
+docker images --format '{{.Repository}}:{{.Tag}}' \
+  | grep -E "^(${BACKEND_IMAGE%:*}|${MIGRATE_IMAGE%:*}):pr-${PR_NUMBER}-" \
+  | grep -vxF "$BACKEND_IMAGE" \
+  | xargs -r docker rmi >/dev/null 2>&1 || true
 
 # `docker run -d` succeeds as soon as the container is created, so without this
 # a backend that exits on a missing env var would report a healthy preview.
