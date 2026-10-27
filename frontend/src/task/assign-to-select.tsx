@@ -1,3 +1,6 @@
+import { useListCounselorStudents } from "../api/endpoints";
+import type { CounselorStudent } from "../api/models";
+
 export type AssignToMode = "" | "all" | "grade" | "individual";
 
 export type AssignToValue = {
@@ -13,14 +16,6 @@ type AssignToSelectProps = {
 
 const GRADES = ["9th", "10th", "11th", "12th"];
 
-// PLACEHOLDER: replace with the counselor's student list once there's an endpoint/hook for it
-const PLACEHOLDER_STUDENTS = [
-  { id: "placeholder-1", name: "Risha Jones" },
-  { id: "placeholder-2", name: "Hasith Klein" },
-  { id: "placeholder-3", name: "Shrikar Rodrigo" },
-  { id: "placeholder-4", name: "Abhinav Smith" },
-];
-
 function toggle(list: string[], item: string) {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
@@ -29,6 +24,13 @@ export default function AssignToSelect({
   value,
   onChange,
 }: AssignToSelectProps) {
+  // Fetch the counselor's students, only when "Individual" is selected
+  const studentsQuery = useListCounselorStudents(
+    {},
+    { query: { enabled: value.mode === "individual" } },
+  );
+  const students: CounselorStudent[] = studentsQuery.data ?? [];
+
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm">
@@ -69,20 +71,31 @@ export default function AssignToSelect({
 
       {value.mode === "individual" && (
         <div className="flex flex-col gap-1 border p-2">
-          <p className="text-xs text-gray-500">Placeholder student list</p>
-          {PLACEHOLDER_STUDENTS.map((student) => (
+          {studentsQuery.isLoading && (
+            <p className="text-sm">Loading students...</p>
+          )}
+          {studentsQuery.error && (
+            <p className="text-sm">Could not load students.</p>
+          )}
+          {!studentsQuery.isLoading &&
+            !studentsQuery.error &&
+            students.length === 0 && (
+              <p className="text-sm">No students found.</p>
+            )}
+
+          {students.map((student) => (
             <label
-              key={student.id}
+              key={student.student_id}
               className="flex items-center justify-between text-sm"
             >
               {student.name}
               <input
                 type="checkbox"
-                checked={value.studentIds.includes(student.id)}
+                checked={value.studentIds.includes(student.student_id)}
                 onChange={() =>
                   onChange({
                     ...value,
-                    studentIds: toggle(value.studentIds, student.id),
+                    studentIds: toggle(value.studentIds, student.student_id),
                   })
                 }
               />
