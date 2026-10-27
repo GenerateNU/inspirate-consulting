@@ -90,11 +90,10 @@ export default function StudentTaskList() {
     updateCompleted.mutate(
       { id: task.id, data: { completed: task.completed_at == null } },
       {
-        onSuccess: () => {
+        onSuccess: () => 
           queryClient.invalidateQueries({
             queryKey: getGetTodoItemsQueryKey(),
-          });
-        },
+        }),
       },
     );
   };
