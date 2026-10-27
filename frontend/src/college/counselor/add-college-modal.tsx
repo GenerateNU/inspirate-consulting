@@ -9,10 +9,14 @@ import {
   primaryButtonClassName,
 } from "../shared";
 
-const toISODateTime = (dateStr: string): string | undefined => dateStr ? `${dateStr}T00:00:00Z` : undefined;
+const toISODateTime = (dateStr: string): string | undefined =>
+  dateStr ? `${dateStr}T00:00:00Z` : undefined;
 
 // popup form for adding a global college
-export default function AddCollegeModal({onClose, onCreated}: {
+export default function AddCollegeModal({
+  onClose,
+  onCreated,
+}: {
   onClose: () => void;
   onCreated: () => Promise<unknown>;
 }) {
@@ -34,7 +38,8 @@ export default function AddCollegeModal({onClose, onCreated}: {
   }, []);
 
   // 409 means the new college is a near-duplicate of an existing one
-  const isDuplicateWarning = (createCollege.error as ApiError | null)?.status === 409;
+  const isDuplicateWarning =
+    (createCollege.error as ApiError | null)?.status === 409;
 
   const create = (confirmDuplicate = false) => {
     createCollege.reset();
@@ -112,9 +117,9 @@ export default function AddCollegeModal({onClose, onCreated}: {
             role="alert"
             className="mt-3 border border-amber-300 bg-amber-100 p-3 text-sm text-amber-700"
           >
-            &quot;{name}&quot; looks very similar to a college that&apos;s already
-            on the list. Check that it isn&apos;t a duplicate, then choose Add
-            anyway to add it.
+            &quot;{name}&quot; looks very similar to a college that&apos;s
+            already on the list. Check that it isn&apos;t a duplicate, then
+            choose Add anyway to add it.
           </p>
         ) : (
           createCollege.error && (

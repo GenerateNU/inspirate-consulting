@@ -50,7 +50,8 @@ function CollegeEditForm({
   const mutationError = updateCollege.error ?? deleteCollege.error;
 
   // 409 means the edit is a near-duplicate of another college
-  const isDuplicateWarning = (updateCollege.error as ApiError | null)?.status === 409;
+  const isDuplicateWarning =
+    (updateCollege.error as ApiError | null)?.status === 409;
 
   // clears the last mutation's error
   const resetMutations = () => {
@@ -137,7 +138,11 @@ function CollegeEditForm({
       </dl>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={busy} className={primaryButtonClassName}>
+        <button
+          type="submit"
+          disabled={busy}
+          className={primaryButtonClassName}
+        >
           {updateCollege.isPending ? "Saving..." : "Save changes"}
         </button>
         {isDuplicateWarning && (

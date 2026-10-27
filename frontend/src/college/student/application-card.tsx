@@ -19,7 +19,13 @@ import {
 export const smallButtonClassName =
   "text-xs text-gray-500 hover:text-black hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline";
 
-function Tag({ className, children }: { className: string; children: ReactNode }) {
+function Tag({
+  className,
+  children,
+}: {
+  className: string;
+  children: ReactNode;
+}) {
   return (
     <span className={`rounded-full border px-5 py-0.5 text-sm ${className}`}>
       {children}

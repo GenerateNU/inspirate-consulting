@@ -33,7 +33,9 @@ export default function AddApplicationForm({
   ) => void;
 }) {
   const [collegeId, setCollegeId] = useState<number | null>(initialCollegeId);
-  const [applicationType, setApplicationType] = useState<ApplicationType | "">("",);
+  const [applicationType, setApplicationType] = useState<ApplicationType | "">(
+    "",
+  );
   const [category, setCategory] = useState<Category | "">("");
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
@@ -92,7 +94,11 @@ export default function AddApplicationForm({
             </option>
           ))}
         </select>
-        <button type="submit" disabled={busy} className={primaryButtonClassName}>
+        <button
+          type="submit"
+          disabled={busy}
+          className={primaryButtonClassName}
+        >
           {adding ? "Adding..." : "Add"}
         </button>
       </div>

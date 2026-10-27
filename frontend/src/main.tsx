@@ -67,10 +67,7 @@ createRoot(document.getElementById("root")!).render(
                 path="/student-college-list/:id"
                 element={<StudentCollegeDetails />}
               />
-              <Route
-                path="/college-applications"
-                element={<MyCollegeList />}
-              />
+              <Route path="/college-applications" element={<MyCollegeList />} />
               <Route path="/upload-video" element={<UploadVideo />} />
               <Route path="/videos" element={<VideoList />} />
               <Route path="/student" element={<Student />} />

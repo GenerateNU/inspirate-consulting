@@ -70,7 +70,12 @@ export function CircleBadge({
   children: ReactNode;
 }) {
   return (
-    <span role="img" aria-label={label} title={title} className={circleClassName}>
+    <span
+      role="img"
+      aria-label={label}
+      title={title}
+      className={circleClassName}
+    >
       {children}
     </span>
   );
@@ -92,7 +97,7 @@ export function Field({
   );
 }
 
-// one search result: name links to the college's page, 
+// one search result: name links to the college's page,
 // children go under the summary line, action sits on the right
 export function CollegeCard({
   college,
