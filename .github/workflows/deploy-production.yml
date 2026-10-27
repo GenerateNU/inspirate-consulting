@@ -105,16 +105,20 @@ jobs:
           # Old <sha> tags are not dangling, so `docker image prune` alone keeps
           # every release's image forever -- that filled the shared disk on
           # 2026-10-26. This removes this project's release images by name
-          # instead of with `prune -a`, which acts on every project's images;
-          # `docker rmi` refuses any image a container still uses, so the live
-          # backend keeps its own. `prune -f` takes dangling images. Previews'
-          # pr-* tags are preview-up.sh's to clean up. Run before the pull as
-          # well, so a nearly full disk cannot fail it before cleanup is reached.
+          # instead of with `prune -a`, which acts on every project's images.
+          # Images any container uses are skipped by ID: when several tags share
+          # one image (a preview and a release built from the same commit),
+          # `docker rmi` of one tag only untags it, even while a container runs
+          # it. `prune -f` takes dangling images. Previews' pr-* tags are
+          # preview-up.sh's to clean up. Run before the pull as well, so a
+          # nearly full disk cannot fail it before cleanup is reached.
           remove_unused_images() {
             ssh "$DROPLET" bash -s -- "$IMAGE" <<'EOF'
-          docker images --format '{{.Repository}}:{{.Tag}}' \
-            | grep -E "^${1%:*}:" \
+          docker images --no-trunc --format '{{.ID}} {{.Repository}}:{{.Tag}}' \
+            | grep -E " ${1%:*}:" \
             | grep -v ':pr-' \
+            | grep -vFf <(docker ps -aq | xargs -r docker inspect -f '{{.Image}}') \
+            | cut -d' ' -f2 \
             | xargs -r docker rmi >/dev/null 2>&1 || true
           docker image prune -f >/dev/null
           EOF
