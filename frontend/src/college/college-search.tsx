@@ -20,7 +20,8 @@ export default function CollegeSearch({
   notice?: ReactNode;
   footer?: ReactNode;
 }) {
-  const { query, setQuery, searching, colleges, searchLoading, searchError } = search;
+  const { query, setQuery, searching, colleges, searchLoading, searchError } =
+    search;
 
   let body;
   if (search.isLoading) {

@@ -61,7 +61,8 @@ export default function MyCollegeList() {
     refetch,
   } = useListPersonalCollegeApplications();
 
-  const { data: collegesData, isLoading: collegesLoading } = useListGlobalColleges();
+  const { data: collegesData, isLoading: collegesLoading } =
+    useListGlobalColleges();
 
   // one hook per kind of change, the row's id is passed when calling mutate
   const createApplication = useCreatePersonalCollegeApplication();
@@ -128,8 +129,9 @@ export default function MyCollegeList() {
     globalCollegeId: number,
     applicationType: string,
   ) => {
-    const key = deadlineOptions.find(({ value }) => value === applicationType)
-      ?.key;
+    const key = deadlineOptions.find(
+      ({ value }) => value === applicationType,
+    )?.key;
     const college = collegeById.get(globalCollegeId);
     return error.status === 400 && !!key && !!college && !college[key];
   };
@@ -149,7 +151,7 @@ export default function MyCollegeList() {
   };
 
   // dropping on a ranked card moves the dragged application into that card's
-  // position (the backend shifts everything in between). 
+  // position (the backend shifts everything in between).
   // dropping on an unranked card unranks it.
   const handleDrop = (target: PersonalCollegeApplication) => {
     if (draggedId == null || draggedId === target.id) return;
@@ -189,7 +191,9 @@ export default function MyCollegeList() {
         },
         // keep the card in edit mode so the student can pick another deadline
         onError: (error) => {
-          if (isMissingDeadline(error, app.global_college_id, applicationType)) {
+          if (
+            isMissingDeadline(error, app.global_college_id, applicationType)
+          ) {
             updateApplication.reset();
             setDeadlineError({
               globalCollegeId: app.global_college_id,

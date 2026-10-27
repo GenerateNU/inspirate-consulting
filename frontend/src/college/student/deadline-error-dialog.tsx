@@ -19,7 +19,6 @@ export default function DeadlineErrorDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) dialog.showModal();
@@ -63,7 +62,11 @@ export default function DeadlineErrorDialog({
       )}
 
       <div className="mt-6 flex justify-end">
-        <button type="button" onClick={onClose} className={primaryButtonClassName}>
+        <button
+          type="button"
+          onClick={onClose}
+          className={primaryButtonClassName}
+        >
           OK
         </button>
       </div>

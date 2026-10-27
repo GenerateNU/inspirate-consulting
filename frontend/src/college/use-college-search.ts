@@ -6,7 +6,7 @@ import {
 } from "../api/endpoints";
 import type { GlobalCollege } from "../api/models";
 
-// shared state for the college list pages: 
+// shared state for the college list pages:
 // shows every college until the user types a query, then shows the search results instead
 export function useCollegeSearch() {
   const [query, setQuery] = useState("");
