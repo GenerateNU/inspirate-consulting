@@ -14,7 +14,6 @@ import (
 
 // SetUpGlobalCollegeRoutes registers the global college endpoints:
 // create, get by id, list, update, delete, and search.
-// Create, update, and delete are counselor-only.
 func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	globalCollegeHandler := globalcollege.NewHandler(repository.GlobalCollege)
 
