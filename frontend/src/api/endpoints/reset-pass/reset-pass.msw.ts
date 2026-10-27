@@ -13,6 +13,15 @@ import type {
   RequestHandlerOptions
 } from 'msw';
 
+import type {
+  SendTempPasswordBody
+} from '../../models';
+
+import {
+  getSendTempPasswordResponseMock
+} from './reset-pass.faker';
+
+export { getSendTempPasswordResponseMock } from './reset-pass.faker';
 
 
 export const getResetUserPasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
@@ -21,6 +30,18 @@ export const getResetUserPasswordMockHandler = (overrideResponse?: void | ((info
 
     return new HttpResponse(null,
       { status: 204
+      })
+  }, options)
+}
+
+export const getSendTempPasswordMockHandler = (overrideResponse?: SendTempPasswordBody | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<SendTempPasswordBody> | SendTempPasswordBody), options?: RequestHandlerOptions) => {
+  return http.post('*/user/:id/send-temp-password', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getSendTempPasswordResponseMock(),
+      { status: 200
       })
   }, options)
 }
@@ -36,5 +57,6 @@ export const getForcePasswordResetMockHandler = (overrideResponse?: void | ((inf
 }
 export const getResetPassMock = () => [
   getResetUserPasswordMockHandler(),
+  getSendTempPasswordMockHandler(),
   getForcePasswordResetMockHandler()
 ]

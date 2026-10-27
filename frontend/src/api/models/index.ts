@@ -76,6 +76,7 @@ export * from './searchTodoItemsParams';
 export * from './searchTodoItemsSortBy';
 export * from './searchTodoItemsSortOrder';
 export * from './searchTodoItemsStatus';
+export * from './sendTempPasswordBody';
 export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
 export * from './todoItem';

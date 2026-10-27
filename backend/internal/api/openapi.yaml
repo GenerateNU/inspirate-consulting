@@ -1321,6 +1321,21 @@ components:
       required:
         - new_password
       type: object
+    SendTempPasswordBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/SendTempPasswordBody.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+      required:
+        - email
+      type: object
     SetStudentReviewBalanceRequestBody:
       additionalProperties: false
       properties:
@@ -3542,6 +3557,31 @@ paths:
           description: Error
       tags:
         - User
+  /user/{id}/send-temp-password:
+    post:
+      description: Generate a new temporary password for a user and email it to them
+      operationId: send-temp-password
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendTempPasswordBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ResetPass
   /user/{supabase_id}/force-password-reset:
     post:
       description: Force a user to reset their password on next login

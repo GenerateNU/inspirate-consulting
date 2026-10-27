@@ -91,3 +91,16 @@ type ForcePasswordResetInput struct {
 }
 
 type ForcePasswordResetOutput struct{}
+
+// id here is the student of choice's internal (non-Supabase) user ID
+type SendTempPasswordInput struct {
+	ID uuid.UUID `path:"id" required:"true"`
+}
+
+type SendTempPasswordBody struct {
+	Email string `json:"email"`
+}
+
+type SendTempPasswordOutput struct {
+	Body *SendTempPasswordBody
+}

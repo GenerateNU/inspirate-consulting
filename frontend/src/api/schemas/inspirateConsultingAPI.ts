@@ -1265,6 +1265,19 @@ export const FetchUserResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Generate a new temporary password for a user and email it to them
+ */
+export const SendTempPasswordParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const SendTempPasswordResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Force a user to reset their password on next login
  */
 export const ForcePasswordResetParams = /*#__PURE__*/ zod.object({

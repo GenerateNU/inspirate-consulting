@@ -5,6 +5,7 @@ import (
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	resetpassword "inspirate-consulting/internal/handlers/reset_password"
 	"inspirate-consulting/internal/models"
 	"net/http"
@@ -12,8 +13,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier) {
-	resetpasswordHandler := resetpassword.NewHandler(repository.User)
+func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier, accountSQSClient *sqsclient.SQSClient) {
+	resetpasswordHandler := resetpassword.NewHandler(repository.User, accountSQSClient)
 	huma.Register(api, huma.Operation{
 		OperationID: "reset-user-password",
 		Method:      http.MethodPatch,
@@ -37,5 +38,16 @@ func SetupResetPasswordRoutes(api huma.API, repository *data.Repository, config 
 		Tags:        []string{"ResetPass"},
 	}, func(ctx context.Context, input *models.ForcePasswordResetInput) (*models.ForcePasswordResetOutput, error) {
 		return resetpasswordHandler.ForcePasswordReset(ctx, input)
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "send-temp-password",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPost,
+		Path:        "/user/{id}/send-temp-password",
+		Description: "Generate a new temporary password for a user and email it to them",
+		Tags:        []string{"ResetPass"},
+	}, func(ctx context.Context, input *models.SendTempPasswordInput) (*models.SendTempPasswordOutput, error) {
+		return resetpasswordHandler.SendTempPassword(ctx, input, config.Supabase)
 	})
 }

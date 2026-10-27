@@ -4,12 +4,13 @@ import (
 	"context"
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/passwordgen"
 	"inspirate-consulting/internal/supabase"
 	"log/slog"
 )
 
 func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, supabase supabase.SupabaseInterface) (*models.CreateUserOutput, error) {
-	tempPassword, err := generateTempPassword()
+	tempPassword, err := passwordgen.Generate()
 	if err != nil {
 		return nil, err
 	}
