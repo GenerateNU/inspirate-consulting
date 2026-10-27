@@ -18,8 +18,6 @@ import Student from "./student/student";
 import Counselor from "./counselor/counselor";
 import CounselorStudents from "./counselor/counselor-students";
 import PendingReviews from "./counselor/pending-reviews";
-import CreateTask from "./task/CreateTask";
-import TaskList from "./task/TaskList";
 import Layout from "./layout/layout";
 import UploadMedia from "./media/upload-media";
 import StudentMediaList from "./media/student-media-list";
@@ -32,6 +30,7 @@ import { AuthProvider } from "./contexts/auth-context.tsx";
 import CollegeApplications from "./college/college-applications.tsx";
 import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
 import AccountExpired from "./account-expiration/account-expired";
+import StudentTaskList from "./task/student-task-list.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -68,8 +67,6 @@ createRoot(document.getElementById("root")!).render(
                 element={<CounselorStudents />}
               />
               <Route path="/pending-reviews" element={<PendingReviews />} />
-              <Route path="/create-task" element={<CreateTask />} />
-              <Route path="/tasks" element={<TaskList />} />
               <Route path="/upload-media" element={<UploadMedia />} />
               <Route
                 path="/student-media-list"
@@ -86,6 +83,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/create-account" element={<CreateUser />} />
               <Route path="/login" element={<LogIn />} />
               <Route path="/logout" element={<LogOut />} />
+              <Route path="/student-tasks" element={<StudentTaskList />} />
             </Route>
           </Routes>
         </AuthProvider>
