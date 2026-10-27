@@ -1,1 +1,24 @@
-/* @import "tailwindcss"; */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-text: #000000;
+  --color-mint: #2aaa7f;
+  --color-charcoal: #14181b;
+  --color-cream: #ece5d8;
+  --color-sage: #a9cbbb;
+  --color-tan: #d8a66a;
+  --font-inter: "Inter", sans-serif;
+}
+
+@layer base {
+  input:not([type="checkbox"], [type="radio"], [type="file"]),
+  textarea,
+  select {
+    @apply rounded-md border border-gray-300 bg-white px-3 py-2;
+  }
+
+  button {
+    @apply cursor-pointer rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}

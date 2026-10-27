@@ -15,8 +15,8 @@ export default function VideoList() {
   if (error) {
     return (
       <div className="form-container">
-        <h2>Videos</h2>
-        <p>Something went wrong.</p>
+        <h2>Videos </h2>
+        <p>Something went wrong. </p>
       </div>
     );
   }
