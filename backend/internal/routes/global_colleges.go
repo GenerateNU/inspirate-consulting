@@ -13,7 +13,8 @@ import (
 )
 
 // SetUpGlobalCollegeRoutes registers the global college endpoints:
-// create, get by id, and list.
+// create, get by id, list, update, delete, and search.
+// Create, update, and delete are counselor-only.
 func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	globalCollegeHandler := globalcollege.NewHandler(repository.GlobalCollege)
 
@@ -66,6 +67,7 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyR
 	// Register PUT /colleges/{id} handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "update-global-college",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPut,
 		Path:        "/colleges/{id}",
 		Description: "Update a global college's details.",
@@ -81,6 +83,7 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyR
 	// Register DELETE /colleges/{id} handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-global-college",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodDelete,
 		Path:        "/colleges/{id}",
 		Description: "Delete a global college.",
