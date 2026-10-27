@@ -1,4 +1,4 @@
-import type { TodoItem } from '../api/models';
+import type { TodoItem } from "../api/models";
 
 type TaskRowProps = {
   task: TodoItem;
@@ -20,14 +20,14 @@ export default function TaskRow({
   return (
     <div
       className={`flex items-center gap-4 rounded-lg px-4 py-3 ${
-        completed ? 'bg-gray-200' : 'bg-white'
+        completed ? "bg-gray-200" : "bg-white"
       }`}
     >
       <input
         type="checkbox"
         checked={completed}
         onChange={() => onToggleComplete(task)}
-        aria-label={`Mark "${title}" as ${completed ? 'not completed' : 'completed'}`}
+        aria-label={`Mark "${title}" as ${completed ? "not completed" : "completed"}`}
         className="h-4 w-4 shrink-0"
       />
 
@@ -38,7 +38,9 @@ export default function TaskRow({
       >
         <div>
           <p className="text-sm font-medium">{title}</p>
-          {description && <p className="text-xs text-gray-500">{description}</p>}
+          {description && (
+            <p className="text-xs text-gray-500">{description}</p>
+          )}
         </div>
 
         <span className="text-2xl" aria-hidden="true">
