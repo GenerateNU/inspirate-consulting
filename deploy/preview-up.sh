@@ -31,6 +31,21 @@ PGPASSWORD=$(grep -E '^DB_PASSWORD=' "$ENV_FILE" | head -1 | cut -d= -f2-)
 
 echo "==> preview for PR #${PR_NUMBER} at https://${HOST}"
 
+# Every push pulls a new pr-<n>-<sha> backend and migrate image, and old tags
+# are not dangling, so `docker image prune` keeps them -- that filled the
+# shared disk on 2026-10-26. This removes this PR's images by name rather than
+# with `prune -a`, which acts on every project's images on the droplet. `docker
+# rmi` refuses any image a container still uses, so the running preview keeps
+# its own. Run before the pulls too, so a nearly full disk does not fail a pull
+# before cleanup is ever reached.
+remove_unused_pr_images() {
+  echo "    removing unused images for PR #${PR_NUMBER}"
+  docker images --format '{{.Repository}}:{{.Tag}}' \
+    | grep -E "^(${BACKEND_IMAGE%:*}|${MIGRATE_IMAGE%:*}):pr-${PR_NUMBER}-" \
+    | xargs -r docker rmi >/dev/null 2>&1 || true
+}
+remove_unused_pr_images
+
 # 1. Database. Idempotent: a re-push to the same PR reuses the existing one so
 #    that data entered during review survives.
 if docker exec -e PGPASSWORD="$PGPASSWORD" preview-db \
@@ -66,16 +81,9 @@ docker run -d \
   --label "caddy.reverse_proxy={{upstreams 8080}}" \
   "$BACKEND_IMAGE" >/dev/null
 
-# Every push pulls a new pr-<n>-<sha> backend and migrate image, and old tags
-# are not dangling, so `docker image prune` keeps them -- that filled the
-# shared disk on 2026-10-26. Remove this PR's older images by name rather than
-# with `prune -a`, which acts on every project's images on the droplet. Done
-# before the health check so a failing deploy still cleans up.
-echo "    removing older images for PR #${PR_NUMBER}"
-docker images --format '{{.Repository}}:{{.Tag}}' \
-  | grep -E "^(${BACKEND_IMAGE%:*}|${MIGRATE_IMAGE%:*}):pr-${PR_NUMBER}-" \
-  | grep -vxF "$BACKEND_IMAGE" \
-  | xargs -r docker rmi >/dev/null 2>&1 || true
+# The old container is gone now, so its image can go too. Before the health
+# check, so a failing deploy still cleans up.
+remove_unused_pr_images
 
 # `docker run -d` succeeds as soon as the container is created, so without this
 # a backend that exits on a missing env var would report a healthy preview.
