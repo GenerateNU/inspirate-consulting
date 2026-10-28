@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import { errorMessage } from "../api/client";
 import { useListCounselorStudents } from "../api/endpoints";
@@ -100,6 +101,10 @@ export default function CounselorStudents() {
             · {student.year}
             {student.has_pending_review && " · Review requested"}
             {student.is_falling_behind && " · Falling behind"}
+            {" · "}
+            <Link to={`/counselor/students/${student.student_id}/essays`}>
+              Essays
+            </Link>
           </li>
         ))}
       </ul>

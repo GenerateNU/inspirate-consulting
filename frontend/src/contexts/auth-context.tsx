@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-query";
 import type { ApiError } from "../api/client";
 import {
+  getGetCurrentUserQueryKey,
+  useGetCurrentUser,
   useLoginUser,
   useLogoutUser,
   useResetUserPassword,
@@ -19,11 +21,6 @@ const isAccountExpiredError = (error: unknown) => {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [resetTime, setResetTime] = useState<string | null>(null);
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
-  const [userID, setUserID] = useState<string | null>(null);
-  const [counselorID, setCounselorID] = useState<string | null>(null);
-  const [studentID, setStudentID] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [path, setPath] = useState("/");
   const [serverExpired, setServerExpired] = useState(false);
@@ -31,16 +28,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useGetCurrentUser();
+  const resetTime = currentUser?.reset_time ?? null;
+  const expiresAt = currentUser?.expires_at ?? null;
+  const userID = currentUser?.id ?? null;
+  const counselorID = currentUser?.counselor_id ?? null;
+  const studentID = currentUser?.student_id ?? null;
+
   const { mutateAsync: loginFunc } = useLoginUser();
   const { mutateAsync: logoutFunc } = useLogoutUser();
   const { mutateAsync: passFunc } = useResetUserPassword();
 
   const clearSession = () => {
-    setResetTime(null);
-    setExpiresAt(null);
-    setUserID(null);
-    setCounselorID(null);
-    setStudentID(null);
+    void queryClient.resetQueries({ queryKey: getGetCurrentUserQueryKey() });
     setServerExpired(false);
   };
 
@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return loginFunc(
       { data: { email, password } },
       {
-        onSuccess: (user) => {
-          setResetTime(user.reset_time);
-          setExpiresAt(user.expires_at);
-          setUserID(user.id);
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: getGetCurrentUserQueryKey(),
+          });
           void navigate(path);
         },
         onError: (err) => {
