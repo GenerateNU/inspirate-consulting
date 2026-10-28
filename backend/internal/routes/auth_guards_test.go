@@ -51,6 +51,7 @@ var routeTable = []routeAccess{
 	{http.MethodPatch, "/user/reset-password", anyRole, nil},
 	{http.MethodPost, "/user/{supabase_id}/force-password-reset", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/user", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// greeting
