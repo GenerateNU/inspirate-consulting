@@ -1,37 +1,31 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { errorMessage, type ApiError } from "../../api/client";
 import {
   useDeleteGlobalCollege,
-  useGetGlobalCollege,
   useUpdateGlobalCollege,
 } from "../../api/endpoints";
 import type { GlobalCollege } from "../../api/models";
+import CollegeDetailsLayout, {
+  useCollegeFromRoute,
+} from "../utils/college-details-layout";
 import {
   Field,
   deadlineOptions,
   inputClassName,
   primaryButtonClassName,
-} from "../shared";
-
-const backTo = "/counselor-college-list";
-
-const toISODateTime = (dateStr: string): string | undefined =>
-  dateStr ? `${dateStr}T00:00:00Z` : undefined;
-
-// date inputs need YYYY-MM-DD
-const toDateInput = (dateTime?: string | null): string =>
-  dateTime ? dateTime.slice(0, 10) : "";
+  toDateInput,
+  toISODateTime,
+} from "../utils/shared";
 
 // counselor-only form for updating a college
-function CollegeEditForm({
-  college,
-  onSaved,
-}: {
+interface CollegeEditFormProps {
   college: GlobalCollege;
   onSaved: () => Promise<unknown>;
-}) {
+}
+
+function CollegeEditForm({ college, onSaved }: CollegeEditFormProps) {
   const [name, setName] = useState(college.school_name);
   const [location, setLocation] = useState(college.school_location);
   const [deadlines, setDeadlines] = useState({
@@ -85,16 +79,13 @@ function CollegeEditForm({
     );
   };
 
-  // delete the college, then go back to the list since this page is gone
+  // delete the college, then go back a page since this one is gone
   const handleDelete = () => {
     if (!window.confirm(`Delete ${college.school_name}?`)) return;
 
     resetMutations();
 
-    deleteCollege.mutate(
-      { id: college.id },
-      { onSuccess: () => navigate(backTo) },
-    );
+    deleteCollege.mutate({ id: college.id }, { onSuccess: () => navigate(-1) });
   };
 
   return (
@@ -188,35 +179,11 @@ function CollegeEditForm({
 
 // loads the college, CollegeEditForm needs loaded data so its fields can start from the saved values
 export default function CounselorCollegeDetails() {
-  const id = Number(useParams().id);
-  const { data: college, isLoading, error, refetch } = useGetGlobalCollege(id);
-
-  let body;
-  if (isLoading) {
-    body = <p className="text-sm">Loading...</p>;
-  } else if (error || !college) {
-    body = (
-      <p className="text-sm">
-        {(error as ApiError | null)?.status === 404
-          ? "College not found."
-          : `Error: ${errorMessage(error)}`}
-      </p>
-    );
-  } else {
-    body = (
-      <>
-        <h3 className="mb-4 text-3xl font-bold">{college.school_name}</h3>
-        <CollegeEditForm college={college} onSaved={refetch} />
-      </>
-    );
-  }
+  const { data: college, isLoading, error, refetch } = useCollegeFromRoute();
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10">
-      <Link to={backTo} className="mb-4 inline-block text-sm hover:underline">
-        ← Back to colleges
-      </Link>
-      <div className="border border-black p-6">{body}</div>
-    </div>
+    <CollegeDetailsLayout college={college} isLoading={isLoading} error={error}>
+      {college && <CollegeEditForm college={college} onSaved={refetch} />}
+    </CollegeDetailsLayout>
   );
 }

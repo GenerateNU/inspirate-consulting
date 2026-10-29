@@ -1,25 +1,27 @@
 import type { ReactNode } from "react";
+import { Search } from "lucide-react";
 
-import { errorMessage } from "../api/client";
-import type { GlobalCollege } from "../api/models";
-import { SearchIcon } from "./shared";
+import { errorMessage } from "../../api/client";
+import type { GlobalCollege } from "../../api/models";
 import type { CollegeSearchState } from "./use-college-search";
 
 // search box plus the list of matching colleges
 // each page decides how a card renders and what goes in the footer
+interface CollegeSearchProps {
+  title: string;
+  search: CollegeSearchState;
+  renderCollege: (college: GlobalCollege) => ReactNode;
+  notice?: ReactNode;
+  footer?: ReactNode;
+}
+
 export default function CollegeSearch({
   title,
   search,
   renderCollege,
   notice,
   footer,
-}: {
-  title: string;
-  search: CollegeSearchState;
-  renderCollege: (college: GlobalCollege) => ReactNode;
-  notice?: ReactNode;
-  footer?: ReactNode;
-}) {
+}: CollegeSearchProps) {
   const { query, setQuery, searching, colleges, searchLoading, searchError } =
     search;
 
@@ -56,7 +58,7 @@ export default function CollegeSearch({
       <h2 className="mb-4 text-2xl text-gray-500">{title}</h2>
       <div className="flex min-h-[32rem] flex-col border border-black p-4">
         <label className="flex items-center gap-3 border-b border-gray-300 px-2 pb-3">
-          <SearchIcon />
+          <Search aria-hidden="true" className="h-5 w-5 shrink-0" />
           <input
             type="text"
             value={query}

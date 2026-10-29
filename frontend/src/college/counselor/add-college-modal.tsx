@@ -7,19 +7,19 @@ import {
   deadlineOptions,
   inputClassName,
   primaryButtonClassName,
-} from "../shared";
-
-const toISODateTime = (dateStr: string): string | undefined =>
-  dateStr ? `${dateStr}T00:00:00Z` : undefined;
+  toISODateTime,
+} from "../utils/shared";
 
 // popup form for adding a global college
+interface AddCollegeModalProps {
+  onClose: () => void;
+  onCreated: () => Promise<unknown>;
+}
+
 export default function AddCollegeModal({
   onClose,
   onCreated,
-}: {
-  onClose: () => void;
-  onCreated: () => Promise<unknown>;
-}) {
+}: AddCollegeModalProps) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [deadlines, setDeadlines] = useState({

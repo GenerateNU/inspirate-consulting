@@ -5,7 +5,7 @@ import {
   CreatePersonalCollegeApplicationRequestBodyCategory as Category,
   type GlobalCollege,
 } from "../../api/models";
-import { inputClassName, primaryButtonClassName } from "../shared";
+import { inputClassName, primaryButtonClassName } from "../utils/shared";
 import {
   applicationTypes,
   categories,
@@ -15,13 +15,7 @@ import {
 
 // pick a college, deadline, and category to add to My List
 // the page passes only colleges not already on the list and handles errors
-export default function AddApplicationForm({
-  colleges,
-  initialCollegeId,
-  busy,
-  adding,
-  onAdd,
-}: {
+interface AddApplicationFormProps {
   colleges: GlobalCollege[];
   initialCollegeId: number | null;
   busy: boolean;
@@ -31,7 +25,15 @@ export default function AddApplicationForm({
     applicationType: ApplicationType,
     category: Category,
   ) => void;
-}) {
+}
+
+export default function AddApplicationForm({
+  colleges,
+  initialCollegeId,
+  busy,
+  adding,
+  onAdd,
+}: AddApplicationFormProps) {
   const [collegeId, setCollegeId] = useState<number | null>(initialCollegeId);
   const [applicationType, setApplicationType] = useState<ApplicationType | "">(
     "",

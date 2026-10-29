@@ -1,22 +1,28 @@
 import { useEffect, useRef } from "react";
 
 import type { GlobalCollege } from "../../api/models";
-import { deadlineOptions, formatDate, primaryButtonClassName } from "../shared";
+import {
+  deadlineOptions,
+  formatDate,
+  primaryButtonClassName,
+} from "../utils/shared";
 import { typeLabel } from "./application-labels";
 
 // popup shown when the backend rejects an application because the college doesn't offer the chosen deadline
 // lists the deadlines it does offer
+interface DeadlineErrorDialogProps {
+  college: GlobalCollege | undefined;
+  collegeName: string;
+  applicationType: string;
+  onClose: () => void;
+}
+
 export default function DeadlineErrorDialog({
   college,
   collegeName,
   applicationType,
   onClose,
-}: {
-  college: GlobalCollege | undefined;
-  collegeName: string;
-  applicationType: string;
-  onClose: () => void;
-}) {
+}: DeadlineErrorDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {

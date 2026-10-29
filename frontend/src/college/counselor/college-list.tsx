@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 
 import { errorMessage } from "../../api/client";
 import { useDeleteGlobalCollege } from "../../api/endpoints";
 import type { GlobalCollege } from "../../api/models";
-import CollegeSearch from "../college-search";
-import { CircleButton, CollegeCard, primaryButtonClassName } from "../shared";
-import { useCollegeSearch } from "../use-college-search";
+import CollegeSearch from "../utils/college-search";
+import {
+  CircleButton,
+  CollegeCard,
+  primaryButtonClassName,
+} from "../utils/shared";
+import { useCollegeSearch } from "../utils/use-college-search";
 import AddCollegeModal from "./add-college-modal";
 
 export default function CounselorCollegeList() {
@@ -44,7 +49,7 @@ export default function CounselorCollegeList() {
                 disabled={deleteCollege.isPending}
                 onClick={() => handleDelete(college)}
               >
-                ×
+                <X aria-hidden="true" className="h-4 w-4" />
               </CircleButton>
             }
           />

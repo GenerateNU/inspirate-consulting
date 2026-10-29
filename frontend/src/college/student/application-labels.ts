@@ -2,7 +2,7 @@ import {
   CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
   CreatePersonalCollegeApplicationRequestBodyCategory as Category,
 } from "../../api/models";
-import { deadlineOptions } from "../shared";
+import { deadlineOptions } from "../utils/shared";
 
 export const applicationTypes = Object.values(ApplicationType);
 export const categories = Object.values(Category);
