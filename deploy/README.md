@@ -1,13 +1,14 @@
-# Shared droplet
+# inspirate-consulting on the shared droplet
 
-One DigitalOcean droplet hosting the backends for several Generate projects,
-plus a per-PR preview backend for each of them.
+This project's backend and its per-PR previews run on the DigitalOcean droplet
+that several Generate projects share. The droplet and its shared stack are
+documented in [GenerateNU/droplet](https://github.com/GenerateNU/droplet); this
+directory is only what inspirate-consulting adds on top.
 
-**Nothing irreplaceable lives here.** Production data and auth stay in
-Supabase; the only Postgres on the droplet holds preview databases, which are
-disposable by definition. If the droplet is lost you rebuild it from this
-directory — you lose uptime, not data. That is the whole reason this is a
-reasonable thing for a student org to own.
+**None of this project's irreplaceable data lives here.** Production data and
+auth stay in Supabase, and its preview databases are disposable. If the droplet
+is lost, it is rebuilt from GenerateNU/droplet and this directory. You lose
+uptime, not data.
 
 ```
 droplet
@@ -24,111 +25,19 @@ reloads.
 
 ## Provisioning
 
-### 1. Create the droplet
+The droplet itself (Docker, the deploy user, firewall, GHCR login, and the
+shared Caddy + preview-db stack) is set up once for every project, and is
+documented in [GenerateNU/droplet](https://github.com/GenerateNU/droplet).
+What follows is only this project's part.
 
-A **2 GB / 1 vCPU** basic droplet ($12/month) fits four Go backends, the
-preview Postgres, Caddy, and a handful of preview containers. Go up to 4 GB
-($24/month) if you expect many concurrent previews.
-
-Pick Ubuntu LTS and add your team's SSH keys.
-
-### 2. Install Docker
-
-```sh
-ssh root@<droplet-ip>
-curl -fsSL https://get.docker.com | sh
-```
-
-Create a non-root deploy user so CI is not connecting as root:
-
-```sh
-adduser --disabled-password --gecos "" deploy
-usermod -aG docker deploy
-install -o deploy -g deploy -m 700 -d /home/deploy/.ssh
-```
-
-### 3. Give CI a deploy key
-
-On your machine, generate a key **used only by CI**:
-
-```sh
-ssh-keygen -t ed25519 -f droplet-deploy-key -C "github-actions" -N ""
-```
-
-Append the public half to `/home/deploy/.ssh/authorized_keys` on the droplet,
-then capture the host key for pinning:
-
-```sh
-ssh-keyscan -t ed25519 <droplet-ip>
-```
-
-Store the private key as the `DROPLET_SSH_KEY` secret and the `ssh-keyscan`
-output as `DROPLET_SSH_KNOWN_HOSTS`. Pinning matters: without it CI would
-accept any host presenting itself at that address, deploy key included.
-
-### 4. Firewall
-
-```sh
-ufw allow OpenSSH
-ufw allow 80
-ufw allow 443
-ufw enable
-```
-
-Postgres is deliberately **not** in that list. It publishes no ports and is
-reachable only from other containers on the `edge` network.
-
-### 5. Let the droplet pull from GHCR
-
-Images are pushed to GitHub Container Registry, and GHCR packages are private
-by default even when the repository is public. The droplet must authenticate
-or the first deploy fails with `denied`.
-
-Create a classic PAT with **only** `read:packages`, then on the droplet:
-
-```sh
-echo "<token>" | docker login ghcr.io -u <github-username> --password-stdin
-```
-
-That writes `~/.docker/config.json` for the `deploy` user and persists across
-reboots. Use a token that can do nothing but read packages — it lives in
-plaintext on the droplet.
-
-Alternatively, make the two packages public (repo → Packages → Package
-settings → Change visibility) and skip the login entirely. Fine for
-open-source projects; not for client work where the image may embed config.
-
-### 6. DNS
+### 1. DNS
 
 | Record | Points at | Purpose |
 | --- | --- | --- |
 | `api.<project>.org` | droplet IP | Production backend |
 | `*.<preview-domain>` | droplet IP | Every PR preview hostname |
 
-The wildcard is what lets a new preview hostname work the instant its
-container starts. Caddy then issues a certificate per hostname over HTTP-01,
-which needs no DNS credentials.
-
-> Let's Encrypt allows 50 certificates per registered domain per week. Heavy PR
-> churn across four projects could approach that; if it becomes a problem,
-> switch Caddy to a DNS-challenge wildcard certificate.
-
-### 7. Bring up the shared stack
-
-Once per droplet:
-
-```sh
-ssh deploy@<droplet-ip>
-sudo install -o deploy -g deploy -d /opt/shared
-# copy deploy/shared/docker-compose.yml to /opt/shared/
-cp .env.example .env   # fill in ACME_EMAIL and PREVIEW_DB_PASSWORD
-chmod 600 .env
-docker compose up -d
-```
-
-`docker network ls` should now show `edge`.
-
-### 8. Set the project up
+### 2. Set the project up
 
 Once per project:
 
@@ -145,13 +54,13 @@ echo "preview.generatenu.com" > preview-domain
 ```
 
 `DB_PASSWORD` in `preview.env` must match `PREVIEW_DB_PASSWORD` in
-`/opt/shared/.env` — the preview containers connect to that Postgres as
+`/opt/shared/.env` (see GenerateNU/droplet) — the preview containers connect to that Postgres as
 superuser, and `preview-up.sh` reads the password from this file.
 
 The deploy workflow copies `docker-compose.yml` here on every run, so it does
 not need to be placed by hand.
 
-### 9. Repository secrets and variables
+### 3. Repository secrets and variables
 
 Secrets: `DROPLET_SSH_KEY` and `DROPLET_SSH_KNOWN_HOSTS`.
 
@@ -198,10 +107,12 @@ bad `docker compose up` takes all of them down at once. That is downtime, not
 data loss — but it is still four clients at once. Enable weekly snapshots
 (+20% of droplet cost) so a rebuild is quick.
 
-**Watch disk.** Preview images accumulate in the local Docker cache. The deploy
-workflow runs `docker image prune -f`, but a monthly
-`docker system prune -af --volumes` is worth doing — note that `--volumes`
-would also drop preview databases, so only run it when no previews are open.
+**Watch disk.** Every project on the droplet shares one disk. On 2026-10-26
+it filled with old images and every deploy failed. Deploys now remove this
+project's superseded images, and the droplet prunes unused ones nightly (see
+GenerateNU/droplet). Never run `docker system prune --volumes` there: it
+deletes every project's preview databases, and other projects' production
+data.
 
 **Keep OS packages current.** `unattended-upgrades` is the cheap answer:
 
@@ -209,15 +120,5 @@ would also drop preview databases, so only run it when no previews are open.
 apt install unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades
 ```
 
-## Adding another project
-
-1. Copy `deploy/app/` into the other repo and change `name:` and
-   `container_name:` in `docker-compose.yml`.
-2. Copy the three workflows and change `PROJECT` in `preview-up.sh` and
-   `preview-down.sh`.
-3. `/opt/<project>/` on the droplet with its own `backend.env`, `preview.env`,
-   and `preview-domain`.
-4. DNS for its API hostname and preview wildcard.
-5. Its own repository secrets and variables.
-
-The shared stack is untouched — that is the point.
+Adding another project to the droplet is covered in
+[GenerateNU/droplet](https://github.com/GenerateNU/droplet).
