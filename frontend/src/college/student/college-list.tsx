@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Check, Plus } from "lucide-react";
 
 import { useListPersonalCollegeApplications } from "../../api/endpoints";
-import CollegeSearch from "../college-search";
+import CollegeSearch from "../utils/college-search";
 import {
   CircleBadge,
   CircleButton,
   CollegeCard,
   inputClassName,
   primaryButtonClassName,
-} from "../shared";
-import { useCollegeSearch } from "../use-college-search";
+} from "../utils/shared";
+import { useCollegeSearch } from "../utils/use-college-search";
 
 // list of colleges
 // sends the student to the applications page to apply
@@ -43,7 +44,7 @@ export default function StudentCollegeList() {
                 label={`${college.school_name} added`}
                 title="Already on your list"
               >
-                ✓
+                <Check aria-hidden="true" className="h-4 w-4" />
               </CircleBadge>
             ) : (
               <CircleButton
@@ -53,7 +54,7 @@ export default function StudentCollegeList() {
                   navigate(`/college-applications?college=${college.id}`)
                 }
               >
-                +
+                <Plus aria-hidden="true" className="h-4 w-4" />
               </CircleButton>
             )
           }

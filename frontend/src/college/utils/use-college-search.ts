@@ -3,8 +3,8 @@ import { useState } from "react";
 import {
   useListGlobalColleges,
   useSearchGlobalColleges,
-} from "../api/endpoints";
-import type { GlobalCollege } from "../api/models";
+} from "../../api/endpoints";
+import type { GlobalCollege } from "../../api/models";
 
 // shared state for the college list pages:
 // shows every college until the user types a query, then shows the search results instead

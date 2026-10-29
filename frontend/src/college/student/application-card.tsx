@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { MapPin, Pencil } from "lucide-react";
 
 import {
   CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
@@ -6,7 +7,7 @@ import {
   type GlobalCollege,
   type PersonalCollegeApplication,
 } from "../../api/models";
-import { PencilIcon, PinIcon } from "../shared";
+import { smallButtonClassName } from "../utils/shared";
 import {
   applicationTypes,
   categories,
@@ -16,21 +17,36 @@ import {
   typeLabel,
 } from "./application-labels";
 
-export const smallButtonClassName =
-  "text-xs text-gray-500 hover:text-black hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline";
-
-function Tag({
-  className,
-  children,
-}: {
+interface TagProps {
   className: string;
   children: ReactNode;
-}) {
+}
+
+function Tag({ className, children }: TagProps) {
   return (
     <span className={`rounded-full border px-5 py-0.5 text-sm ${className}`}>
       {children}
     </span>
   );
+}
+
+interface ApplicationCardProps {
+  app: PersonalCollegeApplication;
+  college: GlobalCollege | undefined;
+  collegeName: string;
+  busy: boolean;
+  saving: boolean;
+  isEditing: boolean;
+  isDragging: boolean;
+  draggable: boolean;
+  rankControls: ReactNode;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDrop: () => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSave: (applicationType: ApplicationType, category: Category) => void;
+  onRemove: () => void;
 }
 
 // one application on My List
@@ -52,24 +68,7 @@ export default function ApplicationCard({
   onCancelEdit,
   onSave,
   onRemove,
-}: {
-  app: PersonalCollegeApplication;
-  college: GlobalCollege | undefined;
-  collegeName: string;
-  busy: boolean;
-  saving: boolean;
-  isEditing: boolean;
-  isDragging: boolean;
-  draggable: boolean;
-  rankControls: ReactNode;
-  onDragStart: () => void;
-  onDragEnd: () => void;
-  onDrop: () => void;
-  onStartEdit: () => void;
-  onCancelEdit: () => void;
-  onSave: (applicationType: ApplicationType, category: Category) => void;
-  onRemove: () => void;
-}) {
+}: ApplicationCardProps) {
   const [editType, setEditType] = useState<ApplicationType>(ApplicationType.RD);
   const [editCategory, setEditCategory] = useState<Category>(Category.target);
 
@@ -105,7 +104,7 @@ export default function ApplicationCard({
         <h3 className="text-3xl font-medium">{collegeName}</h3>
         {college && (
           <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
-            <PinIcon />
+            <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
             {college.school_location}
           </p>
         )}
@@ -184,7 +183,7 @@ export default function ApplicationCard({
               onClick={startEditing}
               className={`flex items-center gap-1 ${smallButtonClassName}`}
             >
-              <PencilIcon />
+              <Pencil aria-hidden="true" className="h-3 w-3" />
               Edit
             </button>
             {rankControls}
