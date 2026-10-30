@@ -30,7 +30,6 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 		return &models.SetStudentReviewBalanceOutput{Body: *updated}, nil
 	})
 
-	// Registered before GET /students/{id} so "fetchall" is not captured as an id.
 	huma.Register(api, huma.Operation{
 		OperationID: "fetch-students",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
