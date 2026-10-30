@@ -34,8 +34,6 @@ type User struct {
 	ExpiresAt  *time.Time `json:"expires_at"`
 }
 
-// I represented year under the assumption that we're following the american high school timeline
-// not sure if we want to change this to assume otherwise
 type Student struct {
 	ID            uuid.UUID  `json:"id"`
 	UserID        uuid.UUID  `json:"user_id"`

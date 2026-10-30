@@ -11,19 +11,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (c *CounselorRepository) ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error) {
+func (c *CounselorRepository) ListCounselors(ctx context.Context, name *string, cursor *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error) {
 	selectQuery, err := schema.ReadSQLBaseScript("list_counselors.sql", SqlCounselorFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	var afterName *string
-	var afterID *uuid.UUID
-	if after != nil {
-		afterName, afterID = &after.Name, &after.ID
+	var cursorName *string
+	var cursorID *uuid.UUID
+	if cursor != nil {
+		cursorName, cursorID = &cursor.Name, &cursor.ID
 	}
 
-	rows, err := c.db.Query(ctx, selectQuery, name, afterName, afterID, limit)
+	rows, err := c.db.Query(ctx, selectQuery, name, cursorName, cursorID, limit)
 	if err != nil {
 		return nil, err
 	}

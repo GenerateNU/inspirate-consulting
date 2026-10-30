@@ -11,19 +11,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *StudentRepository) ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.StudentListItem, error) {
+func (r *StudentRepository) ListStudents(ctx context.Context, name *string, cursor *pagination.NameIDKey, limit int) ([]models.StudentListItem, error) {
 	selectQuery, err := schema.ReadSQLBaseScript("list_students.sql", SqlStudentFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	var afterName *string
-	var afterID *uuid.UUID
-	if after != nil {
-		afterName, afterID = &after.Name, &after.ID
+	var cursorName *string
+	var cursorID *uuid.UUID
+	if cursor != nil {
+		cursorName, cursorID = &cursor.Name, &cursor.ID
 	}
 
-	rows, err := r.db.Query(ctx, selectQuery, name, afterName, afterID, limit)
+	rows, err := r.db.Query(ctx, selectQuery, name, cursorName, cursorID, limit)
 	if err != nil {
 		return nil, err
 	}
