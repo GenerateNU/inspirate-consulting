@@ -33,7 +33,6 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 		return &models.ListPendingReviewsOutput{Body: reviews}, nil
 	})
 
-	// Register GET /counselors/students handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "list-counselor-students",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
@@ -49,7 +48,6 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 		return &models.ListCounselorStudentsOutput{Body: students}, nil
 	})
 
-	// Register GET /counselors/fetchall handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "fetch-counselors",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
