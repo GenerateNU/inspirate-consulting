@@ -14,16 +14,30 @@ import type {
 } from 'msw';
 
 import type {
+  FetchStudentsBody,
   Student
 } from '../../models';
 
 import {
+  getFetchStudentsResponseMock,
   getGetStudentResponseMock,
   getSetStudentReviewBalanceResponseMock
 } from './students.faker';
 
-export { getGetStudentResponseMock, getSetStudentReviewBalanceResponseMock } from './students.faker';
+export { getFetchStudentsResponseMock, getGetStudentResponseMock, getSetStudentReviewBalanceResponseMock } from './students.faker';
 
+
+export const getFetchStudentsMockHandler = (overrideResponse?: FetchStudentsBody | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<FetchStudentsBody> | FetchStudentsBody), options?: RequestHandlerOptions) => {
+  return http.get('*/students/fetchall', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getFetchStudentsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getGetStudentMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
   return http.get('*/students/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
@@ -49,6 +63,7 @@ export const getSetStudentReviewBalanceMockHandler = (overrideResponse?: Student
   }, options)
 }
 export const getStudentsMock = () => [
+  getFetchStudentsMockHandler(),
   getGetStudentMockHandler(),
   getSetStudentReviewBalanceMockHandler()
 ]

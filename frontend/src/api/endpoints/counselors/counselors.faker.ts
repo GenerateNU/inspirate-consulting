@@ -11,11 +11,17 @@ import {
 
 import type {
   CounselorStudent,
-  PendingReview
+  FetchCounselorsBody,
+  PendingReview,
+  Student
 } from '../../models';
 
+
+export const getFetchCounselorsResponseMock = (overrideResponse: Partial<Extract<FetchCounselorsBody, object>> = {}): FetchCounselorsBody => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselors: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), user_id: faker.string.alpha({length: {min: 10, max: 20}})})), null]), next_cursor: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), ...overrideResponse})
 
 export const getListCounselorPendingReviewsResponseMock = (): PendingReview[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({essay_id: faker.string.alpha({length: {min: 10, max: 20}}), essay_link: faker.string.alpha({length: {min: 10, max: 20}}), essay_type: faker.string.alpha({length: {min: 10, max: 20}}), requested_at: faker.date.past().toISOString().slice(0, 19) + 'Z', student_id: faker.string.alpha({length: {min: 10, max: 20}}), student_name: faker.string.alpha({length: {min: 10, max: 20}}), transaction_id: faker.string.alpha({length: {min: 10, max: 20}})})))
 
 export const getListCounselorStudentsResponseMock = (): CounselorStudent[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({has_pending_review: faker.datatype.boolean(), is_falling_behind: faker.datatype.boolean(), name: faker.string.alpha({length: {min: 10, max: 20}}), student_id: faker.string.alpha({length: {min: 10, max: 20}}), year: faker.string.alpha({length: {min: 10, max: 20}})})))
+
+export const getAssignCounselorResponseMock = (overrideResponse: Partial<Extract<Student, object>> = {}): Student => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselor_id: faker.string.alpha({length: {min: 10, max: 20}}), gpa: faker.number.int(), id: faker.string.alpha({length: {min: 10, max: 20}}), organization: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), review_balance: faker.number.int(), student_interest: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), user_id: faker.string.alpha({length: {min: 10, max: 20}}), year: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
