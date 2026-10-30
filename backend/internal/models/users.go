@@ -82,3 +82,14 @@ type FetchUserBySupabaseIDInput struct {
 type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
+
+type CurrentUser struct {
+	User
+	Role        Role       `json:"role" enum:"student,counselor" doc:"Role of the logged-in user"`
+	StudentID   *uuid.UUID `json:"student_id" doc:"Student profile ID, null unless the user is a student"`
+	CounselorID *uuid.UUID `json:"counselor_id" doc:"Counselor profile ID, null unless the user is a counselor"`
+}
+
+type GetCurrentUserOutput struct {
+	Body *CurrentUser
+}
