@@ -33,6 +33,7 @@ import CollegeApplications from "./college/college-applications.tsx";
 import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
 import AccountExpired from "./account-expiration/account-expired";
 import StudentProfile from "./student/student-profile.tsx";
+import StudentEssays from "./counselor/student-essays.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -88,6 +89,10 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/login" element={<LogIn />} />
               <Route path="/logout" element={<LogOut />} />
               <Route path="/students/:id" element={<StudentProfile />} />
+              <Route
+                path="/counselor/students/:studentId/essays"
+                element={<StudentEssays />}
+              />
             </Route>
           </Routes>
         </AuthProvider>

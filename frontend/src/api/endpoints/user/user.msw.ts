@@ -15,15 +15,17 @@ import type {
 
 import type {
   CreateUserBody,
+  CurrentUser,
   User
 } from '../../models';
 
 import {
   getCreateUserResponseMock,
-  getFetchUserResponseMock
+  getFetchUserResponseMock,
+  getGetCurrentUserResponseMock
 } from './user.faker';
 
-export { getCreateUserResponseMock, getFetchUserResponseMock } from './user.faker';
+export { getCreateUserResponseMock, getGetCurrentUserResponseMock, getFetchUserResponseMock } from './user.faker';
 
 
 export const getCreateUserMockHandler = (overrideResponse?: CreateUserBody | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CreateUserBody> | CreateUserBody), options?: RequestHandlerOptions) => {
@@ -33,6 +35,18 @@ export const getCreateUserMockHandler = (overrideResponse?: CreateUserBody | ((i
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getCreateUserResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetCurrentUserMockHandler = (overrideResponse?: CurrentUser | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CurrentUser> | CurrentUser), options?: RequestHandlerOptions) => {
+  return http.get('*/user/me', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetCurrentUserResponseMock(),
       { status: 200
       })
   }, options)
@@ -51,5 +65,6 @@ export const getFetchUserMockHandler = (overrideResponse?: User | ((info: Parame
 }
 export const getUserMock = () => [
   getCreateUserMockHandler(),
+  getGetCurrentUserMockHandler(),
   getFetchUserMockHandler()
 ]
