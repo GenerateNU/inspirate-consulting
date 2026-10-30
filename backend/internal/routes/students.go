@@ -34,7 +34,7 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 		OperationID: "fetch-students",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodGet,
-		Path:        "/students",
+		Path:        "/students/fetchall",
 		Description: "Fetch a page of students, optionally filtered by user_id and name",
 		Tags:        []string{"Students"},
 	}, func(ctx context.Context, input *models.FetchStudentsInput) (*models.FetchStudentsOutput, error) {
