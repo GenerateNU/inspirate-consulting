@@ -52,7 +52,7 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 		OperationID: "fetch-counselors",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodGet,
-		Path:        "/counselors/fetchall",
+		Path:        "/counselors",
 		Description: "Fetch a page of counselors, optionally filtered by user_id and name",
 		Tags:        []string{"Counselors"},
 	}, func(ctx context.Context, input *models.FetchCounselorsInput) (*models.FetchCounselorsOutput, error) {
