@@ -28,6 +28,7 @@ import type {
   CreateUserBody,
   CreateUserInputBody,
   ErrorModel,
+  SessionUser,
   User
 } from '../../models';
 
@@ -175,7 +176,118 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       > => {
       return useMutation(getCreateUserMutationOptions(options), queryClient);
     }
-    export const getFetchUserUrl = (id: string,) => {
+    export const getFetchCurrentUserUrl = () => {
+
+
+
+
+  return `/api/user/me`
+}
+
+/**
+ * fetch the logged-in user along with their student or counselor profile id
+ */
+export const fetchCurrentUser = async ( options?: RequestInit): Promise<SessionUser> => {
+
+  const res = await fetch(getFetchCurrentUserUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: SessionUser, status?: number} = new globalThis.Error();
+    const data : SessionUser = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: SessionUser = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getFetchCurrentUserQueryKey = () => {
+    return [
+    `/api/user/me`
+    ] as const;
+    }
+
+
+export const getFetchCurrentUserQueryOptions = <TData = Awaited<ReturnType<typeof fetchCurrentUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCurrentUser>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFetchCurrentUserQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof fetchCurrentUser>>> = ({ signal }) => fetchCurrentUser({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fetchCurrentUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FetchCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof fetchCurrentUser>>>
+export type FetchCurrentUserQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
+
+
+export function useFetchCurrentUser<TData = Awaited<ReturnType<typeof fetchCurrentUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCurrentUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof fetchCurrentUser>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchCurrentUser<TData = Awaited<ReturnType<typeof fetchCurrentUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCurrentUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof fetchCurrentUser>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchCurrentUser<TData = Awaited<ReturnType<typeof fetchCurrentUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCurrentUser>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useFetchCurrentUser<TData = Awaited<ReturnType<typeof fetchCurrentUser>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchCurrentUser>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFetchCurrentUserQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getFetchUserUrl = (id: string,) => {
 
 
 

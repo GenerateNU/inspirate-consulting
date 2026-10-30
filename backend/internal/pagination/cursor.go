@@ -16,6 +16,11 @@ type TimeIDKey struct {
 	ID        uuid.UUID `json:"i"`
 }
 
+type NameIDKey struct {
+	Name string    `json:"n"`
+	ID   uuid.UUID `json:"i"`
+}
+
 func Encode[K any](key K) (string, error) {
 	b, err := json.Marshal(key)
 	if err != nil {

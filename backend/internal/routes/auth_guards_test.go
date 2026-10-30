@@ -51,6 +51,7 @@ var routeTable = []routeAccess{
 	{http.MethodPatch, "/user/reset-password", anyRole, nil},
 	{http.MethodPost, "/user/{supabase_id}/force-password-reset", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/user", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// greeting
@@ -72,10 +73,13 @@ var routeTable = []routeAccess{
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/students/{id}", anyRole, nil},
+	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
 
 	// colleges & applications
 	{http.MethodPost, "/colleges", guarded, []string{roleCounselor}},
@@ -289,6 +293,9 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"POST /videos",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
+		"GET /counselors/fetchall",
+		"GET /students/fetchall",
+		"PATCH /students/assign",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",

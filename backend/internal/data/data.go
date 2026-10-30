@@ -93,12 +93,14 @@ type CounselorRepository interface {
 	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
 	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
 	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
+	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error)
 }
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 	FetchUserBySupabaseID(ctx context.Context, input models.FetchUserBySupabaseIDInput) (*models.FetchUserOutput, error)
+	FetchSessionUserBySupabaseID(ctx context.Context, supabaseID uuid.UUID) (*models.SessionUser, error)
 	UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error
 }
 
@@ -144,7 +146,6 @@ type EssayReviewRepository interface {
 	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
 
-// To represent the Chat Message schema
 type ChatMessageRepository interface {
 	CreateChatMessage(ctx context.Context, senderID uuid.UUID, body models.CreateChatMessageRequestBody) (*models.ChatMessage, error)
 	ListChats(ctx context.Context, userID uuid.UUID) ([]models.ChatSummary, error)
@@ -161,6 +162,8 @@ type NotificationPreferencesRepository interface {
 
 type StudentRepository interface {
 	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
+	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.StudentListItem, error)
+	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
 }
 
 type Repository struct {

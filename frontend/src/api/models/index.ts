@@ -6,9 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './assignCounselorInputBody';
 export * from './chatMessage';
 export * from './chatMessagePage';
 export * from './chatSummary';
+export * from './counselorListItem';
 export * from './counselorStudent';
 export * from './createChatMessageRequestBody';
 export * from './createEssayBody';
@@ -36,6 +38,10 @@ export * from './essayReviewStatus';
 export * from './essayReviewTransaction';
 export * from './essays';
 export * from './extracurricular';
+export * from './fetchCounselorsBody';
+export * from './fetchCounselorsParams';
+export * from './fetchStudentsBody';
+export * from './fetchStudentsParams';
 export * from './getMediaAccessParams';
 export * from './getTodoItemsLinkedTo';
 export * from './getTodoItemsParams';
@@ -74,8 +80,10 @@ export * from './searchTodoItemsParams';
 export * from './searchTodoItemsSortBy';
 export * from './searchTodoItemsSortOrder';
 export * from './searchTodoItemsStatus';
+export * from './sessionUser';
 export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
+export * from './studentListItem';
 export * from './todoItem';
 export * from './todoItemPage';
 export * from './updateChatMessageReadInputBody';

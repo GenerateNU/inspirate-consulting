@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-query";
 import type { ApiError } from "../api/client";
 import {
+  getFetchCurrentUserQueryKey,
+  useFetchCurrentUser,
   useLoginUser,
   useLogoutUser,
   useResetUserPassword,
@@ -42,7 +44,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCounselorID(null);
     setStudentID(null);
     setServerExpired(false);
+    queryClient.removeQueries({ queryKey: getFetchCurrentUserQueryKey() });
   };
+
+  // restore the session on page load from the session cookie
+  const { data: currentUser } = useFetchCurrentUser({
+    query: { retry: false, refetchOnWindowFocus: false },
+  });
+
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+    setResetTime(currentUser.reset_time);
+    setExpiresAt(currentUser.expires_at);
+    setUserID(currentUser.id);
+    setCounselorID(currentUser.counselor_id);
+    setStudentID(currentUser.student_id);
+  }, [currentUser]);
 
   const login = (email: string, password: string) => {
     return loginFunc(
@@ -52,6 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setResetTime(user.reset_time);
           setExpiresAt(user.expires_at);
           setUserID(user.id);
+          setCounselorID(user.counselor_id);
+          setStudentID(user.student_id);
           void navigate(path);
         },
         onError: (err) => {
