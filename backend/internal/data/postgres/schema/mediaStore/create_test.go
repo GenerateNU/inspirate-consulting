@@ -50,4 +50,3 @@ func TestCreateMedia(t *testing.T) {
 		t.Errorf("expected S3Key %q, got %q", input.S3Key, created.S3Key)
 	}
 }
-
