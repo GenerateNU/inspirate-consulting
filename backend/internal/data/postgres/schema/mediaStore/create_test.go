@@ -18,12 +18,11 @@ func TestCreateMedia(t *testing.T) {
 	repo := NewMediaRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
-	schoolYear := 11
 	input := &models.CreateMediaRequestBody{
 		Title:        "Writing Your Personal Statement",
 		Description:  "A walkthrough of the Common App essay",
 		LengthInMins: 45,
-		SchoolYear:   &schoolYear,
+		SchoolYear:   "junior",
 		S3Key:        "media/personal-statement.mp4",
 	}
 
@@ -44,37 +43,11 @@ func TestCreateMedia(t *testing.T) {
 	if created.LengthInMins != input.LengthInMins {
 		t.Errorf("expected LengthInMins %d, got %d", input.LengthInMins, created.LengthInMins)
 	}
-	if created.SchoolYear == nil || *created.SchoolYear != schoolYear {
-		t.Errorf("expected SchoolYear %d, got %v", schoolYear, created.SchoolYear)
+	if created.SchoolYear != "junior" {
+		t.Errorf("expected SchoolYear %s, got %v", "junior", created.SchoolYear)
 	}
 	if created.S3Key != input.S3Key {
 		t.Errorf("expected S3Key %q, got %q", input.S3Key, created.S3Key)
 	}
 }
 
-// test creation with no school year, since school_year is a nullable column
-func TestCreateMedia_NilSchoolYear(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test in short mode")
-	}
-	t.Parallel()
-
-	repo := NewMediaRepository(testutils.SetupTestDB(t))
-	ctx := context.Background()
-
-	input := &models.CreateMediaRequestBody{
-		Title:        "General Admissions Overview",
-		Description:  "Applies to every grade",
-		LengthInMins: 30,
-		S3Key:        "media/admissions-overview.mp4",
-	}
-
-	created, err := repo.CreateMedia(ctx, input)
-	if err != nil {
-		t.Fatalf("expected create with a nil school year to succeed, got error: %v", err)
-	}
-
-	if created.SchoolYear != nil {
-		t.Errorf("expected nil SchoolYear, got %v", *created.SchoolYear)
-	}
-}

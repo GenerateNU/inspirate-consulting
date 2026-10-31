@@ -18,13 +18,12 @@ func TestHandler_CreateMedia(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	schoolYear := 11
 
 	input := &models.CreateMediaRequestBody{
 		Title:        "Common App Essay Tips",
 		Description:  "How to write a strong personal statement",
 		LengthInMins: 15,
-		SchoolYear:   &schoolYear,
+		SchoolYear:   "junior",
 		S3Key:        "video-bucket/common-app-tips.mp4",
 	}
 	expectedOutput := &models.Media{
@@ -32,7 +31,7 @@ func TestHandler_CreateMedia(t *testing.T) {
 		Title:        "Common App Essay Tips",
 		Description:  "How to write a strong personal statement",
 		LengthInMins: 15,
-		SchoolYear:   &schoolYear,
+		SchoolYear:   "junior",
 		S3Key:        "video-bucket/common-app-tips.mp4",
 	}
 
