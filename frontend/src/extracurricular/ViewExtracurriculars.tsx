@@ -61,7 +61,7 @@ export default function ViewExtracurricular() {
               >
                 ←
               </Link>
-              <h2 className="ec-title">{item.name} - View Only</h2>
+              <h2 className="ec-title">{item.name}</h2>
               <Link
                 to={`/extracurriculars/${item.id}/edit`}
                 className="ec-back"
