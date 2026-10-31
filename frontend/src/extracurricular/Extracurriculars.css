@@ -1,0 +1,195 @@
+.ec-page {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.ec-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.ec-title {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.ec-header-push {
+  margin-left: auto;
+}
+
+.ec-back {
+  color: inherit;
+  font-size: 1.5rem;
+  text-decoration: none;
+}
+
+.ec-box {
+  border: 1px solid currentColor;
+  padding: 1.5rem 2rem;
+}
+
+.ec-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.ec-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid currentColor;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ec-card.active {
+  background: rgba(127, 127, 127, 0.25);
+}
+
+.ec-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ec-card-title {
+  font-weight: 600;
+}
+
+.ec-card-subtitle {
+  font-size: 0.8rem;
+}
+
+.ec-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: inherit;
+}
+
+.ec-link-button {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid currentColor;
+  color: inherit;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.ec-split {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1.5rem;
+}
+
+.ec-sidebar,
+.ec-detail {
+  border: 1px solid currentColor;
+  padding: 1.25rem;
+}
+
+.ec-sidebar .ec-title {
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ec-sidebar .ec-list {
+  margin-top: 1rem;
+}
+
+.ec-section {
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid currentColor;
+}
+
+.ec-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.ec-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0;
+}
+
+.ec-details dt {
+  font-size: 0.8rem;
+}
+
+.ec-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ec-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 2rem;
+}
+
+.ec-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.ec-field-wide {
+  grid-column: 1 / -1;
+}
+
+.ec-field input,
+.ec-field select,
+.ec-field textarea {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+}
+
+.ec-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+.ec-button {
+  padding: 0.5rem 2.5rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ec-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 48rem) {
+  .ec-split,
+  .ec-details,
+  .ec-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
