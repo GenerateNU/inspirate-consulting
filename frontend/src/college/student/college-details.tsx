@@ -1,7 +1,8 @@
 import CollegeDetailsLayout, {
   useCollegeFromRoute,
 } from "../utils/college-details-layout";
-import { Field, deadlineOptions, formatDate } from "../utils/shared";
+import Field from "../utils/components/field";
+import { deadlineOptions, formatDate } from "../utils/shared";
 
 // read-only view of one college
 export default function StudentCollegeDetails() {

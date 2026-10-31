@@ -5,11 +5,9 @@ import { errorMessage } from "../../api/client";
 import { useDeleteGlobalCollege } from "../../api/endpoints";
 import type { GlobalCollege } from "../../api/models";
 import CollegeSearch from "../utils/college-search";
-import {
-  CircleButton,
-  CollegeCard,
-  primaryButtonClassName,
-} from "../utils/shared";
+import CircleButton from "../utils/components/circle-button";
+import CollegeCard from "../utils/components/college-card";
+import { primaryButtonClassName } from "../utils/shared";
 import { useCollegeSearch } from "../utils/use-college-search";
 import AddCollegeModal from "./add-college-modal";
 

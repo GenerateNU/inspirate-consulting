@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { errorMessage, type ApiError } from "../../api/client";
 import { useCreateGlobalCollege } from "../../api/endpoints";
+import Field from "../utils/components/field";
 import {
-  Field,
   deadlineOptions,
   inputClassName,
   primaryButtonClassName,

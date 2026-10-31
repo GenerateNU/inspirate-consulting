@@ -4,13 +4,10 @@ import { Check, Plus } from "lucide-react";
 
 import { useListPersonalCollegeApplications } from "../../api/endpoints";
 import CollegeSearch from "../utils/college-search";
-import {
-  CircleBadge,
-  CircleButton,
-  CollegeCard,
-  inputClassName,
-  primaryButtonClassName,
-} from "../utils/shared";
+import CircleBadge from "../utils/components/circle-badge";
+import CircleButton from "../utils/components/circle-button";
+import CollegeCard from "../utils/components/college-card";
+import { inputClassName, primaryButtonClassName } from "../utils/shared";
 import { useCollegeSearch } from "../utils/use-college-search";
 
 // list of colleges
