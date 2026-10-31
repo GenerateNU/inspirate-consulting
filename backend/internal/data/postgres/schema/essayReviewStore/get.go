@@ -30,6 +30,7 @@ func (r *EssayReviewRepository) LockStudent(ctx context.Context, db dbinterface.
 		&student.GPA,
 		&student.ReviewBalance,
 		&student.CounselorID,
+		&student.Interest,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

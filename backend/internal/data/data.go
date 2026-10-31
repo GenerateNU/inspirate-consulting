@@ -18,6 +18,7 @@ import (
 	notificationLogRepository "inspirate-consulting/internal/data/postgres/schema/notificationLogStore"
 	notificationPreferencesRepository "inspirate-consulting/internal/data/postgres/schema/notificationPreferencesStore"
 	personalCollegeApplicationRepository "inspirate-consulting/internal/data/postgres/schema/personalCollegeApplicationStore"
+	studentRepository "inspirate-consulting/internal/data/postgres/schema/studentStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
 	"inspirate-consulting/internal/models"
@@ -72,6 +73,10 @@ type GlobalCollegeRepository interface {
 	CreateGlobalCollege(ctx context.Context, global_college models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error)
 	GetGlobalCollege(ctx context.Context, id int64) (*models.GlobalCollege, error)
 	ListGlobalColleges(ctx context.Context) ([]models.GlobalCollege, error)
+	DeleteGlobalCollege(ctx context.Context, id int64) error
+	FindNearDuplicateGlobalColleges(ctx context.Context, name string, location string, threshold float64) ([]models.GlobalCollege, error)
+	SearchGlobalColleges(ctx context.Context, query string, threshold float64, limit int) ([]models.GlobalCollege, error)
+	UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error)
 }
 
 // To represent the Personal College Application schema
@@ -154,6 +159,10 @@ type NotificationPreferencesRepository interface {
 	UpdateNotificationPreferences(ctx context.Context, userID uuid.UUID, preferences models.UpdateNotificationPreferencesRequestBody) (*models.NotificationPreferences, error)
 }
 
+type StudentRepository interface {
+	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
@@ -174,6 +183,7 @@ type Repository struct {
 	EssayReview                EssayReviewRepository
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository
+	Student                    StudentRepository
 }
 
 // Close closes the database connection pool
@@ -206,5 +216,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		NotificationPreferences:    notificationPreferencesRepository.NewNotificationPreferencesRepository(db),
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
 		Counselor:                  counselorRepository.NewCounselorRepository(db),
+		Student:                    studentRepository.NewStudentRepository(db),
 	}
 }

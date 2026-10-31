@@ -15,6 +15,8 @@ export interface Student {
   /** @nullable */
   organization: string | null;
   review_balance: number;
+  /** @nullable */
+  student_interest: string | null;
   user_id: string;
   year: string;
 }

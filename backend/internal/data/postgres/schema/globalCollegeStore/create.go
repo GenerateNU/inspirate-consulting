@@ -13,6 +13,7 @@ import (
 )
 
 func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
+
 	createdGlobalCollege := &models.GlobalCollege{}
 
 	insertQuery, err := schema.ReadSQLBaseScript("create_global_college.sql", SqlGlobalCollegeFiles)
@@ -43,7 +44,7 @@ func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, input
 	if err != nil {
 		var pgErr *pgconn.PgError
 
-		// to return a conflict error if the school_name and school_location combination already exists
+		// to return a conflict error if the school_name and school_location combination already exists (exact case-insensitive match)
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return nil, errs.Conflict("global college", "school_name/school_location", inputGlobalCollege.SchoolName+" / "+inputGlobalCollege.SchoolLocation)
 		}

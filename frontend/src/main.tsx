@@ -14,11 +14,12 @@ import Essay from "./essays/essays";
 import CreateCollege from "./college/create-college";
 import CollegeList from "./college/college-list";
 import CreateCollegeApplication from "./college/create-application";
-import CollegeApplicationList from "./college/colleges";
 import UploadVideo from "./video/upload-video";
 import VideoList from "./video/videos";
 import Student from "./student/student";
 import Counselor from "./counselor/counselor";
+import CounselorStudents from "./counselor/counselor-students";
+import PendingReviews from "./counselor/pending-reviews";
 import CreateTask from "./task/CreateTask";
 import TaskList from "./task/TaskList";
 import Layout from "./layout/layout";
@@ -30,6 +31,10 @@ import CreateUser from "./user/create-user";
 import LogOut from "./logout/logout";
 import LogIn from "./login/login";
 import { AuthProvider } from "./contexts/auth-context.tsx";
+import CollegeApplications from "./college/college-applications.tsx";
+import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
+import AccountExpired from "./account-expiration/account-expired";
+import StudentProfile from "./student/student-profile.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -37,6 +42,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path={ACCOUNT_EXPIRED_PATH} element={<AccountExpired />} />
             <Route element={<Layout />}>
               <Route path="/" element={<App />} />
               <Route path="/greeting" element={<Greeting />} />
@@ -60,11 +66,19 @@ createRoot(document.getElementById("root")!).render(
                 path="/create-application"
                 element={<CreateCollegeApplication />}
               />
-              <Route path="/colleges" element={<CollegeApplicationList />} />
+              <Route
+                path="/college-applications"
+                element={<CollegeApplications />}
+              />
               <Route path="/upload-video" element={<UploadVideo />} />
               <Route path="/videos" element={<VideoList />} />
               <Route path="/student" element={<Student />} />
               <Route path="/counselor" element={<Counselor />} />
+              <Route
+                path="/counselor-students"
+                element={<CounselorStudents />}
+              />
+              <Route path="/pending-reviews" element={<PendingReviews />} />
               <Route path="/create-task" element={<CreateTask />} />
               <Route path="/tasks" element={<TaskList />} />
               <Route path="/upload-media" element={<UploadMedia />} />
@@ -83,6 +97,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/create-account" element={<CreateUser />} />
               <Route path="/login" element={<LogIn />} />
               <Route path="/logout" element={<LogOut />} />
+              <Route path="/students/:id" element={<StudentProfile />} />
             </Route>
           </Routes>
         </AuthProvider>

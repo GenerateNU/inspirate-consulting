@@ -9,6 +9,9 @@
 export interface User {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  email: string;
+  /** @nullable */
+  expires_at: string | null;
   id: string;
   name: string;
   /** @nullable */

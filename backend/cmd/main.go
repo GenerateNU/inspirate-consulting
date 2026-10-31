@@ -75,18 +75,20 @@ func LoadConfig() (*config.Config, error) {
 		S3          config.S3
 		SQS         config.SQS
 	}
-	var env envConf
-	err := envconfig.Process(context.Background(), &env)
+
+	var cfg envConf
+	// Load configuration from environment variables for production
+	err := envconfig.Process(context.Background(), &cfg)
 	if err != nil {
 		log.Fatalln("Error processing environment variables: ", err)
 	}
 
 	return &config.Config{
-		Application: env.Application,
-		DB:          env.DB,
-		Supabase:    &env.Supabase,
-		S3:          env.S3,
-		SQS:         env.SQS,
+		Application: cfg.Application,
+		DB:          cfg.DB,
+		Supabase:    &cfg.Supabase,
+		S3:          cfg.S3,
+		SQS:         cfg.SQS,
 		TestMode:    testMode == "true",
 	}, nil
 }

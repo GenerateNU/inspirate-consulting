@@ -272,6 +272,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        confirm_duplicate:
+          description: Set true to create despite a detected near-duplicate warning
+          type: boolean
         ea_deadline:
           description: Early admission deadline
           examples:
@@ -436,6 +439,10 @@ components:
         email:
           description: email of user for supabase signup
           type: string
+        expires_at:
+          description: when the account expires; omit for no expiration
+          format: date-time
+          type: string
         name:
           description: Name of the user
           maxLength: 200
@@ -457,6 +464,62 @@ components:
         - pfp_key
         - email
         - role
+      type: object
+    CurrentUser:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CurrentUser.json
+          format: uri
+          readOnly: true
+          type: string
+        counselor_id:
+          description: Counselor profile ID, null unless the user is a counselor
+          type: string
+        email:
+          type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        role:
+          description: Role of the logged-in user
+          enum:
+            - student
+            - counselor
+          type: string
+        student_id:
+          description: Student profile ID, null unless the user is a student
+          type: string
+        supabase_id:
+          type: string
+      required:
+        - role
+        - student_id
+        - counselor_id
+        - id
+        - name
+        - email
+        - supabase_id
+        - pfp_key
+        - reset_time
+        - expires_at
       type: object
     EditChatMessageRequestBody:
       additionalProperties: false
@@ -1343,6 +1406,10 @@ components:
         review_balance:
           format: int64
           type: integer
+        student_interest:
+          type:
+            - string
+            - "null"
         user_id:
           type: string
         year:
@@ -1351,6 +1418,7 @@ components:
         - id
         - user_id
         - year
+        - student_interest
         - organization
         - gpa
         - review_balance
@@ -1507,6 +1575,51 @@ components:
             - investment
           type: string
       type: object
+    UpdateGlobalCollegeRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateGlobalCollegeRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        confirm_duplicate:
+          description: Set true to create despite a detected near-duplicate warning
+          type: boolean
+        ea_deadline:
+          description: Early admission deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        ed_deadline:
+          description: Early decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        rd_deadline:
+          description: Regular decision deadline
+          examples:
+            - "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        school_location:
+          description: Location of the college
+          examples:
+            - Cambridge, MA
+          type: string
+        school_name:
+          description: Name of the college
+          examples:
+            - Harvard University
+          type: string
+      required:
+        - school_name
+        - school_location
+      type: object
     UpdateNotificationPreferencesRequestBody:
       additionalProperties: false
       properties:
@@ -1638,6 +1751,13 @@ components:
           format: uri
           readOnly: true
           type: string
+        email:
+          type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
         id:
           type: string
         name:
@@ -1656,9 +1776,11 @@ components:
       required:
         - id
         - name
+        - email
         - supabase_id
         - pfp_key
         - reset_time
+        - expires_at
       type: object
     Video:
       additionalProperties: false
@@ -1938,6 +2060,37 @@ paths:
           description: Error
       tags:
         - Chat
+  /college-search:
+    get:
+      description: Search global colleges by name or location.
+      operationId: search-global-colleges
+      parameters:
+        - description: Search text to match against college names
+          explode: false
+          in: query
+          name: query
+          schema:
+            description: Search text to match against college names
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/GlobalCollege"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
   /colleges:
     get:
       description: List all global colleges.
@@ -1986,6 +2139,29 @@ paths:
       tags:
         - Global Colleges
   /colleges/{id}:
+    delete:
+      description: Delete a global college.
+      operationId: delete-global-college
+      parameters:
+        - description: ID of the college to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the college to delete
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
     get:
       description: Get a global college by ID.
       operationId: get-global-college
@@ -1996,6 +2172,39 @@ paths:
           schema:
             format: int64
             type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalCollege"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Global Colleges
+    put:
+      description: Update a global college's details.
+      operationId: update-global-college
+      parameters:
+        - description: ID of the college to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the college to update
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGlobalCollegeRequestBody"
+        required: true
       responses:
         "200":
           content:
@@ -2818,6 +3027,31 @@ paths:
           description: Error
       tags:
         - Essay Reviews
+  /students/{id}:
+    get:
+      description: Get a student
+      operationId: get-student
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
   /students/{id}/review-balance:
     patch:
       description: Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
@@ -3277,6 +3511,25 @@ paths:
           description: Error
       tags:
         - Logout
+  /user/me:
+    get:
+      description: Fetch the logged-in user with their role and student/counselor profile ID
+      operationId: get-current-user
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
   /user/reset-password:
     patch:
       description: reset user password

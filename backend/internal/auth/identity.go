@@ -8,6 +8,7 @@ import (
 	"inspirate-consulting/internal/models"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
@@ -85,7 +86,8 @@ func ResolveIdentityMiddleware(api huma.API, db *pgxpool.Pool) func(ctx huma.Con
 
 		var userID uuid.UUID
 		var studentID, counselorID *uuid.UUID
-		err = db.QueryRow(ctx.Context(), query, sid).Scan(&userID, &studentID, &counselorID)
+		var expiresAt *time.Time
+		err = db.QueryRow(ctx.Context(), query, sid).Scan(&userID, &studentID, &counselorID, &expiresAt)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				slog.Error("no local user for supabase ID", "supabase_id", sid)
@@ -94,6 +96,12 @@ func ResolveIdentityMiddleware(api huma.API, db *pgxpool.Pool) func(ctx huma.Con
 			}
 			slog.Error("identity resolution failed", "err", err)
 			_ = huma.WriteErr(api, ctx, http.StatusInternalServerError, "identity resolution failed")
+			return
+		}
+
+		if expiresAt != nil && !expiresAt.After(time.Now()) && ctx.Operation().Path != "/user/logout" {
+			slog.Warn("expired account rejected", "user_id", userID, "expires_at", *expiresAt)
+			_ = huma.WriteErr(api, ctx, http.StatusForbidden, "account expired")
 			return
 		}
 

@@ -2,9 +2,14 @@ import { createContext } from "react";
 
 import type { User } from "../api/models";
 
+export const ACCOUNT_EXPIRED_PATH = "/account-expired";
+
 export interface AuthContextType {
   resetTime: string | null;
+  expiresAt: string | null;
   userID: string | null;
+  counselorID: string | null;
+  studentID: string | null;
   login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   reset_password: (new_password: string) => Promise<void>;

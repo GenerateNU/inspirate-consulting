@@ -24,7 +24,7 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, reviewBalance int) uuid.U
 
 	var userID, counselorID, studentID uuid.UUID
 	if err := db.QueryRow(ctx,
-		`INSERT INTO public.users (name) VALUES ('essay review test') RETURNING id`).Scan(&userID); err != nil {
+		`INSERT INTO public.users (name, email) VALUES ('essay review test', $1) RETURNING id`, uuid.NewString()+"@test.com").Scan(&userID); err != nil {
 		t.Fatalf("failed to create test user: %v", err)
 	}
 	if err := db.QueryRow(ctx,

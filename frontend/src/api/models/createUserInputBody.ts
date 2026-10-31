@@ -12,6 +12,8 @@ export interface CreateUserInputBody {
   readonly $schema?: string;
   /** email of user for supabase signup */
   email: string;
+  /** when the account expires; omit for no expiration */
+  expires_at?: string;
   /**
      * Name of the user
      * @minLength 1

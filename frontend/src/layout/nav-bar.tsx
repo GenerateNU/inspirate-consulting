@@ -4,7 +4,7 @@ const links = [
   { to: "/essay", label: "Essays" },
   { to: "/college-list", label: "Colleges" },
   { to: "/create-college", label: "Add College" },
-  { to: "/colleges", label: "Applications" },
+  { to: "/college-applications", label: "Applications" },
   { to: "/create-application", label: "New Application" },
   { to: "/tasks", label: "Tasks" },
   { to: "/create-task", label: "New Task" },
@@ -12,6 +12,11 @@ const links = [
   { to: "/upload-video", label: "Upload Video" },
   { to: "/student", label: "Student" },
   { to: "/counselor", label: "Counselor" },
+  { to: "/counselor-students", label: "Counselor Students" },
+  { to: "/pending-reviews", label: "Counselor Pending Reviews" },
+  { to: "/create-account", label: "Create Account" },
+  { to: "/login", label: "Login" },
+  { to: "/logout", label: "Logout" },
 ];
 
 export default function NavBar() {
