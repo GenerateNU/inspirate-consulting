@@ -15,6 +15,11 @@ type Props = {
   onSubmit: (values: ExtracurricularFormValues) => void;
 };
 
+const endsBeforeStart = (values: ExtracurricularFormValues) =>
+  values.end_date !== "" &&
+  values.start_date !== "" &&
+  values.end_date < values.start_date;
+
 export default function ExtracurricularForm({
   initialValues,
   submitLabel,
@@ -24,14 +29,22 @@ export default function ExtracurricularForm({
   onSubmit,
 }: Props) {
   const [values, setValues] = useState(initialValues);
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const update = <K extends keyof ExtracurricularFormValues>(
     key: K,
     value: ExtracurricularFormValues[K],
-  ) => setValues((prev) => ({ ...prev, [key]: value }));
+  ) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    if (key === "start_date" || key === "end_date") setDateError(null);
+  };
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (endsBeforeStart(values)) {
+      setDateError("End date can't be before the start date.");
+      return;
+    }
     onSubmit(values);
   };
 
@@ -126,9 +139,17 @@ export default function ExtracurricularForm({
             End date (optional)
             <input
               type="date"
+              min={values.start_date || undefined}
               value={values.end_date}
               onChange={(e) => update("end_date", e.target.value)}
+              aria-invalid={dateError ? true : undefined}
+              aria-describedby={dateError ? "ec-date-error" : undefined}
             />
+            {dateError && (
+              <span id="ec-date-error" role="alert">
+                {dateError}
+              </span>
+            )}
           </label>
         </div>
       </div>
