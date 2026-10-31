@@ -32,4 +32,15 @@ if [ -r "$ENV_FILE" ]; then
   fi
 fi
 
+# Removed by name rather than with `prune -a`, which would act on every
+# project's images on the shared droplet. An image some container still uses,
+# such as a release built from the same commit, is skipped and left for the
+# droplet's nightly prune.
+echo "    removing images for PR #${PR_NUMBER}"
+docker images --no-trunc --format '{{.ID}} {{.Repository}}:{{.Tag}}' \
+  | grep -E " ghcr\.io/generatenu/${PROJECT}/(backend|migrate):pr-${PR_NUMBER}-" \
+  | grep -vFf <(docker ps -aq | xargs -r docker inspect -f '{{.Image}}') \
+  | cut -d' ' -f2 \
+  | xargs -r docker rmi >/dev/null 2>&1 || true
+
 echo "==> done"
