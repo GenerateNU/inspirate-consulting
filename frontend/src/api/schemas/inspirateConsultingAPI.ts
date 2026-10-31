@@ -1223,6 +1223,24 @@ export const LogoutUserResponse = /*#__PURE__*/ zod.void()
 
 
 /**
+ * Fetch the logged-in user with their role and student/counselor profile ID
+ */
+export const GetCurrentUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Counselor profile ID, null unless the user is a counselor')),
+  "email": /*#__PURE__*/ zod.string(),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('Role of the logged-in user')),
+  "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student profile ID, null unless the user is a student')),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * reset user password
  */
 export const ResetUserPasswordBody = /*#__PURE__*/ zod.object({
