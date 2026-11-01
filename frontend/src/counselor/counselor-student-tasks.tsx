@@ -8,10 +8,30 @@ const gradeByYear: Record<string, number> = {
   senior: 12,
 };
 
-export default function CounselorStudentTasks() {
-  const { id = "" } = useParams();
 
-  const studentQuery = useGetStudent(id, { query: { enabled: id !== "" } });
+//validate URL before anything is fetched
+export default function CounselorStudentTasks(){
+  const{id} = useParams();
+
+  if(!id){
+    return (
+      <div className="p-10">
+        <h1 className="text-2xl font-semibold">An error occurred</h1>
+        <p className="mt-2 text-sm">
+          No student was specified.{" "}
+          <Link to="/counselor-students" className="underline">
+            Back to students
+          </Link>
+        </p>
+      </div>
+    );
+  }
+  return <CounselorStudentTasksContent studentId={id} />;
+}
+
+//only rendered with studentID
+function CounselorStudentTasksContent({studentId} : {studentId : string}){
+  const studentQuery = useGetStudent(studentId, { query: { enabled: studentId !== "" } });
   const student = studentQuery.data;
 
   const userId = student?.user_id ?? "";
@@ -56,7 +76,7 @@ export default function CounselorStudentTasks() {
             </div>
 
             <Link
-              to={`/assign-task?studentId=${id}`}
+              to={`/assign-task?studentId=${studentId}`}
               className="rounded bg-black px-6 py-2 text-white"
             >
               Assign Task →
