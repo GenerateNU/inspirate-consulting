@@ -12,7 +12,7 @@ export default function AssignTaskForm() {
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [assignTo, setAssignTo] = useState<AssignToValue>({
-    mode: preselectedStudentId ? "individual" : "",
+    mode: preselectedStudentId ? "individual" : "undefined",
     grades: [],
     studentIds: preselectedStudentId ? [preselectedStudentId] : [],
   });
