@@ -1,6 +1,6 @@
 import { useListCounselorStudents } from "../api/endpoints";
 import type { CounselorStudent } from "../api/models";
-import {toggleListItem} from "./toggle-list-items";
+import { toggleListItem } from "./toggle-list-items";
 
 export type AssignToMode = "undefined" | "all" | "grade" | "individual";
 
@@ -16,7 +16,6 @@ type AssignToSelectProps = {
 };
 
 const GRADES = ["9th", "10th", "11th", "12th"];
-
 
 export default function AssignToSelect({
   value,
@@ -59,7 +58,10 @@ export default function AssignToSelect({
                 type="checkbox"
                 checked={value.grades.includes(grade)}
                 onChange={() =>
-                  onChange({ ...value, grades: toggleListItem(value.grades, grade) })
+                  onChange({
+                    ...value,
+                    grades: toggleListItem(value.grades, grade),
+                  })
                 }
               />
             </label>
@@ -93,7 +95,10 @@ export default function AssignToSelect({
                 onChange={() =>
                   onChange({
                     ...value,
-                    studentIds: toggleListItem(value.studentIds, student.student_id),
+                    studentIds: toggleListItem(
+                      value.studentIds,
+                      student.student_id,
+                    ),
                   })
                 }
               />

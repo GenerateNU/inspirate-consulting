@@ -8,12 +8,11 @@ const gradeByYear: Record<string, number> = {
   senior: 12,
 };
 
-
 //validate URL before anything is fetched
-export default function CounselorStudentTasks(){
-  const{id} = useParams();
+export default function CounselorStudentTasks() {
+  const { id } = useParams();
 
-  if(!id){
+  if (!id) {
     return (
       <div className="p-10">
         <h1 className="text-2xl font-semibold">An error occurred</h1>
@@ -30,8 +29,10 @@ export default function CounselorStudentTasks(){
 }
 
 //only rendered with studentID
-function CounselorStudentTasksContent({studentId} : {studentId : string}){
-  const studentQuery = useGetStudent(studentId, { query: { enabled: studentId !== "" } });
+function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
+  const studentQuery = useGetStudent(studentId, {
+    query: { enabled: studentId !== "" },
+  });
   const student = studentQuery.data;
 
   const userId = student?.user_id ?? "";
