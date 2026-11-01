@@ -1,7 +1,7 @@
 import { useListCounselorStudents } from "../api/endpoints";
 import type { CounselorStudent } from "../api/models";
 
-export type AssignToMode = "" | "all" | "grade" | "individual";
+export type AssignToMode = "undefined" | "all" | "grade" | "individual";
 
 export type AssignToValue = {
   mode: AssignToMode;
