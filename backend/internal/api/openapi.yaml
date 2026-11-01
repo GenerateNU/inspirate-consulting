@@ -325,9 +325,8 @@ components:
         s3_key:
           type: string
         school_year:
-          format: int64
           type:
-            - integer
+            - string
             - "null"
         title:
           type: string
@@ -1057,9 +1056,8 @@ components:
         s3_key:
           type: string
         school_year:
-          format: int64
           type:
-            - integer
+            - string
             - "null"
         title:
           type: string

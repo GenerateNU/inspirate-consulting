@@ -46,10 +46,10 @@ func TestCreateMedia(t *testing.T) {
 		t.Errorf("expected LengthInMins %d, got %d", input.LengthInMins, created.LengthInMins)
 	}
 	if created.SchoolYear == nil {
-	t.Errorf("expected SchoolYear %q, got nil", *input.SchoolYear)
-	} 	
- 	if *created.SchoolYear != *input.SchoolYear {
-	t.Errorf("expected SchoolYear %q, got %q", *input.SchoolYear, *created.SchoolYear)
+		t.Errorf("expected SchoolYear %q, got nil", *input.SchoolYear)
+	}
+	if *created.SchoolYear != *input.SchoolYear {
+		t.Errorf("expected SchoolYear %q, got %q", *input.SchoolYear, *created.SchoolYear)
 	}
 	if created.S3Key != input.S3Key {
 		t.Errorf("expected S3Key %q, got %q", input.S3Key, created.S3Key)
