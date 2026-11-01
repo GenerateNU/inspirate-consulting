@@ -18,11 +18,13 @@ func TestCreateMedia(t *testing.T) {
 	repo := NewMediaRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
+	schoolYear := models.Junior
+
 	input := &models.CreateMediaRequestBody{
 		Title:        "Writing Your Personal Statement",
 		Description:  "A walkthrough of the Common App essay",
 		LengthInMins: 45,
-		SchoolYear:   "junior",
+		SchoolYear:   &schoolYear,
 		S3Key:        "media/personal-statement.mp4",
 	}
 
@@ -43,8 +45,11 @@ func TestCreateMedia(t *testing.T) {
 	if created.LengthInMins != input.LengthInMins {
 		t.Errorf("expected LengthInMins %d, got %d", input.LengthInMins, created.LengthInMins)
 	}
-	if created.SchoolYear != "junior" {
-		t.Errorf("expected SchoolYear %s, got %v", "junior", created.SchoolYear)
+	if created.SchoolYear == nil {
+	t.Errorf("expected SchoolYear %q, got nil", *input.SchoolYear)
+	} 	
+ 	if *created.SchoolYear != *input.SchoolYear {
+	t.Errorf("expected SchoolYear %q, got %q", *input.SchoolYear, *created.SchoolYear)
 	}
 	if created.S3Key != input.S3Key {
 		t.Errorf("expected S3Key %q, got %q", input.S3Key, created.S3Key)
