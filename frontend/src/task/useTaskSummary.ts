@@ -49,13 +49,17 @@ export function useTaskSummary(
       : 0;
 
     const incomplete = todos.filter((t) => t.completed_at == null);
-    const dueThisWeek = incomplete.filter((t) => isDueWithin(t, now, 7 * DAY_MS)).length;
+    const dueThisWeek = incomplete.filter((t) =>
+      isDueWithin(t, now, 7 * DAY_MS),
+    ).length;
 
     // Days left until the end of the week (Sunday)
     const daysRemaining = 7 - new Date().getDay();
 
     // Placeholder until there's a real priority field: incomplete tasks due within 24 hours
-    const highPriority = incomplete.filter((t) => isDueWithin(t, now, DAY_MS)).length;
+    const highPriority = incomplete.filter((t) =>
+      isDueWithin(t, now, DAY_MS),
+    ).length;
 
     // Sort
     const sorted = [...todos].sort((a, b) => {
