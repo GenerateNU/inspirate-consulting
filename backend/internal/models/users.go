@@ -58,9 +58,9 @@ type CreateUserInput struct {
 		Role      Role       `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
 		ExpiresAt *time.Time `json:"expires_at,omitempty" required:"false" doc:"when the account expires; omit for no expiration"`
 		// student profile fields, only used when role is student
-		Year         *Year   `json:"year,omitempty" required:"false" enum:"freshman,sophomore,junior,senior" doc:"year of the student; required when role is student"`
-		GPA          *int    `json:"gpa,omitempty" required:"false" doc:"gpa of the student; required when role is student"`
-		Organization *string `json:"organization,omitempty" required:"false" doc:"organization of the student"`
+		Year         *Year      `json:"year,omitempty" required:"false" enum:"freshman,sophomore,junior,senior" doc:"year of the student; required when role is student"`
+		GPA          *int       `json:"gpa,omitempty" required:"false" doc:"gpa of the student; required when role is student"`
+		Organization *string    `json:"organization,omitempty" required:"false" doc:"organization of the student"`
 		Interest     *string    `json:"student_interest,omitempty" required:"false" doc:"interest of the student"`
 		CounselorID  *uuid.UUID `json:"counselor_id,omitempty" required:"false" doc:"counselor the student is assigned to; required when role is student"`
 	}

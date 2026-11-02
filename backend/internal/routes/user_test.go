@@ -68,10 +68,10 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		// Send valid JSON payload
 		payload := map[string]any{
-			"email":   email,
-			"name":    name,
-			"pfp_key": &key,
-			"role":    "student",
+			"email":        email,
+			"name":         name,
+			"pfp_key":      &key,
+			"role":         "student",
 			"year":         "senior",
 			"gpa":          4,
 			"counselor_id": counselorID,
