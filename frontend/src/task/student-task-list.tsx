@@ -10,6 +10,7 @@ import TaskStatCard from "./task-stat-card";
 import TaskRow from "./task-row";
 import TaskDrawer from "./task-drawer";
 import { useTaskSummary } from "./useTaskSummary";
+import { errorMessage } from "../api/client";
 
 export default function StudentTaskList() {
   const queryClient = useQueryClient();
@@ -26,7 +27,9 @@ export default function StudentTaskList() {
   const summary = useTaskSummary(todos, sortAscending);
 
   if (todosQuery.isLoading) return <p>Loading...</p>;
-  if (todosQuery.error) return <p>Something went wrong.</p>;
+  if (todosQuery.error) {
+    return <p>Something went wrong: {errorMessage(todosQuery.error)}</p>;
+  }
 
   const handleToggleComplete = (task: TodoItem) => {
     updateCompleted.mutate(
