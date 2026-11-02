@@ -15,7 +15,7 @@ export type TaskSummary = {
   groups: TaskGroup[];
 };
 
-// Sept 23rd
+// Formats date in month first then day using ordinal suffix e.g. "September 23rd"
 function formatDateHeading(date: Date) {
   const day = date.getDate();
   const suffix =
