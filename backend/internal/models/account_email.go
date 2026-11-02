@@ -13,16 +13,3 @@ type AccountEmailNotificationRequestBody struct {
 	TempPassword string           `json:"temp_password"`
 	EmailType    AccountEmailType `json:"email_type"`
 }
-
-type ClaimPasswordInput struct {
-	Token string `query:"token" required:"true"`
-}
-
-type ClaimPasswordBody struct {
-	Email        string `json:"email"`
-	TempPassword string `json:"temp_password"`
-}
-
-type ClaimPasswordOutput struct {
-	Body *ClaimPasswordBody
-}

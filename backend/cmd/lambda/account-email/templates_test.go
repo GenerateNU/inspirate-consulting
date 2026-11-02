@@ -13,37 +13,48 @@ func TestFormatEmail_AccountCreated(t *testing.T) {
 	t.Parallel()
 
 	n := models.AccountEmailNotificationRequestBody{
-		Name:      "Ada",
-		EmailType: models.AccountCreated,
+		Name:         "Ada",
+		TempPassword: "Xk9mPq2Lz",
+		EmailType:    models.AccountCreated,
 	}
-	subject, body := formatEmail(n, "https://app.example.com/claim-password?token=abc", "https://app.example.com/login")
+	subject, body := formatEmail(n, "https://app.example.com/login")
 
 	assert.Contains(t, subject, "Welcome")
 	assert.Contains(t, body, "Ada")
-	assert.Contains(t, body, "https://app.example.com/claim-password?token=abc")
+	assert.Contains(t, body, "Xk9mPq2Lz")
 	assert.Contains(t, body, "https://app.example.com/login")
-	assert.NotContains(t, body, "temp-pass")
 }
 
 func TestFormatEmail_PasswordReset(t *testing.T) {
 	t.Parallel()
 
 	n := models.AccountEmailNotificationRequestBody{
-		Name:      "Grace",
-		EmailType: models.PasswordReset,
+		Name:         "Grace",
+		TempPassword: "Vb7qRt3Wy",
+		EmailType:    models.PasswordReset,
 	}
-	subject, body := formatEmail(n, "https://app.example.com/claim-password?token=xyz", "https://app.example.com/login")
+	subject, body := formatEmail(n, "https://app.example.com/login")
 
 	assert.Contains(t, subject, "reset")
 	assert.Contains(t, body, "Grace")
-	assert.Contains(t, body, "https://app.example.com/claim-password?token=xyz")
+	assert.Contains(t, body, "Vb7qRt3Wy")
+	assert.Contains(t, body, "https://app.example.com/login")
 }
 
 func TestAccountCreatedEmail_EscapesName(t *testing.T) {
 	t.Parallel()
 
-	_, body := accountCreatedEmail(`<script>alert(1)</script>`, "https://claim", "https://login")
+	_, body := accountCreatedEmail(`<script>alert(1)</script>`, "Xk9mPq2Lz", "https://login")
 
 	assert.False(t, strings.Contains(body, "<script>alert(1)</script>"))
+	assert.Contains(t, body, "&lt;script&gt;")
+}
+
+func TestAccountCreatedEmail_EscapesPassword(t *testing.T) {
+	t.Parallel()
+
+	_, body := accountCreatedEmail("Ada", `Xk9<script>&"'`, "https://login")
+
+	assert.False(t, strings.Contains(body, `Xk9<script>&"'`))
 	assert.Contains(t, body, "&lt;script&gt;")
 }

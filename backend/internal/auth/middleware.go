@@ -91,9 +91,8 @@ func VerifyRole(api huma.API, roles ...models.Role) func(ctx huma.Context, next 
 
 func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
-		"/api/v1/health":  true,
-		"/user/login":     true,
-		"/claim-password": true,
+		"/api/v1/health": true,
+		"/user/login":    true,
 	}
 
 	return func(ctx huma.Context, next func(huma.Context)) {

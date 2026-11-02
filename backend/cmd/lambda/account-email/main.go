@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/url"
 	"os"
-	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -16,17 +14,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2/types"
 
-	"inspirate-consulting/internal/claimtoken"
 	"inspirate-consulting/internal/models"
 )
 
-const claimTokenTTL = 30 * time.Minute
-
 var (
-	sesClient        *sesv2.Client
-	senderEmail      string
-	appURL           string
-	claimTokenSecret string
+	sesClient   *sesv2.Client
+	senderEmail string
+	appURL      string
 )
 
 func Handler(ctx context.Context, event events.SQSEvent) error {
@@ -37,16 +31,9 @@ func Handler(ctx context.Context, event events.SQSEvent) error {
 			return err
 		}
 
-		token, err := claimtoken.Sign(claimTokenSecret, notification.UserEmail, notification.TempPassword, claimTokenTTL)
-		if err != nil {
-			log.Printf("failed to sign claim token for message %s: %v", record.MessageId, err)
-			return err
-		}
-
-		claimURL := fmt.Sprintf("%s/claim-password?token=%s", appURL, url.QueryEscape(token))
 		loginURL := fmt.Sprintf("%s/login", appURL)
 
-		subject, body := formatEmail(notification, claimURL, loginURL)
+		subject, body := formatEmail(notification, loginURL)
 
 		if err := sendEmail(ctx, notification.UserEmail, subject, body); err != nil {
 			log.Printf("failed to send message %s: %v", record.MessageId, err)
@@ -58,11 +45,11 @@ func Handler(ctx context.Context, event events.SQSEvent) error {
 	return nil
 }
 
-func formatEmail(n models.AccountEmailNotificationRequestBody, claimURL, loginURL string) (string, string) {
+func formatEmail(n models.AccountEmailNotificationRequestBody, loginURL string) (string, string) {
 	if n.EmailType == models.PasswordReset {
-		return passwordResetEmail(n.Name, claimURL, loginURL)
+		return passwordResetEmail(n.Name, n.TempPassword, loginURL)
 	}
-	return accountCreatedEmail(n.Name, claimURL, loginURL)
+	return accountCreatedEmail(n.Name, n.TempPassword, loginURL)
 }
 
 func sendEmail(ctx context.Context, to, subject, htmlBody string) error {
@@ -100,11 +87,6 @@ func main() {
 	appURL = os.Getenv("APP_URL")
 	if appURL == "" {
 		log.Fatal("APP_URL env variable not set")
-	}
-
-	claimTokenSecret = os.Getenv("CLAIM_TOKEN_SECRET")
-	if claimTokenSecret == "" {
-		log.Fatal("CLAIM_TOKEN_SECRET env variable not set")
 	}
 
 	lambda.Start(Handler)
