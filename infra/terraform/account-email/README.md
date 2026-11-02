@@ -30,8 +30,7 @@ cd infra/terraform/account-email
 terraform init
 terraform plan \
   -var="sender_email=no-reply@inspirate.org" \
-  -var="app_url=https://inspirate.org" \
-  -var="claim_token_secret=$CLAIM_TOKEN_SECRET"
+  -var="app_url=https://inspirate.org"
 terraform apply # same -var flags
 ```
 
@@ -39,16 +38,10 @@ terraform apply # same -var flags
 mode, so recipient addresses need to be verified too until production access
 is granted — same constraint the existing lambda's README calls out.
 
-`claim_token_secret` must match the `CLAIM_TOKEN_SECRET` the backend API uses
-to verify claim-password tokens (`backend/internal/claimtoken`) — the Lambda
-signs tokens with this secret, the backend verifies them with the same one.
-Keep it in a `terraform.tfvars` file (gitignored) or pass it from your
-secrets manager of choice; don't commit it.
-
 No remote state backend is configured — this applies with local state until
 one is wired up. Treat `terraform.tfstate` as sensitive (it contains the
-Lambda's environment variables, including the secret above) and never commit
-it; the root `.gitignore` already excludes `*.tfstate*`.
+Lambda's environment variables) and never commit it; the root `.gitignore`
+already excludes `*.tfstate*`.
 
 ## After applying
 
@@ -62,7 +55,7 @@ enqueueing to it (see PR 3 / PR 4).
 Rebuild the binary (above), then:
 
 ```sh
-terraform apply -var="sender_email=..." -var="app_url=..." -var="claim_token_secret=..."
+terraform apply -var="sender_email=..." -var="app_url=..."
 ```
 
 `source_code_hash` picks up the change and updates the function in place.

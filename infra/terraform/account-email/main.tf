@@ -98,9 +98,8 @@ resource "aws_lambda_function" "account_email" {
 
   environment {
     variables = {
-      SENDER_EMAIL       = var.sender_email
-      APP_URL            = var.app_url
-      CLAIM_TOKEN_SECRET = var.claim_token_secret
+      SENDER_EMAIL = var.sender_email
+      APP_URL      = var.app_url
     }
   }
 }
