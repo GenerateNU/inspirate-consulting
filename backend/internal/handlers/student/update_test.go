@@ -16,7 +16,7 @@ import (
 
 // sets the caller's role the way AuthMiddleware does
 func withRole(ctx context.Context, role models.Role) context.Context {
-	return context.WithValue(ctx, "Role", string(role))
+	return context.WithValue(ctx, "Role", string(role)) //nolint:staticcheck
 }
 
 func TestHandler_UpdateStudent(t *testing.T) {
