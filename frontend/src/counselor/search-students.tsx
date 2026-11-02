@@ -1,32 +1,18 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState} from "react";
 import { useFetchStudents, useAssignCounselor} from "../api/endpoints";
-import type { FetchStudentsParams, StudentListItem } from "../api/models";
+import type {StudentListItem, FetchStudentsParams} from "../api/models";
 import { AuthContext } from "../contexts/auth-context";
+import { useDebounce } from "./use-debounce";
+import { SearchBar } from "../../components/Searchbar";
 
 export default function SearchStudents() {
-
-    type Timer = ReturnType<typeof setTimeout>;
-    const [Input, setInput] = useState("");
-    const [timer, setTimer] = useState<Timer>();
     const auth = useContext(AuthContext)
     const counselorID = auth?.counselorID as string
-
-    const delay: number = 8000;
+    const [Input, setInput] = useState("");
     const params: FetchStudentsParams = {name: Input}
-    
     const {data: response, error} = useFetchStudents(params);
     const {mutate: assignCounselor} = useAssignCounselor();
-
-
-    useEffect(() => {
-        const newTimer = setTimeout(() => {
-            setInput(Input)
-        }, delay)
-    
-        clearTimeout(timer);
-        setTimer(newTimer);
-    }, [Input]);
-
+    useDebounce({Input, setInput})
 
   let students: StudentListItem[] = [];
   if (response?.students) {
@@ -46,17 +32,42 @@ export default function SearchStudents() {
   )
 
     return (
-        <div>
-        <div className="form-group">
-            <h2>Claim and Assign Students</h2>
-        </div>
-        <div className="form-group">
-        <input type="search" value={Input} name="student-search" placeholder="Filter by name" onChange={(e) => setInput(e.target.value)}/>
+        <div className="mx-auto flex w-full max-w-[1024px] flex-col px-4 pt-16 pb-16">
+        <div className="flex flex-col gap-1">
+            <h1 className="font-inter text-2xl leading-8 font-semibold tracking-[-0.6px] text-[#171c20]">
+                Claim &amp; Assign Students
+            </h1>
+            <p className="max-w-[768px] font-inter text-sm leading-5 text-[#45464c]">
+                Claim existing students into your dashboard or invite new students.
+            </p>
         </div>
 
-        <ul>{studentRows}</ul>
-        {error && <p>Could not load students.</p>}
-        
+        {/* Filter & query console (placeholder: search bar + two dropdowns) */}
+        <div className="mt-4 flex items-center gap-4 border border-[#c6c6cd] bg-white p-4">
+            <SearchBar
+                value={Input}
+                onChangeText={setInput}
+                placeholder="Filter by student name"
+                className="flex-1"
+            />
+            <div className="h-11 w-[150px] bg-gray-200" />
+            <div className="h-11 w-[190px] bg-gray-200" />
+        </div>
+
+        {/* Student table (placeholder) */}
+        <div className="mt-7 min-h-[326px] border border-[#c6c6cd] bg-gray-100 p-4">
+            <ul>{studentRows}</ul>
+            {error && <p>Could not load students.</p>}
+        </div>
+
+        {/* Invite / add student card (placeholder) */}
+        <div className="mt-9 h-[92px] border border-dashed border-[#76777d] bg-gray-100" />
+
+        {/* Footer navigation (placeholder: back + save buttons) */}
+        <div className="mt-9 flex items-center justify-between border-t border-[#c6c6cd] pt-4">
+            <div className="h-11 w-[170px] bg-gray-200" />
+            <div className="h-11 w-[190px] bg-gray-300" />
+        </div>
         </div>
         
     )
