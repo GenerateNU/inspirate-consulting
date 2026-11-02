@@ -49,6 +49,7 @@ var routeTable = []routeAccess{
 	// auth & users
 	{http.MethodPost, "/user/logout", anyRole, nil},
 	{http.MethodPatch, "/user/reset-password", anyRole, nil},
+	{http.MethodPatch, "/user", anyRole, nil},
 	{http.MethodPost, "/user/{supabase_id}/force-password-reset", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/user", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
@@ -74,12 +75,14 @@ var routeTable = []routeAccess{
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/students/{id}", anyRole, nil},
+	{http.MethodPatch, "/students/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
 
 	// colleges & applications
@@ -296,6 +299,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"POST /videos",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
+		"PATCH /counselors",
 		"GET /counselors/fetchall",
 		"GET /students/fetchall",
 		"PATCH /students/assign",

@@ -299,6 +299,20 @@ export const UpdateGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Update the authenticated counselor's profile. The counselor has no editable fields yet.
+ */
+export const UpdateCounselorBody = /*#__PURE__*/ zod.object({
+
+})
+
+export const UpdateCounselorResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "id": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Fetch a page of counselors, optionally filtered by user_id and name
  */
 export const fetchCounselorsQueryLimitDefault = 5;
@@ -769,7 +783,7 @@ export const UpdateMediaResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 
@@ -1063,6 +1077,33 @@ export const GetStudentResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Update a student's profile fields. Fields left out of the request are not changed.
+ */
+export const UpdateStudentParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student'))
+})
+
+export const UpdateStudentBody = /*#__PURE__*/ zod.object({
+  "gpa": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('GPA of the student')),
+  "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Organization of the student')),
+  "student_interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Interest of the student')),
+  "year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['freshman', 'sophomore', 'junior', 'senior'])).check(/*#__PURE__*/ zod.describe('School year of the student'))
+})
+
+export const UpdateStudentResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.string(),
+  "gpa": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.string(),
+  "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "review_balance": /*#__PURE__*/ zod.int(),
+  "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "year": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
  */
 export const SetStudentReviewBalanceParams = /*#__PURE__*/ zod.object({
@@ -1288,6 +1329,30 @@ export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
+ */
+export const updateUserBodyNameMax = 200;
+
+
+
+export const UpdateUserBody = /*#__PURE__*/ zod.object({
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(updateUserBodyNameMax))).check(/*#__PURE__*/ zod.describe('Name of the user')),
+  "pfp_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+})
+
+export const UpdateUserResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email": /*#__PURE__*/ zod.string(),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "name": /*#__PURE__*/ zod.string(),
+  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Create a user (student/counselor)
  */
 export const createUserBodyNameMax = 200;
@@ -1295,11 +1360,16 @@ export const createUserBodyNameMax = 200;
 
 
 export const CreateUserBody = /*#__PURE__*/ zod.object({
+  "counselor_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('counselor the student is assigned to; required when role is student')),
   "email": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('email of user for supabase signup')),
   "expires_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('when the account expires; omit for no expiration')),
+  "gpa": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('gpa of the student; required when role is student')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
+  "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('organization of the student')),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
-  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create'))
+  "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create')),
+  "student_interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('interest of the student')),
+  "year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['freshman', 'sophomore', 'junior', 'senior'])).check(/*#__PURE__*/ zod.describe('year of the student; required when role is student'))
 })
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({

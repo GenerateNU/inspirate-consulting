@@ -40,6 +40,7 @@ func TestRoute_CreateUser(t *testing.T) {
 	t.Parallel()
 	u1 := uuid.New()
 	s1 := uuid.New()
+	counselorID := uuid.New()
 
 	key := "key"
 	email := "alengano123@gmail.com"
@@ -56,7 +57,7 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("CreateUser", mock.Anything, mock.MatchedBy(func(in models.CreateUserInput) bool {
-			return in.Body.Name == "Aleng123"
+			return in.Body.Name == "Aleng123" && in.Body.CounselorID != nil && *in.Body.CounselorID == counselorID
 		}), mock.Anything).Return(&models.CreateUserOutput{
 			Body: &models.CreateUserBody{User: &userTest},
 		}, nil)
@@ -71,6 +72,9 @@ func TestRoute_CreateUser(t *testing.T) {
 			"name":    name,
 			"pfp_key": &key,
 			"role":    "student",
+			"year":         "senior",
+			"gpa":          4,
+			"counselor_id": counselorID,
 		}
 		bodyBytes, err := json.Marshal(payload)
 		println(bodyBytes)

@@ -13,7 +13,7 @@ import (
 )
 
 // SetUpCounselorRoutes registers the counselor endpoints:
-// list pending reviews, list students, and fetch all counselors
+// list pending reviews, list students, update counselor, and fetch all counselors
 func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	counselorHandler := counselor.NewHandler(repository.Counselor)
 
@@ -46,6 +46,22 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 			return nil, err
 		}
 		return &models.ListCounselorStudentsOutput{Body: students}, nil
+	})
+
+	// Register PATCH /counselors handler.
+	huma.Register(api, huma.Operation{
+		OperationID: "update-counselor",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/counselors",
+		Description: "Update the authenticated counselor's profile. The counselor has no editable fields yet.",
+		Tags:        []string{"Counselors"},
+	}, func(ctx context.Context, input *models.UpdateCounselorInput) (*models.UpdateCounselorOutput, error) {
+		updatedCounselor, err := counselorHandler.UpdateCounselor(ctx, input.Body)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateCounselorOutput{Body: updatedCounselor}, nil
 	})
 
 	huma.Register(api, huma.Operation{
