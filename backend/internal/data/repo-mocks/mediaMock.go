@@ -123,6 +123,36 @@ func (_m *MediaRepository) ListAllMedia(ctx context.Context, limit int, offset i
 	return r0, r1
 }
 
+// UpdateMedia provides a mock function with given fields: ctx, id, change
+func (_m *MediaRepository) UpdateMedia(ctx context.Context, id string, change string) (*models.Media, error) {
+	ret := _m.Called(ctx, id, change)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateMedia")
+	}
+
+	var r0 *models.Media
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*models.Media, error)); ok {
+		return rf(ctx, id, change)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *models.Media); ok {
+		r0 = rf(ctx, id, change)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Media)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, id, change)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewMediaRepository creates a new instance of MediaRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMediaRepository(t interface {

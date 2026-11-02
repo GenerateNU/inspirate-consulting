@@ -107,6 +107,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/media/{id}", anyRole, nil},
 	{http.MethodGet, "/media", anyRole, nil},
 	{http.MethodDelete, "/media/{id}", anyRole, nil},
+	{http.MethodPatch, "/media/{id}", anyRole, nil},
 	{http.MethodPost, "/media-access", anyRole, nil},
 	{http.MethodDelete, "/media-access/{id}", anyRole, nil},
 	{http.MethodGet, "/media-access", anyRole, nil},

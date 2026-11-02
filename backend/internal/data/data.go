@@ -116,6 +116,7 @@ type MediaRepository interface {
 	GetMedia(ctx context.Context, id string) (*models.Media, error)
 	ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error)
 	DeleteMedia(ctx context.Context, id string) error
+	UpdateMedia(ctx context.Context, id string, change string) (*models.Media, error)
 }
 
 type MediaAccessRepository interface {
