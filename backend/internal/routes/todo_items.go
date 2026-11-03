@@ -101,4 +101,20 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		return nil, nil
 	})
 
+	//Register PATCH /todo-items/{id} handler for updating description(only counselors)
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-item-description",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}",
+		Description: "Update a todo-item's description",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoItemDescriptionInput) (*models.UpdateTodoItemDescriptionOutput, error) {
+		updated, err := todoItemHandler.UpdateTodoItemDescription(ctx, input.ID, input.Body.NewDescription)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateTodoItemDescriptionOutput{Body: *updated}, err
+	})
+
 }
