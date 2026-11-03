@@ -288,6 +288,90 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       > => {
       return useMutation(getCreateEssayMutationOptions(options), queryClient);
     }
+    export const getDeleteEssayUrl = (essayId: string,) => {
+
+
+
+
+  return `/api/essays/${essayId}`
+}
+
+/**
+ * Deletes an essay given an essayID
+ */
+export const deleteEssay = async (essayId: string, options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeleteEssayUrl(essayId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeleteEssayMutationKey = () => ['deleteEssay'] as const;
+
+export const getDeleteEssayMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEssay>>, TError,DeleteEssayMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteEssay>>, TError,DeleteEssayMutationVariables, TContext> => {
+
+const mutationKey = getDeleteEssayMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteEssay>>, DeleteEssayMutationVariables> = (props) => {
+          const {essayId} = props ?? {};
+
+          return  deleteEssay(essayId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteEssayMutationResult = NonNullable<Awaited<ReturnType<typeof deleteEssay>>>
+
+    export type DeleteEssayMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeleteEssayMutationVariables = {essayId: string}
+
+    export const useDeleteEssay = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEssay>>, TError,DeleteEssayMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteEssay>>,
+        TError,
+        DeleteEssayMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteEssayMutationOptions(options), queryClient);
+    }
     export const getUpdateEssayGroupUrl = (essayId: string,) => {
 
 
