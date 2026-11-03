@@ -22,11 +22,10 @@ import type {
 import {
   getCreateUserResponseMock,
   getFetchUserResponseMock,
-  getGetCurrentUserResponseMock,
-  getUpdateUserResponseMock
+  getGetCurrentUserResponseMock
 } from './user.faker';
 
-export { getUpdateUserResponseMock, getCreateUserResponseMock, getGetCurrentUserResponseMock, getFetchUserResponseMock } from './user.faker';
+export { getCreateUserResponseMock, getGetCurrentUserResponseMock, getFetchUserResponseMock } from './user.faker';
 
 
 export const getUpdateUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
