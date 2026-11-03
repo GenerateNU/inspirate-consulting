@@ -3903,6 +3903,37 @@ paths:
       tags:
         - Todo Items
     patch:
+      description: Update a to-do item's completion status
+      operationId: update-todo-item-completed
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemCompletedAtInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}/description:
+    patch:
       description: Update a todo-item's description
       operationId: update-todo-item-description
       parameters:
