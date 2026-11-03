@@ -1280,6 +1280,16 @@ export const ForcePasswordResetResponse = /*#__PURE__*/ zod.void()
 
 
 /**
+ * Delete a video by its S3Key
+ */
+export const DeleteVideoQueryParams = /*#__PURE__*/ zod.object({
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The S3 key/path of the video to delete'))
+})
+
+export const DeleteVideoResponse = /*#__PURE__*/ zod.void()
+
+
+/**
  * List all videos in the S3 bucket.
  */
 export const ListVideosResponseItem = /*#__PURE__*/ zod.object({
