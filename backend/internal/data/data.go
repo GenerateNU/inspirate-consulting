@@ -93,7 +93,7 @@ type CounselorRepository interface {
 	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
 	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
 	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
-	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error)
+	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error)
 }
 
 type UserRepository interface {
@@ -161,7 +161,7 @@ type NotificationPreferencesRepository interface {
 
 type StudentRepository interface {
 	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
-	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.StudentListItem, error)
+	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error)
 	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
 }
 

@@ -7,6 +7,8 @@ import (
 	"inspirate-consulting/internal/pagination"
 )
 
+const nameSearchThreshold = 0.2
+
 func (h *Handler) ListCounselors(ctx context.Context, input *models.FetchCounselorsInput) (*models.FetchCounselorsBody, error) {
 
 	var before *pagination.NameIDKey
@@ -18,7 +20,7 @@ func (h *Handler) ListCounselors(ctx context.Context, input *models.FetchCounsel
 		before = &key
 	}
 
-	rows, err := h.CounselorRepository.ListCounselors(ctx, &input.Name, before, input.Limit+1)
+	rows, err := h.CounselorRepository.ListCounselors(ctx, &input.Name, before, input.Limit+1, nameSearchThreshold)
 	if err != nil {
 		return nil, err
 	}

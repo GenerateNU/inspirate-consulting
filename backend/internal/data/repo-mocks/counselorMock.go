@@ -19,9 +19,9 @@ type CounselorRepository struct {
 	mock.Mock
 }
 
-// ListCounselors provides a mock function with given fields: ctx, name, after, limit
-func (_m *CounselorRepository) ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error) {
-	ret := _m.Called(ctx, name, after, limit)
+// ListCounselors provides a mock function with given fields: ctx, name, after, limit, threshold
+func (_m *CounselorRepository) ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error) {
+	ret := _m.Called(ctx, name, after, limit, threshold)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListCounselors")
@@ -29,19 +29,19 @@ func (_m *CounselorRepository) ListCounselors(ctx context.Context, name *string,
 
 	var r0 []models.CounselorListItem
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int) ([]models.CounselorListItem, error)); ok {
-		return rf(ctx, name, after, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int, float64) ([]models.CounselorListItem, error)); ok {
+		return rf(ctx, name, after, limit, threshold)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int) []models.CounselorListItem); ok {
-		r0 = rf(ctx, name, after, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int, float64) []models.CounselorListItem); ok {
+		r0 = rf(ctx, name, after, limit, threshold)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.CounselorListItem)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *string, *pagination.NameIDKey, int) error); ok {
-		r1 = rf(ctx, name, after, limit)
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *pagination.NameIDKey, int, float64) error); ok {
+		r1 = rf(ctx, name, after, limit, threshold)
 	} else {
 		r1 = ret.Error(1)
 	}

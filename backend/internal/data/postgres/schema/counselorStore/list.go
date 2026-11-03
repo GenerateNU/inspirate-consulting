@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (c *CounselorRepository) ListCounselors(ctx context.Context, name *string, cursor *pagination.NameIDKey, limit int) ([]models.CounselorListItem, error) {
+func (c *CounselorRepository) ListCounselors(ctx context.Context, name *string, cursor *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error) {
 	selectQuery, err := schema.ReadSQLBaseScript("list_counselors.sql", SqlCounselorFiles)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (c *CounselorRepository) ListCounselors(ctx context.Context, name *string, 
 		cursorName, cursorID = &cursor.Name, &cursor.ID
 	}
 
-	rows, err := c.db.Query(ctx, selectQuery, name, cursorName, cursorID, limit)
+	rows, err := c.db.Query(ctx, selectQuery, name, cursorName, cursorID, limit, threshold)
 	if err != nil {
 		return nil, err
 	}

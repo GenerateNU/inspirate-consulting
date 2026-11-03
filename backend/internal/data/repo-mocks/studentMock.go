@@ -79,9 +79,9 @@ func (_m *StudentRepository) GetStudent(ctx context.Context, id uuid.UUID) (*mod
 	return r0, r1
 }
 
-// ListStudents provides a mock function with given fields: ctx, name, after, limit
-func (_m *StudentRepository) ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int) ([]models.StudentListItem, error) {
-	ret := _m.Called(ctx, name, after, limit)
+// ListStudents provides a mock function with given fields: ctx, name, after, limit, threshold
+func (_m *StudentRepository) ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error) {
+	ret := _m.Called(ctx, name, after, limit, threshold)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListStudents")
@@ -89,19 +89,19 @@ func (_m *StudentRepository) ListStudents(ctx context.Context, name *string, aft
 
 	var r0 []models.StudentListItem
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int) ([]models.StudentListItem, error)); ok {
-		return rf(ctx, name, after, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int, float64) ([]models.StudentListItem, error)); ok {
+		return rf(ctx, name, after, limit, threshold)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int) []models.StudentListItem); ok {
-		r0 = rf(ctx, name, after, limit)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *pagination.NameIDKey, int, float64) []models.StudentListItem); ok {
+		r0 = rf(ctx, name, after, limit, threshold)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.StudentListItem)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *string, *pagination.NameIDKey, int) error); ok {
-		r1 = rf(ctx, name, after, limit)
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *pagination.NameIDKey, int, float64) error); ok {
+		r1 = rf(ctx, name, after, limit, threshold)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *StudentRepository) ListStudents(ctx context.Context, name *string, cursor *pagination.NameIDKey, limit int) ([]models.StudentListItem, error) {
+func (r *StudentRepository) ListStudents(ctx context.Context, name *string, cursor *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error) {
 	selectQuery, err := schema.ReadSQLBaseScript("list_students.sql", SqlStudentFiles)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (r *StudentRepository) ListStudents(ctx context.Context, name *string, curs
 		cursorName, cursorID = &cursor.Name, &cursor.ID
 	}
 
-	rows, err := r.db.Query(ctx, selectQuery, name, cursorName, cursorID, limit)
+	rows, err := r.db.Query(ctx, selectQuery, name, cursorName, cursorID, limit, threshold)
 	if err != nil {
 		return nil, err
 	}
