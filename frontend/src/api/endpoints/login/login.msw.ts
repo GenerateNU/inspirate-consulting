@@ -14,7 +14,7 @@ import type {
 } from 'msw';
 
 import type {
-  User
+  SessionUser
 } from '../../models';
 
 import {
@@ -24,7 +24,7 @@ import {
 export { getLoginUserResponseMock } from './login.faker';
 
 
-export const getLoginUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
+export const getLoginUserMockHandler = (overrideResponse?: SessionUser | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<SessionUser> | SessionUser), options?: RequestHandlerOptions) => {
   return http.post('*/user/login', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 

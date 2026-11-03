@@ -15,16 +15,32 @@ import type {
 
 import type {
   CounselorStudent,
-  PendingReview
+  FetchCounselorsBody,
+  PendingReview,
+  Student
 } from '../../models';
 
 import {
+  getAssignCounselorResponseMock,
+  getFetchCounselorsResponseMock,
   getListCounselorPendingReviewsResponseMock,
   getListCounselorStudentsResponseMock
 } from './counselors.faker';
 
-export { getListCounselorPendingReviewsResponseMock, getListCounselorStudentsResponseMock } from './counselors.faker';
+export { getFetchCounselorsResponseMock, getListCounselorPendingReviewsResponseMock, getListCounselorStudentsResponseMock, getAssignCounselorResponseMock } from './counselors.faker';
 
+
+export const getFetchCounselorsMockHandler = (overrideResponse?: FetchCounselorsBody | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<FetchCounselorsBody> | FetchCounselorsBody), options?: RequestHandlerOptions) => {
+  return http.get('*/counselors/fetchall', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getFetchCounselorsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getListCounselorPendingReviewsMockHandler = (overrideResponse?: PendingReview[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PendingReview[] | null> | PendingReview[] | null), options?: RequestHandlerOptions) => {
   return http.get('*/counselors/reviews', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
@@ -49,7 +65,21 @@ export const getListCounselorStudentsMockHandler = (overrideResponse?: Counselor
       })
   }, options)
 }
+
+export const getAssignCounselorMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
+  return http.patch('*/students/assign', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getAssignCounselorResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getCounselorsMock = () => [
+  getFetchCounselorsMockHandler(),
   getListCounselorPendingReviewsMockHandler(),
-  getListCounselorStudentsMockHandler()
+  getListCounselorStudentsMockHandler(),
+  getAssignCounselorMockHandler()
 ]

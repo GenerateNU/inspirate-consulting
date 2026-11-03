@@ -18,7 +18,7 @@ import type {
 import type {
   ErrorModel,
   LoginInputBody,
-  User
+  SessionUser
 } from '../../models';
 
 
@@ -63,7 +63,7 @@ export const getLoginUserUrl = () => {
 /**
  * user login
  */
-export const loginUser = async (loginInputBody: NonReadonly<LoginInputBody>, options?: RequestInit): Promise<User> => {
+export const loginUser = async (loginInputBody: NonReadonly<LoginInputBody>, options?: RequestInit): Promise<SessionUser> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -92,13 +92,13 @@ const res = await fetch(getLoginUserUrl(),
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   if (!res.ok) {
 
-    const err: globalThis.Error & {info?: User, status?: number} = new globalThis.Error();
-    const data : User = body ? JSON.parse(body) : {}
+    const err: globalThis.Error & {info?: SessionUser, status?: number} = new globalThis.Error();
+    const data : SessionUser = body ? JSON.parse(body) : {}
     err.info = data;
     err.status = res.status;
     throw err;
   }
-  const data: User = body ? JSON.parse(body) : {}
+  const data: SessionUser = body ? JSON.parse(body) : {}
   return data
 }
 
