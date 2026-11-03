@@ -125,7 +125,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/media-access", anyRole, nil},
 
 	// extracurriculars
-	{http.MethodPost, "/extracurriculars/{studentID}", anyRole, nil},
+	{http.MethodPost, "/extracurriculars", anyRole, nil},
 	{http.MethodGet, "/extracurriculars", anyRole, nil},
 	{http.MethodPatch, "/extracurriculars/{id}", anyRole, nil},
 
