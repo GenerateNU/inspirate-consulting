@@ -3408,6 +3408,26 @@ paths:
       tags:
         - Todo Items
   /todo-items/{id}:
+    delete:
+      description: Delete a to-do item
+      operationId: delete-todo-item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
     patch:
       description: Update a to-do item's completion status
       operationId: update-todo-item-completed

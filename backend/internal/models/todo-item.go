@@ -148,3 +148,7 @@ type UpdateTodoItemCompletedAtInput struct {
 type UpdateTodoItemCompletedAtOutput struct {
 	Body TodoItem
 }
+
+type DeleteTodoInput struct{
+	ID string `path:"id"`
+}
