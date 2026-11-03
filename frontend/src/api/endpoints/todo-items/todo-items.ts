@@ -31,7 +31,8 @@ import type {
   SearchTodoItemsParams,
   TodoItem,
   TodoItemPage,
-  UpdateTodoItemCompletedAtInputBody
+  UpdateTodoItemCompletedAtInputBody,
+  UpdateTodoItemDescriptionInputBody
 } from '../../models';
 
 
@@ -596,4 +597,103 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateTodoItemCompletedMutationOptions(options), queryClient);
+    }
+    export const getUpdateTodoItemDescriptionUrl = (id: string,) => {
+
+
+
+
+  return `/api/todo-items/${id}/description`
+}
+
+/**
+ * Update a todo-item's description
+ */
+export const updateTodoItemDescription = async (id: string,
+    updateTodoItemDescriptionInputBody: NonReadonly<UpdateTodoItemDescriptionInputBody>, options?: RequestInit): Promise<TodoItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateTodoItemDescriptionUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateTodoItemDescriptionInputBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: TodoItem, status?: number} = new globalThis.Error();
+    const data : TodoItem = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItem = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateTodoItemDescriptionMutationKey = () => ['updateTodoItemDescription'] as const;
+
+export const getUpdateTodoItemDescriptionMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemDescription>>, TError,UpdateTodoItemDescriptionMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemDescription>>, TError,UpdateTodoItemDescriptionMutationVariables, TContext> => {
+
+const mutationKey = getUpdateTodoItemDescriptionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTodoItemDescription>>, UpdateTodoItemDescriptionMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTodoItemDescription(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTodoItemDescriptionMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemDescription>>>
+    export type UpdateTodoItemDescriptionMutationBody = NonReadonly<UpdateTodoItemDescriptionInputBody>
+    export type UpdateTodoItemDescriptionMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateTodoItemDescriptionMutationVariables = {id: string;data: NonReadonly<UpdateTodoItemDescriptionInputBody>}
+
+    export const useUpdateTodoItemDescription = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemDescription>>, TError,UpdateTodoItemDescriptionMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTodoItemDescription>>,
+        TError,
+        UpdateTodoItemDescriptionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateTodoItemDescriptionMutationOptions(options), queryClient);
     }

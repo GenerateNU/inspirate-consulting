@@ -110,5 +110,6 @@ export * from './updateStudentBody';
 export * from './updateStudentBodyYear';
 export * from './updateTodoItemCompletedAtInputBody';
 export * from './updateUserBody';
+export * from './updateTodoItemDescriptionInputBody';
 export * from './user';
 export * from './video';
