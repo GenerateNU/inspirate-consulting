@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type FetchStudentsParams } from "../api/models";
+import { type FetchStudentsParams } from "../src/api/models";
 
 
 interface DebounceProps {
