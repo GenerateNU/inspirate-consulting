@@ -6,7 +6,6 @@ import {
 } from "../api/endpoints";
 import ExtracurricularForm from "./ExtracurricularForm";
 import {
-  TEST_STUDENT_ID,
   emptyFormValues,
   toRequestBody,
   type ExtracurricularFormValues,
@@ -19,8 +18,9 @@ export default function CreateExtracurricular() {
   const { mutate, isPending, error } = useCreateExtracurricular();
 
   const handleSubmit = (values: ExtracurricularFormValues) => {
+    // The backend gets the student from the signed-in user, so only the body is sent.
     mutate(
-      { studentID: TEST_STUDENT_ID, data: toRequestBody(values) },
+      { data: toRequestBody(values) },
       {
         onSuccess: (created) => {
           void queryClient.invalidateQueries({

@@ -3,8 +3,6 @@ import type {
   Extracurricular,
 } from "../api/models";
 
-export const TEST_STUDENT_ID = "00000000-0000-0000-0000-000000000002";
-
 export const CATEGORY_LABELS: Record<
   CreateExtracurricularRequest["type"],
   string
@@ -21,6 +19,7 @@ export const STATUS_LABELS: Record<
   have_done: "Completed",
 };
 
+// Form fields are all strings so inputs stay controlled; optional fields use "".
 export type ExtracurricularFormValues = {
   name: string;
   leadership_role: string;
@@ -43,6 +42,7 @@ export const emptyFormValues: ExtracurricularFormValues = {
   description: "",
 };
 
+// The API returns full ISO datetimes; date inputs need yyyy-MM-dd.
 export const toDateInput = (value?: string | null) =>
   value ? value.slice(0, 10) : "";
 
@@ -59,6 +59,7 @@ export function toFormValues(item: Extracurricular): ExtracurricularFormValues {
   };
 }
 
+// Optional fields are left out of the request when empty.
 export function toRequestBody(
   values: ExtracurricularFormValues,
 ): CreateExtracurricularRequest {
@@ -69,6 +70,7 @@ export function toRequestBody(
   };
 }
 
+// Matches the lo-fi card subtitle: "Position, Organization, Category".
 export function cardSubtitle(item: Extracurricular) {
   const category =
     CATEGORY_LABELS[item.type as ExtracurricularFormValues["type"]] ??

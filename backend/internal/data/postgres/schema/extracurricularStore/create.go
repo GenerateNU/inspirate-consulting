@@ -12,7 +12,7 @@ import (
 
 // CreateExtracurricular inserts a new extracurricular row into the
 // public.extracurriculars table and returns the created record back to the caller.
-func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, userID string, input models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error) {
+func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, studentID string, userID string, input models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error) {
 	body := input.Body
 
 	startDate, err := models.ParseDate(body.StartDate)
@@ -37,7 +37,7 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, u
 	rows, err := r.db.Query(
 		ctx,
 		insertQuery,
-		input.StudentID,
+		studentID,
 		userID,
 		body.Name,
 		body.Status,

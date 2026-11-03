@@ -23,7 +23,7 @@ import {
   getUpdateExtracurricularResponseMock
 } from './extracurriculars.faker';
 
-export { getListExtracurricularsResponseMock, getUpdateExtracurricularResponseMock, getCreateExtracurricularResponseMock } from './extracurriculars.faker';
+export { getListExtracurricularsResponseMock, getCreateExtracurricularResponseMock, getUpdateExtracurricularResponseMock } from './extracurriculars.faker';
 
 
 export const getListExtracurricularsMockHandler = (overrideResponse?: Extracurricular[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Extracurricular[] | null> | Extracurricular[] | null), options?: RequestHandlerOptions) => {
@@ -33,6 +33,18 @@ export const getListExtracurricularsMockHandler = (overrideResponse?: Extracurri
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getListExtracurricularsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getCreateExtracurricularMockHandler = (overrideResponse?: Extracurricular | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Extracurricular> | Extracurricular), options?: RequestHandlerOptions) => {
+  return http.post('*/extracurriculars', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCreateExtracurricularResponseMock(),
       { status: 200
       })
   }, options)
@@ -49,20 +61,8 @@ export const getUpdateExtracurricularMockHandler = (overrideResponse?: Extracurr
       })
   }, options)
 }
-
-export const getCreateExtracurricularMockHandler = (overrideResponse?: Extracurricular | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Extracurricular> | Extracurricular), options?: RequestHandlerOptions) => {
-  return http.post('*/extracurriculars/:studentID', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateExtracurricularResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
 export const getExtracurricularsMock = () => [
   getListExtracurricularsMockHandler(),
-  getUpdateExtracurricularMockHandler(),
-  getCreateExtracurricularMockHandler()
+  getCreateExtracurricularMockHandler(),
+  getUpdateExtracurricularMockHandler()
 ]
