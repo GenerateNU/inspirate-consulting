@@ -15,6 +15,7 @@ type MockSupabase struct {
 	LogoutFunc          func(accessToken string) (models.LogoutResponse, error)
 	ResetPasswordFunc   func(newPassword, userID string) (models.ResetPasswordResponse, error)
 	ValidateSessionFunc func(accessToken string) error
+	RefreshTokenFunc    func(refreshToken string) (models.LoginResponse, error)
 }
 
 func (s *MockSupabase) Signup(email string, password string, Client *http.Client, role string) (models.SignupResponse, error) {
@@ -56,4 +57,12 @@ func (s *MockSupabase) SupabaseValidateSession(Client *http.Client, access_token
 		return s.ValidateSessionFunc(access_token)
 	}
 	return nil
+}
+
+func (s *MockSupabase) SupabaseRefreshToken(Client *http.Client, refreshToken string) (models.LoginResponse, error) {
+	if s.RefreshTokenFunc != nil {
+		return s.RefreshTokenFunc(refreshToken)
+	}
+	resp := models.LoginResponse{}
+	return resp, nil
 }

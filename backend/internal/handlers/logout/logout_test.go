@@ -22,7 +22,7 @@ func withJWT(token string) context.Context {
 func TestHandler_Logout(t *testing.T) {
 	t.Parallel()
 
-	t.Run("revokes the caller's session and expires the cookie", func(t *testing.T) {
+	t.Run("revokes the caller's session and expires the cookies", func(t *testing.T) {
 		t.Parallel()
 		var revoked string
 		sb := &supabase.MockSupabase{
@@ -36,7 +36,8 @@ func TestHandler_Logout(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "session-token", revoked)
 
-		c := out.SetCookie
+		require.Len(t, out.SetCookie, 2)
+		c := out.SetCookie[0]
 		assert.Equal(t, "jwt", c.Name)
 		assert.Empty(t, c.Value)
 		assert.Equal(t, -1, c.MaxAge, "negative MaxAge makes Go send Max-Age=0 (delete); 0 would omit it")
@@ -44,6 +45,12 @@ func TestHandler_Logout(t *testing.T) {
 		assert.True(t, c.HttpOnly)
 		assert.True(t, c.Secure)
 		assert.Equal(t, http.SameSiteLaxMode, c.SameSite)
+
+		r := out.SetCookie[1]
+		assert.Equal(t, "refresh_token", r.Name)
+		assert.Empty(t, r.Value)
+		assert.Equal(t, -1, r.MaxAge)
+		assert.Equal(t, "/", r.Path, "must match the login cookie's path")
 	})
 
 	for _, tc := range []struct {

@@ -108,6 +108,9 @@ func SetupApp(config config.Config, repo *data.Repository, sqsClient *sqsclient.
 	// Register public routes BEFORE auth middleware
 	SetUpHealthRoutes(humaAPI)
 
+	// Must run before AuthMiddleware so refreshed session cookies are written correctly
+	humaAPI.UseMiddleware(auth.SetCookieMiddleware)
+
 	// Apply auth middleware — only affects routes registered after this point
 	if config.TestMode {
 		humaAPI.UseMiddleware(auth.TestModeUserMiddleware(humaAPI))
