@@ -17,7 +17,7 @@ func (r *TodoItemRepository) DeleteTodoItem(ctx context.Context, id string) erro
 		return err
 	}
 
-	if(result.RowsAffected() == 0){
+	if result.RowsAffected() == 0 {
 		return errs.NotFound("todo item", "id", id)
 	}
 

@@ -88,13 +88,13 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-todo-item",
 		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
-		Method: http.MethodDelete,
-		Path: "/todo-items/{id}",
+		Method:      http.MethodDelete,
+		Path:        "/todo-items/{id}",
 		Description: "Delete a to-do item",
-		Tags: []string{"Todo Items"},
-	}, func(ctx context.Context, input *models.DeleteTodoInput)(*struct{}, error){
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.DeleteTodoInput) (*struct{}, error) {
 		err := todoItemHandler.DeleteTodoItem(ctx, input.ID)
-		if err!= nil {
+		if err != nil {
 			return nil, err
 		}
 
