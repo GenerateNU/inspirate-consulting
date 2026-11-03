@@ -2,9 +2,12 @@ package essayRepository
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"testing"
 
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
@@ -159,5 +162,61 @@ func TestGetEssaysByGroup_UnknownGroup(t *testing.T) {
 
 	if len(essays) != 0 {
 		t.Errorf("expected no essays, got %d", len(essays))
+	}
+}
+
+func TestGetEssay(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	db := testutils.SetupTestDB(t)
+	repo := NewEssayRepository(db)
+	ctx := context.Background()
+
+	studentID := uuid.New()
+	created := createEssay(t, repo, studentID, models.CreateEssayBody{
+		Type:          "personal-statement",
+		LinkToContent: "https://docs.google.com/document/d/abc123",
+	})
+
+	got, err := repo.GetEssay(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("GetEssay failed: %v", err)
+	}
+
+	if got.ID != created.ID {
+		t.Errorf("expected ID %v, got %v", created.ID, got.ID)
+	}
+	if got.StudentID != studentID {
+		t.Errorf("expected StudentID %v, got %v", studentID, got.StudentID)
+	}
+	if got.Type != "personal-statement" {
+		t.Errorf("expected Type %q, got %q", "personal-statement", got.Type)
+	}
+}
+
+func TestGetEssay_NotFound(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	db := testutils.SetupTestDB(t)
+	repo := NewEssayRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetEssay(ctx, uuid.New())
+	if err == nil {
+		t.Fatal("expected an error getting a nonexistent essay, got nil")
+	}
+
+	var httpErr errs.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected an errs.HTTPError, got %T: %v", err, err)
+	}
+	if httpErr.GetStatus() != http.StatusNotFound {
+		t.Errorf("expected status %d, got %d", http.StatusNotFound, httpErr.GetStatus())
 	}
 }

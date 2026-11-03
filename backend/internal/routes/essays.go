@@ -72,4 +72,20 @@ func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth
 	}, func(ctx context.Context, input *models.UpdateEssayGroupInput) (*models.UpdateEssayGroupOutput, error) {
 		return essayHandler.UpdateEssayGroup(ctx, input)
 	})
+
+	// Register DELETE route that lets a student delete their own essay, or a counselor delete an assigned student's essay
+	huma.Register(api, huma.Operation{
+		OperationID: "delete-essay",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Method:      http.MethodDelete,
+		Path:        "/essays/{essay_id}",
+		Description: "Deletes an essay given an essayID",
+		Tags:        []string{"Essays"},
+	}, func(ctx context.Context, input *models.DeleteEssayInput) (*struct{}, error) {
+		err := essayHandler.DeleteEssay(ctx, input.EssayID)
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
 }

@@ -46,6 +46,8 @@ type EssayRepository interface {
 	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
 	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
+	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
+	DeleteEssay(ctx context.Context, essayID uuid.UUID, studentID uuid.UUID) error
 }
 
 // Essay Group Repository

@@ -86,3 +86,7 @@ type UpdateEssayGroupInput struct {
 type UpdateEssayGroupOutput struct {
 	Body EssayBody
 }
+
+type DeleteEssayInput struct {
+	EssayID uuid.UUID `path:"essay_id" doc:"Essay to delete"`
+}
