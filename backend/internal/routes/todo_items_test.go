@@ -314,3 +314,76 @@ func TestRoute_DeleteTodoItem(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }
+
+// Route tests for PATCH /todo-items/{id}/description.
+func TestRoute_UpdateTodoItemDescription(t *testing.T) {
+	t.Parallel()
+
+	itemID := uuid.NewString()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		// new_description must reach the repository unchanged
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDescription", mock.Anything, itemID, "Request final transcripts").
+			Return(&models.TodoItem{ID: itemID, TodoDescription: "Request final transcripts"}, nil)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/description", map[string]any{
+			"new_description": "Request final transcripts",
+		})
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var updated models.TodoItem
+		require.NoError(t, json.Unmarshal(respBody, &updated))
+		assert.Equal(t, itemID, updated.ID)
+		assert.Equal(t, "Request final transcripts", updated.TodoDescription)
+	})
+
+	t.Run("validation error - empty description", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when Huma validation fails
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/description", map[string]any{
+			"new_description": "",
+		})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("validation error - missing description", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when Huma validation fails
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/description", map[string]any{})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDescription", mock.Anything, itemID, mock.Anything).
+			Return(nil, errors.New("database error"))
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/description", map[string]any{
+			"new_description": "Request final transcripts",
+		})
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+}
