@@ -101,6 +101,7 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/videos/lookup", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/videos", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/videos", guarded, []string{roleCounselor}},
 
 	// media
 	{http.MethodPost, "/media", anyRole, nil},
@@ -288,6 +289,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"PATCH /students/{id}/review-balance",
 		"POST /colleges",
 		"POST /videos",
+		"DELETE /videos",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
 	}, counselorOnly)

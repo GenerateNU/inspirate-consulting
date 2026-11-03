@@ -109,6 +109,7 @@ type VideoRepository interface {
 	PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error)
 	GetVideo(ctx context.Context, s3Key string) (*models.Video, error)
 	ListVideos(ctx context.Context) ([]models.Video, error)
+	DeleteVideo(ctx context.Context, s3Key string) error
 }
 
 type MediaRepository interface {
