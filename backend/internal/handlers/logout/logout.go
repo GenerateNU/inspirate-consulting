@@ -22,15 +22,7 @@ func (h *Handler) Logout(ctx context.Context, input *models.LogoutInput, supabas
 	// resets the cookies
 	return &models.LogoutResponse{
 		SetCookie: []http.Cookie{
-			{
-				Name:     "jwt",
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-				Secure:   true,
-				SameSite: http.SameSiteLaxMode,
-			},
+			auth.ExpiredAccessTokenCookie(),
 			auth.ExpiredRefreshTokenCookie(),
 		},
 	}, nil

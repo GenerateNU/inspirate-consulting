@@ -61,6 +61,18 @@ func RefreshTokenCookie(refreshToken string) http.Cookie {
 	}
 }
 
+func ExpiredAccessTokenCookie() http.Cookie {
+	return http.Cookie{
+		Name:     AccessTokenCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	}
+}
+
 func ExpiredRefreshTokenCookie() http.Cookie {
 	return http.Cookie{
 		Name:     RefreshTokenCookieName,

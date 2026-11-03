@@ -23,15 +23,7 @@ func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase 
 
 	return &models.LoginOutput{
 		SetCookie: []http.Cookie{
-			{
-				Name:     "jwt",
-				Value:    res.AccessToken,
-				Path:     "/",
-				MaxAge:   res.ExpiresIn,
-				HttpOnly: true,
-				Secure:   true,
-				SameSite: http.SameSiteLaxMode,
-			},
+			auth.AccessTokenCookie(res.AccessToken, res.ExpiresIn),
 			auth.RefreshTokenCookie(res.RefreshToken),
 		},
 		Body: user.Body,
