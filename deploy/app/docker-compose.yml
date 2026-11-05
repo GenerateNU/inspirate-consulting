@@ -2,7 +2,7 @@
 #
 # One of these per project, each in its own directory under /opt. Projects are
 # isolated as separate compose projects but share the `edge` network, Caddy,
-# and the preview database from deploy/shared.
+# and the preview database from GenerateNU/droplet.
 #
 # Production DATA is not here -- DB_* in backend.env points at Supabase.
 name: inspirate-consulting
@@ -14,6 +14,13 @@ services:
     image: ${BACKEND_IMAGE:?set BACKEND_IMAGE}
     container_name: inspirate-consulting-backend
     restart: unless-stopped
+    # Docker keeps container logs forever by default; a crash loop can fill
+    # the shared disk with them.
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     env_file:
       - backend.env
     networks:
