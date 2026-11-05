@@ -4,6 +4,9 @@ import {
   CATEGORY_LABELS,
   STATUS_LABELS,
   type ExtracurricularFormValues,
+  ec,
+  isCategory,
+  isStatus,
 } from "./ExtracurricularShared";
 
 type Props = {
@@ -31,12 +34,14 @@ export default function ExtracurricularForm({
   const [values, setValues] = useState(initialValues);
   const [dateError, setDateError] = useState<string | null>(null);
 
-  const update = <K extends keyof ExtracurricularFormValues>(
-    key: K,
-    value: ExtracurricularFormValues[K],
+  const update = (patch: Partial<ExtracurricularFormValues>) =>
+    setValues((prev) => ({ ...prev, ...patch }));
+
+  const updateDate = (
+    patch: Pick<Partial<ExtracurricularFormValues>, "start_date" | "end_date">,
   ) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-    if (key === "start_date" || key === "end_date") setDateError(null);
+    update(patch);
+    setDateError(null);
   };
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
@@ -50,50 +55,48 @@ export default function ExtracurricularForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="ec-section">
-        <h3>Basics</h3>
-        <div className="ec-form-grid">
-          <label className="ec-field">
+      <div className={ec.section}>
+        <h3 className={ec.sectionHeading}>Basics</h3>
+        <div className={ec.formGrid}>
+          <label className={ec.field}>
             Activity name
             <input
               type="text"
               placeholder="e.g. Track & Field"
               value={values.name}
-              onChange={(e) => update("name", e.target.value)}
+              onChange={(e) => update({ name: e.target.value })}
               required
             />
           </label>
-          <label className="ec-field">
+          <label className={ec.field}>
             Position / role (optional)
             <input
               type="text"
               placeholder="Max 50 characters"
               maxLength={50}
               value={values.leadership_role}
-              onChange={(e) => update("leadership_role", e.target.value)}
+              onChange={(e) => update({ leadership_role: e.target.value })}
             />
           </label>
-          <label className="ec-field">
+          <label className={ec.field}>
             Organization
             <input
               type="text"
               placeholder="Max 100 characters"
               maxLength={100}
               value={values.organization}
-              onChange={(e) => update("organization", e.target.value)}
+              onChange={(e) => update({ organization: e.target.value })}
               required
             />
           </label>
-          <label className="ec-field">
+          <label className={ec.field}>
             Category
             <select
               value={values.type}
-              onChange={(e) =>
-                update(
-                  "type",
-                  e.target.value as ExtracurricularFormValues["type"],
-                )
-              }
+              onChange={(e) => {
+                const type = e.target.value;
+                if (isCategory(type)) update({ type });
+              }}
             >
               {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -105,19 +108,17 @@ export default function ExtracurricularForm({
         </div>
       </div>
 
-      <div className="ec-section">
-        <h3>Timeline</h3>
-        <div className="ec-form-grid">
-          <label className="ec-field">
+      <div className={ec.section}>
+        <h3 className={ec.sectionHeading}>Timeline</h3>
+        <div className={ec.formGrid}>
+          <label className={ec.field}>
             Status
             <select
               value={values.status}
-              onChange={(e) =>
-                update(
-                  "status",
-                  e.target.value as ExtracurricularFormValues["status"],
-                )
-              }
+              onChange={(e) => {
+                const status = e.target.value;
+                if (isStatus(status)) update({ status });
+              }}
             >
               {Object.entries(STATUS_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -126,22 +127,22 @@ export default function ExtracurricularForm({
               ))}
             </select>
           </label>
-          <label className="ec-field">
+          <label className={ec.field}>
             Start date
             <input
               type="date"
               value={values.start_date}
-              onChange={(e) => update("start_date", e.target.value)}
+              onChange={(e) => updateDate({ start_date: e.target.value })}
               required
             />
           </label>
-          <label className="ec-field">
+          <label className={ec.field}>
             End date (optional)
             <input
               type="date"
               min={values.start_date || undefined}
               value={values.end_date}
-              onChange={(e) => update("end_date", e.target.value)}
+              onChange={(e) => updateDate({ end_date: e.target.value })}
               aria-invalid={dateError ? true : undefined}
               aria-describedby={dateError ? "ec-date-error" : undefined}
             />
@@ -154,23 +155,23 @@ export default function ExtracurricularForm({
         </div>
       </div>
 
-      <div className="ec-section">
-        <h3>Application description</h3>
-        <label className="ec-field ec-field-wide">
+      <div className={ec.section}>
+        <h3 className={ec.sectionHeading}>Application description</h3>
+        <label className={`${ec.field} col-span-full`}>
           Up to 250 words (Common App)
           <textarea
             rows={6}
             placeholder="Write your description here..."
             value={values.description}
-            onChange={(e) => update("description", e.target.value)}
+            onChange={(e) => update({ description: e.target.value })}
             required
           />
         </label>
       </div>
 
       {error && <p>Error: {errorMessage(error)}</p>}
-      <div className="ec-actions">
-        <button type="submit" className="ec-button" disabled={isPending}>
+      <div className="mt-5 flex justify-end">
+        <button type="submit" className="px-10 py-2" disabled={isPending}>
           {isPending ? pendingLabel : submitLabel}
         </button>
       </div>

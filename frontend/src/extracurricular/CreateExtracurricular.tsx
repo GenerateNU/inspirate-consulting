@@ -9,8 +9,8 @@ import {
   emptyFormValues,
   toRequestBody,
   type ExtracurricularFormValues,
+  ec,
 } from "./ExtracurricularShared";
-import "./Extracurriculars.css";
 
 export default function CreateExtracurricular() {
   const navigate = useNavigate();
@@ -33,16 +33,16 @@ export default function CreateExtracurricular() {
   };
 
   return (
-    <div className="ec-page ec-box">
-      <div className="ec-header">
+    <div className={`${ec.page} ${ec.box}`}>
+      <div className={ec.header}>
         <Link
           to="/extracurriculars"
-          className="ec-back"
+          className={ec.back}
           aria-label="Back to extracurriculars"
         >
           ←
         </Link>
-        <h2 className="ec-title">Add Extracurricular</h2>
+        <h2 className={ec.title}>Add Extracurricular</h2>
       </div>
       <ExtracurricularForm
         initialValues={emptyFormValues}

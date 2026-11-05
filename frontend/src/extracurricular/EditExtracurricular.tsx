@@ -11,8 +11,8 @@ import {
   toFormValues,
   toRequestBody,
   type ExtracurricularFormValues,
+  ec,
 } from "./ExtracurricularShared";
-import "./Extracurriculars.css";
 
 export default function EditExtracurricular() {
   const { id } = useParams();
@@ -23,12 +23,12 @@ export default function EditExtracurricular() {
 
   const item = (data ?? []).find((entry) => String(entry.id) === id);
 
-  if (isLoading) return <p className="ec-page">Loading...</p>;
+  if (isLoading) return <p className={ec.page}>Loading...</p>;
   if (loadError)
-    return <p className="ec-page">Error: {errorMessage(loadError)}</p>;
+    return <p className={ec.page}>Error: {errorMessage(loadError)}</p>;
   if (!item) {
     return (
-      <div className="ec-page">
+      <div className={ec.page}>
         <p>This extracurricular doesn't exist or was removed.</p>
         <Link to="/extracurriculars">Back to extracurriculars</Link>
       </div>
@@ -50,16 +50,16 @@ export default function EditExtracurricular() {
   };
 
   return (
-    <div className="ec-page ec-box">
-      <div className="ec-header">
+    <div className={`${ec.page} ${ec.box}`}>
+      <div className={ec.header}>
         <Link
           to={`/extracurriculars/${item.id}`}
-          className="ec-back"
+          className={ec.back}
           aria-label={`Back to ${item.name}`}
         >
           ←
         </Link>
-        <h2 className="ec-title">Edit {item.name}</h2>
+        <h2 className={ec.title}>Edit {item.name}</h2>
       </div>
       <ExtracurricularForm
         key={item.id}
