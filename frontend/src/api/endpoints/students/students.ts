@@ -26,6 +26,8 @@ import type {
 
 import type {
   ErrorModel,
+  FetchStudentsBody,
+  FetchStudentsParams,
   SetStudentReviewBalanceRequestBody,
   Student
 } from '../../models';
@@ -75,6 +77,124 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getFetchStudentsUrl = (params?: FetchStudentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/students/fetchall?${stringifiedParams}` : `/api/students/fetchall`
+}
+
+/**
+ * Fetch a page of students, optionally filtered by user_id and name
+ */
+export const fetchStudents = async (params?: FetchStudentsParams, options?: RequestInit): Promise<FetchStudentsBody> => {
+
+  const res = await fetch(getFetchStudentsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: FetchStudentsBody, status?: number} = new globalThis.Error();
+    const data : FetchStudentsBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: FetchStudentsBody = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getFetchStudentsQueryKey = (params?: FetchStudentsParams,) => {
+    return [
+    `/api/students/fetchall`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getFetchStudentsQueryOptions = <TData = Awaited<ReturnType<typeof fetchStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: FetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchStudents>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFetchStudentsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof fetchStudents>>> = ({ signal }) => fetchStudents(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof fetchStudents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FetchStudentsQueryResult = NonNullable<Awaited<ReturnType<typeof fetchStudents>>>
+export type FetchStudentsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
+
+
+export function useFetchStudents<TData = Awaited<ReturnType<typeof fetchStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  FetchStudentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchStudents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchStudents>>,
+          TError,
+          Awaited<ReturnType<typeof fetchStudents>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchStudents<TData = Awaited<ReturnType<typeof fetchStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: FetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchStudents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof fetchStudents>>,
+          TError,
+          Awaited<ReturnType<typeof fetchStudents>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFetchStudents<TData = Awaited<ReturnType<typeof fetchStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: FetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchStudents>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useFetchStudents<TData = Awaited<ReturnType<typeof fetchStudents>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: FetchStudentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof fetchStudents>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFetchStudentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
 
 export const getGetStudentUrl = (id: string,) => {
 
