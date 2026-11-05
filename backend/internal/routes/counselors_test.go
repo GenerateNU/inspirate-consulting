@@ -460,7 +460,7 @@ func TestRoute_FetchCounselors(t *testing.T) {
 		rows := counselorListRows("David Chen", "James Okafor", "Maria Lopez", "Priya Patel", "Sam Rivera", "Tara Singh")
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 6, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
@@ -479,7 +479,7 @@ func TestRoute_FetchCounselors(t *testing.T) {
 		rows := counselorListRows("David Chen", "James Okafor", "Maria Lopez")
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 3).Return(rows, nil)
+		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 3, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
@@ -498,7 +498,7 @@ func TestRoute_FetchCounselors(t *testing.T) {
 		rows := counselorListRows("Priya Patel")
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListCounselors", mock.Anything, listNameIs("pat"), listNoCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListCounselors", mock.Anything, listNameIs("pat"), listNoCursor(), 6, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
@@ -518,8 +518,8 @@ func TestRoute_FetchCounselors(t *testing.T) {
 		second := counselorListRows("Maria Lopez", "Priya Patel")
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 3).Return(first, nil).Once()
-		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listCursorAt("James Okafor", first[1].ID), 3).Return(second, nil).Once()
+		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 3, mock.Anything).Return(first, nil).Once()
+		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listCursorAt("James Okafor", first[1].ID), 3, mock.Anything).Return(second, nil).Once()
 
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
@@ -542,7 +542,7 @@ func TestRoute_FetchCounselors(t *testing.T) {
 		rows := counselorListRows("Priya Patel", "Sam Rivera")
 
 		mockRepo := mocks.NewCounselorRepository(t)
-		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListCounselors", mock.Anything, listNameIs(""), listNoCursor(), 6, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)

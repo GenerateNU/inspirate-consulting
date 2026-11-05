@@ -10,6 +10,9 @@ import (
 	"inspirate-consulting/internal/pagination"
 )
 
+// nameSearchThreshold mirrors the threshold the handler passes for fuzzy name matching.
+const nameSearchThreshold = 0.2
+
 // seedCounselors inserts counselors out of alphabetical order so the tests check the query's sort.
 func seedCounselors(t *testing.T, db *pgxpool.Pool) {
 	t.Helper()
@@ -57,7 +60,7 @@ func TestListCounselors_NoFilters(t *testing.T) {
 
 	// The handler sends an empty name when the name query param is omitted.
 	empty := ""
-	rows, err := repo.ListCounselors(ctx, &empty, nil, 5)
+	rows, err := repo.ListCounselors(ctx, &empty, nil, 5, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors failed: %v", err)
 	}
@@ -75,7 +78,7 @@ func TestListCounselors_CustomLimit(t *testing.T) {
 	ctx := context.Background()
 	seedCounselors(t, db)
 
-	rows, err := repo.ListCounselors(ctx, nil, nil, 2)
+	rows, err := repo.ListCounselors(ctx, nil, nil, 2, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors failed: %v", err)
 	}
@@ -94,7 +97,7 @@ func TestListCounselors_ByName(t *testing.T) {
 	seedCounselors(t, db)
 
 	name := "PAT"
-	rows, err := repo.ListCounselors(ctx, &name, nil, 5)
+	rows, err := repo.ListCounselors(ctx, &name, nil, 5, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors failed: %v", err)
 	}
@@ -112,13 +115,13 @@ func TestListCounselors_NextCursor(t *testing.T) {
 	ctx := context.Background()
 	seedCounselors(t, db)
 
-	page1, err := repo.ListCounselors(ctx, nil, nil, 3)
+	page1, err := repo.ListCounselors(ctx, nil, nil, 3, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors page 1 failed: %v", err)
 	}
 	equalNames(t, []string{"David Chen", "James Okafor", "Maria Lopez"}, listedNames(page1))
 
-	page2, err := repo.ListCounselors(ctx, nil, lastKey(page1), 3)
+	page2, err := repo.ListCounselors(ctx, nil, lastKey(page1), 3, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors page 2 failed: %v", err)
 	}
@@ -135,12 +138,12 @@ func TestListCounselors_LastPage(t *testing.T) {
 	ctx := context.Background()
 	seedCounselors(t, db)
 
-	page1, err := repo.ListCounselors(ctx, nil, nil, 6)
+	page1, err := repo.ListCounselors(ctx, nil, nil, 6, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors page 1 failed: %v", err)
 	}
 
-	page2, err := repo.ListCounselors(ctx, nil, lastKey(page1), 6)
+	page2, err := repo.ListCounselors(ctx, nil, lastKey(page1), 6, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListCounselors page 2 failed: %v", err)
 	}

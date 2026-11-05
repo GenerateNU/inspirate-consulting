@@ -263,7 +263,7 @@ func TestRoute_FetchStudents(t *testing.T) {
 		rows := studentListRows("Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu", "Eva Park", "Finn Ross")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 6, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)
@@ -282,7 +282,7 @@ func TestRoute_FetchStudents(t *testing.T) {
 		rows := studentListRows("Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 4).Return(rows, nil)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 4, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)
@@ -301,7 +301,7 @@ func TestRoute_FetchStudents(t *testing.T) {
 		rows := studentListRows("Anna Lee", "Hannah Kim")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, listNameIs("ann"), listNoCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs("ann"), listNoCursor(), 6, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)
@@ -321,8 +321,8 @@ func TestRoute_FetchStudents(t *testing.T) {
 		second := studentListRows("Dan Wu", "Eva Park")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 3).Return(first, nil).Once()
-		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listCursorAt("Ben Cho", first[1].ID), 3).Return(second, nil).Once()
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 3, mock.Anything).Return(first, nil).Once()
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listCursorAt("Ben Cho", first[1].ID), 3, mock.Anything).Return(second, nil).Once()
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)
@@ -345,7 +345,7 @@ func TestRoute_FetchStudents(t *testing.T) {
 		rows := studentListRows("Dan Wu", "Eva Park", "Finn Ross")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListStudents", mock.Anything, listNameIs(""), listNoCursor(), 6, mock.Anything).Return(rows, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)

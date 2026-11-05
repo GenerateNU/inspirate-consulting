@@ -10,6 +10,9 @@ import (
 	"inspirate-consulting/internal/pagination"
 )
 
+// nameSearchThreshold mirrors the threshold the handler passes for fuzzy name matching.
+const nameSearchThreshold = 0.2
+
 // seedStudents inserts students out of alphabetical order so the tests check the query's sort.
 func seedStudents(t *testing.T, db *pgxpool.Pool) {
 	t.Helper()
@@ -58,7 +61,7 @@ func TestListStudents_NoFilters(t *testing.T) {
 
 	// The handler sends an empty name when the name query param is omitted.
 	empty := ""
-	rows, err := repo.ListStudents(ctx, &empty, nil, 5)
+	rows, err := repo.ListStudents(ctx, &empty, nil, 5, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents failed: %v", err)
 	}
@@ -76,7 +79,7 @@ func TestListStudents_CustomLimit(t *testing.T) {
 	ctx := context.Background()
 	seedStudents(t, db)
 
-	rows, err := repo.ListStudents(ctx, nil, nil, 2)
+	rows, err := repo.ListStudents(ctx, nil, nil, 2, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents failed: %v", err)
 	}
@@ -95,12 +98,14 @@ func TestListStudents_ByName(t *testing.T) {
 	seedStudents(t, db)
 
 	name := "ANN"
-	rows, err := repo.ListStudents(ctx, &name, nil, 5)
+	rows, err := repo.ListStudents(ctx, &name, nil, 5, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents failed: %v", err)
 	}
 
-	equalNames(t, []string{"Anna Lee", "Hannah Kim", "Joanna Smith"}, listedNames(rows))
+	// Trigram similarity is case-insensitive and only keeps names above the threshold,
+	// so "Hannah Kim" and "Joanna Smith" (which merely contain "ann") are excluded.
+	equalNames(t, []string{"Anna Lee"}, listedNames(rows))
 }
 
 func TestListStudents_NextCursor(t *testing.T) {
@@ -113,13 +118,13 @@ func TestListStudents_NextCursor(t *testing.T) {
 	ctx := context.Background()
 	seedStudents(t, db)
 
-	page1, err := repo.ListStudents(ctx, nil, nil, 3)
+	page1, err := repo.ListStudents(ctx, nil, nil, 3, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents page 1 failed: %v", err)
 	}
 	equalNames(t, []string{"Anna Lee", "Ben Cho", "Cara Diaz"}, listedNames(page1))
 
-	page2, err := repo.ListStudents(ctx, nil, lastKey(page1), 3)
+	page2, err := repo.ListStudents(ctx, nil, lastKey(page1), 3, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents page 2 failed: %v", err)
 	}
@@ -136,12 +141,12 @@ func TestListStudents_LastPage(t *testing.T) {
 	ctx := context.Background()
 	seedStudents(t, db)
 
-	page1, err := repo.ListStudents(ctx, nil, nil, 6)
+	page1, err := repo.ListStudents(ctx, nil, nil, 6, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents page 1 failed: %v", err)
 	}
 
-	page2, err := repo.ListStudents(ctx, nil, lastKey(page1), 6)
+	page2, err := repo.ListStudents(ctx, nil, lastKey(page1), 6, nameSearchThreshold)
 	if err != nil {
 		t.Fatalf("ListStudents page 2 failed: %v", err)
 	}

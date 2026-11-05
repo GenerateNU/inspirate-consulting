@@ -56,7 +56,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		rows := studentRows("Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu", "Eva Park", "Finn Ross")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 6, nameSearchThreshold).Return(rows, nil)
 
 		handler := NewHandler(nil, mockRepo, nil)
 		page, err := handler.ListStudents(ctx, &models.FetchStudentsInput{Limit: 5})
@@ -76,7 +76,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		rows := studentRows("Anna Lee", "Ben Cho", "Cara Diaz", "Dan Wu")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 4).Return(rows, nil)
+		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 4, nameSearchThreshold).Return(rows, nil)
 
 		handler := NewHandler(nil, mockRepo, nil)
 		page, err := handler.ListStudents(ctx, &models.FetchStudentsInput{Limit: 3})
@@ -92,7 +92,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		rows := studentRows("Anna Lee", "Hannah Kim")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", ctx, nameIs("ann"), noCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListStudents", ctx, nameIs("ann"), noCursor(), 6, nameSearchThreshold).Return(rows, nil)
 
 		handler := NewHandler(nil, mockRepo, nil)
 		page, err := handler.ListStudents(ctx, &models.FetchStudentsInput{Name: "ann", Limit: 5})
@@ -109,8 +109,8 @@ func TestHandler_ListStudents(t *testing.T) {
 		second := studentRows("Dan Wu", "Eva Park")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 3).Return(first, nil).Once()
-		mockRepo.On("ListStudents", ctx, nameIs(""), cursorAt("Ben Cho", first[1].ID), 3).Return(second, nil).Once()
+		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 3, nameSearchThreshold).Return(first, nil).Once()
+		mockRepo.On("ListStudents", ctx, nameIs(""), cursorAt("Ben Cho", first[1].ID), 3, nameSearchThreshold).Return(second, nil).Once()
 
 		handler := NewHandler(nil, mockRepo, nil)
 
@@ -130,7 +130,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		rows := studentRows("Dan Wu", "Eva Park", "Finn Ross")
 
 		mockRepo := mocks.NewStudentRepository(t)
-		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 6).Return(rows, nil)
+		mockRepo.On("ListStudents", ctx, nameIs(""), noCursor(), 6, nameSearchThreshold).Return(rows, nil)
 
 		handler := NewHandler(nil, mockRepo, nil)
 		page, err := handler.ListStudents(ctx, &models.FetchStudentsInput{Limit: 5})
