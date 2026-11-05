@@ -141,6 +141,8 @@ type AssignCounselorInput struct {
 
 type AssignCounselorOutput struct {
 	Body Student
+}
+
 type CurrentUser struct {
 	User
 	Role        Role       `json:"role" enum:"student,counselor" doc:"Role of the logged-in user"`
