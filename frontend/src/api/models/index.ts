@@ -29,10 +29,7 @@ export * from './createUserInputBody';
 export * from './createUserInputBodyRole';
 export * from './currentUser';
 export * from './currentUserRole';
-<<<<<<< HEAD
 export * from './deleteVideoParams';
-=======
->>>>>>> 19dad96aa80c126f428b6346af8356a8f55cf227
 export * from './editChatMessageRequestBody';
 export * from './errorDetail';
 export * from './errorModel';

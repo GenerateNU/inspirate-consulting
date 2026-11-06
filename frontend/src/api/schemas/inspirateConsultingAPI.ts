@@ -759,7 +759,7 @@ export const UpdateMediaResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 
