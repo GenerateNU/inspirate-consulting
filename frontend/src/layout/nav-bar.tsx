@@ -8,6 +8,7 @@ const links = [
   { to: "/create-application", label: "New Application" },
   { to: "/tasks", label: "Tasks" },
   { to: "/create-task", label: "New Task" },
+  { to: "/chats", label: "Chats" },
   { to: "/videos", label: "Videos" },
   { to: "/upload-video", label: "Upload Video" },
   { to: "/student", label: "Student" },
