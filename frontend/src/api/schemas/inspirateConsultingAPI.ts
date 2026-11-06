@@ -632,7 +632,7 @@ export const ListMediaResponseItem = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 export const ListMediaResponse = /*#__PURE__*/ zod.array(ListMediaResponseItem)
@@ -645,7 +645,7 @@ export const CreateMediaBody = /*#__PURE__*/ zod.object({
   "description": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 
@@ -655,7 +655,7 @@ export const CreateMediaResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 
@@ -682,7 +682,7 @@ export const GetMediaAccessResponseItem = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 export const GetMediaAccessResponse = /*#__PURE__*/ zod.array(GetMediaAccessResponseItem)
@@ -737,7 +737,7 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "length_in_mins": /*#__PURE__*/ zod.int(),
   "s3_key": /*#__PURE__*/ zod.string(),
-  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "title": /*#__PURE__*/ zod.string()
 })
 

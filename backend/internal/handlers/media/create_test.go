@@ -18,8 +18,8 @@ func TestHandler_CreateMedia(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	schoolYear := 11
 
+	schoolYear := models.Junior
 	input := &models.CreateMediaRequestBody{
 		Title:        "Common App Essay Tips",
 		Description:  "How to write a strong personal statement",
