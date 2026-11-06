@@ -1745,6 +1745,21 @@ components:
         - school_name
         - school_location
       type: object
+    UpdateMediaInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateMediaInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        title:
+          type: string
+      required:
+        - title
+      type: object
     UpdateNotificationPreferencesRequestBody:
       additionalProperties: false
       properties:
@@ -2953,6 +2968,36 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
+    patch:
+      description: Retitle a video
+      operationId: update-media
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMediaInputBody"
+        required: true
       responses:
         "200":
           content:

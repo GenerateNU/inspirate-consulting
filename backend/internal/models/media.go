@@ -36,6 +36,17 @@ type CreateMediaOutput struct {
 	Body Media
 }
 
+type UpdateMediaInput struct {
+	ID   string `path:"id"`
+	Body struct {
+		Title string `json:"title"`
+	}
+}
+
+type UpdateMediaOutput struct {
+	Body Media
+}
+
 type GetMediaInput struct {
 	ID string `path:"id"`
 }

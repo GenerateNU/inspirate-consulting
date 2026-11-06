@@ -743,6 +743,28 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Retitle a video
+ */
+export const UpdateMediaParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const UpdateMediaBody = /*#__PURE__*/ zod.object({
+  "title": /*#__PURE__*/ zod.string()
+})
+
+export const UpdateMediaResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "description": /*#__PURE__*/ zod.string(),
+  "id": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.int(),
+  "s3_key": /*#__PURE__*/ zod.string(),
+  "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "title": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Send a message from the current user to another user.
  */
 

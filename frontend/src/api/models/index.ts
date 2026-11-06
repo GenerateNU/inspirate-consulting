@@ -93,6 +93,7 @@ export * from './updateExtracurricularRequest';
 export * from './updateExtracurricularRequestStatus';
 export * from './updateExtracurricularRequestType';
 export * from './updateGlobalCollegeRequestBody';
+export * from './updateMediaInputBody';
 export * from './updateNotificationPreferencesRequestBody';
 export * from './updatePersonalCollegeApplicationRankRequestBody';
 export * from './updatePersonalCollegeApplicationRequestBody';
