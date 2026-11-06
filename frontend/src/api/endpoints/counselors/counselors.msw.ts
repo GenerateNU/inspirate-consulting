@@ -14,6 +14,7 @@ import type {
 } from 'msw';
 
 import type {
+  Counselor,
   CounselorStudent,
   FetchCounselorsBody,
   PendingReview,
@@ -24,11 +25,24 @@ import {
   getAssignCounselorResponseMock,
   getFetchCounselorsResponseMock,
   getListCounselorPendingReviewsResponseMock,
-  getListCounselorStudentsResponseMock
+  getListCounselorStudentsResponseMock,
+  getUpdateCounselorResponseMock
 } from './counselors.faker';
 
-export { getFetchCounselorsResponseMock, getListCounselorPendingReviewsResponseMock, getListCounselorStudentsResponseMock, getAssignCounselorResponseMock } from './counselors.faker';
+export { getUpdateCounselorResponseMock, getFetchCounselorsResponseMock, getListCounselorPendingReviewsResponseMock, getListCounselorStudentsResponseMock, getAssignCounselorResponseMock } from './counselors.faker';
 
+
+export const getUpdateCounselorMockHandler = (overrideResponse?: Counselor | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Counselor> | Counselor), options?: RequestHandlerOptions) => {
+  return http.patch('*/counselors', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateCounselorResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getFetchCounselorsMockHandler = (overrideResponse?: FetchCounselorsBody | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<FetchCounselorsBody> | FetchCounselorsBody), options?: RequestHandlerOptions) => {
   return http.get('*/counselors/fetchall', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
@@ -78,6 +92,7 @@ export const getAssignCounselorMockHandler = (overrideResponse?: Student | ((inf
   }, options)
 }
 export const getCounselorsMock = () => [
+  getUpdateCounselorMockHandler(),
   getFetchCounselorsMockHandler(),
   getListCounselorPendingReviewsMockHandler(),
   getListCounselorStudentsMockHandler(),

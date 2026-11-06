@@ -35,6 +35,54 @@ func (_m *EssayRepository) CreateEssay(ctx context.Context, studentID uuid.UUID,
 	return r0
 }
 
+// DeleteEssay provides a mock function with given fields: ctx, essayID, studentID
+func (_m *EssayRepository) DeleteEssay(ctx context.Context, essayID uuid.UUID, studentID uuid.UUID) error {
+	ret := _m.Called(ctx, essayID, studentID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteEssay")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, uuid.UUID) error); ok {
+		r0 = rf(ctx, essayID, studentID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetEssay provides a mock function with given fields: ctx, essayID
+func (_m *EssayRepository) GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error) {
+	ret := _m.Called(ctx, essayID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEssay")
+	}
+
+	var r0 *models.Essays
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) (*models.Essays, error)); ok {
+		return rf(ctx, essayID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) *models.Essays); ok {
+		r0 = rf(ctx, essayID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Essays)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, essayID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetEssaysByGroup provides a mock function with given fields: ctx, essayGroupID
 func (_m *EssayRepository) GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error) {
 	ret := _m.Called(ctx, essayGroupID)

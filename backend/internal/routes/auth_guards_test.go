@@ -49,6 +49,7 @@ var routeTable = []routeAccess{
 	// auth & users
 	{http.MethodPost, "/user/logout", anyRole, nil},
 	{http.MethodPatch, "/user/reset-password", anyRole, nil},
+	{http.MethodPatch, "/user", anyRole, nil},
 	{http.MethodPost, "/user/{supabase_id}/force-password-reset", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/user", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
@@ -69,16 +70,19 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/reviews/{id}/refund", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/reviews/{id}/complete", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/essays/{essay_id}/review-status", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/essays/{essay_id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/students/{id}", anyRole, nil},
+	{http.MethodPatch, "/students/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
 
 	// colleges & applications
@@ -99,6 +103,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
@@ -110,6 +115,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/media/{id}", anyRole, nil},
 	{http.MethodGet, "/media", anyRole, nil},
 	{http.MethodDelete, "/media/{id}", anyRole, nil},
+	{http.MethodPatch, "/media/{id}", anyRole, nil},
 	{http.MethodPost, "/media-access", anyRole, nil},
 	{http.MethodDelete, "/media-access/{id}", anyRole, nil},
 	{http.MethodGet, "/media-access", anyRole, nil},
@@ -295,6 +301,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"GET /counselors/students",
 		"PUT /colleges/{id}",
 		"DELETE /colleges/{id}",
+		"PATCH /counselors",
 		"GET /counselors/fetchall",
 		"GET /students/fetchall",
 		"PATCH /students/assign",

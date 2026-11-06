@@ -46,6 +46,8 @@ type EssayRepository interface {
 	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
 	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
+	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
+	DeleteEssay(ctx context.Context, essayID uuid.UUID, studentID uuid.UUID) error
 }
 
 // Essay Group Repository
@@ -59,6 +61,7 @@ type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error)
 	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
+	DeleteTodoItem(ctx context.Context, id string) error
 }
 
 // To represent the Notification Log schema
@@ -93,14 +96,17 @@ type CounselorRepository interface {
 	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
 	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
 	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
+	UpdateCounselor(ctx context.Context, id uuid.UUID, input models.UpdateCounselorBody) (*models.Counselor, error)
 	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error)
 }
 
 type UserRepository interface {
+	// creates the users row and its student/counselor row in one transaction
 	CreateUser(ctx context.Context, user models.CreateUserInput, supabase_id uuid.UUID) (*models.CreateUserOutput, error)
 	FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error)
 	FetchUserBySupabaseID(ctx context.Context, input models.FetchUserBySupabaseIDInput) (*models.FetchUserOutput, error)
 	UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error
+	UpdateUser(ctx context.Context, id uuid.UUID, input models.UpdateUserBody) (*models.User, error)
 }
 
 // To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos
@@ -117,6 +123,7 @@ type MediaRepository interface {
 	GetMedia(ctx context.Context, id string) (*models.Media, error)
 	ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error)
 	DeleteMedia(ctx context.Context, id string) error
+	UpdateMedia(ctx context.Context, id string, change string) (*models.Media, error)
 }
 
 type MediaAccessRepository interface {
@@ -161,6 +168,7 @@ type NotificationPreferencesRepository interface {
 
 type StudentRepository interface {
 	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
+	UpdateStudent(ctx context.Context, id uuid.UUID, input models.UpdateStudentBody) (*models.Student, error)
 	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error)
 	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
 }

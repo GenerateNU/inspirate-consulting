@@ -28,7 +28,8 @@ import type {
   CreateMediaRequestBody,
   ErrorModel,
   ListMediaParams,
-  Media
+  Media,
+  UpdateMediaInputBody
 } from '../../models';
 
 
@@ -488,3 +489,102 @@ export function useGetMedia<TData = Awaited<ReturnType<typeof getMedia>>, TError
 
 
 
+export const getUpdateMediaUrl = (id: string,) => {
+
+
+
+
+  return `/api/media/${id}`
+}
+
+/**
+ * Retitle a video
+ */
+export const updateMedia = async (id: string,
+    updateMediaInputBody: NonReadonly<UpdateMediaInputBody>, options?: RequestInit): Promise<Media> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateMediaUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateMediaInputBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: Media, status?: number} = new globalThis.Error();
+    const data : Media = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Media = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateMediaMutationKey = () => ['updateMedia'] as const;
+
+export const getUpdateMediaMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMedia>>, TError,UpdateMediaMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMedia>>, TError,UpdateMediaMutationVariables, TContext> => {
+
+const mutationKey = getUpdateMediaMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMedia>>, UpdateMediaMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateMedia(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMediaMutationResult = NonNullable<Awaited<ReturnType<typeof updateMedia>>>
+    export type UpdateMediaMutationBody = NonReadonly<UpdateMediaInputBody>
+    export type UpdateMediaMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateMediaMutationVariables = {id: string;data: NonReadonly<UpdateMediaInputBody>}
+
+    export const useUpdateMedia = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMedia>>, TError,UpdateMediaMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateMedia>>,
+        TError,
+        UpdateMediaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateMediaMutationOptions(options), queryClient);
+    }

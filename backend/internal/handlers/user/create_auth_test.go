@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/supabase"
 	"testing"
@@ -19,6 +20,14 @@ func createInput(name, email string, role models.Role) *models.CreateUserInput {
 	in.Body.Name = name
 	in.Body.Email = email
 	in.Body.Role = role
+	if role == models.StudentRole {
+		year := models.Senior
+		gpa := 4
+		counselorID := uuid.New()
+		in.Body.Year = &year
+		in.Body.GPA = &gpa
+		in.Body.CounselorID = &counselorID
+	}
 	return in
 }
 
@@ -51,6 +60,33 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 			assert.Equal(t, string(role), gotRole, "role must reach Supabase app_metadata")
 			assert.NotEmpty(t, out.Body.TempPassword)
 			assert.Equal(t, out.Body.TempPassword, gotPassword, "the returned temp password is the one Supabase got")
+		})
+	}
+
+	missingFields := map[string]func(in *models.CreateUserInput){
+		"year":         func(in *models.CreateUserInput) { in.Body.Year = nil },
+		"gpa":          func(in *models.CreateUserInput) { in.Body.GPA = nil },
+		"counselor_id": func(in *models.CreateUserInput) { in.Body.CounselorID = nil },
+	}
+	for field, clear := range missingFields {
+		t.Run("student without "+field+" is rejected before signup", func(t *testing.T) {
+			t.Parallel()
+			signedUp := false
+			sb := &supabase.MockSupabase{
+				SignupFunc: func(string, string, string) (models.SignupResponse, error) {
+					signedUp = true
+					return models.SignupResponse{}, nil
+				},
+			}
+			repo := mocks.NewUserRepository(t) // CreateUser must not be called
+
+			in := createInput("X", "x@example.com", models.StudentRole)
+			clear(in)
+
+			out, err := NewHandler(repo).CreateUser(ctx, in, sb)
+			assert.Nil(t, out)
+			assert.Equal(t, errs.BadRequest("year, gpa, and counselor_id are required for students"), err)
+			assert.False(t, signedUp, "no Supabase account should be created for an invalid request")
 		})
 	}
 

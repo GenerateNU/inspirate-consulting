@@ -14,6 +14,6 @@ export interface Media {
   length_in_mins: number;
   s3_key: string;
   /** @nullable */
-  school_year: number | null;
+  school_year: string | null;
   title: string;
 }

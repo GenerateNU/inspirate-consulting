@@ -5,7 +5,7 @@ type Media struct {
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	LengthInMins int    `json:"length_in_mins"`
-	SchoolYear   *int   `json:"school_year"`
+	SchoolYear   *Year  `json:"school_year"`
 	S3Key        string `json:"s3_key"`
 }
 
@@ -19,7 +19,7 @@ type CreateMediaRequestBody struct {
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	LengthInMins int    `json:"length_in_mins"`
-	SchoolYear   *int   `json:"school_year"`
+	SchoolYear   *Year  `json:"school_year"`
 	S3Key        string `json:"s3_key"`
 }
 
@@ -33,6 +33,17 @@ type CreateMediaInput struct {
 }
 
 type CreateMediaOutput struct {
+	Body Media
+}
+
+type UpdateMediaInput struct {
+	ID   string `path:"id"`
+	Body struct {
+		Title string `json:"title"`
+	}
+}
+
+type UpdateMediaOutput struct {
 	Body Media
 }
 

@@ -9,6 +9,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -257,6 +258,68 @@ func TestRoute_DeleteMedia(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, _ := doRequest(t, app, http.MethodDelete, "/media/"+mediaID, nil)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
+// Route tests for PATCH /media/{id}.
+func TestRoute_UpdateMedia(t *testing.T) {
+	t.Parallel()
+
+	mediaID := uuid.NewString()
+	payload := map[string]any{
+		"title": "Navigating the FAFSA (2026)",
+	}
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		// The path id and body title should be passed through to the repository
+		mockRepo := mocks.NewMediaRepository(t)
+		mockRepo.On("UpdateMedia", mock.Anything, mediaID, "Navigating the FAFSA (2026)").Return(&models.Media{
+			ID:           mediaID,
+			Title:        "Navigating the FAFSA (2026)",
+			LengthInMins: 20,
+			S3Key:        "video-bucket/fafsa.mp4",
+		}, nil)
+
+		app, err := setupMediaTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodPatch, "/media/"+mediaID, payload)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var updated models.Media
+		require.NoError(t, json.Unmarshal(respBody, &updated))
+		assert.Equal(t, mediaID, updated.ID)
+		assert.Equal(t, "Navigating the FAFSA (2026)", updated.Title)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewMediaRepository(t)
+		mockRepo.On("UpdateMedia", mock.Anything, mediaID, "Navigating the FAFSA (2026)").
+			Return(nil, errs.NotFound("media", "id", mediaID))
+
+		app, err := setupMediaTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/media/"+mediaID, payload)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewMediaRepository(t)
+		mockRepo.On("UpdateMedia", mock.Anything, mediaID, "Navigating the FAFSA (2026)").
+			Return(nil, errors.New("database error"))
+
+		app, err := setupMediaTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/media/"+mediaID, payload)
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }

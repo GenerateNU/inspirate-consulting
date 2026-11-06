@@ -20,10 +20,11 @@ import type {
 import {
   getCreateMediaResponseMock,
   getGetMediaResponseMock,
-  getListMediaResponseMock
+  getListMediaResponseMock,
+  getUpdateMediaResponseMock
 } from './media.faker';
 
-export { getListMediaResponseMock, getCreateMediaResponseMock, getGetMediaResponseMock } from './media.faker';
+export { getListMediaResponseMock, getCreateMediaResponseMock, getGetMediaResponseMock, getUpdateMediaResponseMock } from './media.faker';
 
 
 export const getListMediaMockHandler = (overrideResponse?: Media[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Media[] | null> | Media[] | null), options?: RequestHandlerOptions) => {
@@ -71,9 +72,22 @@ export const getGetMediaMockHandler = (overrideResponse?: Media | ((info: Parame
       })
   }, options)
 }
+
+export const getUpdateMediaMockHandler = (overrideResponse?: Media | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Media> | Media), options?: RequestHandlerOptions) => {
+  return http.patch('*/media/:id', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateMediaResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getMediaMock = () => [
   getListMediaMockHandler(),
   getCreateMediaMockHandler(),
   getDeleteMediaMockHandler(),
-  getGetMediaMockHandler()
+  getGetMediaMockHandler(),
+  getUpdateMediaMockHandler()
 ]

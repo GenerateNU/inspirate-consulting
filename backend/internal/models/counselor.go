@@ -51,3 +51,16 @@ type ListCounselorStudentsInput struct {
 type ListCounselorStudentsOutput struct {
 	Body []CounselorStudent
 }
+
+// the counselor table has no profile fields yet
+// to make one editable: add it here, to update_counselor.sql, and to the Counselor model
+type UpdateCounselorBody struct{}
+
+// counselor id is derived from session, counselors can only edit themselves
+type UpdateCounselorInput struct {
+	Body UpdateCounselorBody
+}
+
+type UpdateCounselorOutput struct {
+	Body *Counselor
+}

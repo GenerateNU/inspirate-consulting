@@ -11,6 +11,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -451,6 +452,110 @@ func TestRoute_UpdateEssayGroup(t *testing.T) {
 			_ = resp.Body.Close()
 		}()
 
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
+
+func TestRoute_DeleteEssay(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success - student", func(t *testing.T) {
+		t.Parallel()
+
+		studentID := uuid.New()
+		essayID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("GetEssay", mock.Anything, essayID).Return(&models.Essays{ID: essayID, StudentID: studentID}, nil)
+		mockRepo.On("DeleteEssay", mock.Anything, essayID, studentID).Return(nil)
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/essays/"+essayID.String(), nil)
+		require.NoError(t, err)
+		req.Header.Set("X-Student-ID", studentID.String())
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		// The output envelope has no Body, so Huma responds 204 No Content
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	})
+
+	t.Run("success - counselor", func(t *testing.T) {
+		t.Parallel()
+
+		studentID := uuid.New()
+		essayID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("GetEssay", mock.Anything, essayID).Return(&models.Essays{ID: essayID, StudentID: studentID}, nil)
+		mockRepo.On("DeleteEssay", mock.Anything, essayID, studentID).Return(nil)
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		// A counselor has no student id in context; the owner comes from the essay
+		req, err := http.NewRequest(http.MethodDelete, "/essays/"+essayID.String(), nil)
+		require.NoError(t, err)
+		req.Header.Set("X-Counselor-ID", uuid.New().String())
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		essayID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("GetEssay", mock.Anything, essayID).
+			Return(nil, errs.NotFound("essay", "id", essayID.String()))
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/essays/"+essayID.String(), nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("validation error - essay id is not a uuid", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		// Mock should NOT be called when Huma validation fails
+
+		app, err := setupEssayTestApp(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/essays/not-a-uuid", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		// Huma returns 422 Unprocessable Entity for schema validation failures
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
 }

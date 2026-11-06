@@ -2,6 +2,7 @@ package essayRepository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -52,4 +53,27 @@ func (r *EssayRepository) GetEssaysByGroup(ctx context.Context, essayGroupID uui
 	}
 
 	return essays, nil
+}
+
+func (r *EssayRepository) GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error) {
+	selectQuery, err := schema.ReadSQLBaseScript("get_essay.sql", SqlEssayFiles)
+	if err != nil {
+		return nil, errs.InternalServerError("Failed to read base query: ", err.Error())
+	}
+
+	rows, err := r.db.Query(ctx, selectQuery, essayID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	essay, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[models.Essays])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errs.NotFound("essay", "id", essayID.String())
+		}
+		return nil, err
+	}
+
+	return &essay, nil
 }

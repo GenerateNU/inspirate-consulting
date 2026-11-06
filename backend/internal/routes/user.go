@@ -56,4 +56,18 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		}
 		return userOutput, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "update-user",
+		Method:      http.MethodPatch,
+		Path:        "/user",
+		Description: "Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.",
+		Tags:        []string{"User"},
+	}, func(ctx context.Context, input *models.UpdateUserInput) (*models.UpdateUserOutput, error) {
+		updatedUser, err := userHandler.UpdateUser(ctx, input.Body)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateUserOutput{Body: updatedUser}, nil
+	})
 }

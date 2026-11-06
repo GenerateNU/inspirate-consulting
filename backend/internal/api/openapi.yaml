@@ -128,6 +128,24 @@ components:
         - last_message_read_at
         - unread_count
       type: object
+    Counselor:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Counselor.json
+          format: uri
+          readOnly: true
+          type: string
+        id:
+          type: string
+        user_id:
+          type: string
+      required:
+        - id
+        - user_id
+      type: object
     CounselorListItem:
       additionalProperties: false
       properties:
@@ -364,9 +382,8 @@ components:
         s3_key:
           type: string
         school_year:
-          format: int64
           type:
-            - integer
+            - string
             - "null"
         title:
           type: string
@@ -475,6 +492,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        counselor_id:
+          description: counselor the student is assigned to; required when role is student
+          type: string
         email:
           description: email of user for supabase signup
           type: string
@@ -482,10 +502,17 @@ components:
           description: when the account expires; omit for no expiration
           format: date-time
           type: string
+        gpa:
+          description: gpa of the student; required when role is student
+          format: int64
+          type: integer
         name:
           description: Name of the user
           maxLength: 200
           minLength: 1
+          type: string
+        organization:
+          description: organization of the student
           type: string
         pfp_key:
           description: pfp key of user
@@ -497,6 +524,17 @@ components:
           enum:
             - student
             - counselor
+          type: string
+        student_interest:
+          description: interest of the student
+          type: string
+        year:
+          description: year of the student; required when role is student
+          enum:
+            - freshman
+            - sophomore
+            - junior
+            - senior
           type: string
       required:
         - name
@@ -1146,9 +1184,8 @@ components:
         s3_key:
           type: string
         school_year:
-          format: int64
           type:
-            - integer
+            - string
             - "null"
         title:
           type: string
@@ -1652,6 +1689,17 @@ components:
       required:
         - read
       type: object
+    UpdateCounselorBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateCounselorBody.json
+          format: uri
+          readOnly: true
+          type: string
+      type: object
     UpdateEssayGroupBody:
       additionalProperties: false
       properties:
@@ -1746,6 +1794,21 @@ components:
       required:
         - school_name
         - school_location
+      type: object
+    UpdateMediaInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateMediaInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        title:
+          type: string
+      required:
+        - title
       type: object
     UpdateNotificationPreferencesRequestBody:
       additionalProperties: false
@@ -1853,6 +1916,35 @@ components:
       required:
         - status
       type: object
+    UpdateStudentBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateStudentBody.json
+          format: uri
+          readOnly: true
+          type: string
+        gpa:
+          description: GPA of the student
+          format: int64
+          type: integer
+        organization:
+          description: Organization of the student
+          type: string
+        student_interest:
+          description: Interest of the student
+          type: string
+        year:
+          description: School year of the student
+          enum:
+            - freshman
+            - sophomore
+            - junior
+            - senior
+          type: string
+      type: object
     UpdateTodoItemCompletedAtInputBody:
       additionalProperties: false
       properties:
@@ -1867,6 +1959,25 @@ components:
           type: boolean
       required:
         - completed
+      type: object
+    UpdateUserBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateUserBody.json
+          format: uri
+          readOnly: true
+          type: string
+        name:
+          description: Name of the user
+          maxLength: 200
+          minLength: 1
+          type: string
+        pfp_key:
+          description: pfp key of user
+          type: string
       type: object
     User:
       additionalProperties: false
@@ -2347,6 +2458,31 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /counselors:
+    patch:
+      description: Update the authenticated counselor's profile. The counselor has no editable fields yet.
+      operationId: update-counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCounselorBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Counselor"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
   /counselors/fetchall:
     get:
       description: Fetch a page of counselors, optionally filtered by user_id and name
@@ -2547,6 +2683,29 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateEssayBody"
         required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
+  /essays/{essay_id}:
+    delete:
+      description: Deletes an essay given an essayID
+      operationId: delete-essay
+      parameters:
+        - description: Essay to delete
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: Essay to delete
+            type: string
       responses:
         "204":
           description: No Content
@@ -2970,6 +3129,36 @@ paths:
           description: Error
       tags:
         - Media
+    patch:
+      description: Retitle a video
+      operationId: update-media
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMediaInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media
   /messages:
     post:
       description: Send a message from the current user to another user.
@@ -3289,6 +3478,38 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
+    patch:
+      description: Update a student's profile fields. Fields left out of the request are not changed.
+      operationId: update-student
+      parameters:
+        - description: ID of the student
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the student
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStudentBody"
+        required: true
       responses:
         "200":
           content:
@@ -3660,6 +3881,26 @@ paths:
       tags:
         - Todo Items
   /todo-items/{id}:
+    delete:
+      description: Delete a to-do item
+      operationId: delete-todo-item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
     patch:
       description: Update a to-do item's completion status
       operationId: update-todo-item-completed
@@ -3691,6 +3932,30 @@ paths:
       tags:
         - Todo Items
   /user:
+    patch:
+      description: Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
+      operationId: update-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
     post:
       description: Create a user (student/counselor)
       operationId: create-user

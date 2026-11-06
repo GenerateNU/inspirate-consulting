@@ -12,6 +12,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -260,6 +261,56 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID, map[string]any{
 			"completed": true,
 		})
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
+// Route tests for DELETE /todo-items/{id}.
+func TestRoute_DeleteTodoItem(t *testing.T) {
+	t.Parallel()
+
+	itemID := uuid.NewString()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		// The path id must reach the repository unchanged
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("DeleteTodoItem", mock.Anything, itemID).Return(nil)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodDelete, "/todo-items/"+itemID, nil)
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+		assert.Empty(t, respBody)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("DeleteTodoItem", mock.Anything, itemID).
+			Return(errs.NotFound("todo item", "id", itemID))
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodDelete, "/todo-items/"+itemID, nil)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("DeleteTodoItem", mock.Anything, itemID).
+			Return(errors.New("database error"))
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodDelete, "/todo-items/"+itemID, nil)
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 }

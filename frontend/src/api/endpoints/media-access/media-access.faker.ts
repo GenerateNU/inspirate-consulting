@@ -15,7 +15,7 @@ import type {
 } from '../../models';
 
 
-export const getGetMediaAccessResponseMock = (): Media[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), description: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.string.alpha({length: {min: 10, max: 20}}), length_in_mins: faker.number.int(), s3_key: faker.string.alpha({length: {min: 10, max: 20}}), school_year: faker.helpers.arrayElement([faker.number.int(), null]), title: faker.string.alpha({length: {min: 10, max: 20}})})))
+export const getGetMediaAccessResponseMock = (): Media[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), description: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.string.alpha({length: {min: 10, max: 20}}), length_in_mins: faker.number.int(), s3_key: faker.string.alpha({length: {min: 10, max: 20}}), school_year: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), title: faker.string.alpha({length: {min: 10, max: 20}})})))
 
 export const getCreateMediaAccessResponseMock = (overrideResponse: Partial<Extract<MediaAccess, object>> = {}): MediaAccess => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), media_id: faker.string.alpha({length: {min: 10, max: 20}}), student_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

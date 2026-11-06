@@ -40,6 +40,7 @@ func TestRoute_CreateUser(t *testing.T) {
 	t.Parallel()
 	u1 := uuid.New()
 	s1 := uuid.New()
+	counselorID := uuid.New()
 
 	key := "key"
 	email := "alengano123@gmail.com"
@@ -56,7 +57,7 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("CreateUser", mock.Anything, mock.MatchedBy(func(in models.CreateUserInput) bool {
-			return in.Body.Name == "Aleng123"
+			return in.Body.Name == "Aleng123" && in.Body.CounselorID != nil && *in.Body.CounselorID == counselorID
 		}), mock.Anything).Return(&models.CreateUserOutput{
 			Body: &models.CreateUserBody{User: &userTest},
 		}, nil)
@@ -67,10 +68,13 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		// Send valid JSON payload
 		payload := map[string]any{
-			"email":   email,
-			"name":    name,
-			"pfp_key": &key,
-			"role":    "student",
+			"email":        email,
+			"name":         name,
+			"pfp_key":      &key,
+			"role":         "student",
+			"year":         "senior",
+			"gpa":          4,
+			"counselor_id": counselorID,
 		}
 		bodyBytes, err := json.Marshal(payload)
 		println(bodyBytes)
@@ -192,6 +196,132 @@ func TestRoute_FetchUser(t *testing.T) {
 		defer func() { _ = resp.Body.Close() }()
 
 		// User repository returns an errs.NotFound (HTTPError).
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+}
+
+func TestRoute_CreateUser_RoleFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("student without counselor_id is rejected", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewUserRepository(t) // CreateUser must not be called
+
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPost, "/user", map[string]any{
+			"name":    "No Counselor",
+			"email":   "nocounselor@example.com",
+			"pfp_key": nil,
+			"role":    "student",
+			"year":    "junior",
+			"gpa":     3,
+		})
+
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("counselor needs no student fields", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewUserRepository(t)
+		mockRepo.On("CreateUser", mock.Anything, mock.MatchedBy(func(in models.CreateUserInput) bool {
+			return in.Body.Role == models.CounselorRole && in.Body.CounselorID == nil
+		}), mock.Anything).Return(&models.CreateUserOutput{
+			Body: &models.CreateUserBody{User: &models.User{Name: "New Counselor"}},
+		}, nil)
+
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodPost, "/user", map[string]any{
+			"name":    "New Counselor",
+			"email":   "newcounselor@example.com",
+			"role":    "counselor",
+			"pfp_key": nil,
+		})
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var out models.CreateUserBody
+		require.NoError(t, json.Unmarshal(body, &out))
+		assert.Equal(t, "New Counselor", out.User.Name)
+		assert.NotEmpty(t, out.TempPassword)
+	})
+}
+
+func TestRoute_UpdateUser(t *testing.T) {
+	t.Parallel()
+
+	userID := uuid.New()
+	asUser := map[string]string{"X-User-ID": userID.String()}
+
+	t.Run("success updates the logged-in user", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewUserRepository(t)
+		// the user id comes from the session; fields left out reach the handler as nil
+		mockRepo.On("UpdateUser", mock.Anything, userID, mock.MatchedBy(func(in models.UpdateUserBody) bool {
+			return in.Name != nil && *in.Name == "New Name" && in.PfpKey == nil
+		})).Return(&models.User{ID: userID, Name: "New Name"}, nil)
+
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodPatch, "/user", map[string]any{"name": "New Name"}, asUser)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var out models.User
+		require.NoError(t, json.Unmarshal(body, &out))
+		assert.Equal(t, userID, out.ID)
+		assert.Equal(t, "New Name", out.Name)
+	})
+
+	t.Run("pfp_key is passed through", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewUserRepository(t)
+		mockRepo.On("UpdateUser", mock.Anything, userID, mock.MatchedBy(func(in models.UpdateUserBody) bool {
+			return in.PfpKey != nil && *in.PfpKey == "new-key" && in.Name == nil
+		})).Return(&models.User{ID: userID}, nil)
+
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/user", map[string]any{"pfp_key": "new-key"}, asUser)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("empty name is rejected by validation", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewUserRepository(t)
+		// The handler is never reached.
+
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/user", map[string]any{"name": ""}, asUser)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("unknown user returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewUserRepository(t)
+		mockRepo.On("UpdateUser", mock.Anything, userID, mock.Anything).
+			Return(nil, errs.NotFound("user", "id", userID.String()))
+
+		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/user", map[string]any{"name": "New Name"}, asUser)
+
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }

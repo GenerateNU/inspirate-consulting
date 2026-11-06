@@ -34,6 +34,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 	input.Body.Name = "Aleng123"
 	input.Body.Email = "tt@gmail.com"
 	input.Body.PfpKey = &key
+	input.Body.Role = models.CounselorRole
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
