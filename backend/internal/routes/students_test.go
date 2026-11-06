@@ -111,6 +111,105 @@ func TestRoute_SetStudentReviewBalance(t *testing.T) {
 	})
 }
 
+func TestRoute_UpdateStudent(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success updates only the fields sent and returns the student", func(t *testing.T) {
+		t.Parallel()
+
+		studentID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		// fields left out of the request reach the handler as nil
+		mockRepo.On("UpdateStudent", mock.Anything, studentID, mock.MatchedBy(func(in models.UpdateStudentBody) bool {
+			return in.GPA != nil && *in.GPA == 4 && in.Year == nil && in.Organization == nil && in.Interest == nil
+		})).Return(&models.Student{ID: studentID, Year: models.Junior, GPA: 4}, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodPatch, "/students/"+studentID.String(), map[string]any{"gpa": 4})
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var out models.Student
+		require.NoError(t, json.Unmarshal(body, &out))
+		assert.Equal(t, studentID, out.ID)
+		assert.Equal(t, 4, out.GPA)
+	})
+
+	t.Run("every editable field is passed through", func(t *testing.T) {
+		t.Parallel()
+
+		studentID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("UpdateStudent", mock.Anything, studentID, mock.MatchedBy(func(in models.UpdateStudentBody) bool {
+			return in.Year != nil && *in.Year == models.Senior &&
+				in.GPA != nil && *in.GPA == 3 &&
+				in.Organization != nil && *in.Organization == "Robotics" &&
+				in.Interest != nil && *in.Interest == "Engineering"
+		})).Return(&models.Student{ID: studentID}, nil)
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/"+studentID.String(), map[string]any{
+			"year":             "senior",
+			"gpa":              3,
+			"organization":     "Robotics",
+			"student_interest": "Engineering",
+		})
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("invalid year is rejected by validation", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		// The handler is never reached.
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/"+uuid.New().String(), map[string]any{"year": "grad"})
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("non-uuid id is rejected by validation", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		// The handler is never reached.
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/not-a-uuid", map[string]any{"gpa": 4})
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("unknown student returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		studentID := uuid.New()
+
+		mockRepo := mocks.NewStudentRepository(t)
+		mockRepo.On("UpdateStudent", mock.Anything, studentID, mock.Anything).
+			Return(nil, errs.NotFound("student", "id", studentID.String()))
+
+		app, err := setupTestAppWithStudentRepo(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/students/"+studentID.String(), map[string]any{"gpa": 4})
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+}
+
 func setupTestAppWithStudentRepo(mockRepo data.StudentRepository) (*fiber.App, error) {
 	cfg := config.Config{TestMode: true}
 	repo := &data.Repository{Student: mockRepo}
