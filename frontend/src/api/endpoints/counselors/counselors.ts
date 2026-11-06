@@ -26,13 +26,15 @@ import type {
 
 import type {
   AssignCounselorInputBody,
+  Counselor,
   CounselorStudent,
   ErrorModel,
   FetchCounselorsBody,
   FetchCounselorsParams,
   ListCounselorStudentsParams,
   PendingReview,
-  Student
+  Student,
+  UpdateCounselorBody
 } from '../../models';
 
 
@@ -81,7 +83,105 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getFetchCounselorsUrl = (params?: FetchCounselorsParams,) => {
+export const getUpdateCounselorUrl = () => {
+
+
+
+
+  return `/api/counselors`
+}
+
+/**
+ * Update the authenticated counselor's profile. The counselor has no editable fields yet.
+ */
+export const updateCounselor = async (updateCounselorBody: NonReadonly<UpdateCounselorBody>, options?: RequestInit): Promise<Counselor> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateCounselorUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateCounselorBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: Counselor, status?: number} = new globalThis.Error();
+    const data : Counselor = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Counselor = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateCounselorMutationKey = () => ['updateCounselor'] as const;
+
+export const getUpdateCounselorMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCounselor>>, TError,UpdateCounselorMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCounselor>>, TError,UpdateCounselorMutationVariables, TContext> => {
+
+const mutationKey = getUpdateCounselorMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCounselor>>, UpdateCounselorMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateCounselor(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCounselorMutationResult = NonNullable<Awaited<ReturnType<typeof updateCounselor>>>
+    export type UpdateCounselorMutationBody = NonReadonly<UpdateCounselorBody>
+    export type UpdateCounselorMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateCounselorMutationVariables = {data: NonReadonly<UpdateCounselorBody>}
+
+    export const useUpdateCounselor = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCounselor>>, TError,UpdateCounselorMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateCounselor>>,
+        TError,
+        UpdateCounselorMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateCounselorMutationOptions(options), queryClient);
+    }
+    export const getFetchCounselorsUrl = (params?: FetchCounselorsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {

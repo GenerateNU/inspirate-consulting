@@ -127,6 +127,36 @@ func (_m *UserRepository) UpdateResetTime(ctx context.Context, id uuid.UUID, res
 	return r0
 }
 
+// UpdateUser provides a mock function with given fields: ctx, id, input
+func (_m *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, input models.UpdateUserBody) (*models.User, error) {
+	ret := _m.Called(ctx, id, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateUser")
+	}
+
+	var r0 *models.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.UpdateUserBody) (*models.User, error)); ok {
+		return rf(ctx, id, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.UpdateUserBody) *models.User); ok {
+		r0 = rf(ctx, id, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, models.UpdateUserBody) error); ok {
+		r1 = rf(ctx, id, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewUserRepository creates a new instance of UserRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUserRepository(t interface {

@@ -23,6 +23,7 @@ func TestFetchUser(t *testing.T) {
 	input.Body.Name = "FetchMe"
 	input.Body.Email = "fetchme@gmail.com"
 	input.Body.PfpKey = &key
+	input.Body.Role = models.CounselorRole
 
 	db := testutils.SetupTestDB(t)
 	repo := NewUserRepository(db)

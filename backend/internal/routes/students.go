@@ -59,6 +59,7 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 		return &models.GetStudentOutput{Body: fetchedStudent}, nil
 	})
 
+	// Registered before PATCH /students/{id} so "assign" isn't matched as an ID
 	huma.Register(api, huma.Operation{
 		OperationID: "assign-counselor",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
@@ -72,5 +73,20 @@ func SetUpStudentRoutes(api huma.API, repository *data.Repository, verifyRole au
 			return nil, err
 		}
 		return &models.AssignCounselorOutput{Body: *updated}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "update-student",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/students/{id}",
+		Description: "Update a student's profile fields. Fields left out of the request are not changed.",
+		Tags:        []string{"Students"},
+	}, func(ctx context.Context, input *models.UpdateStudentInput) (*models.UpdateStudentOutput, error) {
+		updatedStudent, err := studentHandler.UpdateStudent(ctx, input.ID, input.Body)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateStudentOutput{Body: updatedStudent}, nil
 	})
 }

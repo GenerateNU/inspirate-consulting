@@ -21,10 +21,11 @@ import type {
 import {
   getFetchStudentsResponseMock,
   getGetStudentResponseMock,
-  getSetStudentReviewBalanceResponseMock
+  getSetStudentReviewBalanceResponseMock,
+  getUpdateStudentResponseMock
 } from './students.faker';
 
-export { getFetchStudentsResponseMock, getGetStudentResponseMock, getSetStudentReviewBalanceResponseMock } from './students.faker';
+export { getFetchStudentsResponseMock, getGetStudentResponseMock, getUpdateStudentResponseMock, getSetStudentReviewBalanceResponseMock } from './students.faker';
 
 
 export const getFetchStudentsMockHandler = (overrideResponse?: FetchStudentsBody | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<FetchStudentsBody> | FetchStudentsBody), options?: RequestHandlerOptions) => {
@@ -51,6 +52,18 @@ export const getGetStudentMockHandler = (overrideResponse?: Student | ((info: Pa
   }, options)
 }
 
+export const getUpdateStudentMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
+  return http.patch('*/students/:id', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateStudentResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getSetStudentReviewBalanceMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
   return http.patch('*/students/:id/review-balance', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
@@ -65,5 +78,6 @@ export const getSetStudentReviewBalanceMockHandler = (overrideResponse?: Student
 export const getStudentsMock = () => [
   getFetchStudentsMockHandler(),
   getGetStudentMockHandler(),
+  getUpdateStudentMockHandler(),
   getSetStudentReviewBalanceMockHandler()
 ]
