@@ -59,6 +59,7 @@ type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error)
 	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
+	DeleteTodoItem(ctx context.Context, id string) error
 }
 
 // To represent the Notification Log schema

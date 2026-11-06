@@ -1241,6 +1241,16 @@ export const SearchTodoItemsResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Delete a to-do item
+ */
+export const DeleteTodoItemParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const DeleteTodoItemResponse = /*#__PURE__*/ zod.void()
+
+
+/**
  * Update a to-do item's completion status
  */
 export const UpdateTodoItemCompletedParams = /*#__PURE__*/ zod.object({

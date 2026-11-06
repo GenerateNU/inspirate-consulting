@@ -414,7 +414,91 @@ export function useSearchTodoItems<TData = Awaited<ReturnType<typeof searchTodoI
 
 
 
-export const getUpdateTodoItemCompletedUrl = (id: string,) => {
+export const getDeleteTodoItemUrl = (id: string,) => {
+
+
+
+
+  return `/api/todo-items/${id}`
+}
+
+/**
+ * Delete a to-do item
+ */
+export const deleteTodoItem = async (id: string, options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeleteTodoItemUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeleteTodoItemMutationKey = () => ['deleteTodoItem'] as const;
+
+export const getDeleteTodoItemMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTodoItem>>, TError,DeleteTodoItemMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTodoItem>>, TError,DeleteTodoItemMutationVariables, TContext> => {
+
+const mutationKey = getDeleteTodoItemMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTodoItem>>, DeleteTodoItemMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteTodoItem(id,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTodoItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTodoItem>>>
+
+    export type DeleteTodoItemMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeleteTodoItemMutationVariables = {id: string}
+
+    export const useDeleteTodoItem = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTodoItem>>, TError,DeleteTodoItemMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTodoItem>>,
+        TError,
+        DeleteTodoItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteTodoItemMutationOptions(options), queryClient);
+    }
+    export const getUpdateTodoItemCompletedUrl = (id: string,) => {
 
 
 
