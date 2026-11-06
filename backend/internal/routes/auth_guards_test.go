@@ -69,6 +69,7 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/reviews/{id}/refund", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/reviews/{id}/complete", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/essays/{essay_id}/review-status", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/essays/{essay_id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},

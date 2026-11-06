@@ -426,6 +426,16 @@ export const CreateEssayResponse = /*#__PURE__*/ zod.void()
 
 
 /**
+ * Deletes an essay given an essayID
+ */
+export const DeleteEssayParams = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Essay to delete'))
+})
+
+export const DeleteEssayResponse = /*#__PURE__*/ zod.void()
+
+
+/**
  * Adds an essay to a group, moves it to another group, or removes it from its group
  */
 export const UpdateEssayGroupParams = /*#__PURE__*/ zod.object({

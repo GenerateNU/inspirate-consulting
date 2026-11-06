@@ -2571,6 +2571,29 @@ paths:
           description: Error
       tags:
         - Essays
+  /essays/{essay_id}:
+    delete:
+      description: Deletes an essay given an essayID
+      operationId: delete-essay
+      parameters:
+        - description: Essay to delete
+          in: path
+          name: essay_id
+          required: true
+          schema:
+            description: Essay to delete
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Essays
   /essays/{essay_id}/group:
     patch:
       description: Adds an essay to a group, moves it to another group, or removes it from its group

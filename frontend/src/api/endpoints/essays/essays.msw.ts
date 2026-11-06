@@ -50,6 +50,16 @@ export const getCreateEssayMockHandler = (overrideResponse?: void | ((info: Para
   }, options)
 }
 
+export const getDeleteEssayMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/essays/:essayId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
 export const getUpdateEssayGroupMockHandler = (overrideResponse?: EssayBody | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<EssayBody> | EssayBody), options?: RequestHandlerOptions) => {
   return http.patch('*/essays/:essayId/group', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
@@ -88,6 +98,7 @@ export const getGetEssaysFromStudentMockHandler = (overrideResponse?: EssayListB
 export const getEssaysMock = () => [
   getGetEssaysByGroupMockHandler(),
   getCreateEssayMockHandler(),
+  getDeleteEssayMockHandler(),
   getUpdateEssayGroupMockHandler(),
   getUpdateEssayStatusMockHandler(),
   getGetEssaysFromStudentMockHandler()
