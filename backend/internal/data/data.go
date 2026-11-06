@@ -59,6 +59,7 @@ type TodoItemRepository interface {
 	CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error)
 	ListTodoItems(ctx context.Context, query models.TodoItemQuery) ([]models.TodoItem, error)
 	UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error)
+	DeleteTodoItem(ctx context.Context, id string) error
 }
 
 // To represent the Notification Log schema
@@ -93,6 +94,7 @@ type CounselorRepository interface {
 	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
 	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
 	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
+	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error)
 }
 
 type UserRepository interface {
@@ -117,6 +119,7 @@ type MediaRepository interface {
 	GetMedia(ctx context.Context, id string) (*models.Media, error)
 	ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error)
 	DeleteMedia(ctx context.Context, id string) error
+	UpdateMedia(ctx context.Context, id string, change string) (*models.Media, error)
 }
 
 type MediaAccessRepository interface {
@@ -145,7 +148,6 @@ type EssayReviewRepository interface {
 	MarkCompleted(ctx context.Context, db dbinterface.QueryInterface, id uuid.UUID) (*models.EssayReviewTransaction, error)
 }
 
-// To represent the Chat Message schema
 type ChatMessageRepository interface {
 	CreateChatMessage(ctx context.Context, senderID uuid.UUID, body models.CreateChatMessageRequestBody) (*models.ChatMessage, error)
 	ListChats(ctx context.Context, userID uuid.UUID) ([]models.ChatSummary, error)
@@ -162,6 +164,8 @@ type NotificationPreferencesRepository interface {
 
 type StudentRepository interface {
 	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
+	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error)
+	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
 }
 
 type Repository struct {

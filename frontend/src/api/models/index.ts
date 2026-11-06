@@ -6,9 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './assignCounselorInputBody';
 export * from './chatMessage';
 export * from './chatMessagePage';
 export * from './chatSummary';
+export * from './counselorListItem';
 export * from './counselorStudent';
 export * from './createChatMessageRequestBody';
 export * from './createEssayBody';
@@ -27,7 +29,10 @@ export * from './createUserInputBody';
 export * from './createUserInputBodyRole';
 export * from './currentUser';
 export * from './currentUserRole';
+<<<<<<< HEAD
 export * from './deleteVideoParams';
+=======
+>>>>>>> 19dad96aa80c126f428b6346af8356a8f55cf227
 export * from './editChatMessageRequestBody';
 export * from './errorDetail';
 export * from './errorModel';
@@ -39,6 +44,10 @@ export * from './essayReviewStatus';
 export * from './essayReviewTransaction';
 export * from './essays';
 export * from './extracurricular';
+export * from './fetchCounselorsBody';
+export * from './fetchCounselorsParams';
+export * from './fetchStudentsBody';
+export * from './fetchStudentsParams';
 export * from './getMediaAccessParams';
 export * from './getTodoItemsLinkedTo';
 export * from './getTodoItemsParams';
@@ -79,6 +88,7 @@ export * from './searchTodoItemsSortOrder';
 export * from './searchTodoItemsStatus';
 export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
+export * from './studentListItem';
 export * from './todoItem';
 export * from './todoItemPage';
 export * from './updateChatMessageReadInputBody';
@@ -87,6 +97,7 @@ export * from './updateExtracurricularRequest';
 export * from './updateExtracurricularRequestStatus';
 export * from './updateExtracurricularRequestType';
 export * from './updateGlobalCollegeRequestBody';
+export * from './updateMediaInputBody';
 export * from './updateNotificationPreferencesRequestBody';
 export * from './updatePersonalCollegeApplicationRankRequestBody';
 export * from './updatePersonalCollegeApplicationRequestBody';

@@ -74,4 +74,21 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository) {
 		return nil, nil
 	})
 
+	//Register UPDATE media/{id} handler
+	huma.Register(api, huma.Operation{
+		OperationID: "update-media",
+		Method:      http.MethodPatch,
+		Path:        "/media/{id}",
+		Description: "Retitle a video",
+		Tags:        []string{"Media"},
+	}, func(ctx context.Context, input *models.UpdateMediaInput) (*models.UpdateMediaOutput, error) {
+		updatedMedia, err := mediaHandler.UpdateMedia(ctx, input.ID, input.Body.Title)
+
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateMediaOutput{Body: *updatedMedia}, nil
+
+	})
+
 }

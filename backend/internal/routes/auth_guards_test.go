@@ -73,10 +73,13 @@ var routeTable = []routeAccess{
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/students/{id}", anyRole, nil},
+	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
 
 	// colleges & applications
 	{http.MethodPost, "/colleges", guarded, []string{roleCounselor}},
@@ -96,6 +99,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
@@ -108,6 +112,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/media/{id}", anyRole, nil},
 	{http.MethodGet, "/media", anyRole, nil},
 	{http.MethodDelete, "/media/{id}", anyRole, nil},
+	{http.MethodPatch, "/media/{id}", anyRole, nil},
 	{http.MethodPost, "/media-access", anyRole, nil},
 	{http.MethodDelete, "/media-access/{id}", anyRole, nil},
 	{http.MethodGet, "/media-access", anyRole, nil},
@@ -292,6 +297,9 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"DELETE /videos",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
+		"GET /counselors/fetchall",
+		"GET /students/fetchall",
+		"PATCH /students/assign",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",

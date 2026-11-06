@@ -64,6 +64,16 @@ export const getSearchTodoItemsMockHandler = (overrideResponse?: TodoItemPage | 
   }, options)
 }
 
+export const getDeleteTodoItemMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/todo-items/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
 export const getUpdateTodoItemCompletedMockHandler = (overrideResponse?: TodoItem | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem> | TodoItem), options?: RequestHandlerOptions) => {
   return http.patch('*/todo-items/:id', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
@@ -79,5 +89,6 @@ export const getTodoItemsMock = () => [
   getGetTodoItemsMockHandler(),
   getCreateTodoItemMockHandler(),
   getSearchTodoItemsMockHandler(),
+  getDeleteTodoItemMockHandler(),
   getUpdateTodoItemCompletedMockHandler()
 ]
