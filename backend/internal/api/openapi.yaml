@@ -1960,6 +1960,22 @@ components:
       required:
         - completed
       type: object
+    UpdateTodoItemDescriptionInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemDescriptionInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        new_description:
+          minLength: 1
+          type: string
+      required:
+        - new_description
+      type: object
     UpdateUserBody:
       additionalProperties: false
       properties:
@@ -3915,6 +3931,37 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateTodoItemCompletedAtInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}/description:
+    patch:
+      description: Update a todo-item's description
+      operationId: update-todo-item-description
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemDescriptionInputBody"
         required: true
       responses:
         "200":

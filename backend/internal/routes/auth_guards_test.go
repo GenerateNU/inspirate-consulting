@@ -104,6 +104,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/todo-items/{id}/description", guarded, []string{roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
@@ -307,6 +308,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"GET /counselors/fetchall",
 		"GET /students/fetchall",
 		"PATCH /students/assign",
+		"PATCH /todo-items/{id}/description",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",

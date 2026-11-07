@@ -18,3 +18,13 @@ func (h *Handler) UpdateTodoItemCompletedAt(ctx context.Context, id string, comp
 	}
 	return updatedItem, nil
 }
+
+func (h *Handler) UpdateTodoItemDescription(ctx context.Context, id string, newDescription string) (*models.TodoItem, error) {
+	updatedItem, err := h.TodoItemRepository.UpdateTodoItemDescription(ctx, id, newDescription)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedItem, nil
+
+}

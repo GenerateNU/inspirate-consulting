@@ -88,3 +88,49 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 		assert.EqualError(t, err, "database error")
 	})
 }
+
+// Unit tests for the UpdateTodoItemDescription handler logic without HTTP or database dependencies.
+func TestHandler_UpdateTodoItemDescription(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	id := uuid.NewString()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		expectedOutput := &models.TodoItem{
+			ID:              id,
+			TodoDescription: "Submit the CSS Profile",
+		}
+
+		// the new description should be passed through to the repository unchanged
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDescription", mock.Anything, id, "Submit the CSS Profile").Return(expectedOutput, nil)
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemDescription(ctx, id, "Submit the CSS Profile")
+
+		// Verify result
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOutput, res)
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		// Simulate database repository failure
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDescription", mock.Anything, id, mock.Anything).Return(nil, errors.New("database error"))
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemDescription(ctx, id, "Submit the CSS Profile")
+
+		// Verify error propagation
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.EqualError(t, err, "database error")
+	})
+}

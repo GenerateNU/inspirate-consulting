@@ -124,6 +124,36 @@ func (_m *TodoItemRepository) UpdateTodoItemCompletedAt(ctx context.Context, id 
 	return r0, r1
 }
 
+// UpdateTodoItemDescription provides a mock function with given fields: ctx, id, newDescription
+func (_m *TodoItemRepository) UpdateTodoItemDescription(ctx context.Context, id string, newDescription string) (*models.TodoItem, error) {
+	ret := _m.Called(ctx, id, newDescription)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateTodoItemDescription")
+	}
+
+	var r0 *models.TodoItem
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*models.TodoItem, error)); ok {
+		return rf(ctx, id, newDescription)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *models.TodoItem); ok {
+		r0 = rf(ctx, id, newDescription)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.TodoItem)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, id, newDescription)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTodoItemRepository creates a new instance of TodoItemRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTodoItemRepository(t interface {
