@@ -1,4 +1,4 @@
-package user
+package passwordgen
 
 import (
 	"regexp"
@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// The same rules validatePasswordStrength (internal/supabase/signup.go) enforces at signup.
 var (
 	hasUpper   = regexp.MustCompile(`[A-Z]`)
 	hasLower   = regexp.MustCompile(`[a-z]`)
@@ -25,7 +24,7 @@ func TestGenerateTempPassword(t *testing.T) {
 
 	// many runs, since a generator that only sometimes misses a class would pass a single check
 	for range 1000 {
-		password, err := generateTempPassword()
+		password, err := GenerateTempPassword()
 		require.NoError(t, err)
 
 		assert.Len(t, password, tempPasswordLength)
