@@ -5,6 +5,7 @@ import (
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/passwordgen"
 	"inspirate-consulting/internal/supabase"
 	"log/slog"
 )
@@ -15,7 +16,7 @@ func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput,
 		return nil, errs.BadRequest("year, gpa, and counselor_id are required for students")
 	}
 
-	tempPassword, err := passwordgen.generateTempPassword()
+	tempPassword, err := passwordgen.GenerateTempPassword()
 	if err != nil {
 		return nil, err
 	}

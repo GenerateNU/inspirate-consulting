@@ -7,6 +7,7 @@ import (
 
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/models"
+	"inspirate-consulting/internal/passwordgen"
 	"inspirate-consulting/internal/supabase"
 )
 
@@ -16,7 +17,7 @@ func (h *Handler) SendTempPassword(ctx context.Context, input *models.SendTempPa
 		return nil, err
 	}
 
-	tempPassword, err := passwordgen.generateTempPassword()
+	tempPassword, err := passwordgen.GenerateTempPassword()
 	if err != nil {
 		return nil, err
 	}

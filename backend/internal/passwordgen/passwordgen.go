@@ -13,7 +13,7 @@ const (
 	specialChars       = "!@#~$%^&*()+|_.,;<>?/{}-"
 )
 
-func generateTempPassword() (string, error) {
+func GenerateTempPassword() (string, error) {
 	classes := []string{lowerChars, upperChars, digitChars, specialChars}
 	all := lowerChars + upperChars + digitChars + specialChars
 
