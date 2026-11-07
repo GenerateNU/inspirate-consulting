@@ -38,7 +38,7 @@ func TestHandler_FetchUserBySupabaseID(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("FetchUserBySupabaseID", mock.Anything, input).Return(&expectedOutput, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.FetchUserBySupabaseID(ctx, &input)
 
 		assert.NoError(t, err)
@@ -53,7 +53,7 @@ func TestHandler_FetchUserBySupabaseID(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("FetchUserBySupabaseID", mock.Anything, input).Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.FetchUserBySupabaseID(ctx, &input)
 
 		assert.Error(t, err)

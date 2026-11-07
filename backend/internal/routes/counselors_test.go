@@ -28,7 +28,7 @@ func setupTestAppWithCounselor(mockCounselorRepo data.CounselorRepository) (*fib
 	repo := &data.Repository{
 		Counselor: mockCounselorRepo,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

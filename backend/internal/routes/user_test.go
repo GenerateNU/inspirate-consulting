@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -30,7 +31,8 @@ func setupTestAppWithUser(mockUser data.UserRepository, supabase supabase.Supaba
 	repo := &data.Repository{
 		User: mockUser,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	accountSQSClient := sqsclient.NewSQSClientWithAPI(&fakeSQS{}, "test-account-queue-url")
+	app, _, err := SetupApp(cfg, repo, nil, accountSQSClient)
 	return app, err
 }
 

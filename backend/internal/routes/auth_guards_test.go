@@ -174,7 +174,7 @@ func TestRouteTable_CoversEveryRegisteredRoute(t *testing.T) {
 	t.Parallel()
 
 	signingKey()
-	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{}, &sqsclient.SQSClient{})
+	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{}, &sqsclient.SQSClient{}, &sqsclient.SQSClient{})
 	require.NoError(t, err)
 
 	var registered []string

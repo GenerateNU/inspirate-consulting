@@ -7,14 +7,15 @@ import (
 
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	"inspirate-consulting/internal/handlers/user"
 	"inspirate-consulting/internal/models"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier) {
-	userHandler := user.NewHandler(repository.User)
+func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier, accountSQSClient *sqsclient.SQSClient) {
+	userHandler := user.NewHandler(repository.User, accountSQSClient)
 	huma.Register(api, huma.Operation{
 		OperationID: "create-user",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
