@@ -37,7 +37,8 @@ func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput,
 		EmailType:    models.AccountCreated,
 	}
 	if _, err := h.SQSClient.SendAccountEmailNotification(ctx, notification); err != nil {
-		slog.Error("failed to queue account-created email", "err", err, "email", input.Body.Email)
+		// TODO: surface this failure more durably than a log line so users aren't silently locked out.
+		slog.Warn("failed to queue account-created email", "err", err, "email", input.Body.Email)
 	}
 
 	return user, nil

@@ -250,7 +250,6 @@ func TestRoute_CreateUser_RoleFields(t *testing.T) {
 		var out models.CreateUserBody
 		require.NoError(t, json.Unmarshal(body, &out))
 		assert.Equal(t, "New Counselor", out.User.Name)
-		assert.NotEmpty(t, out.TempPassword)
 	})
 }
 

@@ -29,7 +29,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 		repo := mocks.NewUserRepository(t)
 		repo.On("UpdateUser", ctx, userID, input).Return(&models.User{ID: userID, Name: name}, nil)
 
-		res, err := NewHandler(repo).UpdateUser(ctx, input)
+		res, err := NewHandler(repo, nil).UpdateUser(ctx, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, name, res.Name)
@@ -40,7 +40,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 
 		repo := mocks.NewUserRepository(t) // UpdateUser should not be called
 
-		res, err := NewHandler(repo).UpdateUser(context.Background(), input)
+		res, err := NewHandler(repo, nil).UpdateUser(context.Background(), input)
 
 		assert.Nil(t, res)
 		assert.Equal(t, errs.Unauthorized(), err)
@@ -56,7 +56,7 @@ func TestHandler_UpdateUser(t *testing.T) {
 		repo := mocks.NewUserRepository(t)
 		repo.On("UpdateUser", ctx, userID, input).Return(nil, notFound)
 
-		res, err := NewHandler(repo).UpdateUser(ctx, input)
+		res, err := NewHandler(repo, nil).UpdateUser(ctx, input)
 
 		assert.Nil(t, res)
 		assert.Equal(t, notFound, err)

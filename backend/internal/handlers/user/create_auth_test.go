@@ -90,7 +90,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 			in := createInput("X", "x@example.com", models.StudentRole)
 			clear(in)
 
-			out, err := NewHandler(repo).CreateUser(ctx, in, sb)
+			out, err := NewHandler(repo, nil).CreateUser(ctx, in, sb)
 			assert.Nil(t, out)
 			assert.Equal(t, errs.BadRequest("year, gpa, and counselor_id are required for students"), err)
 			assert.False(t, signedUp, "no Supabase account should be created for an invalid request")
