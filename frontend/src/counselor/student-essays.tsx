@@ -15,6 +15,7 @@ import type { Essays } from "../api/models";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import UserAvatar from "@/components/user-avatar";
 import {
   EssaySections,
   RequestedAt,
@@ -24,15 +25,6 @@ import {
   reviewStats,
   useReviewStatuses,
 } from "../essays/essay-sections";
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
 export default function StudentEssays() {
   const { studentId = "" } = useParams();
@@ -90,12 +82,11 @@ export default function StudentEssays() {
 
         <Card className="flex-row flex-wrap items-center justify-between gap-4 p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-4">
-            <div
-              aria-hidden
-              className="flex size-16 items-center justify-center rounded-md bg-muted text-2xl font-semibold"
-            >
-              {student ? initials(student.name) : "?"}
-            </div>
+            <UserAvatar
+              name={student?.name ?? ""}
+              className="size-16 rounded-md"
+              fallbackClassName="rounded-md text-2xl font-semibold text-foreground"
+            />
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 {student?.name ?? "Student"}
