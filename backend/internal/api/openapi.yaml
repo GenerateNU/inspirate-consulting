@@ -1960,6 +1960,24 @@ components:
       required:
         - completed
       type: object
+    UpdateTodoItemDeadlineInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemDeadlineInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        deadline:
+          format: date-time
+          type:
+            - string
+            - "null"
+      required:
+        - deadline
+      type: object
     UpdateTodoItemDescriptionInputBody:
       additionalProperties: false
       properties:
@@ -3931,6 +3949,38 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateTodoItemCompletedAtInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}/deadline:
+    patch:
+      description: Update a to-do item's deadline
+      operationId: update-todo-item-deadline
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemDeadlineInputBody"
         required: true
       responses:
         "200":

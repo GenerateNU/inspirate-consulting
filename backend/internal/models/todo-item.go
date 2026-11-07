@@ -163,3 +163,14 @@ type UpdateTodoItemDescriptionInput struct {
 type UpdateTodoItemDescriptionOutput struct {
 	Body TodoItem
 }
+
+type UpdateTodoItemDeadlineInput struct {
+	ID   string `path:"id" format:"uuid"`
+	Body struct {
+		NewDeadline *time.Time `json:"deadline"`
+	}
+}
+
+type UpdateTodoItemDeadlineOutput struct {
+	Body TodoItem
+}
