@@ -25,7 +25,7 @@ import (
 func setupChatMessageTestApp(t *testing.T, mockChat data.ChatMessageRepository) *fiber.App {
 	t.Helper()
 
-	app, _, err := SetupApp(config.Config{TestMode: true}, &data.Repository{ChatMessage: mockChat}, nil)
+	app, _, err := SetupApp(config.Config{TestMode: true}, &data.Repository{ChatMessage: mockChat}, nil, nil)
 	require.NoError(t, err)
 	return app
 }
