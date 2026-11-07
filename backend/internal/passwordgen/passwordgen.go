@@ -1,10 +1,9 @@
-package user
+package passwordgen
 
 import "github.com/sethvargo/go-password/password"
 
-// generateTempPassword creates the temporary password a new user signs up with.
+// Generate creates a temporary password for a new or reset account.
 // Need to replace current generation with a proper method that actually follows the constraints we have
-func generateTempPassword() (string, error) {
+func Generate() (string, error) {
 	return password.Generate(16, 4, 4, false, false)
-
 }
