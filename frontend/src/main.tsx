@@ -9,9 +9,11 @@ import Greeting from "./greeting/greeting";
 import CreateExtracurricular from "./extracurricular/CreateExtracurricular";
 import Extracurriculars from "./extracurricular/Extracurriculars";
 import Essay from "./essays/essays";
-import CreateCollege from "./college/create-college";
-import CollegeList from "./college/college-list";
-import CreateCollegeApplication from "./college/create-application";
+import CounselorCollegeList from "./college/counselor/college-list.tsx";
+import CounselorCollegeDetails from "./college/counselor/college-details.tsx";
+import StudentCollegeList from "./college/student/college-list.tsx";
+import StudentCollegeDetails from "./college/student/college-details.tsx";
+import MyCollegeList from "./college/student/my-college-list";
 import UploadVideo from "./video/upload-video";
 import VideoList from "./video/videos";
 import Student from "./student/student";
@@ -28,7 +30,6 @@ import LogOut from "./logout/logout";
 import LogIn from "./login/login";
 import SearchStudents from "./counselor/search-students.tsx";
 import { AuthProvider } from "./contexts/auth-context.tsx";
-import CollegeApplications from "./college/college-applications.tsx";
 import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
 import AccountExpired from "./account-expiration/account-expired";
 import StudentTaskList from "./task/student-task-list.tsx";
@@ -51,16 +52,23 @@ createRoot(document.getElementById("root")!).render(
               />
               <Route path="/extracurriculars" element={<Extracurriculars />} />
               <Route path="/essay" element={<Essay />} />
-              <Route path="/create-college" element={<CreateCollege />} />
-              <Route path="/college-list" element={<CollegeList />} />
               <Route
-                path="/create-application"
-                element={<CreateCollegeApplication />}
+                path="/counselor-college-list"
+                element={<CounselorCollegeList />}
               />
               <Route
-                path="/college-applications"
-                element={<CollegeApplications />}
+                path="/counselor-college-list/:id"
+                element={<CounselorCollegeDetails />}
               />
+              <Route
+                path="/student-college-list"
+                element={<StudentCollegeList />}
+              />
+              <Route
+                path="/student-college-list/:id"
+                element={<StudentCollegeDetails />}
+              />
+              <Route path="/college-applications" element={<MyCollegeList />} />
               <Route path="/upload-video" element={<UploadVideo />} />
               <Route path="/videos" element={<VideoList />} />
               <Route path="/student" element={<Student />} />
