@@ -2,3 +2,9 @@
 **/.vscode/
 
 node_modules/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+infra/terraform/*/build/
