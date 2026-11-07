@@ -73,15 +73,13 @@ type LoginResponse struct {
 
 type LogoutInput struct{}
 
-// tokens stay in the cookie only, body returns the logged in user
 type LoginOutput struct {
-	SetCookie http.Cookie `header:"Set-Cookie"`
+	SetCookie []http.Cookie `header:"Set-Cookie"`
 	Body      *User
 }
 
-// expires the jwt cookie set on login
 type LogoutResponse struct {
-	SetCookie http.Cookie `header:"Set-Cookie"`
+	SetCookie []http.Cookie `header:"Set-Cookie"`
 }
 
 type ResetPasswordInput struct {
@@ -100,3 +98,16 @@ type ForcePasswordResetInput struct {
 }
 
 type ForcePasswordResetOutput struct{}
+
+// id here is the student of choice's internal (non-Supabase) user ID
+type SendTempPasswordInput struct {
+	ID uuid.UUID `path:"id" required:"true"`
+}
+
+type SendTempPasswordBody struct {
+	Email string `json:"email"`
+}
+
+type SendTempPasswordOutput struct {
+	Body *SendTempPasswordBody
+}

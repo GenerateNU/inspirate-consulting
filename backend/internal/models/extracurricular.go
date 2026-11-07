@@ -49,7 +49,7 @@ type Extracurricular struct {
 }
 
 // CreateExtracurricularRequest is the body shape for creating an extracurricular.
-// StudentID comes from the route path and UserID comes from the auth context,
+// StudentID comes from the auth context and UserID comes from the auth context,
 // so neither is accepted in the body. Huma validates required fields, enums,
 // and date formats from these tags before the handler runs.
 type CreateExtracurricularRequest struct {
@@ -65,8 +65,7 @@ type CreateExtracurricularRequest struct {
 
 // CreateExtracurricularInput is the request payload shape for creating a new extracurricular record.
 type CreateExtracurricularInput struct {
-	StudentID string `path:"studentID" doc:"ID of the student the extracurricular belongs to"`
-	Body      CreateExtracurricularRequest
+	Body CreateExtracurricularRequest
 }
 
 // CreateExtracurricularOutput is the created record returned after insert.

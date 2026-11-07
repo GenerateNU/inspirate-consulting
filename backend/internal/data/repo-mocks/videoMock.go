@@ -15,6 +15,24 @@ type VideoRepository struct {
 	mock.Mock
 }
 
+// DeleteVideo provides a mock function with given fields: ctx, s3Key
+func (_m *VideoRepository) DeleteVideo(ctx context.Context, s3Key string) error {
+	ret := _m.Called(ctx, s3Key)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteVideo")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, s3Key)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetVideo provides a mock function with given fields: ctx, s3Key
 func (_m *VideoRepository) GetVideo(ctx context.Context, s3Key string) (*models.Video, error) {
 	ret := _m.Called(ctx, s3Key)

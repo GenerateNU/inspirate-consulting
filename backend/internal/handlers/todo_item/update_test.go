@@ -88,3 +88,139 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 		assert.EqualError(t, err, "database error")
 	})
 }
+
+// Unit tests for the UpdateTodoItemDescription handler logic without HTTP or database dependencies.
+func TestHandler_UpdateTodoItemDescription(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	id := uuid.NewString()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		expectedOutput := &models.TodoItem{
+			ID:              id,
+			TodoDescription: "Submit the CSS Profile",
+		}
+
+		// the new description should be passed through to the repository unchanged
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDescription", mock.Anything, id, "Submit the CSS Profile").Return(expectedOutput, nil)
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemDescription(ctx, id, "Submit the CSS Profile")
+
+		// Verify result
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOutput, res)
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		// Simulate database repository failure
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDescription", mock.Anything, id, mock.Anything).Return(nil, errors.New("database error"))
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemDescription(ctx, id, "Submit the CSS Profile")
+
+		// Verify error propagation
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.EqualError(t, err, "database error")
+	})
+}
+
+// Unit tests for the UpdateTodoItemDeadline handler logic without HTTP or database dependencies.
+// The handler rejects deadlines in the past and passes everything else to the repository.
+func TestHandler_UpdateTodoItemDeadline(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	id := uuid.NewString()
+
+	t.Run("future deadline is saved", func(t *testing.T) {
+		t.Parallel()
+
+		deadline := time.Now().Add(7 * 24 * time.Hour)
+		expectedOutput := &models.TodoItem{
+			ID:              id,
+			TodoDescription: "Submit the FAFSA",
+			Deadline:        &deadline,
+		}
+
+		// a future deadline should be passed through to the repository unchanged
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDeadline", mock.Anything, id, &deadline).Return(expectedOutput, nil)
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemDeadline(ctx, id, &deadline)
+
+		// Verify result
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOutput, res)
+	})
+
+	t.Run("nil deadline clears it", func(t *testing.T) {
+		t.Parallel()
+
+		expectedOutput := &models.TodoItem{
+			ID:              id,
+			TodoDescription: "Submit the FAFSA",
+			Deadline:        nil,
+		}
+
+		// a nil deadline should reach the repository as nil, which removes the deadline
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDeadline", mock.Anything, id, (*time.Time)(nil)).Return(expectedOutput, nil)
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemDeadline(ctx, id, nil)
+
+		// Verify result
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOutput, res)
+		assert.Nil(t, res.Deadline)
+	})
+
+	t.Run("past deadline is rejected", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when the deadline is in the past
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		past := time.Now().Add(-24 * time.Hour)
+		res, err := handler.UpdateTodoItemDeadline(ctx, id, &past)
+
+		// Verify the request is rejected before reaching the repository
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.Contains(t, err.Error(), "deadline cannot be in the past")
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		// Simulate database repository failure
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDeadline", mock.Anything, id, mock.Anything).Return(nil, errors.New("database error"))
+
+		// Execute handler
+		handler := NewHandler(mockRepo, nil)
+		deadline := time.Now().Add(24 * time.Hour)
+		res, err := handler.UpdateTodoItemDeadline(ctx, id, &deadline)
+
+		// Verify error propagation
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.EqualError(t, err, "database error")
+	})
+}

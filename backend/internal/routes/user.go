@@ -7,14 +7,15 @@ import (
 
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	"inspirate-consulting/internal/data/aws/sqsclient"
 	"inspirate-consulting/internal/handlers/user"
 	"inspirate-consulting/internal/models"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier) {
-	userHandler := user.NewHandler(repository.User)
+func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier, accountSQSClient *sqsclient.SQSClient) {
+	userHandler := user.NewHandler(repository.User, accountSQSClient)
 	huma.Register(api, huma.Operation{
 		OperationID: "create-user",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
@@ -55,5 +56,19 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 			return nil, err
 		}
 		return userOutput, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "update-user",
+		Method:      http.MethodPatch,
+		Path:        "/user",
+		Description: "Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.",
+		Tags:        []string{"User"},
+	}, func(ctx context.Context, input *models.UpdateUserInput) (*models.UpdateUserOutput, error) {
+		updatedUser, err := userHandler.UpdateUser(ctx, input.Body)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateUserOutput{Body: updatedUser}, nil
 	})
 }

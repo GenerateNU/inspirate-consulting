@@ -10,6 +10,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -27,7 +28,7 @@ func setupTestAppWithCounselor(mockCounselorRepo data.CounselorRepository) (*fib
 	repo := &data.Repository{
 		Counselor: mockCounselorRepo,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 
@@ -428,6 +429,63 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
+func TestRoute_UpdateCounselor(t *testing.T) {
+	t.Parallel()
+
+	counselorID := uuid.New()
+	asCounselor := map[string]string{"X-Counselor-ID": counselorID.String()}
+
+	t.Run("success updates the logged-in counselor", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewCounselorRepository(t)
+		// the counselor id comes from the session
+		mockRepo.On("UpdateCounselor", mock.Anything, counselorID, models.UpdateCounselorBody{}).
+			Return(&models.Counselor{ID: counselorID, UserID: uuid.New()}, nil)
+
+		app, err := setupTestAppWithCounselor(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doJSON(t, app, http.MethodPatch, "/counselors", map[string]any{}, asCounselor)
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var output models.Counselor
+		require.NoError(t, json.Unmarshal(body, &output))
+		assert.Equal(t, counselorID, output.ID)
+	})
+
+	t.Run("caller without a counselor profile is unauthorized", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewCounselorRepository(t)
+		// The repository is never reached.
+
+		app, err := setupTestAppWithCounselor(mockRepo)
+		require.NoError(t, err)
+
+		// no X-Counselor-ID: test mode identifies the caller as the placeholder student
+		resp, _ := doJSON(t, app, http.MethodPatch, "/counselors", map[string]any{})
+
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	})
+
+	t.Run("unknown counselor returns not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewCounselorRepository(t)
+		mockRepo.On("UpdateCounselor", mock.Anything, counselorID, models.UpdateCounselorBody{}).
+			Return(nil, errs.NotFound("counselor", "id", counselorID.String()))
+
+		app, err := setupTestAppWithCounselor(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doJSON(t, app, http.MethodPatch, "/counselors", map[string]any{}, asCounselor)
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
 

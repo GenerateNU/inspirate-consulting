@@ -152,3 +152,25 @@ type UpdateTodoItemCompletedAtOutput struct {
 type DeleteTodoInput struct {
 	ID string `path:"id"`
 }
+
+type UpdateTodoItemDescriptionInput struct {
+	ID   string `path:"id"`
+	Body struct {
+		NewDescription string `json:"new_description" minLength:"1"`
+	}
+}
+
+type UpdateTodoItemDescriptionOutput struct {
+	Body TodoItem
+}
+
+type UpdateTodoItemDeadlineInput struct {
+	ID   string `path:"id" format:"uuid"`
+	Body struct {
+		NewDeadline *time.Time `json:"deadline"`
+	}
+}
+
+type UpdateTodoItemDeadlineOutput struct {
+	Body TodoItem
+}

@@ -22,10 +22,12 @@ import {
   getCreateTodoItemResponseMock,
   getGetTodoItemsResponseMock,
   getSearchTodoItemsResponseMock,
-  getUpdateTodoItemCompletedResponseMock
+  getUpdateTodoItemCompletedResponseMock,
+  getUpdateTodoItemDeadlineResponseMock,
+  getUpdateTodoItemDescriptionResponseMock
 } from './todo-items.faker';
 
-export { getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getSearchTodoItemsResponseMock, getUpdateTodoItemCompletedResponseMock } from './todo-items.faker';
+export { getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getSearchTodoItemsResponseMock, getUpdateTodoItemCompletedResponseMock, getUpdateTodoItemDeadlineResponseMock, getUpdateTodoItemDescriptionResponseMock } from './todo-items.faker';
 
 
 export const getGetTodoItemsMockHandler = (overrideResponse?: TodoItemPage | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TodoItemPage> | TodoItemPage), options?: RequestHandlerOptions) => {
@@ -85,10 +87,36 @@ export const getUpdateTodoItemCompletedMockHandler = (overrideResponse?: TodoIte
       })
   }, options)
 }
+
+export const getUpdateTodoItemDeadlineMockHandler = (overrideResponse?: TodoItem | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem> | TodoItem), options?: RequestHandlerOptions) => {
+  return http.patch('*/todo-items/:id/deadline', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateTodoItemDeadlineResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUpdateTodoItemDescriptionMockHandler = (overrideResponse?: TodoItem | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem> | TodoItem), options?: RequestHandlerOptions) => {
+  return http.patch('*/todo-items/:id/description', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateTodoItemDescriptionResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getTodoItemsMock = () => [
   getGetTodoItemsMockHandler(),
   getCreateTodoItemMockHandler(),
   getSearchTodoItemsMockHandler(),
   getDeleteTodoItemMockHandler(),
-  getUpdateTodoItemCompletedMockHandler()
+  getUpdateTodoItemCompletedMockHandler(),
+  getUpdateTodoItemDeadlineMockHandler(),
+  getUpdateTodoItemDescriptionMockHandler()
 ]

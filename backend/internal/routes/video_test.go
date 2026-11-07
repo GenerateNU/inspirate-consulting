@@ -10,6 +10,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -26,7 +27,7 @@ func setupTestAppWithVideo(mockVideo data.VideoRepository) (*fiber.App, error) {
 	repo := &data.Repository{
 		Video: mockVideo,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 
@@ -194,5 +195,73 @@ func TestRoute_ListVideos(t *testing.T) {
 		err = json.Unmarshal(respBody, &output)
 		require.NoError(t, err)
 		assert.Len(t, output, 0)
+	})
+}
+
+func TestRoute_DeleteVideo(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewVideoRepository(t)
+		mockRepo.On("DeleteVideo", mock.Anything, "videos/uuid-common-app-tips.mp4").Return(nil)
+
+		app, err := setupTestAppWithVideo(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/videos?s3_key=videos/uuid-common-app-tips.mp4", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewVideoRepository(t)
+		mockRepo.On("DeleteVideo", mock.Anything, "videos/uuid-missing.mp4").
+			Return(errs.NotFound("video", "s3Key", "videos/uuid-missing.mp4"))
+
+		app, err := setupTestAppWithVideo(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/videos?s3_key=videos/uuid-missing.mp4", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("validation error : missing s3_key", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewVideoRepository(t)
+		// Mock should not be called when Huma validation fails.
+
+		app, err := setupTestAppWithVideo(mockRepo)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodDelete, "/videos", nil)
+		require.NoError(t, err)
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
 }

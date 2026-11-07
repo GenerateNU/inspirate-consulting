@@ -101,16 +101,33 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 			return
 		}
 
-		cookie, err := huma.ReadCookie(ctx, "jwt")
-		if err != nil || cookie.Value == "" {
-			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Token Not Found")
-			if err != nil {
-				slog.Error("Failed to write error", "err", err)
-			}
-			return
+		accessToken := ""
+		if cookie, err := huma.ReadCookie(ctx, AccessTokenCookieName); err == nil {
+			accessToken = cookie.Value
 		}
 
-		claims, err := verifier.Verify(cookie.Value)
+		refreshed := false
+		if accessToken == "" {
+			token, err := refreshSession(ctx, sb)
+			if err != nil {
+				err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Token Not Found")
+				if err != nil {
+					slog.Error("Failed to write error", "err", err)
+				}
+				return
+			}
+			accessToken, refreshed = token, true
+		}
+
+		claims, err := verifier.Verify(accessToken)
+
+		// only an expired token is refreshed
+		if err != nil && !refreshed && errors.Is(err, jwt.ErrTokenExpired) {
+			if token, refreshErr := refreshSession(ctx, sb); refreshErr == nil {
+				accessToken = token
+				claims, err = verifier.Verify(accessToken)
+			}
+		}
 
 		if err != nil {
 			slog.Error("jwt verify failed", "err", err)
@@ -131,7 +148,7 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 			return
 		}
 
-		if err := sb.SupabaseValidateSession(Client, cookie.Value); err != nil {
+		if err := sb.SupabaseValidateSession(Client, accessToken); err != nil {
 			slog.Error("session validation failed", "err", err)
 			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "Invalid/Expired Token")
 			if err != nil {
@@ -140,11 +157,35 @@ func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterf
 			return
 		}
 
-		//ctx.SetHeader("Supabase-ID", claims.Sub)
 		ctx = huma.WithValue(ctx, "Supabase-ID", claims.Sub)
-		ctx = huma.WithValue(ctx, "JWT", cookie.Value)
+		ctx = huma.WithValue(ctx, "JWT", accessToken)
 		ctx = huma.WithValue(ctx, "Role", role)
 
 		next(ctx)
 	}
+}
+
+func refreshSession(ctx huma.Context, sb supabase.SupabaseInterface) (string, error) {
+	cookie, err := huma.ReadCookie(ctx, RefreshTokenCookieName)
+	if err != nil || cookie.Value == "" {
+		return "", ErrMissingToken
+	}
+
+	res, err := sb.SupabaseRefreshToken(Client, cookie.Value)
+	if err != nil {
+		slog.Error("token refresh failed", "err", err)
+		expired := ExpiredRefreshTokenCookie()
+		ctx.AppendHeader("Set-Cookie", expired.String())
+		return "", err
+	}
+	if res.AccessToken == "" || res.RefreshToken == "" {
+		return "", ErrInvalidToken
+	}
+
+	access := AccessTokenCookie(res.AccessToken, res.ExpiresIn)
+	refresh := RefreshTokenCookie(res.RefreshToken)
+	ctx.AppendHeader("Set-Cookie", access.String())
+	ctx.AppendHeader("Set-Cookie", refresh.String())
+
+	return res.AccessToken, nil
 }

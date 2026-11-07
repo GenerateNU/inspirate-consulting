@@ -23,6 +23,7 @@ func TestFetchUserBySupabaseID(t *testing.T) {
 	input.Body.Name = "FetchMeBySupabase"
 	input.Body.Email = "fetchmebysupabase@gmail.com"
 	input.Body.PfpKey = &key
+	input.Body.Role = models.CounselorRole
 
 	db := testutils.SetupTestDB(t)
 	repo := NewUserRepository(db)

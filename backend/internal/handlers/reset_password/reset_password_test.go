@@ -42,7 +42,7 @@ func TestHandler_ResetPassword(t *testing.T) {
 		repo := mocks.NewUserRepository(t)
 		repo.On("UpdateResetTime", mock.Anything, caller, (*time.Time)(nil)).Return(nil).Once()
 
-		_, err := NewHandler(repo).ResetPassword(asUser(caller.String()), resetInput("MyOwnPass1!"), sb)
+		_, err := NewHandler(repo, nil).ResetPassword(asUser(caller.String()), resetInput("MyOwnPass1!"), sb)
 		require.NoError(t, err)
 		assert.Equal(t, caller.String(), gotUser, "only the caller's own account may be changed")
 		assert.Equal(t, "MyOwnPass1!", gotPassword)
@@ -58,7 +58,7 @@ func TestHandler_ResetPassword(t *testing.T) {
 			},
 		}
 
-		_, err := NewHandler(mocks.NewUserRepository(t)).ResetPassword(context.Background(), resetInput("MyOwnPass1!"), sb)
+		_, err := NewHandler(mocks.NewUserRepository(t), nil).ResetPassword(context.Background(), resetInput("MyOwnPass1!"), sb)
 		assert.Error(t, err)
 		assert.False(t, called, "must not change any password without knowing who is asking")
 	})
@@ -72,7 +72,7 @@ func TestHandler_ResetPassword(t *testing.T) {
 		}
 		repo := mocks.NewUserRepository(t) // UpdateResetTime must not be called
 
-		_, err := NewHandler(repo).ResetPassword(asUser(uuid.NewString()), resetInput("x"), sb)
+		_, err := NewHandler(repo, nil).ResetPassword(asUser(uuid.NewString()), resetInput("x"), sb)
 		assert.EqualError(t, err, "weak password")
 	})
 
@@ -81,7 +81,7 @@ func TestHandler_ResetPassword(t *testing.T) {
 		repo := mocks.NewUserRepository(t)
 		repo.On("UpdateResetTime", mock.Anything, mock.Anything, (*time.Time)(nil)).Return(errors.New("db down"))
 
-		_, err := NewHandler(repo).ResetPassword(asUser(uuid.NewString()), resetInput("MyOwnPass1!"), &supabase.MockSupabase{})
+		_, err := NewHandler(repo, nil).ResetPassword(asUser(uuid.NewString()), resetInput("MyOwnPass1!"), &supabase.MockSupabase{})
 		assert.EqualError(t, err, "db down")
 	})
 }
@@ -99,7 +99,7 @@ func TestHandler_ForcePasswordReset(t *testing.T) {
 			Return(nil).Once()
 
 		before := time.Now()
-		_, err := NewHandler(repo).ForcePasswordReset(context.Background(), &models.ForcePasswordResetInput{SupabaseID: target})
+		_, err := NewHandler(repo, nil).ForcePasswordReset(context.Background(), &models.ForcePasswordResetInput{SupabaseID: target})
 		require.NoError(t, err)
 
 		require.NotNil(t, got)
@@ -112,7 +112,7 @@ func TestHandler_ForcePasswordReset(t *testing.T) {
 		repo := mocks.NewUserRepository(t)
 		repo.On("UpdateResetTime", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("db down"))
 
-		_, err := NewHandler(repo).ForcePasswordReset(context.Background(), &models.ForcePasswordResetInput{SupabaseID: uuid.New()})
+		_, err := NewHandler(repo, nil).ForcePasswordReset(context.Background(), &models.ForcePasswordResetInput{SupabaseID: uuid.New()})
 		assert.EqualError(t, err, "db down")
 	})
 }

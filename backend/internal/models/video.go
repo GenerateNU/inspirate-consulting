@@ -43,3 +43,7 @@ type ListVideosInput struct{}
 type ListVideosOutput struct {
 	Body []Video
 }
+
+type DeleteVideoInput struct {
+	S3Key string `query:"s3_key" required:"true" doc:"The S3 key/path of the video to delete"`
+}

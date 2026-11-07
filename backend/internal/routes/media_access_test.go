@@ -26,7 +26,7 @@ func setupMediaAccessTestApp(mockMediaAccess data.MediaAccessRepository) (*fiber
 	repo := &data.Repository{
 		MediaAccess: mockMediaAccess,
 	}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

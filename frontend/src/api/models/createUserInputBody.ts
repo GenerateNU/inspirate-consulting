@@ -6,20 +6,27 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { CreateUserInputBodyRole } from './createUserInputBodyRole';
+import type { CreateUserInputBodyYear } from './createUserInputBodyYear';
 
 export interface CreateUserInputBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /** counselor the student is assigned to; required when role is student */
+  counselor_id?: string;
   /** email of user for supabase signup */
   email: string;
   /** when the account expires; omit for no expiration */
   expires_at?: string;
+  /** gpa of the student; required when role is student */
+  gpa?: number;
   /**
      * Name of the user
      * @minLength 1
      * @maxLength 200
      */
   name: string;
+  /** organization of the student */
+  organization?: string;
   /**
      * pfp key of user
      * @nullable
@@ -27,4 +34,8 @@ export interface CreateUserInputBody {
   pfp_key: string | null;
   /** the type of user the counselor would like to create */
   role: CreateUserInputBodyRole;
+  /** interest of the student */
+  student_interest?: string;
+  /** year of the student; required when role is student */
+  year?: CreateUserInputBodyYear;
 }

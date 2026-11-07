@@ -48,6 +48,14 @@ func (m *mockUserRepository) UpdateResetTime(ctx context.Context, id uuid.UUID, 
 	return args.Error(0)
 }
 
+func (m *mockUserRepository) UpdateUser(ctx context.Context, id uuid.UUID, input models.UpdateUserBody) (*models.User, error) {
+	args := m.Called(ctx, id, input)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.User), args.Error(1)
+}
+
 func TestHandler_CreateUser(t *testing.T) {
 	t.Parallel()
 
@@ -62,7 +70,7 @@ func TestHandler_CreateUser(t *testing.T) {
 		mockRepo.On("CreateUser", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.CreateUser(context.Background(), input, &supabase.MockSupabase{})
 
 		assert.Error(t, err)

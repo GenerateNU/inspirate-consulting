@@ -23,7 +23,7 @@ func main() {
 		TestMode: true,
 	}
 
-	_, humaAPI, err := routes.SetupApp(cfg, &data.Repository{}, &sqsclient.SQSClient{})
+	_, humaAPI, err := routes.SetupApp(cfg, &data.Repository{}, &sqsclient.SQSClient{}, &sqsclient.SQSClient{})
 	if err != nil {
 		log.Fatalf("failed to set up app: %v", err)
 	}

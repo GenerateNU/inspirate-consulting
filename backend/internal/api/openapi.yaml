@@ -128,6 +128,24 @@ components:
         - last_message_read_at
         - unread_count
       type: object
+    Counselor:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Counselor.json
+          format: uri
+          readOnly: true
+          type: string
+        id:
+          type: string
+        user_id:
+          type: string
+      required:
+        - id
+        - user_id
+      type: object
     CounselorListItem:
       additionalProperties: false
       properties:
@@ -456,13 +474,10 @@ components:
           format: uri
           readOnly: true
           type: string
-        temp_password:
-          type: string
         user:
           $ref: "#/components/schemas/User"
       required:
         - user
-        - temp_password
       type: object
     CreateUserInputBody:
       additionalProperties: false
@@ -474,6 +489,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        counselor_id:
+          description: counselor the student is assigned to; required when role is student
+          type: string
         email:
           description: email of user for supabase signup
           type: string
@@ -481,10 +499,17 @@ components:
           description: when the account expires; omit for no expiration
           format: date-time
           type: string
+        gpa:
+          description: gpa of the student; required when role is student
+          format: int64
+          type: integer
         name:
           description: Name of the user
           maxLength: 200
           minLength: 1
+          type: string
+        organization:
+          description: organization of the student
           type: string
         pfp_key:
           description: pfp key of user
@@ -496,6 +521,17 @@ components:
           enum:
             - student
             - counselor
+          type: string
+        student_interest:
+          description: interest of the student
+          type: string
+        year:
+          description: year of the student; required when role is student
+          enum:
+            - freshman
+            - sophomore
+            - junior
+            - senior
           type: string
       required:
         - name
@@ -1449,6 +1485,21 @@ components:
       required:
         - new_password
       type: object
+    SendTempPasswordBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/SendTempPasswordBody.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+      required:
+        - email
+      type: object
     SetStudentReviewBalanceRequestBody:
       additionalProperties: false
       properties:
@@ -1649,6 +1700,17 @@ components:
           type: boolean
       required:
         - read
+      type: object
+    UpdateCounselorBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateCounselorBody.json
+          format: uri
+          readOnly: true
+          type: string
       type: object
     UpdateEssayGroupBody:
       additionalProperties: false
@@ -1866,6 +1928,35 @@ components:
       required:
         - status
       type: object
+    UpdateStudentBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateStudentBody.json
+          format: uri
+          readOnly: true
+          type: string
+        gpa:
+          description: GPA of the student
+          format: int64
+          type: integer
+        organization:
+          description: Organization of the student
+          type: string
+        student_interest:
+          description: Interest of the student
+          type: string
+        year:
+          description: School year of the student
+          enum:
+            - freshman
+            - sophomore
+            - junior
+            - senior
+          type: string
+      type: object
     UpdateTodoItemCompletedAtInputBody:
       additionalProperties: false
       properties:
@@ -1880,6 +1971,59 @@ components:
           type: boolean
       required:
         - completed
+      type: object
+    UpdateTodoItemDeadlineInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemDeadlineInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        deadline:
+          format: date-time
+          type:
+            - string
+            - "null"
+      required:
+        - deadline
+      type: object
+    UpdateTodoItemDescriptionInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemDescriptionInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        new_description:
+          minLength: 1
+          type: string
+      required:
+        - new_description
+      type: object
+    UpdateUserBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateUserBody.json
+          format: uri
+          readOnly: true
+          type: string
+        name:
+          description: Name of the user
+          maxLength: 200
+          minLength: 1
+          type: string
+        pfp_key:
+          description: pfp key of user
+          type: string
       type: object
     User:
       additionalProperties: false
@@ -2360,6 +2504,31 @@ paths:
           description: Error
       tags:
         - Global Colleges
+  /counselors:
+    patch:
+      description: Update the authenticated counselor's profile. The counselor has no editable fields yet.
+      operationId: update-counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCounselorBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Counselor"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
   /counselors/fetchall:
     get:
       description: Fetch a page of counselors, optionally filtered by user_id and name
@@ -2710,6 +2879,30 @@ paths:
           description: Error
       tags:
         - Extracurriculars
+    post:
+      description: Create a new extracurricular for the authenticated student.
+      operationId: create-extracurricular
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtracurricularRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
   /extracurriculars/{id}:
     patch:
       description: Update fields on an extracurricular for the authenticated student.
@@ -2728,39 +2921,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateExtracurricularRequest"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Extracurricular"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      tags:
-        - Extracurriculars
-  /extracurriculars/{studentID}:
-    post:
-      description: Create a new extracurricular for the given student.
-      operationId: create-extracurricular
-      parameters:
-        - description: ID of the student the extracurricular belongs to
-          in: path
-          name: studentID
-          required: true
-          schema:
-            description: ID of the student the extracurricular belongs to
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateExtracurricularRequest"
         required: true
       responses:
         "200":
@@ -3370,6 +3530,38 @@ paths:
           description: Error
       tags:
         - Students
+    patch:
+      description: Update a student's profile fields. Fields left out of the request are not changed.
+      operationId: update-student
+      parameters:
+        - description: ID of the student
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the student
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStudentBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Students
   /students/{id}/review-balance:
     patch:
       description: Overwrite a student's review balance with an absolute value, recording the change in the review ledger.
@@ -3776,7 +3968,94 @@ paths:
           description: Error
       tags:
         - Todo Items
+  /todo-items/{id}/deadline:
+    patch:
+      description: Update a to-do item's deadline
+      operationId: update-todo-item-deadline
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemDeadlineInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}/description:
+    patch:
+      description: Update a todo-item's description
+      operationId: update-todo-item-description
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemDescriptionInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
   /user:
+    patch:
+      description: Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
+      operationId: update-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
     post:
       description: Create a user (student/counselor)
       operationId: create-user
@@ -3914,6 +4193,31 @@ paths:
           description: Error
       tags:
         - User
+  /user/{id}/send-temp-password:
+    post:
+      description: Generate a new temporary password for a user and email it to them
+      operationId: send-temp-password
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendTempPasswordBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - ResetPass
   /user/{supabase_id}/force-password-reset:
     post:
       description: Force a user to reset their password on next login
@@ -3936,6 +4240,29 @@ paths:
       tags:
         - ResetPass
   /videos:
+    delete:
+      description: Delete a video by its S3Key
+      operationId: delete-video
+      parameters:
+        - description: The S3 key/path of the video to delete
+          explode: false
+          in: query
+          name: s3_key
+          required: true
+          schema:
+            description: The S3 key/path of the video to delete
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Videos
     get:
       description: List all videos in the S3 bucket.
       operationId: list-videos

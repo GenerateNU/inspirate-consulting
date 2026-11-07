@@ -5,4 +5,14 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import {
+  faker
+} from '@faker-js/faker';
+
+import type {
+  SendTempPasswordBody
+} from '../../models';
+
+
+export const getSendTempPasswordResponseMock = (overrideResponse: Partial<Extract<SendTempPasswordBody, object>> = {}): SendTempPasswordBody => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), email: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

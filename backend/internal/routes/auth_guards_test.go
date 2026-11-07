@@ -49,7 +49,9 @@ var routeTable = []routeAccess{
 	// auth & users
 	{http.MethodPost, "/user/logout", anyRole, nil},
 	{http.MethodPatch, "/user/reset-password", anyRole, nil},
+	{http.MethodPatch, "/user", anyRole, nil},
 	{http.MethodPost, "/user/{supabase_id}/force-password-reset", guarded, []string{roleCounselor}},
+	{http.MethodPost, "/user/{id}/send-temp-password", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/user", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
@@ -74,20 +76,22 @@ var routeTable = []routeAccess{
 	// students
 	{http.MethodPatch, "/students/{id}/review-balance", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/students/{id}", anyRole, nil},
+	{http.MethodPatch, "/students/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
 
 	// colleges & applications
 	{http.MethodPost, "/colleges", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/colleges/{id}", anyRole, nil},
 	{http.MethodGet, "/colleges", anyRole, nil},
-	{http.MethodPut, "/colleges/{id}", anyRole, nil},
-	{http.MethodDelete, "/colleges/{id}", anyRole, nil},
+	{http.MethodPut, "/colleges/{id}", guarded, []string{roleCounselor}},
+	{http.MethodDelete, "/colleges/{id}", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/college-search", anyRole, nil},
 	{http.MethodPost, "/applications", guarded, []string{roleStudent}},
 	{http.MethodGet, "/applications", guarded, []string{roleStudent}},
@@ -100,12 +104,15 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/todo-items/{id}/deadline", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/todo-items/{id}/description", guarded, []string{roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/videos/lookup", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/videos", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/videos", guarded, []string{roleCounselor}},
 
 	// media
 	{http.MethodPost, "/media", anyRole, nil},
@@ -118,7 +125,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/media-access", anyRole, nil},
 
 	// extracurriculars
-	{http.MethodPost, "/extracurriculars/{studentID}", anyRole, nil},
+	{http.MethodPost, "/extracurriculars", anyRole, nil},
 	{http.MethodGet, "/extracurriculars", anyRole, nil},
 	{http.MethodPatch, "/extracurriculars/{id}", anyRole, nil},
 
@@ -168,7 +175,7 @@ func TestRouteTable_CoversEveryRegisteredRoute(t *testing.T) {
 	t.Parallel()
 
 	signingKey()
-	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{}, &sqsclient.SQSClient{})
+	_, api, err := SetupApp(config.Config{Supabase: &supabase.MockSupabase{}}, &data.Repository{}, &sqsclient.SQSClient{}, &sqsclient.SQSClient{})
 	require.NoError(t, err)
 
 	var registered []string
@@ -288,17 +295,24 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 	assert.ElementsMatch(t, []string{
 		"POST /user",
 		"POST /user/{supabase_id}/force-password-reset",
+		"POST /user/{id}/send-temp-password",
 		"POST /greeting",
 		"POST /reviews/{id}/refund",
 		"POST /reviews/{id}/complete",
 		"PATCH /students/{id}/review-balance",
 		"POST /colleges",
 		"POST /videos",
+		"DELETE /videos",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
+		"PUT /colleges/{id}",
+		"DELETE /colleges/{id}",
+		"PATCH /counselors",
+		"PATCH /todo-items/{id}/deadline",
 		"GET /counselors/fetchall",
 		"GET /students/fetchall",
 		"PATCH /students/assign",
+		"PATCH /todo-items/{id}/description",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",
