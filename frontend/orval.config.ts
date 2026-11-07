@@ -13,6 +13,9 @@ export default defineConfig({
       target: "src/api/endpoints",
       schemas: "src/api/models",
       mock: true,
+      // Remove stale generated files (and their barrel exports) that no
+      // longer correspond to a schema/endpoint in the current spec.
+      clean: true,
       // Relative so the same bundle works on localhost, previews and prod.
       // The '/api' prefix is stripped by the Vite dev proxy in development and
       // by the Netlify proxy in production, before the backend sees it.
