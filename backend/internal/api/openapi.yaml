@@ -1951,6 +1951,21 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
+            - http://localhost:8080/schemas/UpdateTodoItemCompletedAtInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        completed:
+          type: boolean
+      required:
+        - completed
+      type: object
+    UpdateTodoItemDescriptionInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
             - http://localhost:8080/schemas/UpdateTodoItemDescriptionInputBody.json
           format: uri
           readOnly: true

@@ -1329,6 +1329,36 @@ export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Update a todo-item's description
+ */
+export const UpdateTodoItemDescriptionParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+
+
+
+export const UpdateTodoItemDescriptionBody = /*#__PURE__*/ zod.object({
+  "new_description": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))
+})
+
+export const UpdateTodoItemDescriptionResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
  */
 export const updateUserBodyNameMax = 200;
