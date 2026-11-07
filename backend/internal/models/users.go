@@ -67,8 +67,7 @@ type CreateUserInput struct {
 }
 
 type CreateUserBody struct {
-	User         *User  `json:"user"`
-	TempPassword string `json:"temp_password"`
+	User *User `json:"user"`
 }
 
 type CreateUserOutput struct {

@@ -170,7 +170,7 @@ func newAuthApp(t *testing.T, override func(*data.Repository)) *authApp {
 			return nil
 		},
 	}
-	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo, &sqsclient.SQSClient{})
+	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo, &sqsclient.SQSClient{}, &sqsclient.SQSClient{})
 	require.NoError(t, err)
 	a.app = app
 	return a

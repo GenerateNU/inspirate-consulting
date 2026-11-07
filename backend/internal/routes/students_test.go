@@ -22,7 +22,7 @@ import (
 func setupTestAppWithStudent(mockRepo data.EssayReviewRepository) (*fiber.App, error) {
 	cfg := config.Config{TestMode: true}
 	repo := &data.Repository{EssayReview: mockRepo}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 
@@ -213,7 +213,7 @@ func TestRoute_UpdateStudent(t *testing.T) {
 func setupTestAppWithStudentRepo(mockRepo data.StudentRepository) (*fiber.App, error) {
 	cfg := config.Config{TestMode: true}
 	repo := &data.Repository{Student: mockRepo}
-	app, _, err := SetupApp(cfg, repo, nil)
+	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
 

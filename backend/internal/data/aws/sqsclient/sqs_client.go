@@ -57,3 +57,18 @@ func (s *SQSClient) SendEmailNotification(ctx context.Context, notification *mod
 	return result.MessageId, nil
 
 }
+
+func (s *SQSClient) SendAccountEmailNotification(ctx context.Context, notification *models.AccountEmailNotificationRequestBody) (*string, error) {
+	body, err := json.Marshal(notification)
+	if err != nil {
+		return nil, err
+	}
+	result, err := s.sqsClient.SendMessage(ctx, &sqs.SendMessageInput{
+		MessageBody: aws.String(string(body)),
+		QueueUrl:    aws.String(s.queueURL),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.MessageId, nil
+}

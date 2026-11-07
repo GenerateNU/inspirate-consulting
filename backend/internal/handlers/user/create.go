@@ -6,6 +6,7 @@ import (
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/supabase"
+	"log/slog"
 )
 
 func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, supabase supabase.SupabaseInterface) (*models.CreateUserOutput, error) {
@@ -29,6 +30,16 @@ func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput,
 		return nil, err
 	}
 
-	user.Body.TempPassword = tempPassword
+	notification := &models.AccountEmailNotificationRequestBody{
+		UserEmail:    input.Body.Email,
+		Name:         input.Body.Name,
+		TempPassword: tempPassword,
+		EmailType:    models.AccountCreated,
+	}
+	if _, err := h.SQSClient.SendAccountEmailNotification(ctx, notification); err != nil {
+		// TODO: surface this failure more durably than a log line so users aren't silently locked out.
+		slog.Warn("failed to queue account-created email", "err", err, "email", input.Body.Email)
+	}
+
 	return user, nil
 }
