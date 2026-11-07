@@ -51,6 +51,7 @@ var routeTable = []routeAccess{
 	{http.MethodPatch, "/user/reset-password", anyRole, nil},
 	{http.MethodPatch, "/user", anyRole, nil},
 	{http.MethodPost, "/user/{supabase_id}/force-password-reset", guarded, []string{roleCounselor}},
+	{http.MethodPost, "/user/{id}/send-temp-password", guarded, []string{roleCounselor}},
 	{http.MethodPost, "/user", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
@@ -294,6 +295,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 	assert.ElementsMatch(t, []string{
 		"POST /user",
 		"POST /user/{supabase_id}/force-password-reset",
+		"POST /user/{id}/send-temp-password",
 		"POST /greeting",
 		"POST /reviews/{id}/refund",
 		"POST /reviews/{id}/complete",

@@ -17,7 +17,8 @@ import type {
 
 import type {
   ErrorModel,
-  ResetPasswordInputBody
+  ResetPasswordInputBody,
+  SendTempPasswordBody
 } from '../../models';
 
 
@@ -148,6 +149,90 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getResetUserPasswordMutationOptions(options), queryClient);
+    }
+    export const getSendTempPasswordUrl = (id: string,) => {
+
+
+
+
+  return `/api/user/${id}/send-temp-password`
+}
+
+/**
+ * Generate a new temporary password for a user and email it to them
+ */
+export const sendTempPassword = async (id: string, options?: RequestInit): Promise<SendTempPasswordBody> => {
+
+  const res = await fetch(getSendTempPasswordUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: SendTempPasswordBody, status?: number} = new globalThis.Error();
+    const data : SendTempPasswordBody = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: SendTempPasswordBody = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getSendTempPasswordMutationKey = () => ['sendTempPassword'] as const;
+
+export const getSendTempPasswordMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTempPassword>>, TError,SendTempPasswordMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof sendTempPassword>>, TError,SendTempPasswordMutationVariables, TContext> => {
+
+const mutationKey = getSendTempPasswordMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendTempPassword>>, SendTempPasswordMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  sendTempPassword(id,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendTempPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof sendTempPassword>>>
+
+    export type SendTempPasswordMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type SendTempPasswordMutationVariables = {id: string}
+
+    export const useSendTempPassword = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTempPassword>>, TError,SendTempPasswordMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof sendTempPassword>>,
+        TError,
+        SendTempPasswordMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSendTempPasswordMutationOptions(options), queryClient);
     }
     export const getForcePasswordResetUrl = (supabaseId: string,) => {
 
