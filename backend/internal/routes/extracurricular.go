@@ -18,8 +18,8 @@ func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, autho
 	huma.Register(api, huma.Operation{
 		OperationID: "create-extracurricular",
 		Method:      http.MethodPost,
-		Path:        "/extracurriculars/{studentID}",
-		Description: "Create a new extracurricular for the given student.",
+		Path:        "/extracurriculars",
+		Description: "Create a new extracurricular for the authenticated student.",
 		Tags:        []string{"Extracurriculars"},
 	}, extracurricularHandler.CreateExtracurricular)
 

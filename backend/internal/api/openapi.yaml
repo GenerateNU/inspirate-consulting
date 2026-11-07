@@ -2879,6 +2879,30 @@ paths:
           description: Error
       tags:
         - Extracurriculars
+    post:
+      description: Create a new extracurricular for the authenticated student.
+      operationId: create-extracurricular
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtracurricularRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
   /extracurriculars/{id}:
     patch:
       description: Update fields on an extracurricular for the authenticated student.
@@ -2897,39 +2921,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateExtracurricularRequest"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Extracurricular"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      tags:
-        - Extracurriculars
-  /extracurriculars/{studentID}:
-    post:
-      description: Create a new extracurricular for the given student.
-      operationId: create-extracurricular
-      parameters:
-        - description: ID of the student the extracurricular belongs to
-          in: path
-          name: studentID
-          required: true
-          schema:
-            description: ID of the student the extracurricular belongs to
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateExtracurricularRequest"
         required: true
       responses:
         "200":

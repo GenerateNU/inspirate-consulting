@@ -6,8 +6,10 @@ import { queryClient } from "./api/client";
 import "./index.css";
 import App from "./App";
 import Greeting from "./greeting/greeting";
-import CreateExtracurricular from "./extracurricular/CreateExtracurricular";
 import Extracurriculars from "./extracurricular/Extracurriculars";
+import CreateExtracurricular from "./extracurricular/CreateExtracurricular";
+import ViewExtracurricular from "./extracurricular/ViewExtracurriculars";
+import EditExtracurricular from "./extracurricular/EditExtracurricular";
 import Essay from "./essays/essays";
 import CounselorCollegeList from "./college/counselor/college-list.tsx";
 import CounselorCollegeDetails from "./college/counselor/college-details.tsx";
@@ -46,11 +48,19 @@ createRoot(document.getElementById("root")!).render(
             <Route element={<Layout />}>
               <Route path="/" element={<App />} />
               <Route path="/greeting" element={<Greeting />} />
+              <Route path="/extracurriculars" element={<Extracurriculars />} />
               <Route
-                path="/create-extracurricular"
+                path="/extracurriculars/new"
                 element={<CreateExtracurricular />}
               />
-              <Route path="/extracurriculars" element={<Extracurriculars />} />
+              <Route
+                path="/extracurriculars/:id"
+                element={<ViewExtracurricular />}
+              />
+              <Route
+                path="/extracurriculars/:id/edit"
+                element={<EditExtracurricular />}
+              />
               <Route path="/essay" element={<Essay />} />
               <Route
                 path="/counselor-college-list"
