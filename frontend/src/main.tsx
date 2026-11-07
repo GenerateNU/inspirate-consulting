@@ -34,6 +34,7 @@ import AccountExpired from "./account-expiration/account-expired";
 import StudentTaskList from "./task/student-task-list.tsx";
 import StudentProfile from "./student/student-profile.tsx";
 import StudentEssays from "./counselor/student-essays.tsx";
+import ProfilePages from "./profile/profile-pages.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -93,6 +94,7 @@ createRoot(document.getElementById("root")!).render(
                 element={<StudentEssays />}
               />
               <Route path="/search" element={<SearchStudents />} />
+              <Route path="/profile" element={<ProfilePages />} />
             </Route>
           </Routes>
         </AuthProvider>

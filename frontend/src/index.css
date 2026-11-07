@@ -107,13 +107,13 @@
   --chart-3: var(--color-tan);
   --chart-4: var(--color-charcoal);
   --chart-5: var(--color-cream);
-  --sidebar: var(--color-cream);
-  --sidebar-foreground: var(--color-charcoal);
+  --sidebar: var(--color-charcoal);
+  --sidebar-foreground: oklch(1 0 0);
   --sidebar-primary: var(--color-mint);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: color-mix(in oklab, var(--color-sage) 40%, white);
+  --sidebar-accent: var(--color-sage);
   --sidebar-accent-foreground: var(--color-charcoal);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: var(--color-mint);
 }
 
@@ -141,12 +141,12 @@
   --chart-3: var(--color-tan);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar: var(--color-charcoal);
+  --sidebar-foreground: oklch(1 0 0);
   --sidebar-primary: var(--color-mint);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--color-sage);
+  --sidebar-accent-foreground: var(--color-charcoal);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: var(--color-mint);
 }
