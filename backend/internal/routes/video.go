@@ -64,4 +64,22 @@ func SetUpVideoRoutes(api huma.API, repository *data.Repository, verifyRole auth
 		}
 		return &models.ListVideosOutput{Body: videos}, nil
 	})
+
+	//Register DELETE /videos handler for deleting a video by its S3Key
+	huma.Register(api, huma.Operation{
+		OperationID: "delete-video",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodDelete,
+		Path:        "/videos",
+		Description: "Delete a video by its S3Key",
+		Tags:        []string{"Videos"},
+	}, func(ctx context.Context, input *models.DeleteVideoInput) (*struct{}, error) {
+		err := videoHandler.DeleteVideo(ctx, input.S3Key)
+		if err != nil {
+
+			return nil, err
+		}
+
+		return nil, nil
+	})
 }

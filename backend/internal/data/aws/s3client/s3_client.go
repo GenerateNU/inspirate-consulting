@@ -2,12 +2,14 @@ package s3client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 )
 
@@ -110,4 +112,20 @@ func (c *Client) DeleteObject(ctx context.Context, key string) error {
 // returns the underlying AWS S3 client, for cases (mainly testing) that need direct S3 access
 func (c *Client) Raw() *s3.Client {
 	return c.s3Client
+}
+
+// Checks if a video exists
+func (c *Client) ObjectExists(ctx context.Context, key string) (bool, error) {
+	_, err := c.s3Client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		var notFound *types.NotFound
+		if errors.As(err, &notFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

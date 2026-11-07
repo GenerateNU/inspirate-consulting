@@ -4115,6 +4115,29 @@ paths:
       tags:
         - ResetPass
   /videos:
+    delete:
+      description: Delete a video by its S3Key
+      operationId: delete-video
+      parameters:
+        - description: The S3 key/path of the video to delete
+          explode: false
+          in: query
+          name: s3_key
+          required: true
+          schema:
+            description: The S3 key/path of the video to delete
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Videos
     get:
       description: List all videos in the S3 bucket.
       operationId: list-videos

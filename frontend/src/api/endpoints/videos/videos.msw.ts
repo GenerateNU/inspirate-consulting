@@ -27,6 +27,16 @@ import {
 export { getListVideosResponseMock, getUploadVideoResponseMock, getGetVideoResponseMock } from './videos.faker';
 
 
+export const getDeleteVideoMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/videos', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
 export const getListVideosMockHandler = (overrideResponse?: Video[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Video[] | null> | Video[] | null), options?: RequestHandlerOptions) => {
   return http.get('*/videos', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
@@ -63,6 +73,7 @@ export const getGetVideoMockHandler = (overrideResponse?: Video | ((info: Parame
   }, options)
 }
 export const getVideosMock = () => [
+  getDeleteVideoMockHandler(),
   getListVideosMockHandler(),
   getUploadVideoMockHandler(),
   getGetVideoMockHandler()

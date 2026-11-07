@@ -32,6 +32,7 @@ export * from './createUserInputBodyRole';
 export * from './createUserInputBodyYear';
 export * from './currentUser';
 export * from './currentUserRole';
+export * from './deleteVideoParams';
 export * from './editChatMessageRequestBody';
 export * from './errorDetail';
 export * from './errorModel';

@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  DeleteVideoParams,
   ErrorModel,
   GetVideoParams,
   PresignUploadRequestBody,
@@ -78,7 +79,98 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getListVideosUrl = () => {
+export const getDeleteVideoUrl = (params: DeleteVideoParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/videos?${stringifiedParams}` : `/api/videos`
+}
+
+/**
+ * Delete a video by its S3Key
+ */
+export const deleteVideo = async (params: DeleteVideoParams, options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeleteVideoUrl(params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeleteVideoMutationKey = () => ['deleteVideo'] as const;
+
+export const getDeleteVideoMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVideo>>, TError,DeleteVideoMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteVideo>>, TError,DeleteVideoMutationVariables, TContext> => {
+
+const mutationKey = getDeleteVideoMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteVideo>>, DeleteVideoMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  deleteVideo(params,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteVideoMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVideo>>>
+
+    export type DeleteVideoMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeleteVideoMutationVariables = {params: DeleteVideoParams}
+
+    export const useDeleteVideo = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVideo>>, TError,DeleteVideoMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteVideo>>,
+        TError,
+        DeleteVideoMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteVideoMutationOptions(options), queryClient);
+    }
+    export const getListVideosUrl = () => {
 
 
 
