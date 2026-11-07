@@ -16,7 +16,7 @@ func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput,
 		return nil, errs.BadRequest("year, gpa, and counselor_id are required for students")
 	}
 
-	tempPassword, err := passwordgen.Generate()
+	tempPassword, err := passwordgen.GenerateTempPassword()
 	if err != nil {
 		return nil, err
 	}

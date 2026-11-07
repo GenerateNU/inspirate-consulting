@@ -12,6 +12,7 @@ type SupabaseInterface interface {
 	SupabaseLogout(Client *http.Client, access_token string) (models.LogoutResponse, error)
 	SupabaseResetPassword(Client *http.Client, newPassword string, userID string) (models.ResetPasswordResponse, error)
 	SupabaseValidateSession(Client *http.Client, access_token string) error
+	SupabaseRefreshToken(Client *http.Client, refreshToken string) (models.LoginResponse, error)
 }
 
 // Supabase holds Supabase-related configuration

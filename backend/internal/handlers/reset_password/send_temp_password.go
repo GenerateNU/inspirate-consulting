@@ -17,7 +17,7 @@ func (h *Handler) SendTempPassword(ctx context.Context, input *models.SendTempPa
 		return nil, err
 	}
 
-	tempPassword, err := passwordgen.Generate()
+	tempPassword, err := passwordgen.GenerateTempPassword()
 	if err != nil {
 		return nil, err
 	}

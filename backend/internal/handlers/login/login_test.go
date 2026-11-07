@@ -56,7 +56,8 @@ func TestHandler_Login(t *testing.T) {
 
 		assert.Equal(t, user, out.Body)
 
-		c := out.SetCookie
+		require.Len(t, out.SetCookie, 2)
+		c := out.SetCookie[0]
 		assert.Equal(t, "jwt", c.Name)
 		assert.Equal(t, "access-token", c.Value)
 		assert.Equal(t, 3600, c.MaxAge)
@@ -64,6 +65,15 @@ func TestHandler_Login(t *testing.T) {
 		assert.True(t, c.HttpOnly)
 		assert.True(t, c.Secure)
 		assert.Equal(t, http.SameSiteLaxMode, c.SameSite)
+
+		r := out.SetCookie[1]
+		assert.Equal(t, "refresh_token", r.Name)
+		assert.Equal(t, "refresh-token", r.Value)
+		assert.Positive(t, r.MaxAge)
+		assert.Equal(t, "/", r.Path, "must match the jwt cookie's path")
+		assert.True(t, r.HttpOnly)
+		assert.True(t, r.Secure)
+		assert.Equal(t, http.SameSiteLaxMode, r.SameSite)
 	})
 
 	t.Run("pending password reset is passed through", func(t *testing.T) {

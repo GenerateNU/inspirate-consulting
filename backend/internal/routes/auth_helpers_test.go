@@ -12,6 +12,8 @@ import (
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/aws/sqsclient"
 	testutils "inspirate-consulting/internal/data/postgres/testUtils"
+	"inspirate-consulting/internal/errs"
+	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/supabase"
 	"io"
 	"math/big"
@@ -146,6 +148,9 @@ type authApp struct {
 	app     *fiber.App
 	mu      sync.Mutex
 	revoked map[string]bool
+	// refresh tokens Supabase would accept, mapped to the role of the session they renew
+	refreshTokens map[string]string
+	refreshCalls  atomic.Int64
 }
 
 // newAuthApp seeds one user per role (see subFor) so ResolveIdentityMiddleware
@@ -159,7 +164,7 @@ func newAuthApp(t *testing.T, override func(*data.Repository)) *authApp {
 	if override != nil {
 		override(repo)
 	}
-	a := &authApp{t: t, revoked: map[string]bool{}}
+	a := &authApp{t: t, revoked: map[string]bool{}, refreshTokens: map[string]string{}}
 	sb := &supabase.MockSupabase{
 		ValidateSessionFunc: func(tok string) error {
 			a.mu.Lock()
@@ -168,6 +173,20 @@ func newAuthApp(t *testing.T, override func(*data.Repository)) *authApp {
 				return errors.New("session validation failed: status 403")
 			}
 			return nil
+		},
+		// a refresh token is single use: it is swapped for a new session and a rotated token
+		RefreshTokenFunc: func(refreshToken string) (models.LoginResponse, error) {
+			a.refreshCalls.Add(1)
+			a.mu.Lock()
+			defer a.mu.Unlock()
+			role, ok := a.refreshTokens[refreshToken]
+			if !ok {
+				return models.LoginResponse{}, errs.NewHTTPError(http.StatusBadRequest, errors.New("Invalid Refresh Token"))
+			}
+			delete(a.refreshTokens, refreshToken)
+			rotated := refreshToken + "-rotated"
+			a.refreshTokens[rotated] = role
+			return models.LoginResponse{AccessToken: tokenFor(role), RefreshToken: rotated, ExpiresIn: 3600}, nil
 		},
 	}
 	app, _, err := SetupApp(config.Config{TestMode: false, Supabase: sb}, repo, &sqsclient.SQSClient{}, &sqsclient.SQSClient{})
@@ -211,8 +230,9 @@ func (a *authApp) revoke(tok string) {
 }
 
 type apiResponse struct {
-	Status int
-	Body   []byte
+	Status  int
+	Body    []byte
+	Cookies []*http.Cookie
 }
 
 // Detail is the huma error message ("detail") of an error response.
@@ -255,5 +275,5 @@ func (a *authApp) doReq(method, path string, body any, mutate func(*http.Request
 	defer func() { _ = resp.Body.Close() }()
 	b, err := io.ReadAll(resp.Body)
 	require.NoError(a.t, err)
-	return apiResponse{Status: resp.StatusCode, Body: b}
+	return apiResponse{Status: resp.StatusCode, Body: b, Cookies: resp.Cookies()}
 }
