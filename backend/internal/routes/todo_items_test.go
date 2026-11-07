@@ -265,6 +265,138 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 	})
 }
 
+// Route tests for PATCH /todo-items/{id}/deadline.
+func TestRoute_UpdateTodoItemDeadline(t *testing.T) {
+	t.Parallel()
+
+	itemID := uuid.NewString()
+
+	t.Run("future deadline is saved", func(t *testing.T) {
+		t.Parallel()
+
+		deadline := time.Now().Add(7 * 24 * time.Hour).UTC().Truncate(time.Second)
+
+		// the deadline in the body must reach the repository as the same instant
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDeadline", mock.Anything, itemID, mock.MatchedBy(func(at *time.Time) bool {
+			return at != nil && at.Equal(deadline)
+		})).Return(&models.TodoItem{
+			ID:              itemID,
+			TodoDescription: "Request transcripts",
+			Deadline:        &deadline,
+		}, nil)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/deadline", map[string]any{
+			"deadline": deadline.Format(time.RFC3339),
+		})
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var updated models.TodoItem
+		require.NoError(t, json.Unmarshal(respBody, &updated))
+		assert.Equal(t, itemID, updated.ID)
+		require.NotNil(t, updated.Deadline)
+		assert.True(t, updated.Deadline.Equal(deadline))
+	})
+
+	t.Run("null deadline clears it", func(t *testing.T) {
+		t.Parallel()
+
+		// deadline: null must reach the repository as a nil timestamp
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDeadline", mock.Anything, itemID, (*time.Time)(nil)).
+			Return(&models.TodoItem{ID: itemID, TodoDescription: "Request transcripts"}, nil)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/deadline", map[string]any{
+			"deadline": nil,
+		})
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var updated models.TodoItem
+		require.NoError(t, json.Unmarshal(respBody, &updated))
+		assert.Nil(t, updated.Deadline)
+	})
+
+	t.Run("past deadline is rejected", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when the deadline is in the past
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/deadline", map[string]any{
+			"deadline": time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339),
+		})
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("validation error - missing deadline", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when Huma validation fails
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/deadline", map[string]any{})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("validation error - invalid deadline", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when Huma validation fails
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/deadline", map[string]any{
+			"deadline": "tomorrow",
+		})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("validation error - invalid id", func(t *testing.T) {
+		t.Parallel()
+
+		// Mock should NOT be called when the path id is not a UUID
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/not-a-uuid/deadline", map[string]any{
+			"deadline": time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+		})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("repository error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoItemDeadline", mock.Anything, itemID, mock.Anything).
+			Return(nil, errors.New("database error"))
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/deadline", map[string]any{
+			"deadline": time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+		})
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+}
+
 // Route tests for DELETE /todo-items/{id}.
 func TestRoute_DeleteTodoItem(t *testing.T) {
 	t.Parallel()

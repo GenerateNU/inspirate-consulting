@@ -32,6 +32,7 @@ import type {
   TodoItem,
   TodoItemPage,
   UpdateTodoItemCompletedAtInputBody,
+  UpdateTodoItemDeadlineInputBody,
   UpdateTodoItemDescriptionInputBody
 } from '../../models';
 
@@ -597,6 +598,105 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateTodoItemCompletedMutationOptions(options), queryClient);
+    }
+    export const getUpdateTodoItemDeadlineUrl = (id: string,) => {
+
+
+
+
+  return `/api/todo-items/${id}/deadline`
+}
+
+/**
+ * Update a to-do item's deadline
+ */
+export const updateTodoItemDeadline = async (id: string,
+    updateTodoItemDeadlineInputBody: NonReadonly<UpdateTodoItemDeadlineInputBody>, options?: RequestInit): Promise<TodoItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateTodoItemDeadlineUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateTodoItemDeadlineInputBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: TodoItem, status?: number} = new globalThis.Error();
+    const data : TodoItem = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItem = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateTodoItemDeadlineMutationKey = () => ['updateTodoItemDeadline'] as const;
+
+export const getUpdateTodoItemDeadlineMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemDeadline>>, TError,UpdateTodoItemDeadlineMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemDeadline>>, TError,UpdateTodoItemDeadlineMutationVariables, TContext> => {
+
+const mutationKey = getUpdateTodoItemDeadlineMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTodoItemDeadline>>, UpdateTodoItemDeadlineMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTodoItemDeadline(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTodoItemDeadlineMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemDeadline>>>
+    export type UpdateTodoItemDeadlineMutationBody = NonReadonly<UpdateTodoItemDeadlineInputBody>
+    export type UpdateTodoItemDeadlineMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateTodoItemDeadlineMutationVariables = {id: string;data: NonReadonly<UpdateTodoItemDeadlineInputBody>}
+
+    export const useUpdateTodoItemDeadline = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemDeadline>>, TError,UpdateTodoItemDeadlineMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTodoItemDeadline>>,
+        TError,
+        UpdateTodoItemDeadlineMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateTodoItemDeadlineMutationOptions(options), queryClient);
     }
     export const getUpdateTodoItemDescriptionUrl = (id: string,) => {
 

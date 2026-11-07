@@ -84,6 +84,23 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		return &models.UpdateTodoItemCompletedAtOutput{Body: *updated}, err
 	})
 
+	//Register PATCH /todo-items/{id}/deadline
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-item-deadline",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}/deadline",
+		Description: "Update a to-do item's deadline",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoItemDeadlineInput) (*models.UpdateTodoItemDeadlineOutput, error) {
+		updated, err := todoItemHandler.UpdateTodoItemDeadline(ctx, input.ID, input.Body.NewDeadline)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.UpdateTodoItemDeadlineOutput{Body: *updated}, nil
+	})
+
 	//Register DELETE /todo-items/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-todo-item",
@@ -101,7 +118,6 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		return nil, nil
 	})
 
-	//Register PATCH /todo-items/{id} handler for updating description(only counselors)
 	//Register PATCH /todo-items/{id}/description handler for updating description(only counselors)
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-item-description",
@@ -117,5 +133,4 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		}
 		return &models.UpdateTodoItemDescriptionOutput{Body: *updated}, err
 	})
-
 }
