@@ -1,12 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser } from "../api/endpoints";
-
-const gradeByYear: Record<string, number> = {
-  freshman: 9,
-  sophomore: 10,
-  junior: 11,
-  senior: 12,
-};
+import { gradeByYear } from "../lib/constants";
 
 //validate URL before anything is fetched
 export default function CounselorStudentTasks() {

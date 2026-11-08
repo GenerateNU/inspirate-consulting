@@ -1,13 +1,7 @@
 // name, grade, highschool, major of interest, tasks completed
 import { useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser, useGetTodoItems } from "../api/endpoints";
-
-const gradeByYear: Record<string, number> = {
-  freshman: 9,
-  sophomore: 10,
-  junior: 11,
-  senior: 12,
-};
+import { gradeByYear } from "../lib/constants";
 
 export default function StudentProfile() {
   const { id = "" } = useParams();
