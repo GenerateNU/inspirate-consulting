@@ -43,6 +43,14 @@ func (m *mockUserRepository) FetchUserBySupabaseID(ctx context.Context, input mo
 	return args.Get(0).(*models.FetchUserOutput), args.Error(1)
 }
 
+func (m *mockUserRepository) FetchSessionUserBySupabaseID(ctx context.Context, supabaseID uuid.UUID) (*models.SessionUser, error) {
+	args := m.Called(ctx, supabaseID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.SessionUser), args.Error(1)
+}
+
 func (m *mockUserRepository) UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error {
 	args := m.Called(ctx, id, resetTime)
 	return args.Error(0)

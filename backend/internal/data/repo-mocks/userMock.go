@@ -49,6 +49,36 @@ func (_m *UserRepository) CreateUser(ctx context.Context, user models.CreateUser
 	return r0, r1
 }
 
+// FetchSessionUserBySupabaseID provides a mock function with given fields: ctx, supabaseID
+func (_m *UserRepository) FetchSessionUserBySupabaseID(ctx context.Context, supabaseID uuid.UUID) (*models.SessionUser, error) {
+	ret := _m.Called(ctx, supabaseID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FetchSessionUserBySupabaseID")
+	}
+
+	var r0 *models.SessionUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) (*models.SessionUser, error)); ok {
+		return rf(ctx, supabaseID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) *models.SessionUser); ok {
+		r0 = rf(ctx, supabaseID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.SessionUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, supabaseID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FetchUser provides a mock function with given fields: ctx, input
 func (_m *UserRepository) FetchUser(ctx context.Context, input models.FetchUserInput) (*models.FetchUserOutput, error) {
 	ret := _m.Called(ctx, input)
