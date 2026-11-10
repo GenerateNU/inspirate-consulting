@@ -3,7 +3,6 @@ import { errorMessage } from "../api/client";
 import { useCreateUser } from "../api/endpoints";
 import { CreateUserInputBodyRole } from "../api/models";
 
-
 export default function CreateUser() {
   const [Name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -12,12 +11,12 @@ export default function CreateUser() {
   );
   const [Status, setStatus] = useState("");
 
-  const {mutateAsync, error, isPending} = useCreateUser();
+  const { mutateAsync, error, isPending } = useCreateUser();
 
   const handleSubmit = (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
     setStatus("");
-    mutateAsync(
+    void mutateAsync(
       { data: { name: Name, email: email, role: Role, pfp_key: null } },
       {
         onSuccess: () =>
