@@ -85,6 +85,7 @@ export * from './searchTodoItemsSortBy';
 export * from './searchTodoItemsSortOrder';
 export * from './searchTodoItemsStatus';
 export * from './sendTempPasswordBody';
+export * from './sessionUser';
 export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
 export * from './studentListItem';

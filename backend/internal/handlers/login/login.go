@@ -14,9 +14,7 @@ func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase 
 		return nil, err
 	}
 
-	userInput := models.FetchUserBySupabaseIDInput{}
-	userInput.SupabaseID = res.User.ID
-	user, err := h.LoginRepository.FetchUserBySupabaseID(ctx, userInput)
+	user, err := h.LoginRepository.FetchSessionUserBySupabaseID(ctx, res.User.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -26,6 +24,6 @@ func (h *Handler) Login(ctx context.Context, input *models.LoginInput, supabase 
 			auth.AccessTokenCookie(res.AccessToken, res.ExpiresIn),
 			auth.RefreshTokenCookie(res.RefreshToken),
 		},
-		Body: user.Body,
+		Body: user,
 	}, nil
 }

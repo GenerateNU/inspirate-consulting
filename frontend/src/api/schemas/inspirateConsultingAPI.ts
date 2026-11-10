@@ -1450,12 +1450,14 @@ export const LoginUserBody = /*#__PURE__*/ zod.object({
 
 export const LoginUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "counselor_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the user\'s counselor profile; null when the user is not a counselor')),
   "email": /*#__PURE__*/ zod.string(),
   "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "student_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the user\'s student profile; null when the user is not a student')),
   "supabase_id": /*#__PURE__*/ zod.string()
 })
 

@@ -11,12 +11,12 @@ export default function CreateUser() {
   );
   const [Status, setStatus] = useState("");
 
-  const { mutate, isPending, error } = useCreateUser();
+  const { mutateAsync, error, isPending } = useCreateUser();
 
   const handleSubmit = (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
     setStatus("");
-    mutate(
+    void mutateAsync(
       { data: { name: Name, email: email, role: Role, pfp_key: null } },
       {
         onSuccess: () =>

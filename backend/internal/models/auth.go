@@ -75,7 +75,7 @@ type LogoutInput struct{}
 
 type LoginOutput struct {
 	SetCookie []http.Cookie `header:"Set-Cookie"`
-	Body      *User
+	Body      *SessionUser
 }
 
 type LogoutResponse struct {
