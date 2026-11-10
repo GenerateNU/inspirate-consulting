@@ -11,6 +11,13 @@ import TaskRow from "./task-row";
 import TaskDrawer from "./task-drawer";
 import { useTaskSummary } from "./useTaskSummary";
 import { errorMessage } from "../api/client";
+import PageLinks, { type PageLink } from "@/components/page-links";
+
+// Temporary links to this page's sub-pages (see the Figma sitemap).
+const pageLinks: PageLink[] = [
+  { to: "/counselor-students", label: "My Students", role: "Counselor" },
+  { to: "/search", label: "Claim Students", role: "Counselor" },
+];
 
 export default function StudentTaskList() {
   const queryClient = useQueryClient();
@@ -26,9 +33,20 @@ export default function StudentTaskList() {
     : [];
   const summary = useTaskSummary(todos, sortAscending);
 
-  if (todosQuery.isLoading) return <p>Loading...</p>;
+  if (todosQuery.isLoading)
+    return (
+      <>
+        <PageLinks links={pageLinks} />
+        <p>Loading...</p>
+      </>
+    );
   if (todosQuery.error) {
-    return <p>Something went wrong: {errorMessage(todosQuery.error)}</p>;
+    return (
+      <>
+        <PageLinks links={pageLinks} />
+        <p>Something went wrong: {errorMessage(todosQuery.error)}</p>
+      </>
+    );
   }
 
   const handleToggleComplete = (task: TodoItem) => {
@@ -44,78 +62,83 @@ export default function StudentTaskList() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-10">
-      {/* Header + legend */}
-      <div>
-        <h1 className="text-3xl font-semibold">Tasks</h1>
-        <div className="mt-2 flex gap-16 text-xs">
-          <span>Extracurriculars</span>
-          <span>Essays</span>
-          <span>Modules</span>
+    <>
+      <PageLinks links={pageLinks} />
+      <div className="flex flex-col gap-6 p-10">
+        {/* Header + legend */}
+        <div>
+          <h1 className="text-3xl font-semibold">Tasks</h1>
+          <div className="mt-2 flex gap-16 text-xs">
+            <span>Extracurriculars</span>
+            <span>Essays</span>
+            <span>Modules</span>
+          </div>
         </div>
+
+        {/* Stat cards */}
+        <div className="flex gap-4 pl-10">
+          <TaskStatCard
+            label="Tasks completed"
+            value={`${summary.completedCount}/${summary.totalCount}`}
+            caption={`${summary.percentFinished}% finished`}
+          />
+          <TaskStatCard
+            label="Tasks due this week"
+            value={String(summary.dueThisWeek)}
+            caption={`${summary.daysRemaining} days remaining`}
+          />
+          <TaskStatCard
+            label="High priority"
+            value={String(summary.highPriority)}
+            caption="due within 24 hours"
+          />
+        </div>
+
+        {/* Date groups */}
+        <div className="flex flex-col gap-6">
+          {summary.groups.length === 0 && <p>No tasks yet.</p>}
+
+          {summary.groups.map((group, index) => (
+            <section key={group.heading} className="flex flex-col gap-3">
+              <div className="flex items-center gap-4">
+                <h2 className="shrink-0 text-xl font-semibold">
+                  {group.heading}
+                </h2>
+                <div className="h-px flex-1 bg-gray-400" />
+                {/* Sort toggle sits on the first heading's line, like the Figma */}
+                {index === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSortAscending((prev) => !prev)}
+                    aria-label={
+                      sortAscending
+                        ? "Sort latest first"
+                        : "Sort earliest first"
+                    }
+                    className="rounded border px-2 py-1"
+                  >
+                    ↓↑
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 pl-10">
+                {group.tasks.map((task) => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    title={task.todo_description}
+                    onToggleComplete={handleToggleComplete}
+                    onOpen={setSelectedTask}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <TaskDrawer task={selectedTask} onClose={() => setSelectedTask(null)} />
       </div>
-
-      {/* Stat cards */}
-      <div className="flex gap-4 pl-10">
-        <TaskStatCard
-          label="Tasks completed"
-          value={`${summary.completedCount}/${summary.totalCount}`}
-          caption={`${summary.percentFinished}% finished`}
-        />
-        <TaskStatCard
-          label="Tasks due this week"
-          value={String(summary.dueThisWeek)}
-          caption={`${summary.daysRemaining} days remaining`}
-        />
-        <TaskStatCard
-          label="High priority"
-          value={String(summary.highPriority)}
-          caption="due within 24 hours"
-        />
-      </div>
-
-      {/* Date groups */}
-      <div className="flex flex-col gap-6">
-        {summary.groups.length === 0 && <p>No tasks yet.</p>}
-
-        {summary.groups.map((group, index) => (
-          <section key={group.heading} className="flex flex-col gap-3">
-            <div className="flex items-center gap-4">
-              <h2 className="shrink-0 text-xl font-semibold">
-                {group.heading}
-              </h2>
-              <div className="h-px flex-1 bg-gray-400" />
-              {/* Sort toggle sits on the first heading's line, like the Figma */}
-              {index === 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSortAscending((prev) => !prev)}
-                  aria-label={
-                    sortAscending ? "Sort latest first" : "Sort earliest first"
-                  }
-                  className="rounded border px-2 py-1"
-                >
-                  ↓↑
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3 pl-10">
-              {group.tasks.map((task) => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  title={task.todo_description}
-                  onToggleComplete={handleToggleComplete}
-                  onOpen={setSelectedTask}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-
-      <TaskDrawer task={selectedTask} onClose={() => setSelectedTask(null)} />
-    </div>
+    </>
   );
 }
