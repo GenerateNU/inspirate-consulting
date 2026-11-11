@@ -1,6 +1,6 @@
 function App() {
   return (
-    <div className="w-screen h-screen flex justify-center items-center">
+    <div className="flex flex-1 items-center justify-center">
       <p className="text-6xl font-semibold w-auto h-auto">
         Howdy Inspirate Consulting Engineers! 👋🤠
       </p>

@@ -37,6 +37,14 @@ import {
   useCollegeNames,
   useReviewStatuses,
 } from "./essay-sections";
+import PageLinks, { type PageLink } from "@/components/page-links";
+
+// Temporary links to this page's sub-pages (see the Figma sitemap).
+const pageLinks: PageLink[] = [
+  { to: "/student", label: "Essay Reviews", role: "Student" },
+  { to: "/pending-reviews", label: "Pending Reviews", role: "Counselor" },
+  { to: "/counselor", label: "Complete Reviews", role: "Counselor" },
+];
 
 export default function Essay() {
   const { studentID } = useAuthContext();
@@ -76,7 +84,12 @@ export default function Essay() {
   ]);
 
   if (!studentId) {
-    return <p className="p-8">Log in as a student to see your essays.</p>;
+    return (
+      <>
+        <PageLinks links={pageLinks} />
+        <p className="p-8">Log in as a student to see your essays.</p>
+      </>
+    );
   }
 
   const error =
@@ -116,151 +129,156 @@ export default function Essay() {
   const stats = reviewStats(visibleEssays, reviews);
 
   return (
-    <div className="flex-1 bg-muted/40 px-4 py-8">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        <Card className="gap-6 p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight uppercase">
-                My Essay Workspace
-              </h1>
-              {balance != null && (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Review credits remaining: {balance}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <NativeSelect
-                aria-label="Filter by target"
-                value={targetFilter}
-                onChange={(e) => setTargetFilter(e.target.value)}
-              >
-                <NativeSelectOption value="all">All targets</NativeSelectOption>
-                <NativeSelectOption value="general">
-                  No specific college
-                </NativeSelectOption>
-                {targetIds.map((id) => (
-                  <NativeSelectOption key={id} value={id}>
-                    {collegeNames[id]}
+    <>
+      <PageLinks links={pageLinks} />
+      <div className="flex-1 bg-muted/40 px-4 py-8">
+        <div className="mx-auto flex max-w-5xl flex-col gap-6">
+          <Card className="gap-6 p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight uppercase">
+                  My Essay Workspace
+                </h1>
+                {balance != null && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Review credits remaining: {balance}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <NativeSelect
+                  aria-label="Filter by target"
+                  value={targetFilter}
+                  onChange={(e) => setTargetFilter(e.target.value)}
+                >
+                  <NativeSelectOption value="all">
+                    All targets
                   </NativeSelectOption>
-                ))}
-              </NativeSelect>
-              <Button
-                variant="secondary"
-                onClick={() => setShowGroupForm((s) => !s)}
-              >
-                <FolderPlus className="size-4" aria-hidden />
-                New section
-              </Button>
-              <Button onClick={() => setShowEssayForm((s) => !s)}>
-                <FilePlus className="size-4" aria-hidden />
-                Add new essay
-              </Button>
+                  <NativeSelectOption value="general">
+                    No specific college
+                  </NativeSelectOption>
+                  {targetIds.map((id) => (
+                    <NativeSelectOption key={id} value={id}>
+                      {collegeNames[id]}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowGroupForm((s) => !s)}
+                >
+                  <FolderPlus className="size-4" aria-hidden />
+                  New section
+                </Button>
+                <Button onClick={() => setShowEssayForm((s) => !s)}>
+                  <FilePlus className="size-4" aria-hidden />
+                  Add new essay
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {showGroupForm && (
-            <NewGroupForm
-              studentId={studentId}
-              onDone={() => setShowGroupForm(false)}
+            {showGroupForm && (
+              <NewGroupForm
+                studentId={studentId}
+                onDone={() => setShowGroupForm(false)}
+              />
+            )}
+            {showEssayForm && (
+              <NewEssayForm
+                studentId={studentId}
+                groups={groups}
+                colleges={applicationCollegeIds.map((id) => ({
+                  id,
+                  name: collegeNames[id],
+                }))}
+                onDone={() => setShowEssayForm(false)}
+              />
+            )}
+
+            <StatGrid
+              stats={[
+                { label: "Total essays", value: stats.total },
+                { label: "Counselor queue", value: stats.open },
+                { label: "Reviewed", value: stats.completed },
+                { label: "Not reviewed", value: stats.notReviewed },
+              ]}
             />
-          )}
-          {showEssayForm && (
-            <NewEssayForm
-              studentId={studentId}
-              groups={groups}
-              colleges={applicationCollegeIds.map((id) => ({
-                id,
-                name: collegeNames[id],
-              }))}
-              onDone={() => setShowEssayForm(false)}
-            />
-          )}
-
-          <StatGrid
-            stats={[
-              { label: "Total essays", value: stats.total },
-              { label: "Counselor queue", value: stats.open },
-              { label: "Reviewed", value: stats.completed },
-              { label: "Not reviewed", value: stats.notReviewed },
-            ]}
-          />
-        </Card>
-
-        {error && (
-          <p
-            role="alert"
-            className="rounded-md bg-destructive/10 p-4 text-destructive"
-          >
-            {errorMessage(error)}
-          </p>
-        )}
-
-        {essaysQuery.isLoading || groupsQuery.isLoading ? (
-          <p>Loading...</p>
-        ) : visibleEssays.length === 0 ? (
-          <Card className="p-8 text-center text-muted-foreground">
-            {essays.length === 0
-              ? "No essays yet. Add one to get started."
-              : "No essays match this filter."}
           </Card>
-        ) : (
-          <EssaySections
-            essays={visibleEssays}
-            groups={groups}
-            applicationTypes={applicationTypes}
-            renderBadges={(essay) => {
-              const review = reviews[essay.id];
-              return (
-                <>
-                  {!isReviewOpen(review) && !isReviewCompleted(review) && (
-                    <Badge variant="secondary">Not reviewed</Badge>
-                  )}
-                  {isReviewOpen(review) && (
-                    <>
-                      <Badge variant="secondary">Under review</Badge>
-                      <RequestedAt review={review!} />
-                    </>
-                  )}
-                  {isReviewCompleted(review) && (
-                    <Badge variant="outline">Reviewed</Badge>
-                  )}
-                </>
-              );
-            }}
-            renderActions={(essay) => {
-              const canRequest = !isReviewOpen(reviews[essay.id]);
-              return (
-                <>
-                  {canRequest && (
-                    <Button
-                      variant="secondary"
-                      disabled={requestReview.isPending || balance === 0}
-                      title={balance === 0 ? "No review credits left" : ""}
-                      onClick={() => handleRequestReview(essay)}
-                    >
-                      <Send className="size-4" aria-hidden />
-                      Request review
+
+          {error && (
+            <p
+              role="alert"
+              className="rounded-md bg-destructive/10 p-4 text-destructive"
+            >
+              {errorMessage(error)}
+            </p>
+          )}
+
+          {essaysQuery.isLoading || groupsQuery.isLoading ? (
+            <p>Loading...</p>
+          ) : visibleEssays.length === 0 ? (
+            <Card className="p-8 text-center text-muted-foreground">
+              {essays.length === 0
+                ? "No essays yet. Add one to get started."
+                : "No essays match this filter."}
+            </Card>
+          ) : (
+            <EssaySections
+              essays={visibleEssays}
+              groups={groups}
+              applicationTypes={applicationTypes}
+              renderBadges={(essay) => {
+                const review = reviews[essay.id];
+                return (
+                  <>
+                    {!isReviewOpen(review) && !isReviewCompleted(review) && (
+                      <Badge variant="secondary">Not reviewed</Badge>
+                    )}
+                    {isReviewOpen(review) && (
+                      <>
+                        <Badge variant="secondary">Under review</Badge>
+                        <RequestedAt review={review!} />
+                      </>
+                    )}
+                    {isReviewCompleted(review) && (
+                      <Badge variant="outline">Reviewed</Badge>
+                    )}
+                  </>
+                );
+              }}
+              renderActions={(essay) => {
+                const canRequest = !isReviewOpen(reviews[essay.id]);
+                return (
+                  <>
+                    {canRequest && (
+                      <Button
+                        variant="secondary"
+                        disabled={requestReview.isPending || balance === 0}
+                        title={balance === 0 ? "No review credits left" : ""}
+                        onClick={() => handleRequestReview(essay)}
+                      >
+                        <Send className="size-4" aria-hidden />
+                        Request review
+                      </Button>
+                    )}
+                    <Button asChild>
+                      <a
+                        href={essay.link_to_content}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open essay
+                        <ExternalLink className="size-4" aria-hidden />
+                      </a>
                     </Button>
-                  )}
-                  <Button asChild>
-                    <a
-                      href={essay.link_to_content}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Open essay
-                      <ExternalLink className="size-4" aria-hidden />
-                    </a>
-                  </Button>
-                </>
-              );
-            }}
-          />
-        )}
+                  </>
+                );
+              }}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

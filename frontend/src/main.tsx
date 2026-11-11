@@ -39,6 +39,7 @@ import StudentProfile from "./student/student-profile.tsx";
 import StudentEssays from "./counselor/student-essays.tsx";
 import AssignTaskForm from "./task/assign-task-form.tsx";
 import CounselorStudentTasks from "./counselor/counselor-student-tasks.tsx";
+import ProfilePages from "./profile/profile-pages.tsx";
 import Chats from "./chat/chats.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -119,6 +120,7 @@ createRoot(document.getElementById("root")!).render(
                 path="/counselor/students/:id"
                 element={<CounselorStudentTasks />}
               />
+              <Route path="/profile" element={<ProfilePages />} />
               <Route path="/chats" element={<Chats />} />
               <Route path="/chats/:userId" element={<Chats />} />
             </Route>
