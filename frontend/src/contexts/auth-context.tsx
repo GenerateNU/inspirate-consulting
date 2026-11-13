@@ -1,4 +1,10 @@
-import { ACCOUNT_EXPIRED_PATH, AuthContext } from "./auth-context";
+import {
+  ACCOUNT_EXPIRED_PATH,
+  CLAIM_ACCOUNT_PATH,
+  LOGIN_PATH,
+  PUBLIC_PATHS,
+  AuthContext,
+} from "./auth-context";
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -28,12 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: currentUser } = useGetCurrentUser();
+  const { data: currentUser, isLoading: isLoadingCurrentUser } =
+    useGetCurrentUser();
   const resetTime = currentUser?.reset_time ?? null;
   const expiresAt = currentUser?.expires_at ?? null;
   const userID = currentUser?.id ?? null;
   const counselorID = currentUser?.counselor_id ?? null;
   const studentID = currentUser?.student_id ?? null;
+  const role = currentUser?.role ?? null;
 
   const { mutateAsync: loginFunc } = useLoginUser();
   const { mutateAsync: logoutFunc } = useLogoutUser();
@@ -116,6 +124,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isExpired =
     serverExpired ||
     (expiresAt !== null && new Date(expiresAt).getTime() <= Date.now());
+  const mustClaim = resetTime !== null;
+  const isLoggedIn = userID !== null;
+  const isPublicPath = PUBLIC_PATHS.includes(pathname);
 
   return (
     <AuthContext
@@ -125,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         userID: userID,
         counselorID: counselorID,
         studentID: studentID,
+        role: role,
         login: login,
         logout: logout,
         reset_password: new_password,
@@ -134,6 +146,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         <Navigate to={ACCOUNT_EXPIRED_PATH} replace />
       ) : !isExpired && pathname === ACCOUNT_EXPIRED_PATH ? (
         <Navigate to="/" replace />
+      ) : !isExpired && mustClaim && pathname !== CLAIM_ACCOUNT_PATH ? (
+        <Navigate to={CLAIM_ACCOUNT_PATH} replace />
+      ) : !isExpired &&
+        !mustClaim &&
+        !isLoggedIn &&
+        !isLoadingCurrentUser &&
+        !isPublicPath ? (
+        <Navigate to={LOGIN_PATH} replace />
       ) : (
         children
       )}

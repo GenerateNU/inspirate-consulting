@@ -32,8 +32,12 @@ import LogOut from "./logout/logout";
 import LogIn from "./login/login";
 import SearchStudents from "./counselor/search-students.tsx";
 import { AuthProvider } from "./contexts/auth-context.tsx";
-import { ACCOUNT_EXPIRED_PATH } from "./contexts/auth-context.ts";
+import {
+  ACCOUNT_EXPIRED_PATH,
+  CLAIM_ACCOUNT_PATH,
+} from "./contexts/auth-context.ts";
 import AccountExpired from "./account-expiration/account-expired";
+import ClaimAccount from "./claim-account/claim-account";
 import StudentTaskList from "./task/student-task-list.tsx";
 import StudentProfile from "./student/student-profile.tsx";
 import StudentEssays from "./counselor/student-essays.tsx";
@@ -49,6 +53,13 @@ createRoot(document.getElementById("root")!).render(
         <AuthProvider>
           <Routes>
             <Route path={ACCOUNT_EXPIRED_PATH} element={<AccountExpired />} />
+            <Route path={CLAIM_ACCOUNT_PATH} element={<ClaimAccount />} />
+            <Route path="/login" element={<LogIn />} />
+            <Route path="/student/login" element={<LogIn audience="student" />} />
+            <Route
+              path="/counselor/login"
+              element={<LogIn audience="counselor" />}
+            />
             <Route element={<Layout />}>
               <Route path="/" element={<App />} />
               <Route path="/greeting" element={<Greeting />} />
@@ -106,7 +117,6 @@ createRoot(document.getElementById("root")!).render(
                 element={<UpdateNotificationPreferences />}
               />
               <Route path="/create-account" element={<CreateUser />} />
-              <Route path="/login" element={<LogIn />} />
               <Route path="/logout" element={<LogOut />} />
               <Route path="/student-tasks" element={<StudentTaskList />} />
               <Route path="/students/:id" element={<StudentProfile />} />
