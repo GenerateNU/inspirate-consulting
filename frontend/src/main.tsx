@@ -55,7 +55,10 @@ createRoot(document.getElementById("root")!).render(
             <Route path={ACCOUNT_EXPIRED_PATH} element={<AccountExpired />} />
             <Route path={CLAIM_ACCOUNT_PATH} element={<ClaimAccount />} />
             <Route path="/login" element={<LogIn />} />
-            <Route path="/student/login" element={<LogIn audience="student" />} />
+            <Route
+              path="/student/login"
+              element={<LogIn audience="student" />}
+            />
             <Route
               path="/counselor/login"
               element={<LogIn audience="counselor" />}

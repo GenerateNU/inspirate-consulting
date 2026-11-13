@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { errorMessage } from "../api/client";
 import { useCreateUser } from "../api/endpoints";
-import { CreateUserInputBodyRole, CreateUserInputBodyYear } from "../api/models";
+import {
+  CreateUserInputBodyRole,
+  CreateUserInputBodyYear,
+} from "../api/models";
 import { useAuthContext } from "../contexts/use-auth-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -122,10 +125,14 @@ export default function CreateUser() {
                       setYear(e.target.value as CreateUserInputBodyYear)
                     }
                   >
-                    <NativeSelectOption value={CreateUserInputBodyYear.freshman}>
+                    <NativeSelectOption
+                      value={CreateUserInputBodyYear.freshman}
+                    >
                       Freshman
                     </NativeSelectOption>
-                    <NativeSelectOption value={CreateUserInputBodyYear.sophomore}>
+                    <NativeSelectOption
+                      value={CreateUserInputBodyYear.sophomore}
+                    >
                       Sophomore
                     </NativeSelectOption>
                     <NativeSelectOption value={CreateUserInputBodyYear.junior}>
@@ -154,7 +161,9 @@ export default function CreateUser() {
             <Button type="submit" disabled={isPending}>
               {isPending ? "Creating User..." : "Create User"}
             </Button>
-            {status && <p className="text-sm text-muted-foreground">{status}</p>}
+            {status && (
+              <p className="text-sm text-muted-foreground">{status}</p>
+            )}
             {error && (
               <p
                 role="alert"

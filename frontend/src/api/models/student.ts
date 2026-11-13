@@ -10,11 +10,21 @@ export interface Student {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   counselor_id: string;
+  /** @nullable */
+  geographic_preferences: string | null;
   gpa: number;
+  /** @nullable */
+  high_school: string | null;
   id: string;
+  /** @nullable */
+  intended_major: string | null;
+  /** @nullable */
+  intended_minor: string | null;
   /** @nullable */
   organization: string | null;
   review_balance: number;
+  /** @nullable */
+  standardized_test_score: string | null;
   /** @nullable */
   student_interest: string | null;
   user_id: string;

@@ -1010,10 +1010,15 @@ export const AssignCounselorBody = /*#__PURE__*/ zod.object({
 export const AssignCounselorResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "counselor_id": /*#__PURE__*/ zod.string(),
+  "geographic_preferences": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "gpa": /*#__PURE__*/ zod.int(),
+  "high_school": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "id": /*#__PURE__*/ zod.string(),
+  "intended_major": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "intended_minor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "review_balance": /*#__PURE__*/ zod.int(),
+  "standardized_test_score": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "user_id": /*#__PURE__*/ zod.string(),
   "year": /*#__PURE__*/ zod.string()
@@ -1062,10 +1067,15 @@ export const GetStudentParams = /*#__PURE__*/ zod.object({
 export const GetStudentResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "counselor_id": /*#__PURE__*/ zod.string(),
+  "geographic_preferences": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "gpa": /*#__PURE__*/ zod.int(),
+  "high_school": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "id": /*#__PURE__*/ zod.string(),
+  "intended_major": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "intended_minor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "review_balance": /*#__PURE__*/ zod.int(),
+  "standardized_test_score": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "user_id": /*#__PURE__*/ zod.string(),
   "year": /*#__PURE__*/ zod.string()
@@ -1080,8 +1090,13 @@ export const UpdateStudentParams = /*#__PURE__*/ zod.object({
 })
 
 export const UpdateStudentBody = /*#__PURE__*/ zod.object({
+  "geographic_preferences": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Geographic preferences for colleges')),
   "gpa": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('GPA of the student')),
+  "high_school": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('High school the student attends')),
+  "intended_major": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Intended major of the student')),
+  "intended_minor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Intended minor of the student')),
   "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Organization of the student')),
+  "standardized_test_score": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('SAT or ACT score of the student')),
   "student_interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Interest of the student')),
   "year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['freshman', 'sophomore', 'junior', 'senior'])).check(/*#__PURE__*/ zod.describe('School year of the student'))
 })
@@ -1089,10 +1104,15 @@ export const UpdateStudentBody = /*#__PURE__*/ zod.object({
 export const UpdateStudentResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "counselor_id": /*#__PURE__*/ zod.string(),
+  "geographic_preferences": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "gpa": /*#__PURE__*/ zod.int(),
+  "high_school": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "id": /*#__PURE__*/ zod.string(),
+  "intended_major": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "intended_minor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "review_balance": /*#__PURE__*/ zod.int(),
+  "standardized_test_score": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "user_id": /*#__PURE__*/ zod.string(),
   "year": /*#__PURE__*/ zod.string()
@@ -1117,10 +1137,15 @@ export const SetStudentReviewBalanceBody = /*#__PURE__*/ zod.object({
 export const SetStudentReviewBalanceResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "counselor_id": /*#__PURE__*/ zod.string(),
+  "geographic_preferences": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "gpa": /*#__PURE__*/ zod.int(),
+  "high_school": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "id": /*#__PURE__*/ zod.string(),
+  "intended_major": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "intended_minor": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "organization": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "review_balance": /*#__PURE__*/ zod.int(),
+  "standardized_test_score": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "user_id": /*#__PURE__*/ zod.string(),
   "year": /*#__PURE__*/ zod.string()

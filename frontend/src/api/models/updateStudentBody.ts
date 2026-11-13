@@ -10,10 +10,20 @@ import type { UpdateStudentBodyYear } from './updateStudentBodyYear';
 export interface UpdateStudentBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /** Geographic preferences for colleges */
+  geographic_preferences?: string;
   /** GPA of the student */
   gpa?: number;
+  /** High school the student attends */
+  high_school?: string;
+  /** Intended major of the student */
+  intended_major?: string;
+  /** Intended minor of the student */
+  intended_minor?: string;
   /** Organization of the student */
   organization?: string;
+  /** SAT or ACT score of the student */
+  standardized_test_score?: string;
   /** Interest of the student */
   student_interest?: string;
   /** School year of the student */

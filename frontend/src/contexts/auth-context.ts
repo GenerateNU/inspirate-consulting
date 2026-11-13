@@ -6,11 +6,7 @@ export const ACCOUNT_EXPIRED_PATH = "/account-expired";
 export const CLAIM_ACCOUNT_PATH = "/claim-account";
 export const LOGIN_PATH = "/login";
 // Pages reachable without being logged in.
-export const PUBLIC_PATHS = [
-  LOGIN_PATH,
-  "/student/login",
-  "/counselor/login",
-];
+export const PUBLIC_PATHS = [LOGIN_PATH, "/student/login", "/counselor/login"];
 
 export interface AuthContextType {
   resetTime: string | null;

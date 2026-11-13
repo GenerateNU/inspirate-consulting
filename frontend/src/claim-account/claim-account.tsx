@@ -90,9 +90,7 @@ export default function ClaimAccount() {
   const [minor, setMinor] = useState("");
   const [geoPrefs, setGeoPrefs] = useState("");
 
-  const handleProfileSubmit = async (
-    event: React.SubmitEvent<HTMLElement>,
-  ) => {
+  const handleProfileSubmit = async (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
     if (!studentID) return;
     try {
