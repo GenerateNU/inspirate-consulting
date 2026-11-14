@@ -83,4 +83,96 @@ func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, verif
 		}
 		return nil, nil
 	})
+
+	studentOrCounselor := huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)}
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "create-extracurricular-note",
+		Middlewares:   studentOrCounselor,
+		Method:        http.MethodPost,
+		Path:          "/extracurriculars/{id}/notes",
+		DefaultStatus: http.StatusCreated,
+		Description:   "Add a note to an extracurricular. Students can add to their own; counselors to their assigned students'.",
+		Tags:          []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.CreateExtracurricularNoteInput) (*models.ExtracurricularNoteOutput, error) {
+		note, err := extracurricularHandler.CreateExtracurricularNote(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.ExtracurricularNoteOutput{Body: *note}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "update-extracurricular-note",
+		Middlewares: studentOrCounselor,
+		Method:      http.MethodPatch,
+		Path:        "/extracurriculars/{id}/notes/{noteId}",
+		Description: "Edit a note on an extracurricular. Students can edit their own; counselors their assigned students'.",
+		Tags:        []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.UpdateExtracurricularNoteInput) (*models.ExtracurricularNoteOutput, error) {
+		note, err := extracurricularHandler.UpdateExtracurricularNote(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.ExtracurricularNoteOutput{Body: *note}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "delete-extracurricular-note",
+		Middlewares: studentOrCounselor,
+		Method:      http.MethodDelete,
+		Path:        "/extracurriculars/{id}/notes/{noteId}",
+		Description: "Delete a note from an extracurricular. Students can delete their own; counselors their assigned students'.",
+		Tags:        []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.DeleteExtracurricularNoteInput) (*struct{}, error) {
+		if err := extracurricularHandler.DeleteExtracurricularNote(ctx, input); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "create-extracurricular-achievement",
+		Middlewares:   studentOrCounselor,
+		Method:        http.MethodPost,
+		Path:          "/extracurriculars/{id}/achievements",
+		DefaultStatus: http.StatusCreated,
+		Description:   "Log an achievement on an extracurricular. Students can add to their own; counselors to their assigned students'.",
+		Tags:          []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.CreateExtracurricularAchievementInput) (*models.ExtracurricularAchievementOutput, error) {
+		achievement, err := extracurricularHandler.CreateExtracurricularAchievement(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.ExtracurricularAchievementOutput{Body: *achievement}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "update-extracurricular-achievement",
+		Middlewares: studentOrCounselor,
+		Method:      http.MethodPatch,
+		Path:        "/extracurriculars/{id}/achievements/{achievementId}",
+		Description: "Edit an achievement on an extracurricular. Omitted fields keep their value.",
+		Tags:        []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.UpdateExtracurricularAchievementInput) (*models.ExtracurricularAchievementOutput, error) {
+		achievement, err := extracurricularHandler.UpdateExtracurricularAchievement(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.ExtracurricularAchievementOutput{Body: *achievement}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "delete-extracurricular-achievement",
+		Middlewares: studentOrCounselor,
+		Method:      http.MethodDelete,
+		Path:        "/extracurriculars/{id}/achievements/{achievementId}",
+		Description: "Delete an achievement from an extracurricular. Students can delete their own; counselors their assigned students'.",
+		Tags:        []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.DeleteExtracurricularAchievementInput) (*struct{}, error) {
+		if err := extracurricularHandler.DeleteExtracurricularAchievement(ctx, input); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
 }

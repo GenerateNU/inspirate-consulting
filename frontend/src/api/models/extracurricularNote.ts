@@ -7,6 +7,8 @@
  */
 
 export interface ExtracurricularNote {
+  /** A URL to the JSON Schema for this object. */
+  readonly $schema?: string;
   body: string;
   created_at: string;
   extracurricular_id: number;

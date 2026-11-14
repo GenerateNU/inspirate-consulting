@@ -40,6 +40,14 @@ type ExtracurricularRepository interface {
 	GetExtracurricularStudentID(ctx context.Context, id int64) (uuid.UUID, error)
 	GetExtracurricular(ctx context.Context, id int64) (*models.ExtracurricularDetail, error)
 	DeleteExtracurricular(ctx context.Context, id int64, studentID string) error
+
+	CreateExtracurricularNote(ctx context.Context, extracurricularID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)
+	UpdateExtracurricularNote(ctx context.Context, extracurricularID, noteID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)
+	DeleteExtracurricularNote(ctx context.Context, extracurricularID, noteID int64) error
+
+	CreateExtracurricularAchievement(ctx context.Context, extracurricularID int64, input models.CreateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)
+	UpdateExtracurricularAchievement(ctx context.Context, extracurricularID, achievementID int64, input models.UpdateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)
+	DeleteExtracurricularAchievement(ctx context.Context, extracurricularID, achievementID int64) error
 }
 
 // Essay Repository

@@ -657,6 +657,7 @@ export const GetExtracurricularParams = /*#__PURE__*/ zod.object({
 export const GetExtracurricularResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "achievements": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "body": /*#__PURE__*/ zod.string(),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "entry_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
@@ -675,6 +676,7 @@ export const GetExtracurricularResponse = /*#__PURE__*/ zod.object({
   "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "notes": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "body": /*#__PURE__*/ zod.string(),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "extracurricular_id": /*#__PURE__*/ zod.int(),
@@ -708,19 +710,19 @@ export const updateExtracurricularBodyWeeksPerYearMax = 52;
 
 
 export const UpdateExtracurricularBody = /*#__PURE__*/ zod.object({
-  "application_description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
-  "goals": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "hours_per_week": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.number().check(/*#__PURE__*/ zod.gte(updateExtracurricularBodyHoursPerWeekMin))),
-  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "application_description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "end_date": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "goals": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "hours_per_week": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.number().check(/*#__PURE__*/ zod.gte(updateExtracurricularBodyHoursPerWeekMin))).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "leadership_role": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
   "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))),
   "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "ready_for_application": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()),
   "start_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
   "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['doing', 'have_done'])),
   "type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['maintenance', 'investment'])),
-  "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(updateExtracurricularBodyWeeksPerYearMin)).check(/*#__PURE__*/ zod.lte(updateExtracurricularBodyWeeksPerYearMax)))
+  "weeks_per_year": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(updateExtracurricularBodyWeeksPerYearMin)).check(/*#__PURE__*/ zod.lte(updateExtracurricularBodyWeeksPerYearMax))).check(/*#__PURE__*/ zod.describe('Send null to clear'))
 })
 
 export const UpdateExtracurricularResponse = /*#__PURE__*/ zod.object({
@@ -743,6 +745,130 @@ export const UpdateExtracurricularResponse = /*#__PURE__*/ zod.object({
   "type": /*#__PURE__*/ zod.string(),
   "user_id": /*#__PURE__*/ zod.string(),
   "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int())
+})
+
+
+/**
+ * Log an achievement on an extracurricular. Students can add to their own; counselors to their assigned students'.
+ */
+export const CreateExtracurricularAchievementParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular'))
+})
+
+
+
+
+export const CreateExtracurricularAchievementBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)),
+  "entry_date": /*#__PURE__*/ zod.iso.date()
+})
+
+export const CreateExtracurricularAchievementResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "entry_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Delete an achievement from an extracurricular. Students can delete their own; counselors their assigned students'.
+ */
+export const DeleteExtracurricularAchievementParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "achievementId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the achievement'))
+})
+
+export const DeleteExtracurricularAchievementResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Edit an achievement on an extracurricular. Omitted fields keep their value.
+ */
+export const UpdateExtracurricularAchievementParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "achievementId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the achievement'))
+})
+
+
+
+
+export const UpdateExtracurricularAchievementBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))),
+  "entry_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date())
+})
+
+export const UpdateExtracurricularAchievementResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "entry_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Add a note to an extracurricular. Students can add to their own; counselors to their assigned students'.
+ */
+export const CreateExtracurricularNoteParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular'))
+})
+
+
+
+
+export const CreateExtracurricularNoteBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))
+})
+
+export const CreateExtracurricularNoteResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Delete a note from an extracurricular. Students can delete their own; counselors their assigned students'.
+ */
+export const DeleteExtracurricularNoteParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "noteId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the note'))
+})
+
+export const DeleteExtracurricularNoteResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Edit a note on an extracurricular. Students can edit their own; counselors their assigned students'.
+ */
+export const UpdateExtracurricularNoteParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "noteId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the note'))
+})
+
+
+
+
+export const UpdateExtracurricularNoteBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))
+})
+
+export const UpdateExtracurricularNoteResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
 })
 
 

@@ -15,17 +15,23 @@ import type {
 
 import type {
   Extracurricular,
-  ExtracurricularDetail
+  ExtracurricularAchievement,
+  ExtracurricularDetail,
+  ExtracurricularNote
 } from '../../models';
 
 import {
+  getCreateExtracurricularAchievementResponseMock,
+  getCreateExtracurricularNoteResponseMock,
   getCreateExtracurricularResponseMock,
   getGetExtracurricularResponseMock,
   getListExtracurricularsResponseMock,
+  getUpdateExtracurricularAchievementResponseMock,
+  getUpdateExtracurricularNoteResponseMock,
   getUpdateExtracurricularResponseMock
 } from './extracurriculars.faker';
 
-export { getListExtracurricularsResponseMock, getCreateExtracurricularResponseMock, getGetExtracurricularResponseMock, getUpdateExtracurricularResponseMock } from './extracurriculars.faker';
+export { getListExtracurricularsResponseMock, getCreateExtracurricularResponseMock, getGetExtracurricularResponseMock, getUpdateExtracurricularResponseMock, getCreateExtracurricularAchievementResponseMock, getUpdateExtracurricularAchievementResponseMock, getCreateExtracurricularNoteResponseMock, getUpdateExtracurricularNoteResponseMock } from './extracurriculars.faker';
 
 
 export const getListExtracurricularsMockHandler = (overrideResponse?: Extracurricular[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Extracurricular[] | null> | Extracurricular[] | null), options?: RequestHandlerOptions) => {
@@ -85,10 +91,84 @@ export const getUpdateExtracurricularMockHandler = (overrideResponse?: Extracurr
       })
   }, options)
 }
+
+export const getCreateExtracurricularAchievementMockHandler = (overrideResponse?: ExtracurricularAchievement | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ExtracurricularAchievement> | ExtracurricularAchievement), options?: RequestHandlerOptions) => {
+  return http.post('*/extracurriculars/:id/achievements', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCreateExtracurricularAchievementResponseMock(),
+      { status: 201
+      })
+  }, options)
+}
+
+export const getDeleteExtracurricularAchievementMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/extracurriculars/:id/achievements/:achievementId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
+export const getUpdateExtracurricularAchievementMockHandler = (overrideResponse?: ExtracurricularAchievement | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<ExtracurricularAchievement> | ExtracurricularAchievement), options?: RequestHandlerOptions) => {
+  return http.patch('*/extracurriculars/:id/achievements/:achievementId', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateExtracurricularAchievementResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getCreateExtracurricularNoteMockHandler = (overrideResponse?: ExtracurricularNote | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ExtracurricularNote> | ExtracurricularNote), options?: RequestHandlerOptions) => {
+  return http.post('*/extracurriculars/:id/notes', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCreateExtracurricularNoteResponseMock(),
+      { status: 201
+      })
+  }, options)
+}
+
+export const getDeleteExtracurricularNoteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/extracurriculars/:id/notes/:noteId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
+export const getUpdateExtracurricularNoteMockHandler = (overrideResponse?: ExtracurricularNote | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<ExtracurricularNote> | ExtracurricularNote), options?: RequestHandlerOptions) => {
+  return http.patch('*/extracurriculars/:id/notes/:noteId', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateExtracurricularNoteResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getExtracurricularsMock = () => [
   getListExtracurricularsMockHandler(),
   getCreateExtracurricularMockHandler(),
   getDeleteExtracurricularMockHandler(),
   getGetExtracurricularMockHandler(),
-  getUpdateExtracurricularMockHandler()
+  getUpdateExtracurricularMockHandler(),
+  getCreateExtracurricularAchievementMockHandler(),
+  getDeleteExtracurricularAchievementMockHandler(),
+  getUpdateExtracurricularAchievementMockHandler(),
+  getCreateExtracurricularNoteMockHandler(),
+  getDeleteExtracurricularNoteMockHandler(),
+  getUpdateExtracurricularNoteMockHandler()
 ]

@@ -95,23 +95,27 @@ type ListExtracurricularsOutput struct {
 }
 
 // UpdateExtracurricularRequest is the partial update body shape for extracurriculars.
-// Every field is optional; omitted fields keep their current value. StudentID is
-// derived from the existing entry and UserID from the auth context.
+// Every field is optional; omitted fields keep their current value. Fields
+// backed by nullable columns use Nullable so that sending an explicit null
+// clears the stored value. Required columns stay plain pointers, where null is
+// treated the same as omitted. StudentID is derived from the existing entry and
+// UserID from the auth context.
 type UpdateExtracurricularRequest struct {
-	Name           *string                `json:"name,omitempty"            minLength:"1"`
-	Status         *ExtracurricularStatus `json:"status,omitempty"          enum:"doing,have_done"`
-	Type           *ExtracurricularType   `json:"type,omitempty"            enum:"maintenance,investment"`
-	Description    *string                `json:"description,omitempty"`
-	LeadershipRole *string                `json:"leadership_role,omitempty"`
-	StartDate      *string                `json:"start_date,omitempty"      format:"date"`
-	EndDate        *string                `json:"end_date,omitempty"        format:"date"`
-	Organization   *string                `json:"organization,omitempty"`
+	Name         *string                `json:"name,omitempty"         minLength:"1"`
+	Status       *ExtracurricularStatus `json:"status,omitempty"       enum:"doing,have_done"`
+	Type         *ExtracurricularType   `json:"type,omitempty"         enum:"maintenance,investment"`
+	StartDate    *string                `json:"start_date,omitempty"   format:"date"`
+	Organization *string                `json:"organization,omitempty"`
 
-	HoursPerWeek           *float64 `json:"hours_per_week,omitempty"          minimum:"0"`
-	WeeksPerYear           *int16   `json:"weeks_per_year,omitempty"          minimum:"0" maximum:"52"`
-	Goals                  *string  `json:"goals,omitempty"`
-	ReadyForApplication    *bool    `json:"ready_for_application,omitempty"`
-	ApplicationDescription *string  `json:"application_description,omitempty"`
+	Description    Nullable[string] `json:"description,omitempty"     doc:"Send null to clear"`
+	LeadershipRole Nullable[string] `json:"leadership_role,omitempty" doc:"Send null to clear"`
+	EndDate        Nullable[string] `json:"end_date,omitempty"        format:"date" doc:"Send null to clear"`
+
+	HoursPerWeek           Nullable[float64] `json:"hours_per_week,omitempty"          minimum:"0" doc:"Send null to clear"`
+	WeeksPerYear           Nullable[int16]   `json:"weeks_per_year,omitempty"          minimum:"0" maximum:"52" doc:"Send null to clear"`
+	Goals                  Nullable[string]  `json:"goals,omitempty"                   doc:"Send null to clear"`
+	ReadyForApplication    *bool             `json:"ready_for_application,omitempty"`
+	ApplicationDescription Nullable[string]  `json:"application_description,omitempty" doc:"Send null to clear"`
 }
 
 // UpdateExtracurricularInput updates a student's extracurricular entry.
@@ -165,4 +169,70 @@ type GetExtracurricularOutput struct {
 // DeleteExtracurricularInput deletes one extracurricular by id.
 type DeleteExtracurricularInput struct {
 	ID int64 `path:"id" doc:"ID of the extracurricular to delete"`
+}
+
+// ExtracurricularNoteRequest is the body for creating or editing a note.
+type ExtracurricularNoteRequest struct {
+	Body string `json:"body" minLength:"1"`
+}
+
+// CreateExtracurricularNoteInput adds a note to an extracurricular.
+type CreateExtracurricularNoteInput struct {
+	ExtracurricularID int64 `path:"id" doc:"ID of the extracurricular"`
+	Body              ExtracurricularNoteRequest
+}
+
+// UpdateExtracurricularNoteInput replaces the text of an existing note.
+type UpdateExtracurricularNoteInput struct {
+	ExtracurricularID int64 `path:"id"     doc:"ID of the extracurricular"`
+	NoteID            int64 `path:"noteId" doc:"ID of the note"`
+	Body              ExtracurricularNoteRequest
+}
+
+// DeleteExtracurricularNoteInput removes a note.
+type DeleteExtracurricularNoteInput struct {
+	ExtracurricularID int64 `path:"id"     doc:"ID of the extracurricular"`
+	NoteID            int64 `path:"noteId" doc:"ID of the note"`
+}
+
+// ExtracurricularNoteOutput returns a single note.
+type ExtracurricularNoteOutput struct {
+	Body ExtracurricularNote
+}
+
+// CreateExtracurricularAchievementRequest is the body for logging an achievement.
+type CreateExtracurricularAchievementRequest struct {
+	EntryDate string `json:"entry_date" format:"date"`
+	Body      string `json:"body"       minLength:"1"`
+}
+
+// UpdateExtracurricularAchievementRequest is a partial update for an
+// achievement. Both columns are required, so omitted fields keep their value.
+type UpdateExtracurricularAchievementRequest struct {
+	EntryDate *string `json:"entry_date,omitempty" format:"date"`
+	Body      *string `json:"body,omitempty"       minLength:"1"`
+}
+
+// CreateExtracurricularAchievementInput adds an achievement to an extracurricular.
+type CreateExtracurricularAchievementInput struct {
+	ExtracurricularID int64 `path:"id" doc:"ID of the extracurricular"`
+	Body              CreateExtracurricularAchievementRequest
+}
+
+// UpdateExtracurricularAchievementInput edits an existing achievement.
+type UpdateExtracurricularAchievementInput struct {
+	ExtracurricularID int64 `path:"id"            doc:"ID of the extracurricular"`
+	AchievementID     int64 `path:"achievementId" doc:"ID of the achievement"`
+	Body              UpdateExtracurricularAchievementRequest
+}
+
+// DeleteExtracurricularAchievementInput removes an achievement.
+type DeleteExtracurricularAchievementInput struct {
+	ExtracurricularID int64 `path:"id"            doc:"ID of the extracurricular"`
+	AchievementID     int64 `path:"achievementId" doc:"ID of the achievement"`
+}
+
+// ExtracurricularAchievementOutput returns a single achievement.
+type ExtracurricularAchievementOutput struct {
+	Body ExtracurricularAchievement
 }

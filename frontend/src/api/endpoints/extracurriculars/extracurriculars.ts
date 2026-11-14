@@ -25,10 +25,15 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CreateExtracurricularAchievementRequest,
   CreateExtracurricularRequest,
   ErrorModel,
   Extracurricular,
+  ExtracurricularAchievement,
   ExtracurricularDetail,
+  ExtracurricularNote,
+  ExtracurricularNoteRequest,
+  UpdateExtracurricularAchievementRequest,
   UpdateExtracurricularRequest
 } from '../../models';
 
@@ -580,4 +585,576 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateExtracurricularMutationOptions(options), queryClient);
+    }
+    export const getCreateExtracurricularAchievementUrl = (id: number,) => {
+
+
+
+
+  return `/api/extracurriculars/${id}/achievements`
+}
+
+/**
+ * Log an achievement on an extracurricular. Students can add to their own; counselors to their assigned students'.
+ */
+export const createExtracurricularAchievement = async (id: number,
+    createExtracurricularAchievementRequest: NonReadonly<CreateExtracurricularAchievementRequest>, options?: RequestInit): Promise<ExtracurricularAchievement> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getCreateExtracurricularAchievementUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createExtracurricularAchievementRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ExtracurricularAchievement, status?: number} = new globalThis.Error();
+    const data : ExtracurricularAchievement = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ExtracurricularAchievement = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getCreateExtracurricularAchievementMutationKey = () => ['createExtracurricularAchievement'] as const;
+
+export const getCreateExtracurricularAchievementMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExtracurricularAchievement>>, TError,CreateExtracurricularAchievementMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createExtracurricularAchievement>>, TError,CreateExtracurricularAchievementMutationVariables, TContext> => {
+
+const mutationKey = getCreateExtracurricularAchievementMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createExtracurricularAchievement>>, CreateExtracurricularAchievementMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createExtracurricularAchievement(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateExtracurricularAchievementMutationResult = NonNullable<Awaited<ReturnType<typeof createExtracurricularAchievement>>>
+    export type CreateExtracurricularAchievementMutationBody = NonReadonly<CreateExtracurricularAchievementRequest>
+    export type CreateExtracurricularAchievementMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateExtracurricularAchievementMutationVariables = {id: number;data: NonReadonly<CreateExtracurricularAchievementRequest>}
+
+    export const useCreateExtracurricularAchievement = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExtracurricularAchievement>>, TError,CreateExtracurricularAchievementMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createExtracurricularAchievement>>,
+        TError,
+        CreateExtracurricularAchievementMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateExtracurricularAchievementMutationOptions(options), queryClient);
+    }
+    export const getDeleteExtracurricularAchievementUrl = (id: number,
+    achievementId: number,) => {
+
+
+
+
+  return `/api/extracurriculars/${id}/achievements/${achievementId}`
+}
+
+/**
+ * Delete an achievement from an extracurricular. Students can delete their own; counselors their assigned students'.
+ */
+export const deleteExtracurricularAchievement = async (id: number,
+    achievementId: number, options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeleteExtracurricularAchievementUrl(id,achievementId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeleteExtracurricularAchievementMutationKey = () => ['deleteExtracurricularAchievement'] as const;
+
+export const getDeleteExtracurricularAchievementMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExtracurricularAchievement>>, TError,DeleteExtracurricularAchievementMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteExtracurricularAchievement>>, TError,DeleteExtracurricularAchievementMutationVariables, TContext> => {
+
+const mutationKey = getDeleteExtracurricularAchievementMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteExtracurricularAchievement>>, DeleteExtracurricularAchievementMutationVariables> = (props) => {
+          const {id,achievementId} = props ?? {};
+
+          return  deleteExtracurricularAchievement(id,achievementId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteExtracurricularAchievementMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExtracurricularAchievement>>>
+
+    export type DeleteExtracurricularAchievementMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeleteExtracurricularAchievementMutationVariables = {id: number;achievementId: number}
+
+    export const useDeleteExtracurricularAchievement = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExtracurricularAchievement>>, TError,DeleteExtracurricularAchievementMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteExtracurricularAchievement>>,
+        TError,
+        DeleteExtracurricularAchievementMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteExtracurricularAchievementMutationOptions(options), queryClient);
+    }
+    export const getUpdateExtracurricularAchievementUrl = (id: number,
+    achievementId: number,) => {
+
+
+
+
+  return `/api/extracurriculars/${id}/achievements/${achievementId}`
+}
+
+/**
+ * Edit an achievement on an extracurricular. Omitted fields keep their value.
+ */
+export const updateExtracurricularAchievement = async (id: number,
+    achievementId: number,
+    updateExtracurricularAchievementRequest: NonReadonly<UpdateExtracurricularAchievementRequest>, options?: RequestInit): Promise<ExtracurricularAchievement> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateExtracurricularAchievementUrl(id,achievementId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateExtracurricularAchievementRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ExtracurricularAchievement, status?: number} = new globalThis.Error();
+    const data : ExtracurricularAchievement = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ExtracurricularAchievement = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateExtracurricularAchievementMutationKey = () => ['updateExtracurricularAchievement'] as const;
+
+export const getUpdateExtracurricularAchievementMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricularAchievement>>, TError,UpdateExtracurricularAchievementMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricularAchievement>>, TError,UpdateExtracurricularAchievementMutationVariables, TContext> => {
+
+const mutationKey = getUpdateExtracurricularAchievementMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateExtracurricularAchievement>>, UpdateExtracurricularAchievementMutationVariables> = (props) => {
+          const {id,achievementId,data} = props ?? {};
+
+          return  updateExtracurricularAchievement(id,achievementId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateExtracurricularAchievementMutationResult = NonNullable<Awaited<ReturnType<typeof updateExtracurricularAchievement>>>
+    export type UpdateExtracurricularAchievementMutationBody = NonReadonly<UpdateExtracurricularAchievementRequest>
+    export type UpdateExtracurricularAchievementMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateExtracurricularAchievementMutationVariables = {id: number;achievementId: number;data: NonReadonly<UpdateExtracurricularAchievementRequest>}
+
+    export const useUpdateExtracurricularAchievement = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricularAchievement>>, TError,UpdateExtracurricularAchievementMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateExtracurricularAchievement>>,
+        TError,
+        UpdateExtracurricularAchievementMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateExtracurricularAchievementMutationOptions(options), queryClient);
+    }
+    export const getCreateExtracurricularNoteUrl = (id: number,) => {
+
+
+
+
+  return `/api/extracurriculars/${id}/notes`
+}
+
+/**
+ * Add a note to an extracurricular. Students can add to their own; counselors to their assigned students'.
+ */
+export const createExtracurricularNote = async (id: number,
+    extracurricularNoteRequest: NonReadonly<ExtracurricularNoteRequest>, options?: RequestInit): Promise<ExtracurricularNote> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getCreateExtracurricularNoteUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(extracurricularNoteRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ExtracurricularNote, status?: number} = new globalThis.Error();
+    const data : ExtracurricularNote = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ExtracurricularNote = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getCreateExtracurricularNoteMutationKey = () => ['createExtracurricularNote'] as const;
+
+export const getCreateExtracurricularNoteMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExtracurricularNote>>, TError,CreateExtracurricularNoteMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createExtracurricularNote>>, TError,CreateExtracurricularNoteMutationVariables, TContext> => {
+
+const mutationKey = getCreateExtracurricularNoteMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createExtracurricularNote>>, CreateExtracurricularNoteMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createExtracurricularNote(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateExtracurricularNoteMutationResult = NonNullable<Awaited<ReturnType<typeof createExtracurricularNote>>>
+    export type CreateExtracurricularNoteMutationBody = NonReadonly<ExtracurricularNoteRequest>
+    export type CreateExtracurricularNoteMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type CreateExtracurricularNoteMutationVariables = {id: number;data: NonReadonly<ExtracurricularNoteRequest>}
+
+    export const useCreateExtracurricularNote = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExtracurricularNote>>, TError,CreateExtracurricularNoteMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createExtracurricularNote>>,
+        TError,
+        CreateExtracurricularNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateExtracurricularNoteMutationOptions(options), queryClient);
+    }
+    export const getDeleteExtracurricularNoteUrl = (id: number,
+    noteId: number,) => {
+
+
+
+
+  return `/api/extracurriculars/${id}/notes/${noteId}`
+}
+
+/**
+ * Delete a note from an extracurricular. Students can delete their own; counselors their assigned students'.
+ */
+export const deleteExtracurricularNote = async (id: number,
+    noteId: number, options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeleteExtracurricularNoteUrl(id,noteId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeleteExtracurricularNoteMutationKey = () => ['deleteExtracurricularNote'] as const;
+
+export const getDeleteExtracurricularNoteMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExtracurricularNote>>, TError,DeleteExtracurricularNoteMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteExtracurricularNote>>, TError,DeleteExtracurricularNoteMutationVariables, TContext> => {
+
+const mutationKey = getDeleteExtracurricularNoteMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteExtracurricularNote>>, DeleteExtracurricularNoteMutationVariables> = (props) => {
+          const {id,noteId} = props ?? {};
+
+          return  deleteExtracurricularNote(id,noteId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteExtracurricularNoteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExtracurricularNote>>>
+
+    export type DeleteExtracurricularNoteMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type DeleteExtracurricularNoteMutationVariables = {id: number;noteId: number}
+
+    export const useDeleteExtracurricularNote = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExtracurricularNote>>, TError,DeleteExtracurricularNoteMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteExtracurricularNote>>,
+        TError,
+        DeleteExtracurricularNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteExtracurricularNoteMutationOptions(options), queryClient);
+    }
+    export const getUpdateExtracurricularNoteUrl = (id: number,
+    noteId: number,) => {
+
+
+
+
+  return `/api/extracurriculars/${id}/notes/${noteId}`
+}
+
+/**
+ * Edit a note on an extracurricular. Students can edit their own; counselors their assigned students'.
+ */
+export const updateExtracurricularNote = async (id: number,
+    noteId: number,
+    extracurricularNoteRequest: NonReadonly<ExtracurricularNoteRequest>, options?: RequestInit): Promise<ExtracurricularNote> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateExtracurricularNoteUrl(id,noteId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(extracurricularNoteRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ExtracurricularNote, status?: number} = new globalThis.Error();
+    const data : ExtracurricularNote = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ExtracurricularNote = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateExtracurricularNoteMutationKey = () => ['updateExtracurricularNote'] as const;
+
+export const getUpdateExtracurricularNoteMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricularNote>>, TError,UpdateExtracurricularNoteMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricularNote>>, TError,UpdateExtracurricularNoteMutationVariables, TContext> => {
+
+const mutationKey = getUpdateExtracurricularNoteMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateExtracurricularNote>>, UpdateExtracurricularNoteMutationVariables> = (props) => {
+          const {id,noteId,data} = props ?? {};
+
+          return  updateExtracurricularNote(id,noteId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateExtracurricularNoteMutationResult = NonNullable<Awaited<ReturnType<typeof updateExtracurricularNote>>>
+    export type UpdateExtracurricularNoteMutationBody = NonReadonly<ExtracurricularNoteRequest>
+    export type UpdateExtracurricularNoteMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateExtracurricularNoteMutationVariables = {id: number;noteId: number;data: NonReadonly<ExtracurricularNoteRequest>}
+
+    export const useUpdateExtracurricularNote = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExtracurricularNote>>, TError,UpdateExtracurricularNoteMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateExtracurricularNote>>,
+        TError,
+        UpdateExtracurricularNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateExtracurricularNoteMutationOptions(options), queryClient);
     }

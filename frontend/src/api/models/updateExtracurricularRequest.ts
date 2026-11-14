@@ -11,13 +11,37 @@ import type { UpdateExtracurricularRequestType } from './updateExtracurricularRe
 export interface UpdateExtracurricularRequest {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  application_description?: string;
-  description?: string;
-  end_date?: string;
-  goals?: string;
-  /** @minimum 0 */
-  hours_per_week?: number;
-  leadership_role?: string;
+  /**
+     * Send null to clear
+     * @nullable
+     */
+  application_description?: string | null;
+  /**
+     * Send null to clear
+     * @nullable
+     */
+  description?: string | null;
+  /**
+     * Send null to clear
+     * @nullable
+     */
+  end_date?: string | null;
+  /**
+     * Send null to clear
+     * @nullable
+     */
+  goals?: string | null;
+  /**
+     * Send null to clear
+     * @minimum 0
+     * @nullable
+     */
+  hours_per_week?: number | null;
+  /**
+     * Send null to clear
+     * @nullable
+     */
+  leadership_role?: string | null;
   /** @minLength 1 */
   name?: string;
   organization?: string;
@@ -26,8 +50,10 @@ export interface UpdateExtracurricularRequest {
   status?: UpdateExtracurricularRequestStatus;
   type?: UpdateExtracurricularRequestType;
   /**
+     * Send null to clear
      * @minimum 0
      * @maximum 52
+     * @nullable
      */
-  weeks_per_year?: number;
+  weeks_per_year?: number | null;
 }
