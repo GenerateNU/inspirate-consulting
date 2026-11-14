@@ -1,22 +1,36 @@
 import {
-  CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
   CreatePersonalCollegeApplicationRequestBodyCategory as Category,
+  PersonalCollegeApplicationEssayProgress as EssayProgress,
+  UpdatePersonalCollegeApplicationRequestBodyInterest as Interest,
 } from "../../api/models";
-import { deadlineOptions } from "../utils/shared";
+import type { ChoiceOption } from "../utils/components/choice-chips";
+import type { TagTone } from "../utils/components/tag";
 
-export const applicationTypes = Object.values(ApplicationType);
-export const categories = Object.values(Category);
+// order matches the School Details page
+export const categoryOptions: ChoiceOption<Category>[] = [
+  { value: Category.target, label: "Target" },
+  { value: Category.reach, label: "Reach" },
+  { value: Category.safety, label: "Safety" },
+];
 
-export const typeLabel = (type: string) =>
-  deadlineOptions.find(({ value }) => value === type)?.label ?? type;
+export const interestOptions: ChoiceOption<Interest>[] = [
+  { value: Interest.top_choice, label: "Top Choice" },
+  { value: Interest.strong_contender, label: "Strong Contender" },
+  { value: Interest.considering, label: "Considering" },
+];
 
 export const categoryLabel = (category: string) =>
-  category.charAt(0).toUpperCase() + category.slice(1);
+  categoryOptions.find(({ value }) => value === category)?.label ?? category;
 
-export const deadlineClassName = "border-blue-300 bg-blue-100 text-blue-700";
+export const interestLabel = (interest: string) =>
+  interestOptions.find(({ value }) => value === interest)?.label ?? interest;
 
-export const categoryClassName: Record<string, string> = {
-  [Category.target]: "border-red-300 bg-red-100 text-red-700",
-  [Category.reach]: "border-amber-300 bg-amber-100 text-amber-700",
-  [Category.safety]: "border-emerald-300 bg-emerald-100 text-emerald-700",
+// the pill next to a school's name on My List
+export const essayProgressTag: Record<
+  string,
+  { label: string; tone: TagTone }
+> = {
+  [EssayProgress.not_started]: { label: "Essays Not Started", tone: "grey" },
+  [EssayProgress.in_progress]: { label: "Essays In Progress", tone: "yellow" },
+  [EssayProgress.completed]: { label: "All Essays Completed", tone: "green" },
 };

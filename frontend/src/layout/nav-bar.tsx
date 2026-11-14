@@ -40,7 +40,7 @@ type NavItemConfig = {
 
 const mainLinks: NavItemConfig[] = [
   { to: "/student-tasks", label: "Task Dashboard", icon: ListTodo },
-  { to: "/student-college-list", label: "Colleges", icon: School },
+  { to: "/college-applications", label: "Colleges", icon: School },
   { to: "/essay", label: "Essays", icon: FileText },
   { to: "/extracurriculars", label: "Extracurriculars", icon: Palette },
   { to: "/videos", label: "Modules", icon: SquarePlay },

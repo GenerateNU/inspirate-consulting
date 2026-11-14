@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500&family=Plus+Jakarta+Sans:wght@500;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -16,6 +17,26 @@
   --color-paper: #faf9f6;
   --color-mist: #c3cfd9;
   --font-inter: "Inter", sans-serif;
+
+  /* Hi-fi design tokens (Figma "Color/..." and type styles) */
+  --color-dark-green: #19664c;
+  --color-lightest-green: #e6f5ef;
+  --color-dark-yellow: #786246;
+  --color-lightest-yellow: #f8efe4;
+  --color-blue: #587d91;
+  --color-dark-blue: #415763;
+  --color-lightest-blue: #e7edef;
+  --color-off-white: #fbfaf7;
+  --color-greyish-brown: #bdb7ad;
+  --color-dark-greyish-brown: #5e5c56;
+  --color-warm-grey: #98938b;
+  --color-warm-grey-dark: #76736d;
+  --color-danger: #a6261f;
+  --color-danger-stroke: #c78a86;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-host: "Host Grotesk", sans-serif;
+  --shadow-card:
+    0px 1px 3px 0px rgb(22 25 29 / 0.1), 0px 1px 2px -1px rgb(22 25 29 / 0.1);
 }
 
 @layer base {

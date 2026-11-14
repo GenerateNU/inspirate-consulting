@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./api/client";
 import "./index.css";
@@ -13,9 +13,8 @@ import EditExtracurricular from "./extracurricular/EditExtracurricular";
 import Essay from "./essays/essays";
 import CounselorCollegeList from "./college/counselor/college-list.tsx";
 import CounselorCollegeDetails from "./college/counselor/college-details.tsx";
-import StudentCollegeList from "./college/student/college-list.tsx";
-import StudentCollegeDetails from "./college/student/college-details.tsx";
 import MyCollegeList from "./college/student/my-college-list";
+import SchoolDetails from "./college/student/school-details";
 import UploadVideo from "./video/upload-video";
 import VideoList from "./video/videos";
 import Student from "./student/student";
@@ -88,15 +87,16 @@ createRoot(document.getElementById("root")!).render(
                 path="/counselor-college-list/:id"
                 element={<CounselorCollegeDetails />}
               />
+              {/* old student college search page; Add School on My List replaced it */}
               <Route
-                path="/student-college-list"
-                element={<StudentCollegeList />}
-              />
-              <Route
-                path="/student-college-list/:id"
-                element={<StudentCollegeDetails />}
+                path="/student-college-list/*"
+                element={<Navigate to="/college-applications" replace />}
               />
               <Route path="/college-applications" element={<MyCollegeList />} />
+              <Route
+                path="/college-applications/:id"
+                element={<SchoolDetails />}
+              />
               <Route path="/upload-video" element={<UploadVideo />} />
               <Route path="/videos" element={<VideoList />} />
               <Route path="/student" element={<Student />} />
