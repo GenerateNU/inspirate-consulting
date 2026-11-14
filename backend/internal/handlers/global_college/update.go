@@ -8,6 +8,10 @@ import (
 
 func (h *Handler) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
 
+	if err := validateCycles(input.Cycles); err != nil {
+		return nil, err
+	}
+
 	// allow for manual override of near duplicate check
 	if !input.ConfirmDuplicate {
 		if err := h.checkNearDuplicate(ctx, input.SchoolName, input.SchoolLocation, &id); err != nil {
