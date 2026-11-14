@@ -1,11 +1,10 @@
 package extracurricular
 
 import (
-	"context"
 	"errors"
+	"net/http"
 	"testing"
 
-	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -50,6 +49,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		}
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(expected, nil)
 
 		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
@@ -67,6 +67,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		}
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, mock.MatchedBy(func(in models.UpdateExtracurricularInput) bool {
 			return in.Body.ReadyForApplication != nil && !*in.Body.ReadyForApplication
 		})).Return(&models.Extracurricular{ID: id}, nil)
@@ -80,6 +81,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 
 		input := &models.UpdateExtracurricularInput{ID: id}
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(&models.Extracurricular{ID: id}, nil)
 
 		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
@@ -88,18 +90,47 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		assert.Equal(t, id, res.ID)
 	})
 
-	t.Run("missing student id is unauthorized", func(t *testing.T) {
+	t.Run("owner passes the real authorizer", func(t *testing.T) {
+		t.Parallel()
+
+		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
+		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(&models.Extracurricular{ID: id}, nil)
+
+		res, err := NewHandler(mockRepo, realAuthorizer()).UpdateExtracurricular(studentRoleCtx(studentID), id, input)
+
+		require.NoError(t, err)
+		assert.Equal(t, id, res.ID)
+	})
+
+	t.Run("another student is forbidden", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 
-		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(auth.WithUserID(context.Background(), userID), id, input)
+		res, err := NewHandler(mockRepo, realAuthorizer()).UpdateExtracurricular(studentRoleCtx(uuid.New()), id, input)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
 		require.ErrorAs(t, err, &httpErr)
-		assert.Equal(t, 401, httpErr.Code)
+		assert.Equal(t, http.StatusForbidden, httpErr.Code)
+		mockRepo.AssertNotCalled(t, "UpdateExtracurricular")
+	})
+
+	t.Run("owner lookup not found is propagated", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(uuid.Nil, pgx.ErrNoRows)
+		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
+
+		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+
+		assert.Nil(t, res)
+		assert.ErrorIs(t, err, pgx.ErrNoRows)
 		mockRepo.AssertNotCalled(t, "UpdateExtracurricular")
 	})
 
@@ -108,6 +139,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 
 		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(nil, pgx.ErrNoRows)
 
 		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
@@ -121,6 +153,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 
 		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(nil, errors.New("database error"))
 
 		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)

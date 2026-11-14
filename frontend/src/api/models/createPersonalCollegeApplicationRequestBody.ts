@@ -11,7 +11,7 @@ import type { CreatePersonalCollegeApplicationRequestBodyCategory } from './crea
 export interface CreatePersonalCollegeApplicationRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  /** Which deadline the student is applying by */
+  /** Which application cycle the student is applying by; the college must offer it */
   application_type: CreatePersonalCollegeApplicationRequestBodyApplicationType;
   /** How the student categorizes this school */
   category: CreatePersonalCollegeApplicationRequestBodyCategory;

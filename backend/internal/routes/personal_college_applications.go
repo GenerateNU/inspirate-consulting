@@ -13,9 +13,10 @@ import (
 )
 
 // SetUpPersonalCollegeApplicationRoutes registers the personal college application endpoints:
-// create and list by student ID, delete, update rank, and update application details
-func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege)
+// create and list by student ID, delete, update rank, and update application details.
+// Counselors can read a student's list (GET with student_id); every write is student-only.
+func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
+	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege, authorizer)
 
 	// Register POST /applications handler.
 	huma.Register(api, huma.Operation{
@@ -36,13 +37,13 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 	// Register GET /applications handler.
 	huma.Register(api, huma.Operation{
 		OperationID: "list-personal-college-applications",
-		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/applications",
-		Description: "List all college applications for the authenticated student.",
+		Description: "List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.",
 		Tags:        []string{"Personal College Applications"},
 	}, func(ctx context.Context, input *models.ListPersonalCollegeApplicationsInput) (*models.ListPersonalCollegeApplicationsOutput, error) {
-		applications, err := personalCollegeApplicationHandler.ListPersonalCollegeApplicationsByStudentID(ctx)
+		applications, err := personalCollegeApplicationHandler.ListPersonalCollegeApplicationsByStudentID(ctx, input.StudentID)
 		if err != nil {
 			return nil, err
 		}
@@ -55,7 +56,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodDelete,
 		Path:        "/applications/{id}",
-		Description: "Delete a personal college application for the authenticated student.",
+		Description: "Remove a school from the authenticated student's list. Also deletes the essays the student started for that school (essays with review history are archived instead) and closes the gap in their ranking.",
 		Tags:        []string{"Personal College Applications"},
 	}, func(ctx context.Context, input *models.DeletePersonalCollegeApplicationInput) (*models.DeletePersonalCollegeApplicationOutput, error) {
 		err := personalCollegeApplicationHandler.DeletePersonalCollegeApplication(ctx, input.ID)
@@ -87,7 +88,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
 		Method:      http.MethodPut,
 		Path:        "/applications/{id}",
-		Description: "Update a personal college application for the authenticated student.",
+		Description: "Update a personal college application for the authenticated student: college, cycle, category, interest, and application status. Full replacement; omitting interest clears it.",
 		Tags:        []string{"Personal College Applications"},
 	}, func(ctx context.Context, input *models.UpdatePersonalCollegeApplicationInput) (*models.UpdatePersonalCollegeApplicationOutput, error) {
 		updated, err := personalCollegeApplicationHandler.UpdatePersonalCollegeApplication(ctx, input.ID, input.Body)

@@ -25,8 +25,9 @@ func ensureContainerAndTemplate() error {
 
 		log.Println("Starting reusable PostgreSQL container...")
 
+		// pgvector image = postgres 15 + the vector extension (Supabase ships it built in)
 		pg, err := postgres.Run(ctx,
-			"postgres:15-alpine",
+			"pgvector/pgvector:0.8.0-pg15",
 			postgres.WithDatabase("postgres"),
 			postgres.WithUsername("test"),
 			postgres.WithPassword("test"),
@@ -50,6 +51,13 @@ func ensureContainerAndTemplate() error {
 
 		adminPool, err = pgxpool.New(ctx, connStr)
 		if err != nil {
+			setupErr = err
+			return
+		}
+
+		// extensions live in the "extensions" schema, which is on the search path
+		// so types/operators like vector and <=> resolve without a schema prefix.
+		if _, err := adminPool.Exec(ctx, `ALTER ROLE test SET search_path = "$user", public, extensions`); err != nil {
 			setupErr = err
 			return
 		}

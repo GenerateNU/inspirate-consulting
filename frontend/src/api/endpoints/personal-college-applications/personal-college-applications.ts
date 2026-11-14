@@ -27,6 +27,7 @@ import type {
 import type {
   CreatePersonalCollegeApplicationRequestBody,
   ErrorModel,
+  ListPersonalCollegeApplicationsParams,
   PersonalCollegeApplication,
   UpdatePersonalCollegeApplicationRankRequestBody,
   UpdatePersonalCollegeApplicationRequestBody
@@ -78,20 +79,27 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getListPersonalCollegeApplicationsUrl = () => {
+export const getListPersonalCollegeApplicationsUrl = (params?: ListPersonalCollegeApplicationsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/applications`
+  return stringifiedParams.length > 0 ? `/api/applications?${stringifiedParams}` : `/api/applications`
 }
 
 /**
- * List all college applications for the authenticated student.
+ * List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
  */
-export const listPersonalCollegeApplications = async ( options?: RequestInit): Promise<PersonalCollegeApplication[] | null> => {
+export const listPersonalCollegeApplications = async (params?: ListPersonalCollegeApplicationsParams, options?: RequestInit): Promise<PersonalCollegeApplication[] | null> => {
 
-  const res = await fetch(getListPersonalCollegeApplicationsUrl(),
+  const res = await fetch(getListPersonalCollegeApplicationsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -118,23 +126,23 @@ export const listPersonalCollegeApplications = async ( options?: RequestInit): P
 
 
 
-export const getListPersonalCollegeApplicationsQueryKey = () => {
+export const getListPersonalCollegeApplicationsQueryKey = (params?: ListPersonalCollegeApplicationsParams,) => {
     return [
-    `/api/applications`
+    `/api/applications`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListPersonalCollegeApplicationsQueryOptions = <TData = Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>>, fetch?: RequestInit}
+export const getListPersonalCollegeApplicationsQueryOptions = <TData = Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: ListPersonalCollegeApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListPersonalCollegeApplicationsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListPersonalCollegeApplicationsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPersonalCollegeApplications>>> = ({ signal }) => listPersonalCollegeApplications({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPersonalCollegeApplications>>> = ({ signal }) => listPersonalCollegeApplications(params, { signal, ...fetchOptions });
 
 
 
@@ -148,7 +156,7 @@ export type ListPersonalCollegeApplicationsQueryError = globalThis.Error & { inf
 
 
 export function useListPersonalCollegeApplications<TData = Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>> & Pick<
+ params: undefined |  ListPersonalCollegeApplicationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listPersonalCollegeApplications>>,
           TError,
@@ -158,7 +166,7 @@ export function useListPersonalCollegeApplications<TData = Awaited<ReturnType<ty
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListPersonalCollegeApplications<TData = Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>> & Pick<
+ params?: ListPersonalCollegeApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listPersonalCollegeApplications>>,
           TError,
@@ -168,16 +176,16 @@ export function useListPersonalCollegeApplications<TData = Awaited<ReturnType<ty
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListPersonalCollegeApplications<TData = Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>>, fetch?: RequestInit}
+ params?: ListPersonalCollegeApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useListPersonalCollegeApplications<TData = Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>>, fetch?: RequestInit}
+ params?: ListPersonalCollegeApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPersonalCollegeApplications>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListPersonalCollegeApplicationsQueryOptions(options)
+  const queryOptions = getListPersonalCollegeApplicationsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -296,7 +304,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 }
 
 /**
- * Delete a personal college application for the authenticated student.
+ * Remove a school from the authenticated student's list. Also deletes the essays the student started for that school (essays with review history are archived instead) and closes the gap in their ranking.
  */
 export const deletePersonalCollegeApplication = async (id: number, options?: RequestInit): Promise<void> => {
 
@@ -380,7 +388,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 }
 
 /**
- * Update a personal college application for the authenticated student.
+ * Update a personal college application for the authenticated student: college, cycle, category, interest, and application status. Full replacement; omitting interest clears it.
  */
 export const updatePersonalCollegeApplication = async (id: number,
     updatePersonalCollegeApplicationRequestBody: NonReadonly<UpdatePersonalCollegeApplicationRequestBody>, options?: RequestInit): Promise<PersonalCollegeApplication> => {
