@@ -5,6 +5,7 @@ import (
 	"time"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	activityRepository "inspirate-consulting/internal/data/postgres/schema/activityStore"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
@@ -29,6 +30,11 @@ import (
 )
 
 // For each schema, their interfaces are to be defined here
+type ActivityRepository interface {
+	CreateActivity(ctx context.Context, studentID uuid.UUID, body models.CreateActivityBody) error
+	GetActivitiesForCounselor(ctx context.Context, counselorID uuid.UUID, studentID *uuid.UUID) ([]models.Activity, error)
+}
+
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
@@ -77,6 +83,7 @@ type TodoItemRepository interface {
 	DeleteTodoItem(ctx context.Context, id string) error
 	UpdateTodoItemDescription(ctx context.Context, id string, newDescription string) (*models.TodoItem, error)
 	UpdateTodoItemDeadline(ctx context.Context, id string, newDeadline *time.Time) (*models.TodoItem, error)
+	GetTodoItemStudentID(ctx context.Context, todoItemID string) (uuid.UUID, error)
 }
 
 // To represent the Notification Log schema
@@ -195,6 +202,7 @@ type Repository struct {
 	db *pgxpool.Pool
 
 	// For each interface, add a field here
+	Activity                   ActivityRepository
 	Greeting                   GreetingRepository
 	Extracurricular            ExtracurricularRepository
 	Essay                      EssayRepository
@@ -229,6 +237,7 @@ func (r *Repository) GetDB() *pgxpool.Pool {
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db:                         db,
+		Activity:                   activityRepository.NewActivityRepository(db),
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
 		Extracurricular:            extracurricularRepository.NewExtracurricularRepository(db),
 		Essay:                      essayRepository.NewEssayRepository(db),
