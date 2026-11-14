@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import type { ApiError } from "../api/client";
+import { cycleDateLabel, cycleLabel, findCycle } from "../college/utils/shared";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
@@ -22,12 +23,7 @@ import {
   getGetGlobalCollegeQueryOptions,
   useGetGlobalCollege,
 } from "../api/endpoints";
-import type {
-  EssayGroups,
-  EssayReviewStatus,
-  Essays,
-  GlobalCollege,
-} from "../api/models";
+import type { EssayGroups, EssayReviewStatus, Essays } from "../api/models";
 
 export type ReviewMap = Record<string, EssayReviewStatus | undefined>;
 
@@ -94,28 +90,6 @@ export function StatGrid({
   );
 }
 
-const applicationTypeLabels: Record<string, string> = {
-  EA: "Early Action",
-  ED: "Early Decision",
-  RD: "Regular Decision",
-};
-
-const deadlineFor = (college: GlobalCollege, applicationType: string) =>
-  ({
-    EA: college.ea_deadline,
-    ED: college.ed_deadline,
-    RD: college.rd_deadline,
-  })[applicationType];
-
-// Deadlines are calendar dates, so format in UTC to avoid shifting a day back
-const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString(undefined, {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-
 export function useCollegeNames(collegeIds: number[]) {
   const results = useQueries({
     queries: collegeIds.map((id) => getGetGlobalCollegeQueryOptions(id)),
@@ -136,8 +110,9 @@ function CollegeHeading({
   applicationType?: string;
 }) {
   const { data: college } = useGetGlobalCollege(collegeId);
-  const deadline =
-    college && applicationType && deadlineFor(college, applicationType);
+  const cycle = applicationType
+    ? findCycle(college, applicationType)
+    : undefined;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted px-4 py-3">
@@ -147,11 +122,9 @@ function CollegeHeading({
       </h3>
       <div className="flex items-center gap-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         {applicationType && (
-          <Badge variant="outline">
-            {applicationTypeLabels[applicationType] ?? applicationType}
-          </Badge>
+          <Badge variant="outline">{cycleLabel(applicationType)}</Badge>
         )}
-        {deadline && <span>Due: {formatDate(deadline)}</span>}
+        {cycle && <span>Due: {cycleDateLabel(cycle)}</span>}
       </div>
     </div>
   );

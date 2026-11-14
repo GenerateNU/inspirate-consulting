@@ -1,25 +1,38 @@
-import type { ReactNode } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 import { errorMessage } from "../../api/client";
-import type { PersonalCollegeApplication } from "../../api/models";
-import { smallButtonClassName } from "../utils/shared";
-import AddApplicationForm from "./add-application-form";
+import arrowsDownUpIcon from "@/assets/college/arrows-down-up.svg";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import AddSchoolModal from "./add-school-modal";
 import ApplicationCard from "./application-card";
-import DeadlineErrorDialog from "./deadline-error-dialog";
-import { useMyCollegeList } from "./use-my-college-list";
+import RemoveSchoolDialog from "./remove-school-dialog";
+import {
+  sortOptions,
+  useMyCollegeList,
+  type SortKey,
+} from "./use-my-college-list";
 
-// page frame with the "My List" heading, actions sit next to the heading
-interface MyListShellProps {
+// page frame with the "My List" heading; actions sit to the right of it
+function MyListShell({
+  actions,
+  children,
+}: {
   actions?: ReactNode;
   children: ReactNode;
-}
-
-function MyListShell({ actions, children }: MyListShellProps) {
+}) {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10">
-      <div className="flex items-baseline gap-4">
-        <h2 className="text-5xl font-medium">My List</h2>
+    <div className="flex min-h-full w-full flex-col gap-5 bg-off-white py-12 pr-20 pl-[115px] max-lg:px-6">
+      <div className="flex w-full items-center justify-between gap-4">
+        <h1 className="font-jakarta text-[34px] leading-[normal] font-bold tracking-[-0.34px] text-black">
+          My List
+        </h1>
         {actions}
       </div>
       {children}
@@ -29,11 +42,22 @@ function MyListShell({ actions, children }: MyListShellProps) {
 
 export default function MyCollegeList() {
   const list = useMyCollegeList();
+  const [addOpen, setAddOpen] = useState(false);
+
+  if (!list.isStudent) {
+    return (
+      <MyListShell>
+        <p className="font-host text-sm text-dark-greyish-brown">
+          My List is for students. Log in as a student to see your list.
+        </p>
+      </MyListShell>
+    );
+  }
 
   if (list.isLoading) {
     return (
       <MyListShell>
-        <p className="mt-6 text-sm">Loading...</p>
+        <p className="font-host text-sm">Loading...</p>
       </MyListShell>
     );
   }
@@ -41,142 +65,93 @@ export default function MyCollegeList() {
   if (list.error) {
     return (
       <MyListShell>
-        <p className="mt-6 text-sm">Error: {errorMessage(list.error)}</p>
+        <p className="font-host text-sm">Error: {errorMessage(list.error)}</p>
       </MyListShell>
     );
   }
 
-  const renderRankControls = (app: PersonalCollegeApplication) => {
-    if (app.rank == null) {
-      return (
-        <button
-          type="button"
-          disabled={list.busy}
-          onClick={() => list.addToRanking(app)}
-          className={smallButtonClassName}
-        >
-          Add to ranking
-        </button>
-      );
-    }
-
-    const index = list.rankIndex(app);
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-label={`Move ${list.collegeName(app)} up`}
-          disabled={list.busy || index === 0}
-          onClick={() => list.moveUp(app)}
-          className={smallButtonClassName}
-        >
-          <ArrowUp aria-hidden="true" className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          aria-label={`Move ${list.collegeName(app)} down`}
-          disabled={list.busy || index === list.rankedCount - 1}
-          onClick={() => list.moveDown(app)}
-          className={smallButtonClassName}
-        >
-          <ArrowDown aria-hidden="true" className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          disabled={list.busy}
-          onClick={() => list.unrank(app)}
-          className={smallButtonClassName}
-        >
-          Unrank
-        </button>
-      </div>
-    );
-  };
-
-  const renderCard = (app: PersonalCollegeApplication) => {
-    const isEditing = list.editingId === app.id;
-
-    return (
-      <ApplicationCard
-        key={app.id}
-        app={app}
-        college={list.collegeById.get(app.global_college_id)}
-        collegeName={list.collegeName(app)}
-        busy={list.busy}
-        saving={list.saving}
-        isEditing={isEditing}
-        isDragging={list.draggedId === app.id}
-        draggable={!list.busy && !isEditing}
-        rankControls={renderRankControls(app)}
-        onDragStart={() => list.setDraggedId(app.id)}
-        onDragEnd={() => list.setDraggedId(null)}
-        onDrop={() => list.handleDrop(app)}
-        onStartEdit={() => list.startEditing(app)}
-        onCancelEdit={list.cancelEditing}
-        onSave={(applicationType, category) =>
-          list.saveEdit(app, applicationType, category)
-        }
-        onRemove={() => list.removeApplication(app)}
-      />
-    );
-  };
-
-  const deadlineErrorCollege = list.deadlineError
-    ? list.collegeById.get(list.deadlineError.globalCollegeId)
-    : undefined;
+  const sortLabel = sortOptions.find(
+    ({ value }) => value === list.sortKey,
+  )?.label;
 
   return (
     <MyListShell
       actions={
         <button
           type="button"
-          onClick={() => list.setShowAddForm(!list.showAddForm)}
-          className="text-sm underline"
+          data-slot="primary-action"
+          onClick={() => setAddOpen(true)}
+          className="rounded-lg bg-dark-green px-4 py-2 font-host text-xs leading-[normal] text-white hover:bg-dark-green/90"
         >
-          {list.showAddForm ? "Close" : "Add a school"}
+          + Add a School
         </button>
       }
     >
-      {list.showAddForm && (
-        <AddApplicationForm
-          colleges={list.availableColleges}
-          initialCollegeId={list.preselectedId}
-          busy={list.busy}
-          adding={list.creating}
-          onAdd={list.createApplication}
-        />
-      )}
-
-      {list.mutationError && (
-        <p role="alert" className="mt-3 text-sm text-red-600">
-          Error: {errorMessage(list.mutationError)}
-        </p>
-      )}
+      <div className="-mt-1 flex w-full items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              data-slot="sort-trigger"
+              aria-label={`Sort by: ${sortLabel}`}
+              className="flex items-center justify-center gap-px rounded-[15px] border border-greyish-brown bg-white px-2.5 py-2 font-host text-xs leading-[normal] text-charcoal hover:bg-off-white"
+            >
+              <img src={arrowsDownUpIcon} alt="" width={16} height={16} />
+              Sort By
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="font-host">
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={list.sortKey}
+              onValueChange={(value) => list.setSortKey(value as SortKey)}
+            >
+              {sortOptions.map(({ value, label }) => (
+                <DropdownMenuRadioItem key={value} value={value}>
+                  {label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       {list.applications.length === 0 ? (
-        <p className="mt-6 text-sm">
-          Your list is empty. Choose Add a school to start your list.
+        <p className="font-host text-sm text-dark-greyish-brown">
+          Your list is empty. Choose + Add a School to start your list.
         </p>
       ) : (
-        <>
-          <p className="mt-4 text-xs text-gray-500">
-            Drag colleges to reorder them, or use the arrow buttons. Drop a
-            college onto an unranked one to unrank it.
-          </p>
-          <ol className="mt-4 flex flex-col gap-4">
-            {list.applications.map(renderCard)}
-          </ol>
-        </>
+        <ol className="flex w-full flex-col gap-5">
+          {list.applications.map((app) => (
+            <ApplicationCard
+              key={app.id}
+              app={app}
+              college={list.collegeById.get(app.global_college_id)}
+              collegeName={list.collegeName(app)}
+              onRemove={() => list.requestRemoval(app)}
+            />
+          ))}
+        </ol>
       )}
 
-      {list.deadlineError && (
-        <DeadlineErrorDialog
-          college={deadlineErrorCollege}
-          collegeName={deadlineErrorCollege?.school_name ?? "This college"}
-          applicationType={list.deadlineError.applicationType}
-          onClose={list.closeDeadlineError}
-        />
-      )}
+      <AddSchoolModal
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        addedCollegeIds={list.addedCollegeIds}
+        adding={list.adding}
+        error={list.addError}
+        onSave={list.addSchools}
+      />
+
+      <RemoveSchoolDialog
+        collegeName={
+          list.pendingRemoval ? list.collegeName(list.pendingRemoval) : null
+        }
+        removing={list.removing}
+        error={list.removeError}
+        onCancel={list.cancelRemoval}
+        onConfirm={list.confirmRemoval}
+      />
     </MyListShell>
   );
 }

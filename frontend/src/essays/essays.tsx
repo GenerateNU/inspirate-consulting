@@ -64,7 +64,7 @@ export default function Essay() {
   const studentQuery = useGetStudent(studentId, {
     query: { enabled: !!studentId },
   });
-  const applicationsQuery = useListPersonalCollegeApplications({
+  const applicationsQuery = useListPersonalCollegeApplications(undefined, {
     query: { enabled: !!studentId },
   });
   const requestReview = useRequestEssayReview();

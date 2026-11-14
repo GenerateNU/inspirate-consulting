@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './activity';
+export * from './activityAction';
+export * from './activityEssayStatus';
 export * from './askLLMInputBody';
 export * from './askLLMOutputBody';
 export * from './assignCounselorInputBody';
@@ -56,6 +59,7 @@ export * from './fetchCounselorsBody';
 export * from './fetchCounselorsParams';
 export * from './fetchStudentsBody';
 export * from './fetchStudentsParams';
+export * from './getActivitiesParams';
 export * from './getMediaAccessParams';
 export * from './getTodoItemsLinkedTo';
 export * from './getTodoItemsParams';
