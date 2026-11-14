@@ -21,13 +21,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// stubStudentID is the student ID that test mode injects into the request context.
+var stubStudentID = uuid.MustParse("00000000-0000-0000-0000-000000000002")
+
 // setupEssayTestApp creates a Fiber app in test mode with a mocked essay repository.
 func setupEssayTestApp(mockEssay data.EssayRepository) (*fiber.App, error) {
+	return setupEssayTestAppWithGroups(mockEssay, nil)
+}
+
+// setupEssayTestAppWithGroups creates a Fiber app in test mode with mocked essay and essay group repositories.
+func setupEssayTestAppWithGroups(mockEssay data.EssayRepository, mockEssayGroup data.EssayGroupRepository) (*fiber.App, error) {
 	cfg := config.Config{
 		TestMode: true,
 	}
 	repo := &data.Repository{
-		Essay: mockEssay,
+		Essay:      mockEssay,
+		EssayGroup: mockEssayGroup,
 	}
 	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
@@ -188,6 +197,7 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 
 		// Mock the repository call expected for valid input
 		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(stubStudentID, nil)
 		mockRepo.On(
 			"UpdateStatus",
 			mock.Anything,
@@ -347,6 +357,9 @@ func TestRoute_UpdateEssayGroup(t *testing.T) {
 		groupID := uuid.New()
 
 		mockRepo := mocks.NewEssayRepository(t)
+		mockGroupRepo := mocks.NewEssayGroupRepository(t)
+		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(stubStudentID, nil)
+		mockGroupRepo.On("GetEssayGroupStudentID", mock.Anything, groupID).Return(stubStudentID, nil)
 		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, mock.MatchedBy(func(id *uuid.UUID) bool {
 			return id != nil && *id == groupID
 		})).Return(&models.Essays{
@@ -354,7 +367,7 @@ func TestRoute_UpdateEssayGroup(t *testing.T) {
 			EssayGroupID: &groupID,
 		}, nil)
 
-		app, err := setupEssayTestApp(mockRepo)
+		app, err := setupEssayTestAppWithGroups(mockRepo, mockGroupRepo)
 		require.NoError(t, err)
 
 		payload := map[string]any{"essay_group_id": groupID.String()}
@@ -395,12 +408,15 @@ func TestRoute_UpdateEssayGroup(t *testing.T) {
 		essayID := uuid.New()
 
 		mockRepo := mocks.NewEssayRepository(t)
+		// No expectations: the group lookup must not happen when removing from a group
+		mockGroupRepo := mocks.NewEssayGroupRepository(t)
+		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(stubStudentID, nil)
 		mockRepo.On("UpdateEssayGroup", mock.Anything, essayID, (*uuid.UUID)(nil)).Return(&models.Essays{
 			ID:           essayID,
 			EssayGroupID: nil,
 		}, nil)
 
-		app, err := setupEssayTestApp(mockRepo)
+		app, err := setupEssayTestAppWithGroups(mockRepo, mockGroupRepo)
 		require.NoError(t, err)
 
 		req, err := http.NewRequest(
@@ -427,6 +443,42 @@ func TestRoute_UpdateEssayGroup(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, output.Essay)
 		assert.Nil(t, output.Essay.EssayGroupID)
+	})
+
+	t.Run("rejects moving into another student's group", func(t *testing.T) {
+		t.Parallel()
+
+		essayID := uuid.New()
+		groupID := uuid.New()
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockGroupRepo := mocks.NewEssayGroupRepository(t)
+		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(stubStudentID, nil)
+		mockGroupRepo.On("GetEssayGroupStudentID", mock.Anything, groupID).Return(uuid.New(), nil)
+		// No UpdateEssayGroup expectation: it must not be called
+
+		app, err := setupEssayTestAppWithGroups(mockRepo, mockGroupRepo)
+		require.NoError(t, err)
+
+		payload := map[string]any{"essay_group_id": groupID.String()}
+		bodyBytes, err := json.Marshal(payload)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(
+			http.MethodPatch,
+			"/essays/"+essayID.String()+"/group",
+			bytes.NewReader(bodyBytes),
+		)
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		assert.Equal(t, http.StatusForbidden, resp.StatusCode)
 	})
 
 	t.Run("validation error - essay group id is not a uuid", func(t *testing.T) {

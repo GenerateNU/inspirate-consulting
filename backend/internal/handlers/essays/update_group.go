@@ -7,7 +7,6 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-
 func (h *Handler) UpdateEssayGroup(ctx context.Context, input *models.UpdateEssayGroupInput) (*models.UpdateEssayGroupOutput, error) {
 	studentID, err := h.EssayRepository.GetEssayStudentID(ctx, input.EssayID)
 	if err != nil {
@@ -17,7 +16,7 @@ func (h *Handler) UpdateEssayGroup(ctx context.Context, input *models.UpdateEssa
 	if err := h.Authorizer.CanAccessStudent(ctx, studentID); err != nil {
 		return nil, err
 	}
-	
+
 	if input.Body.EssayGroupID != nil {
 		groupStudentID, err := h.EssayGroupsRepository.GetEssayGroupStudentID(ctx, *input.Body.EssayGroupID)
 		if err != nil {

@@ -64,7 +64,7 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/essays", guarded, []string{roleStudent}},
 	{http.MethodPatch, "/essays/{essay_id}/status", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/essay-groups/{essay_group_id}/essays", anyRole, nil},
-	{http.MethodPatch, "/essays/{essay_id}/group", anyRole, nil},
+	{http.MethodPatch, "/essays/{essay_id}/group", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPost, "/essay-groups", anyRole, nil},
 	{http.MethodGet, "/students/{student_id}/essay-groups", anyRole, nil},
 	{http.MethodPost, "/reviews", guarded, []string{roleStudent}},
