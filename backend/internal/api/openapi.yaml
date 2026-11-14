@@ -128,6 +128,42 @@ components:
         - last_message_read_at
         - unread_count
       type: object
+    CollegeApplicationCycle:
+      additionalProperties: false
+      properties:
+        cycle:
+          description: Application cycle
+          enum:
+            - ED
+            - ED2
+            - REA
+            - EA
+            - RD
+            - ROLLING
+          examples:
+            - ED
+          type: string
+        deadline:
+          description: Deadline for this cycle; omitted for rolling admissions
+          examples:
+            - "2023-11-01T00:00:00Z"
+          format: date-time
+          type: string
+        rolling_end:
+          description: End of the rolling admissions window (ROLLING only)
+          examples:
+            - "2024-03-01"
+          format: date
+          type: string
+        rolling_start:
+          description: Start of the rolling admissions window (ROLLING only)
+          examples:
+            - "2023-09-01"
+          format: date
+          type: string
+      required:
+        - cycle
+      type: object
     Counselor:
       additionalProperties: false
       properties:
@@ -332,24 +368,13 @@ components:
         confirm_duplicate:
           description: Set true to create despite a detected near-duplicate warning
           type: boolean
-        ea_deadline:
-          description: Early admission deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        ed_deadline:
-          description: Early decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        rd_deadline:
-          description: Regular decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
+        cycles:
+          description: Application cycles this college offers
+          items:
+            $ref: "#/components/schemas/CollegeApplicationCycle"
+          type:
+            - array
+            - "null"
         school_location:
           description: Location of the college
           examples:
@@ -405,11 +430,14 @@ components:
           readOnly: true
           type: string
         application_type:
-          description: Which deadline the student is applying by
+          description: Which application cycle the student is applying by; the college must offer it
           enum:
-            - EA
             - ED
+            - ED2
+            - REA
+            - EA
             - RD
+            - ROLLING
           type: string
         category:
           description: How the student categorizes this school
@@ -1023,30 +1051,19 @@ components:
             - "2023-01-01T00:00:00Z"
           format: date-time
           type: string
-        ea_deadline:
-          description: Early admission deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        ed_deadline:
-          description: Early decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
+        cycles:
+          description: Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order
+          items:
+            $ref: "#/components/schemas/CollegeApplicationCycle"
+          type:
+            - array
+            - "null"
         id:
           description: Unique identifier for the college
           examples:
             - 1
           format: int64
           type: integer
-        rd_deadline:
-          description: Regular decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
         school_location:
           description: Location of the college
           examples:
@@ -1069,6 +1086,7 @@ components:
         - updated_at
         - school_name
         - school_location
+        - cycles
       type: object
     GrantMediaAccessRequestBody:
       additionalProperties: false
@@ -1302,6 +1320,15 @@ components:
           format: uri
           readOnly: true
           type: string
+        application_status:
+          description: Where the student is in submitting this application
+          enum:
+            - not_started
+            - in_progress
+            - submitted
+          examples:
+            - not_started
+          type: string
         application_type:
           description: "Which deadline the student is applying by: EA, ED, or RD"
           examples:
@@ -1315,6 +1342,18 @@ components:
         created_at:
           format: date-time
           type: string
+        cycle_offered:
+          description: False when the college no longer offers application_type (e.g. a counselor removed it); show a warning
+          type: boolean
+        essay_progress:
+          description: "Computed from the student's non-archived essays for this college: none, some not yet submitted, or all submitted"
+          enum:
+            - not_started
+            - in_progress
+            - completed
+          examples:
+            - in_progress
+          type: string
         global_college_id:
           description: ID of the global college being applied to
           format: int64
@@ -1323,6 +1362,15 @@ components:
           description: Unique identifier for the application
           format: int64
           type: integer
+        interest:
+          description: How interested the student is in this school, or null if not set
+          enum:
+            - top_choice
+            - strong_contender
+            - considering
+          type:
+            - string
+            - "null"
         rank:
           description: Student's ranking of this application relative to others, or null if unranked
           format: int64
@@ -1344,6 +1392,10 @@ components:
         - created_at
         - updated_at
         - rank
+        - interest
+        - application_status
+        - cycle_offered
+        - essay_progress
       type: object
     PresignUploadRequestBody:
       additionalProperties: false
@@ -1853,24 +1905,13 @@ components:
         confirm_duplicate:
           description: Set true to create despite a detected near-duplicate warning
           type: boolean
-        ea_deadline:
-          description: Early admission deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        ed_deadline:
-          description: Early decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        rd_deadline:
-          description: Regular decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
+        cycles:
+          description: The full set of application cycles this college offers; cycles left out are removed
+          items:
+            $ref: "#/components/schemas/CollegeApplicationCycle"
+          type:
+            - array
+            - "null"
         school_location:
           description: Location of the college
           examples:
@@ -1884,6 +1925,7 @@ components:
       required:
         - school_name
         - school_location
+        - cycles
       type: object
     UpdateMediaInputBody:
       additionalProperties: false
@@ -1962,12 +2004,22 @@ components:
           format: uri
           readOnly: true
           type: string
-        application_type:
-          description: Which deadline the student is applying by
+        application_status:
+          description: Where the student is in submitting this application
           enum:
-            - EA
+            - not_started
+            - in_progress
+            - submitted
+          type: string
+        application_type:
+          description: Which application cycle the student is applying by; the college must offer it
+          enum:
             - ED
+            - ED2
+            - REA
+            - EA
             - RD
+            - ROLLING
           type: string
         category:
           description: How the student categorizes this school
@@ -1980,10 +2032,18 @@ components:
           description: ID of the global college being applied to
           format: int64
           type: integer
+        interest:
+          description: How interested the student is in this school; omit to clear
+          enum:
+            - top_choice
+            - strong_contender
+            - considering
+          type: string
       required:
         - global_college_id
         - application_type
         - category
+        - application_status
       type: object
     UpdateStatusBody:
       additionalProperties: false
@@ -2208,8 +2268,17 @@ paths:
         - Health
   /applications:
     get:
-      description: List all college applications for the authenticated student.
+      description: List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
       operationId: list-personal-college-applications
+      parameters:
+        - description: Student whose college list to return; required for counselors, defaults to the authenticated student
+          explode: false
+          in: query
+          name: student_id
+          schema:
+            description: Student whose college list to return; required for counselors, defaults to the authenticated student
+            format: uuid
+            type: string
       responses:
         "200":
           content:
@@ -2255,7 +2324,7 @@ paths:
         - Personal College Applications
   /applications/{id}:
     delete:
-      description: Delete a personal college application for the authenticated student.
+      description: Remove a school from the authenticated student's list. Also deletes the essays the student started for that school (essays with review history are archived instead) and closes the gap in their ranking.
       operationId: delete-personal-college-application
       parameters:
         - description: ID of the application to delete
@@ -2278,7 +2347,7 @@ paths:
       tags:
         - Personal College Applications
     put:
-      description: Update a personal college application for the authenticated student.
+      description: "Update a personal college application for the authenticated student: college, cycle, category, interest, and application status. Full replacement; omitting interest clears it."
       operationId: update-personal-college-application
       parameters:
         - description: ID of the application to update
@@ -2492,7 +2561,7 @@ paths:
       tags:
         - Global Colleges
     post:
-      description: Create a global college with a name, location, and optional EA/ED/RD deadlines.
+      description: Create a global college with a name, location, and the application cycles it offers (ED, ED2, REA, EA, RD, ROLLING).
       operationId: create-global-college
       requestBody:
         content:
@@ -2565,7 +2634,7 @@ paths:
       tags:
         - Global Colleges
     put:
-      description: Update a global college's details.
+      description: Update a global college's name, location, and application cycles. cycles replaces the full set; applications under a removed cycle are kept and come back with cycle_offered=false.
       operationId: update-global-college
       parameters:
         - description: ID of the college to update
