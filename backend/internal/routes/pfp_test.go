@@ -44,7 +44,7 @@ func TestRoute_PresignPfpUpload(t *testing.T) {
 		}).Return(&models.PresignUploadResponse{S3Key: key, UploadURL: "https://bucket/upload"}, nil)
 
 		app := setupTestAppWithPfp(t, mocks.NewUserRepository(t), mockPfp)
-		resp, body := doJSON(t, app, http.MethodPut, "/user/pfp", map[string]any{
+		resp, body := doRequest(t, app, http.MethodPut, "/user/pfp", map[string]any{
 			"content_type":   "image/jpeg",
 			"content_length": 2048,
 		}, asUser)
@@ -73,7 +73,7 @@ func TestRoute_PresignPfpUpload(t *testing.T) {
 
 				// Mock should not be called when Huma validation fails.
 				app := setupTestAppWithPfp(t, mocks.NewUserRepository(t), mocks.NewPfpRepository(t))
-				resp, _ := doJSON(t, app, http.MethodPut, "/user/pfp", payload, asUser)
+				resp, _ := doRequest(t, app, http.MethodPut, "/user/pfp", payload, asUser)
 
 				assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 			})
@@ -98,7 +98,7 @@ func TestRoute_UpdatePfp(t *testing.T) {
 		mockUser.On("SetPfpKey", mock.Anything, userID, &key).Return(&models.User{ID: userID, PfpKey: &key}, nil, nil)
 
 		app := setupTestAppWithPfp(t, mockUser, mockPfp)
-		resp, body := doJSON(t, app, http.MethodPatch, "/user/pfp", map[string]any{"s3_key": key}, asUser)
+		resp, body := doRequest(t, app, http.MethodPatch, "/user/pfp", map[string]any{"s3_key": key}, asUser)
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -117,7 +117,7 @@ func TestRoute_UpdatePfp(t *testing.T) {
 			Return(errs.Forbidden("you can only use your own profile picture"))
 
 		app := setupTestAppWithPfp(t, mocks.NewUserRepository(t), mockPfp)
-		resp, _ := doJSON(t, app, http.MethodPatch, "/user/pfp", map[string]any{"s3_key": otherKey}, asUser)
+		resp, _ := doRequest(t, app, http.MethodPatch, "/user/pfp", map[string]any{"s3_key": otherKey}, asUser)
 
 		assert.Equal(t, http.StatusForbidden, resp.StatusCode)
 	})
@@ -126,7 +126,7 @@ func TestRoute_UpdatePfp(t *testing.T) {
 		t.Parallel()
 
 		app := setupTestAppWithPfp(t, mocks.NewUserRepository(t), mocks.NewPfpRepository(t))
-		resp, _ := doJSON(t, app, http.MethodPatch, "/user/pfp", map[string]any{}, asUser)
+		resp, _ := doRequest(t, app, http.MethodPatch, "/user/pfp", map[string]any{}, asUser)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
@@ -148,7 +148,7 @@ func TestRoute_DeletePfp(t *testing.T) {
 		mockPfp.On("DeletePfp", mock.Anything, userID, key).Return(nil)
 
 		app := setupTestAppWithPfp(t, mockUser, mockPfp)
-		resp, _ := doJSON(t, app, http.MethodDelete, "/user/pfp", nil, asUser)
+		resp, _ := doRequest(t, app, http.MethodDelete, "/user/pfp", nil, asUser)
 
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 	})
@@ -160,7 +160,7 @@ func TestRoute_DeletePfp(t *testing.T) {
 		mockUser.On("SetPfpKey", mock.Anything, userID, (*string)(nil)).Return(&models.User{ID: userID}, nil, nil)
 
 		app := setupTestAppWithPfp(t, mockUser, mocks.NewPfpRepository(t))
-		resp, _ := doJSON(t, app, http.MethodDelete, "/user/pfp", nil, asUser)
+		resp, _ := doRequest(t, app, http.MethodDelete, "/user/pfp", nil, asUser)
 
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})

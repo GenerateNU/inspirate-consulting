@@ -4,11 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -22,8 +20,7 @@ func TestHandler_PresignUpload(t *testing.T) {
 	t.Run("presigns for the logged-in user", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 		expected := &models.PresignUploadResponse{S3Key: "pfps/" + userID.String() + "/a.jpg", UploadURL: "https://bucket/upload"}
 
 		pfpRepo := mocks.NewPfpRepository(t)

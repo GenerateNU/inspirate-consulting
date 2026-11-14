@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -22,8 +21,7 @@ func TestHandler_UpdatePfp(t *testing.T) {
 	t.Run("saves the key and deletes the replaced picture", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 		newKey := "pfps/" + userID.String() + "/new.jpg"
 		oldKey := "pfps/" + userID.String() + "/old.jpg"
 
@@ -44,8 +42,7 @@ func TestHandler_UpdatePfp(t *testing.T) {
 	t.Run("first picture deletes nothing", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 		newKey := "pfps/" + userID.String() + "/new.jpg"
 
 		pfpRepo := mocks.NewPfpRepository(t)
@@ -64,8 +61,7 @@ func TestHandler_UpdatePfp(t *testing.T) {
 	t.Run("failed cleanup still saves the new picture", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 		newKey := "pfps/" + userID.String() + "/new.jpg"
 		oldKey := "pfps/" + userID.String() + "/old.jpg"
 
@@ -86,8 +82,7 @@ func TestHandler_UpdatePfp(t *testing.T) {
 	t.Run("rejected upload is not saved", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 		otherKey := "pfps/" + uuid.NewString() + "/theirs.jpg"
 		forbidden := errs.Forbidden("you can only use your own profile picture")
 

@@ -4,11 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"inspirate-consulting/internal/auth"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
@@ -20,8 +18,7 @@ func TestHandler_DeletePfp(t *testing.T) {
 	t.Run("clears the key and deletes the picture", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 		oldKey := "pfps/" + userID.String() + "/old.jpg"
 
 		userRepo := mocks.NewUserRepository(t)
@@ -36,8 +33,7 @@ func TestHandler_DeletePfp(t *testing.T) {
 	t.Run("user without a picture gets not found", func(t *testing.T) {
 		t.Parallel()
 
-		userID := uuid.New()
-		ctx := auth.WithUserID(context.Background(), userID)
+		userID, ctx := userCtx()
 
 		userRepo := mocks.NewUserRepository(t)
 		userRepo.On("SetPfpKey", ctx, userID, (*string)(nil)).Return(&models.User{ID: userID}, nil, nil)

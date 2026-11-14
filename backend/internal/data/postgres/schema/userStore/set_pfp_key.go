@@ -19,8 +19,7 @@ func (r *UserRepository) SetPfpKey(ctx context.Context, id uuid.UUID, pfpKey *st
 
 	query, err := schema.ReadSQLBaseScript("set_pfp_key.sql", SqlUserFiles)
 	if err != nil {
-		err := errs.InternalServerError("Failed to read base query: ", err.Error())
-		return nil, nil, &err
+		return nil, nil, errs.InternalServerError("Failed to read base query: ", err.Error())
 	}
 
 	err = r.db.QueryRow(ctx, query, id, pfpKey).Scan(

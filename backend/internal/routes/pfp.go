@@ -55,6 +55,9 @@ func SetUpPfpRoutes(api huma.API, repository *data.Repository, verifyRole auth.R
 		Description: "Remove the logged-in user's profile picture.",
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *struct{}) (*struct{}, error) {
-		return nil, pfpHandler.DeletePfp(ctx)
+		if err := pfpHandler.DeletePfp(ctx); err != nil {
+			return nil, err
+		}
+		return nil, nil
 	})
 }
