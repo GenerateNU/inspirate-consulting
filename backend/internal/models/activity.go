@@ -29,6 +29,14 @@ type Activity struct {
 	CreatedAt         time.Time  `json:"created_at"`
 }
 
+type GetActivitiesInput struct {
+	StudentID uuid.UUID `query:"student_id" required:"false" doc:"Optional: scope to one student assigned to the caller"`
+}
+
+type GetActivitiesOutput struct {
+	Body []Activity
+}
+
 type CreateActivityBody struct {
 	Action            Action     `json:"action" enum:"added_school,removed_school,essay_status_changed,added_extracurricular,removed_extracurricular,task_past_due"`
 	EssayID           *uuid.UUID `json:"essay_id,omitempty" required:"false"`
