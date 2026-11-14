@@ -64,6 +64,21 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID) uu
 	return studentID
 }
 
+// createTestTodoItem inserts a bare todo item row and returns its id.
+func createTestTodoItem(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID) uuid.UUID {
+	t.Helper()
+
+	var todoItemID uuid.UUID
+	if err := db.QueryRow(context.Background(),
+		`INSERT INTO public.todo_items (student_id, user_id, todo_description)
+		 VALUES ($1, $2, 'test todo item')
+		 RETURNING id`,
+		studentID, uuid.New()).Scan(&todoItemID); err != nil {
+		t.Fatalf("setup createTestTodoItem failed: %v", err)
+	}
+	return todoItemID
+}
+
 // createTestEssay inserts a bare essay row and returns its id.
 func createTestEssay(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID) uuid.UUID {
 	t.Helper()
