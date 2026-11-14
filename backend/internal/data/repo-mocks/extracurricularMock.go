@@ -47,6 +47,54 @@ func (_m *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, 
 	return r0, r1
 }
 
+// DeleteExtracurricular provides a mock function with given fields: ctx, id, studentID
+func (_m *ExtracurricularRepository) DeleteExtracurricular(ctx context.Context, id int64, studentID string) error {
+	ret := _m.Called(ctx, id, studentID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteExtracurricular")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = rf(ctx, id, studentID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetExtracurricular provides a mock function with given fields: ctx, id
+func (_m *ExtracurricularRepository) GetExtracurricular(ctx context.Context, id int64) (*models.ExtracurricularDetail, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetExtracurricular")
+	}
+
+	var r0 *models.ExtracurricularDetail
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (*models.ExtracurricularDetail, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) *models.ExtracurricularDetail); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ExtracurricularDetail)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetExtracurricularStudentID provides a mock function with given fields: ctx, id
 func (_m *ExtracurricularRepository) GetExtracurricularStudentID(ctx context.Context, id int64) (uuid.UUID, error) {
 	ret := _m.Called(ctx, id)

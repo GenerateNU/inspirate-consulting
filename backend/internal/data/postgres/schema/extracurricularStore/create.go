@@ -47,6 +47,11 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, s
 		startDate,
 		endDate,
 		body.Organization,
+		body.HoursPerWeek,
+		body.WeeksPerYear,
+		body.Goals,
+		body.ReadyForApplication,
+		body.ApplicationDescription,
 	)
 	if err != nil {
 		return nil, err
@@ -118,6 +123,11 @@ func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, i
 		startDate,
 		endDate,
 		body.Organization,
+		body.HoursPerWeek,
+		body.WeeksPerYear,
+		body.Goals,
+		body.ReadyForApplication,
+		body.ApplicationDescription,
 		id,
 	)
 	if err != nil {

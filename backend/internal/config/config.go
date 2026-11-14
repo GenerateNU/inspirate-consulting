@@ -9,6 +9,7 @@ type Config struct {
 	Supabase    supabase.SupabaseInterface
 	S3          S3
 	SQS         SQS
+	Gemini      Gemini
 	// TestMode=true will skip the auth middleware
 	TestMode bool
 }

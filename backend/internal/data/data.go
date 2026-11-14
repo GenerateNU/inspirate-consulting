@@ -38,6 +38,8 @@ type ExtracurricularRepository interface {
 	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
 	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
 	GetExtracurricularStudentID(ctx context.Context, id int64) (uuid.UUID, error)
+	GetExtracurricular(ctx context.Context, id int64) (*models.ExtracurricularDetail, error)
+	DeleteExtracurricular(ctx context.Context, id int64, studentID string) error
 }
 
 // Essay Repository
@@ -135,6 +137,7 @@ type MediaAccessRepository interface {
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
 	RevokeMediaAccess(ctx context.Context, id string) error
 	ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error)
+	GetMediaAccessStudentID(ctx context.Context, id string) (uuid.UUID, error)
 }
 
 // To represent the Essay Review Transaction schema

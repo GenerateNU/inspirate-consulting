@@ -12,7 +12,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository, authorizer *auth.Authorizer) {
+func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
 	mediaAccessHandler := mediaaccess.NewHandler(repository.MediaAccess, authorizer)
 
 	//Register POST /media-access handler
@@ -34,6 +34,7 @@ func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository, authorize
 	//Register DELETE media-access/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-media-access",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodDelete,
 		Path:        "/media-access/{id}",
 		Description: "Allow a counselor to revoke a student access to a video",

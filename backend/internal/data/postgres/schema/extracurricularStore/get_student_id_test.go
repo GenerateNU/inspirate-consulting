@@ -40,7 +40,8 @@ func createExtracurricular(t *testing.T, repo *ExtracurricularRepository, studen
 	input.Body.Name = name
 	input.Body.Status = models.ExtracurricularStatusDoing
 	input.Body.Type = models.ExtracurricularTypeInvestment
-	input.Body.Description = "test description"
+	desc := "test description"
+	input.Body.Description = &desc
 	input.Body.StartDate = "2025-09-01"
 	input.Body.Organization = "Test Org"
 
