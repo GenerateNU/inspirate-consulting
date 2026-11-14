@@ -1262,7 +1262,7 @@ export const RefundEssayReviewResponse = /*#__PURE__*/ zod.object({
  * Assign a counselor to a particular student
  */
 export const AssignCounselorBody = /*#__PURE__*/ zod.object({
-  "counselor_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('id of the counselor to assign')),
+  "counselor_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('id of the counselor to assign')),
   "user_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('user id of the student being assigned'))
 })
 
