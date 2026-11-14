@@ -13,6 +13,8 @@ interface RemoveSchoolDialogProps {
   error: unknown;
   // defaults to the student's "removed from your list" wording
   description?: string;
+  // replaces the raw error text and disables Remove (e.g. "can't delete, still in use")
+  blockedMessage?: string | null;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -22,6 +24,7 @@ export default function RemoveSchoolDialog({
   collegeName,
   removing,
   error,
+  blockedMessage = null,
   description = "It will be removed from your list, along with the essays you started for it.",
   onCancel,
   onConfirm,
@@ -42,10 +45,16 @@ export default function RemoveSchoolDialog({
           <DialogDescription className="font-host text-sm leading-5 text-[#575c57]">
             {description}
           </DialogDescription>
-          {error != null && (
+          {blockedMessage ? (
             <p role="alert" className="font-host text-sm text-danger">
-              Error: {errorMessage(error)}
+              {blockedMessage}
             </p>
+          ) : (
+            error != null && (
+              <p role="alert" className="font-host text-sm text-danger">
+                Error: {errorMessage(error)}
+              </p>
+            )
           )}
         </div>
         <div className="flex items-center justify-end gap-2">
@@ -60,7 +69,7 @@ export default function RemoveSchoolDialog({
           <button
             type="button"
             data-slot="dialog-action"
-            disabled={removing}
+            disabled={removing || !!blockedMessage}
             onClick={onConfirm}
             className="rounded-lg border border-danger-stroke bg-danger px-5 py-2 font-host text-xs leading-[normal] text-white drop-shadow-[0px_2px_2px_rgba(0,0,0,0.16)] hover:bg-danger/90 disabled:cursor-not-allowed disabled:opacity-60"
           >

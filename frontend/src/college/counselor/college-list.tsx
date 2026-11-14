@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { errorMessage } from "../../api/client";
+import { errorMessage, type ApiError } from "../../api/client";
 import {
   useDeleteGlobalCollege,
   useListGlobalColleges,
@@ -26,6 +26,12 @@ export default function CounselorCollegeList() {
   const colleges = [...(collegesQuery.data ?? [])].sort((a, b) =>
     a.school_name.localeCompare(b.school_name),
   );
+
+  // the backend refuses (400 "still in use") while any student has the school
+  // on their list or has essays for it
+  const deleteBlocked =
+    (deleteCollege.error as ApiError | null)?.status === 400 &&
+    errorMessage(deleteCollege.error).includes("still in use");
 
   const confirmDelete = () => {
     if (!pendingDelete) return;
@@ -121,6 +127,11 @@ export default function CounselorCollegeList() {
       <RemoveSchoolDialog
         collegeName={pendingDelete?.school_name ?? null}
         description="It will be removed from the college list. A school that's on a student's list or has essays can't be deleted."
+        blockedMessage={
+          deleteBlocked
+            ? `${pendingDelete?.school_name} is on a student's list or has essays, so it can't be deleted. It can be deleted once no student has it on their list.`
+            : null
+        }
         removing={deleteCollege.isPending}
         error={deleteCollege.error}
         onCancel={() => setPendingDelete(null)}
