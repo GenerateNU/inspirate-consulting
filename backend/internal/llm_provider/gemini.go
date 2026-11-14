@@ -30,13 +30,13 @@ func callGemini(ctx context.Context, cfg config.Config, provider LLMProvider) (*
 			}
 
 			if fc.Name == "search_tasks" {
-				res, err = provider.searchTasks(query)
+				res, err = provider.searchTasks(ctx, query)
 				if err != nil {
 					return nil, err
 				}
 			}
 			if fc.Name == "search_chats" {
-				res, err = provider.searchChats(query)
+				res, err = provider.searchChats(ctx, query)
 				if err != nil {
 					return nil, err
 				}
