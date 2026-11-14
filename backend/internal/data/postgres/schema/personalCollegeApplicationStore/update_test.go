@@ -31,9 +31,10 @@ func TestUpdatePersonalCollegeApplication(t *testing.T) {
 	}
 
 	update := models.UpdatePersonalCollegeApplicationRequestBody{
-		GlobalCollegeID: collegeB,
-		ApplicationType: "RD",
-		Category:        "safety",
+		GlobalCollegeID:   collegeB,
+		ApplicationType:   "RD",
+		Category:          "safety",
+		ApplicationStatus: models.ApplicationStatusNotStarted,
 	}
 
 	updated, err := repo.UpdatePersonalCollegeApplication(ctx, studentID, created.ID, update)
@@ -82,9 +83,10 @@ func TestUpdatePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	}
 
 	_, err = repo.UpdatePersonalCollegeApplication(ctx, otherStudentID, created.ID, models.UpdatePersonalCollegeApplicationRequestBody{
-		GlobalCollegeID: collegeID,
-		ApplicationType: "RD",
-		Category:        "safety",
+		GlobalCollegeID:   collegeID,
+		ApplicationType:   "RD",
+		Category:          "safety",
+		ApplicationStatus: models.ApplicationStatusNotStarted,
 	})
 	if err == nil {
 		t.Fatal("expected an error updating another student's application, got nil")
