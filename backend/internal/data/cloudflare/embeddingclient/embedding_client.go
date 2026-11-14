@@ -79,7 +79,7 @@ func (c *EmbeddingClient) Embed(ctx context.Context, text string) ([]float32, er
 	if err != nil {
 		return nil, fmt.Errorf("embeddingclient: request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var parsed embedResponse
 	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
