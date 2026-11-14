@@ -5,20 +5,20 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { CollegeApplicationCycle } from './collegeApplicationCycle';
 
 export interface GlobalCollege {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   /** Timestamp when the college was created */
   created_at: string;
-  /** Early admission deadline */
-  ea_deadline?: string;
-  /** Early decision deadline */
-  ed_deadline?: string;
+  /**
+     * Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order
+     * @nullable
+     */
+  cycles: CollegeApplicationCycle[] | null;
   /** Unique identifier for the college */
   id: number;
-  /** Regular decision deadline */
-  rd_deadline?: string;
   /** Location of the college */
   school_location: string;
   /** Name of the college */
