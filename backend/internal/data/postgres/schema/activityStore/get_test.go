@@ -23,13 +23,21 @@ func TestGetActivitiesForCounselor_ScopedToOwnStudents(t *testing.T) {
 
 	counselorA := createTestCounselor(t, db)
 	studentA := createTestStudent(t, db, counselorA)
-	if err := repo.CreateActivity(ctx, studentA, models.CreateActivityBody{Action: models.ActionAddedSchool}); err != nil {
+	essayA := createTestEssay(t, db, studentA)
+	statusA := models.Review
+	if err := repo.CreateActivity(ctx, studentA, models.CreateActivityBody{
+		Action: models.ActionAddedSchool, EssayID: &essayA, EssayStatus: &statusA,
+	}); err != nil {
 		t.Fatalf("failed to create activity for studentA: %v", err)
 	}
 
 	counselorB := createTestCounselor(t, db)
 	studentB := createTestStudent(t, db, counselorB)
-	if err := repo.CreateActivity(ctx, studentB, models.CreateActivityBody{Action: models.ActionRemovedSchool}); err != nil {
+	essayB := createTestEssay(t, db, studentB)
+	statusB := models.Review
+	if err := repo.CreateActivity(ctx, studentB, models.CreateActivityBody{
+		Action: models.ActionRemovedSchool, EssayID: &essayB, EssayStatus: &statusB,
+	}); err != nil {
 		t.Fatalf("failed to create activity for studentB: %v", err)
 	}
 
@@ -131,10 +139,18 @@ func TestGetActivitiesForCounselor_FilteredByStudentID(t *testing.T) {
 	studentOne := createTestStudent(t, db, counselorID)
 	studentTwo := createTestStudent(t, db, counselorID)
 
-	if err := repo.CreateActivity(ctx, studentOne, models.CreateActivityBody{Action: models.ActionAddedSchool}); err != nil {
+	essayOne := createTestEssay(t, db, studentOne)
+	statusOne := models.Review
+	if err := repo.CreateActivity(ctx, studentOne, models.CreateActivityBody{
+		Action: models.ActionAddedSchool, EssayID: &essayOne, EssayStatus: &statusOne,
+	}); err != nil {
 		t.Fatalf("failed to create activity for studentOne: %v", err)
 	}
-	if err := repo.CreateActivity(ctx, studentTwo, models.CreateActivityBody{Action: models.ActionTaskPastDue}); err != nil {
+	essayTwo := createTestEssay(t, db, studentTwo)
+	statusTwo := models.Review
+	if err := repo.CreateActivity(ctx, studentTwo, models.CreateActivityBody{
+		Action: models.ActionTaskPastDue, EssayID: &essayTwo, EssayStatus: &statusTwo,
+	}); err != nil {
 		t.Fatalf("failed to create activity for studentTwo: %v", err)
 	}
 
@@ -167,7 +183,11 @@ func TestGetActivitiesForCounselor_StudentIDFromAnotherCounselorReturnsNothing(t
 
 	counselorB := createTestCounselor(t, db)
 	studentB := createTestStudent(t, db, counselorB)
-	if err := repo.CreateActivity(ctx, studentB, models.CreateActivityBody{Action: models.ActionAddedSchool}); err != nil {
+	essayB := createTestEssay(t, db, studentB)
+	statusB := models.Review
+	if err := repo.CreateActivity(ctx, studentB, models.CreateActivityBody{
+		Action: models.ActionAddedSchool, EssayID: &essayB, EssayStatus: &statusB,
+	}); err != nil {
 		t.Fatalf("failed to create activity for studentB: %v", err)
 	}
 
