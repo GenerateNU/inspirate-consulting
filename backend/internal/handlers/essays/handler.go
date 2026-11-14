@@ -6,13 +6,15 @@ import (
 )
 
 type Handler struct {
-	EssayRepository storage.EssayRepository
-	Authorizer      *auth.Authorizer
+	EssayRepository       storage.EssayRepository
+	EssayGroupsRepository storage.EssayGroupRepository
+	Authorizer            *auth.Authorizer
 }
 
-func NewHandler(essayRepository storage.EssayRepository, authorizer *auth.Authorizer) *Handler {
+func NewHandler(essayRepository storage.EssayRepository, authorizer *auth.Authorizer, essayGroupRepository storage.EssayGroupRepository) *Handler {
 	return &Handler{
-		EssayRepository: essayRepository,
-		Authorizer:      authorizer,
+		EssayRepository:       essayRepository,
+		EssayGroupsRepository: essayGroupRepository,
+		Authorizer:            authorizer,
 	}
 }

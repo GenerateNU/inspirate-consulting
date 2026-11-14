@@ -59,12 +59,14 @@ type EssayRepository interface {
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
 	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
 	DeleteEssay(ctx context.Context, essayID uuid.UUID, studentID uuid.UUID) error
+	GetEssayStudentID(ctx context.Context, essayID uuid.UUID) (uuid.UUID, error)
 }
 
 // Essay Group Repository
 type EssayGroupRepository interface {
 	CreateEssayGroup(ctx context.Context, studentID uuid.UUID, group models.CreateEssayGroupBody) (*models.EssayGroups, error)
 	ListEssayGroups(ctx context.Context, studentID uuid.UUID) ([]models.EssayGroups, error)
+	GetEssayGroupStudentID(ctx context.Context, groupID uuid.UUID) (uuid.UUID, error)
 }
 
 // To represent Todo Item schema

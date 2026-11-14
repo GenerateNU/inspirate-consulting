@@ -13,7 +13,7 @@ import (
 )
 
 func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
-	essayHandler := essays.NewHandler(repository.Essay, authorizer)
+	essayHandler := essays.NewHandler(repository.Essay, authorizer, repository.EssayGroup)
 
 	// GET route that shows all of a students essay
 	huma.Register(api, huma.Operation{
@@ -65,6 +65,7 @@ func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth
 	// PATCH route that adds an essay to a group or moves it between groups
 	huma.Register(api, huma.Operation{
 		OperationID: "update-essay-group",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/essays/{essay_id}/group",
 		Description: "Adds an essay to a group, moves it to another group, or removes it from its group",
