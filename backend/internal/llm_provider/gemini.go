@@ -1,9 +1,9 @@
 package llmprovider
 
 import (
+	"context"
 	"inspirate-consulting/internal/config"
 
-	"github.com/danielgtaylor/huma/v2"
 	"google.golang.org/genai"
 	"google.golang.org/genai/interactions/models/interactions"
 	"google.golang.org/genai/interactions/models/operations"
@@ -13,9 +13,9 @@ type Gemini struct {
 	APIKey string
 }
 
-func callGemini(ctx huma.Context, cfg config.Config, provider LLMProvider) (*string, error) {
-	c := ctx.Context()
-	client, err := genai.NewClient(c, &genai.ClientConfig{
+func callGemini(ctx context.Context, cfg config.Config, provider LLMProvider) (*string, error) {
+
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		APIKey:  cfg.Gemini.APIKey,
 		Backend: genai.BackendGeminiAPI,
 	})
@@ -24,7 +24,7 @@ func callGemini(ctx huma.Context, cfg config.Config, provider LLMProvider) (*str
 		return nil, err
 	}
 
-	resp, err := client.Interactions.Create(c, operations.CreateInteractionRequest{
+	resp, err := client.Interactions.Create(ctx, operations.CreateInteractionRequest{
 		Body: operations.NewCreateInteractionRequestBody(
 			interactions.CreateModelInteraction{
 				Model: interactions.Model(cfg.Gemini.Model),
