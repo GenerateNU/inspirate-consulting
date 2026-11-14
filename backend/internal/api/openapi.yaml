@@ -1355,11 +1355,26 @@ components:
           format: uri
           readOnly: true
           type: string
+        content_length:
+          description: Size of the video in bytes; the upload must send exactly this many bytes
+          format: int64
+          maximum: 5368709120
+          minimum: 1
+          type: integer
+        content_type:
+          description: MIME type of the video; the upload must send this exact Content-Type header
+          enum:
+            - video/mp4
+            - video/quicktime
+            - video/webm
+          type: string
         original_filename:
           description: The filename of the video about to be uploaded
           type: string
       required:
         - original_filename
+        - content_type
+        - content_length
       type: object
     PresignUploadResponse:
       additionalProperties: false

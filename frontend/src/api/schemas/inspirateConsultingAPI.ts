@@ -1587,7 +1587,13 @@ export const ListVideosResponse = /*#__PURE__*/ zod.array(ListVideosResponseItem
 /**
  * Upload a new video to the S3 bucket.
  */
+export const uploadVideoBodyContentLengthMax = 5368709120;
+
+
+
 export const UploadVideoBody = /*#__PURE__*/ zod.object({
+  "content_length": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(uploadVideoBodyContentLengthMax)).check(/*#__PURE__*/ zod.describe('Size of the video in bytes; the upload must send exactly this many bytes')),
+  "content_type": /*#__PURE__*/ zod.enum(['video/mp4', 'video/quicktime', 'video/webm']).check(/*#__PURE__*/ zod.describe('MIME type of the video; the upload must send this exact Content-Type header')),
   "original_filename": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The filename of the video about to be uploaded'))
 })
 

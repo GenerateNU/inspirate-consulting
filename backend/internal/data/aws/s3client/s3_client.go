@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/google/uuid"
 )
 
 const (
@@ -51,17 +50,13 @@ func NewClient(ctx context.Context, bucket string) (*Client, error) {
 	}, nil
 }
 
-// creates a unique S3 object key for a new upload
-// preserves the original filename for readability
-func GenerateObjectKey(originalFilename string) string {
-	return fmt.Sprintf("videos/%s-%s", uuid.NewString(), originalFilename)
-}
-
-// returns a presigned URL for the given object key (PUT: new upload).
-func (c *Client) PresignUpload(ctx context.Context, key string) (string, error) {
+// returns a presigned PUT URL for the key; the upload must send exactly this Content-Type and Content-Length
+func (c *Client) PresignUpload(ctx context.Context, key string, contentType string, contentLength int64) (string, error) {
 	request, err := c.presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(c.bucket),
-		Key:    aws.String(key),
+		Bucket:        aws.String(c.bucket),
+		Key:           aws.String(key),
+		ContentType:   aws.String(contentType),
+		ContentLength: aws.Int64(contentLength),
 	}, s3.WithPresignExpires(UploadURLExpiry))
 	if err != nil {
 		return "", fmt.Errorf("s3client: failed to upload object: %w", err)
@@ -81,10 +76,11 @@ func (c *Client) PresignDownload(ctx context.Context, key string) (string, error
 	return request.URL, nil
 }
 
-// returns the key of every object currently in the bucket.
-func (c *Client) ListObjectKeys(ctx context.Context) ([]string, error) {
+// returns the key of every object under the given prefix.
+func (c *Client) ListObjectKeys(ctx context.Context, prefix string) ([]string, error) {
 	output, err := c.s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: aws.String(c.bucket),
+		Prefix: aws.String(prefix),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("s3client: failed to list objects: %w", err)
@@ -114,7 +110,7 @@ func (c *Client) Raw() *s3.Client {
 	return c.s3Client
 }
 
-// Checks if a video exists
+// reports whether an object exists at the key.
 func (c *Client) ObjectExists(ctx context.Context, key string) (bool, error) {
 	_, err := c.s3Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(c.bucket),

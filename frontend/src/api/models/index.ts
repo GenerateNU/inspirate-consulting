@@ -72,6 +72,7 @@ export * from './notificationPreferences';
 export * from './pendingReview';
 export * from './personalCollegeApplication';
 export * from './presignUploadRequestBody';
+export * from './presignUploadRequestBodyContentType';
 export * from './presignUploadResponse';
 export * from './queueEmailNotificationRequestBody';
 export * from './queueEmailNotificationResponseBody';
