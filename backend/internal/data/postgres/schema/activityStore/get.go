@@ -12,7 +12,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-// Gets all the activites from all of the given counselor students.
+// Gets all the activities from all of the given counselor students.
 func (r *ActivityRepository) GetActivitiesForCounselor(ctx context.Context, counselorID uuid.UUID) ([]models.Activity, error) {
 	selectQuery, err := schema.ReadSQLBaseScript("get_activities_for_counselor.sql", SqlActivityFiles)
 	if err != nil {
