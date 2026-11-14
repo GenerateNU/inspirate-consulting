@@ -134,6 +134,7 @@ type MediaAccessRepository interface {
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
 	RevokeMediaAccess(ctx context.Context, id string) error
 	ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error)
+	GetMediaAccessStudentID(ctx context.Context, id string) (uuid.UUID, error)
 }
 
 // To represent the Essay Review Transaction schema
