@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"inspirate-consulting/internal/errs"
+	"inspirate-consulting/internal/models"
 )
 
 // The extracurricular is returned with all of its fields, achievements and notes.
@@ -37,6 +38,13 @@ func TestGetExtracurricular_WithAchievementsAndNotes(t *testing.T) {
 		t.Fatalf("GetExtracurricular failed: %v", err)
 	}
 
+	assertDetailParentFields(t, got, created, studentID, userID)
+	assertDetailAchievements(t, got, created.ID, newAch, oldAch)
+	assertDetailNotes(t, got, created.ID, newNote, oldNote)
+}
+
+func assertDetailParentFields(t *testing.T, got *models.ExtracurricularDetail, created models.Extracurricular, studentID, userID string) {
+	t.Helper()
 	// Parent fields
 	if got.ID != created.ID || got.StudentID != studentID || got.UserID != userID {
 		t.Errorf("identity mismatch: %+v", got.Extracurricular)
@@ -59,7 +67,10 @@ func TestGetExtracurricular_WithAchievementsAndNotes(t *testing.T) {
 	if got.ApplicationDescription == nil || *got.ApplicationDescription != "Original application description" {
 		t.Errorf("ApplicationDescription = %v", got.ApplicationDescription)
 	}
+}
 
+func assertDetailAchievements(t *testing.T, got *models.ExtracurricularDetail, ecID, newAch, oldAch int64) {
+	t.Helper()
 	// Achievements: newest entry_date first
 	if len(got.Achievements) != 2 {
 		t.Fatalf("expected 2 achievements, got %d", len(got.Achievements))
@@ -68,7 +79,7 @@ func TestGetExtracurricular_WithAchievementsAndNotes(t *testing.T) {
 		t.Errorf("achievement order = [%d %d], want [%d %d]", got.Achievements[0].ID, got.Achievements[1].ID, newAch, oldAch)
 	}
 	a := got.Achievements[0]
-	if a.ExtracurricularID != created.ID {
+	if a.ExtracurricularID != ecID {
 		t.Errorf("achievement ExtracurricularID = %d", a.ExtracurricularID)
 	}
 	if !a.EntryDate.Equal(time.Date(2024, 11, 15, 0, 0, 0, 0, time.UTC)) {
@@ -80,7 +91,10 @@ func TestGetExtracurricular_WithAchievementsAndNotes(t *testing.T) {
 	if a.CreatedAt.IsZero() || a.ModifiedAt.IsZero() {
 		t.Error("achievement timestamps not set")
 	}
+}
 
+func assertDetailNotes(t *testing.T, got *models.ExtracurricularDetail, ecID, newNote, oldNote int64) {
+	t.Helper()
 	// Notes: newest created_at first
 	if len(got.Notes) != 2 {
 		t.Fatalf("expected 2 notes, got %d", len(got.Notes))
@@ -89,7 +103,7 @@ func TestGetExtracurricular_WithAchievementsAndNotes(t *testing.T) {
 		t.Errorf("note order = [%d %d], want [%d %d]", got.Notes[0].ID, got.Notes[1].ID, newNote, oldNote)
 	}
 	n := got.Notes[0]
-	if n.ExtracurricularID != created.ID || n.Body != "Ask coach for a rec letter" {
+	if n.ExtracurricularID != ecID || n.Body != "Ask coach for a rec letter" {
 		t.Errorf("note = %+v", n)
 	}
 	if !n.CreatedAt.Equal(time.Date(2024, 6, 1, 10, 0, 0, 0, time.UTC)) {
