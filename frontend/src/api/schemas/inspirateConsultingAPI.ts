@@ -8,27 +8,6 @@
 import * as zod from 'zod/mini';
 
 /**
- * Get activity across the authenticated counselor's students, newest first. Optionally scope to one student.
- */
-export const GetActivitiesQueryParams = /*#__PURE__*/ zod.object({
-  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Optional: scope to one student assigned to the caller'))
-})
-
-export const GetActivitiesResponseItem = /*#__PURE__*/ zod.object({
-  "action": /*#__PURE__*/ zod.enum(['added_school', 'removed_school', 'essay_status_changed', 'added_extracurricular', 'removed_extracurricular', 'task_past_due']),
-  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
-  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "essay_status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['Submitted', 'Draft', 'Review', 'Archived'])),
-  "extracurricular_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()),
-  "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()),
-  "id": /*#__PURE__*/ zod.string(),
-  "student_id": /*#__PURE__*/ zod.string(),
-  "todo_item_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
-})
-export const GetActivitiesResponse = /*#__PURE__*/ zod.array(GetActivitiesResponseItem)
-
-
-/**
  * Report whether the API is running.
  */
 export const HealthCheckResponse = /*#__PURE__*/ zod.object({

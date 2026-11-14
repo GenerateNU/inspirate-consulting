@@ -1,4 +1,3 @@
-export * from './activity/activity';
 export * from './chat/chat';
 export * from './counselors/counselors';
 export * from './essay-groups/essay-groups';
