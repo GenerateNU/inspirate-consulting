@@ -128,6 +128,42 @@ components:
         - last_message_read_at
         - unread_count
       type: object
+    CollegeApplicationCycle:
+      additionalProperties: false
+      properties:
+        cycle:
+          description: Application cycle
+          enum:
+            - ED
+            - ED2
+            - REA
+            - EA
+            - RD
+            - ROLLING
+          examples:
+            - ED
+          type: string
+        deadline:
+          description: Deadline for this cycle; omitted for rolling admissions
+          examples:
+            - "2023-11-01T00:00:00Z"
+          format: date-time
+          type: string
+        rolling_end:
+          description: End of the rolling admissions window (ROLLING only)
+          examples:
+            - "2024-03-01"
+          format: date
+          type: string
+        rolling_start:
+          description: Start of the rolling admissions window (ROLLING only)
+          examples:
+            - "2023-09-01"
+          format: date
+          type: string
+      required:
+        - cycle
+      type: object
     Counselor:
       additionalProperties: false
       properties:
@@ -276,6 +312,26 @@ components:
       required:
         - name
       type: object
+    CreateExtracurricularAchievementRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateExtracurricularAchievementRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          minLength: 1
+          type: string
+        entry_date:
+          format: date
+          type: string
+      required:
+        - entry_date
+        - body
+      type: object
     CreateExtracurricularRequest:
       additionalProperties: false
       properties:
@@ -286,11 +342,19 @@ components:
           format: uri
           readOnly: true
           type: string
+        application_description:
+          type: string
         description:
           type: string
         end_date:
           format: date
           type: string
+        goals:
+          type: string
+        hours_per_week:
+          format: double
+          minimum: 0
+          type: number
         leadership_role:
           type: string
         name:
@@ -298,6 +362,9 @@ components:
           type: string
         organization:
           type: string
+        ready_for_application:
+          description: Defaults to false when omitted
+          type: boolean
         start_date:
           format: date
           type: string
@@ -311,11 +378,15 @@ components:
             - maintenance
             - investment
           type: string
+        weeks_per_year:
+          format: int32
+          maximum: 52
+          minimum: 0
+          type: integer
       required:
         - name
         - status
         - type
-        - description
         - start_date
         - organization
       type: object
@@ -332,24 +403,13 @@ components:
         confirm_duplicate:
           description: Set true to create despite a detected near-duplicate warning
           type: boolean
-        ea_deadline:
-          description: Early admission deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        ed_deadline:
-          description: Early decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        rd_deadline:
-          description: Regular decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
+        cycles:
+          description: Application cycles this college offers
+          items:
+            $ref: "#/components/schemas/CollegeApplicationCycle"
+          type:
+            - array
+            - "null"
         school_location:
           description: Location of the college
           examples:
@@ -405,11 +465,14 @@ components:
           readOnly: true
           type: string
         application_type:
-          description: Which deadline the student is applying by
+          description: Which application cycle the student is applying by; the college must offer it
           enum:
-            - EA
             - ED
+            - ED2
+            - REA
+            - EA
             - RD
+            - ROLLING
           type: string
         category:
           description: How the student categorizes this school
@@ -913,6 +976,8 @@ components:
           format: uri
           readOnly: true
           type: string
+        application_description:
+          type: string
         created_at:
           format: date-time
           type: string
@@ -921,6 +986,11 @@ components:
         end_date:
           format: date-time
           type: string
+        goals:
+          type: string
+        hours_per_week:
+          format: double
+          type: number
         id:
           format: int64
           type: integer
@@ -933,6 +1003,8 @@ components:
           type: string
         organization:
           type: string
+        ready_for_application:
+          type: boolean
         start_date:
           format: date-time
           type: string
@@ -944,6 +1016,9 @@ components:
           type: string
         user_id:
           type: string
+        weeks_per_year:
+          format: int32
+          type: integer
       required:
         - id
         - created_at
@@ -953,9 +1028,171 @@ components:
         - name
         - status
         - type
-        - description
         - start_date
         - organization
+        - ready_for_application
+      type: object
+    ExtracurricularAchievement:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularAchievement.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        entry_date:
+          format: date-time
+          type: string
+        extracurricular_id:
+          format: int64
+          type: integer
+        id:
+          format: int64
+          type: integer
+        modified_at:
+          format: date-time
+          type: string
+      required:
+        - id
+        - extracurricular_id
+        - entry_date
+        - body
+        - created_at
+        - modified_at
+      type: object
+    ExtracurricularDetail:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularDetail.json
+          format: uri
+          readOnly: true
+          type: string
+        achievements:
+          items:
+            $ref: "#/components/schemas/ExtracurricularAchievement"
+          type:
+            - array
+            - "null"
+        application_description:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        description:
+          type: string
+        end_date:
+          format: date-time
+          type: string
+        goals:
+          type: string
+        hours_per_week:
+          format: double
+          type: number
+        id:
+          format: int64
+          type: integer
+        leadership_role:
+          type: string
+        modified_at:
+          format: date-time
+          type: string
+        name:
+          type: string
+        notes:
+          items:
+            $ref: "#/components/schemas/ExtracurricularNote"
+          type:
+            - array
+            - "null"
+        organization:
+          type: string
+        ready_for_application:
+          type: boolean
+        start_date:
+          format: date-time
+          type: string
+        status:
+          type: string
+        student_id:
+          type: string
+        type:
+          type: string
+        user_id:
+          type: string
+        weeks_per_year:
+          format: int32
+          type: integer
+      required:
+        - achievements
+        - notes
+        - id
+        - created_at
+        - modified_at
+        - student_id
+        - user_id
+        - name
+        - status
+        - type
+        - start_date
+        - organization
+        - ready_for_application
+      type: object
+    ExtracurricularNote:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularNote.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        extracurricular_id:
+          format: int64
+          type: integer
+        id:
+          format: int64
+          type: integer
+        modified_at:
+          format: date-time
+          type: string
+      required:
+        - id
+        - extracurricular_id
+        - body
+        - created_at
+        - modified_at
+      type: object
+    ExtracurricularNoteRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularNoteRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          minLength: 1
+          type: string
+      required:
+        - body
       type: object
     FetchCounselorsBody:
       additionalProperties: false
@@ -1023,30 +1260,19 @@ components:
             - "2023-01-01T00:00:00Z"
           format: date-time
           type: string
-        ea_deadline:
-          description: Early admission deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        ed_deadline:
-          description: Early decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
+        cycles:
+          description: Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order
+          items:
+            $ref: "#/components/schemas/CollegeApplicationCycle"
+          type:
+            - array
+            - "null"
         id:
           description: Unique identifier for the college
           examples:
             - 1
           format: int64
           type: integer
-        rd_deadline:
-          description: Regular decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
         school_location:
           description: Location of the college
           examples:
@@ -1069,6 +1295,7 @@ components:
         - updated_at
         - school_name
         - school_location
+        - cycles
       type: object
     GrantMediaAccessRequestBody:
       additionalProperties: false
@@ -1302,6 +1529,15 @@ components:
           format: uri
           readOnly: true
           type: string
+        application_status:
+          description: Where the student is in submitting this application
+          enum:
+            - not_started
+            - in_progress
+            - submitted
+          examples:
+            - not_started
+          type: string
         application_type:
           description: "Which deadline the student is applying by: EA, ED, or RD"
           examples:
@@ -1315,6 +1551,18 @@ components:
         created_at:
           format: date-time
           type: string
+        cycle_offered:
+          description: False when the college no longer offers application_type (e.g. a counselor removed it); show a warning
+          type: boolean
+        essay_progress:
+          description: "Computed from the student's non-archived essays for this college: none, some not yet submitted, or all submitted"
+          enum:
+            - not_started
+            - in_progress
+            - completed
+          examples:
+            - in_progress
+          type: string
         global_college_id:
           description: ID of the global college being applied to
           format: int64
@@ -1323,6 +1571,15 @@ components:
           description: Unique identifier for the application
           format: int64
           type: integer
+        interest:
+          description: How interested the student is in this school, or null if not set
+          enum:
+            - top_choice
+            - strong_contender
+            - considering
+          type:
+            - string
+            - "null"
         rank:
           description: Student's ranking of this application relative to others, or null if unranked
           format: int64
@@ -1344,6 +1601,10 @@ components:
         - created_at
         - updated_at
         - rank
+        - interest
+        - application_status
+        - cycle_offered
+        - essay_progress
       type: object
     PresignUploadRequestBody:
       additionalProperties: false
@@ -1804,6 +2065,23 @@ components:
           description: Group to move the essay into, or null to remove it from its group
           type: string
       type: object
+    UpdateExtracurricularAchievementRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateExtracurricularAchievementRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          minLength: 1
+          type: string
+        entry_date:
+          format: date
+          type: string
+      type: object
     UpdateExtracurricularRequest:
       additionalProperties: false
       properties:
@@ -1814,18 +2092,46 @@ components:
           format: uri
           readOnly: true
           type: string
+        application_description:
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         description:
-          type: string
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         end_date:
+          description: Send null to clear
           format: date
-          type: string
+          type:
+            - string
+            - "null"
+        goals:
+          description: Send null to clear
+          type:
+            - string
+            - "null"
+        hours_per_week:
+          description: Send null to clear
+          format: double
+          minimum: 0
+          type:
+            - number
+            - "null"
         leadership_role:
-          type: string
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         name:
           minLength: 1
           type: string
         organization:
           type: string
+        ready_for_application:
+          type: boolean
         start_date:
           format: date
           type: string
@@ -1839,6 +2145,14 @@ components:
             - maintenance
             - investment
           type: string
+        weeks_per_year:
+          description: Send null to clear
+          format: int32
+          maximum: 52
+          minimum: 0
+          type:
+            - integer
+            - "null"
       type: object
     UpdateGlobalCollegeRequestBody:
       additionalProperties: false
@@ -1853,24 +2167,13 @@ components:
         confirm_duplicate:
           description: Set true to create despite a detected near-duplicate warning
           type: boolean
-        ea_deadline:
-          description: Early admission deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        ed_deadline:
-          description: Early decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
-        rd_deadline:
-          description: Regular decision deadline
-          examples:
-            - "2023-01-01T00:00:00Z"
-          format: date-time
-          type: string
+        cycles:
+          description: The full set of application cycles this college offers; cycles left out are removed
+          items:
+            $ref: "#/components/schemas/CollegeApplicationCycle"
+          type:
+            - array
+            - "null"
         school_location:
           description: Location of the college
           examples:
@@ -1884,6 +2187,7 @@ components:
       required:
         - school_name
         - school_location
+        - cycles
       type: object
     UpdateMediaInputBody:
       additionalProperties: false
@@ -1962,12 +2266,22 @@ components:
           format: uri
           readOnly: true
           type: string
-        application_type:
-          description: Which deadline the student is applying by
+        application_status:
+          description: Where the student is in submitting this application
           enum:
-            - EA
+            - not_started
+            - in_progress
+            - submitted
+          type: string
+        application_type:
+          description: Which application cycle the student is applying by; the college must offer it
+          enum:
             - ED
+            - ED2
+            - REA
+            - EA
             - RD
+            - ROLLING
           type: string
         category:
           description: How the student categorizes this school
@@ -1980,10 +2294,18 @@ components:
           description: ID of the global college being applied to
           format: int64
           type: integer
+        interest:
+          description: How interested the student is in this school; omit to clear
+          enum:
+            - top_choice
+            - strong_contender
+            - considering
+          type: string
       required:
         - global_college_id
         - application_type
         - category
+        - application_status
       type: object
     UpdateStatusBody:
       additionalProperties: false
@@ -2208,8 +2530,17 @@ paths:
         - Health
   /applications:
     get:
-      description: List all college applications for the authenticated student.
+      description: List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
       operationId: list-personal-college-applications
+      parameters:
+        - description: Student whose college list to return; required for counselors, defaults to the authenticated student
+          explode: false
+          in: query
+          name: student_id
+          schema:
+            description: Student whose college list to return; required for counselors, defaults to the authenticated student
+            format: uuid
+            type: string
       responses:
         "200":
           content:
@@ -2255,7 +2586,7 @@ paths:
         - Personal College Applications
   /applications/{id}:
     delete:
-      description: Delete a personal college application for the authenticated student.
+      description: Remove a school from the authenticated student's list. Also deletes the essays the student started for that school (essays with review history are archived instead) and closes the gap in their ranking.
       operationId: delete-personal-college-application
       parameters:
         - description: ID of the application to delete
@@ -2278,7 +2609,7 @@ paths:
       tags:
         - Personal College Applications
     put:
-      description: Update a personal college application for the authenticated student.
+      description: "Update a personal college application for the authenticated student: college, cycle, category, interest, and application status. Full replacement; omitting interest clears it."
       operationId: update-personal-college-application
       parameters:
         - description: ID of the application to update
@@ -2492,7 +2823,7 @@ paths:
       tags:
         - Global Colleges
     post:
-      description: Create a global college with a name, location, and optional EA/ED/RD deadlines.
+      description: Create a global college with a name, location, and the application cycles it offers (ED, ED2, REA, EA, RD, ROLLING).
       operationId: create-global-college
       requestBody:
         content:
@@ -2565,7 +2896,7 @@ paths:
       tags:
         - Global Colleges
     put:
-      description: Update a global college's details.
+      description: Update a global college's name, location, and application cycles. cycles replaces the full set; applications under a removed cycle are kept and come back with cycle_offered=false.
       operationId: update-global-college
       parameters:
         - description: ID of the college to update
@@ -2997,6 +3328,56 @@ paths:
       tags:
         - Extracurriculars
   /extracurriculars/{id}:
+    delete:
+      description: Delete an extracurricular along with its achievements and notes. Students can delete their own; counselors can delete their assigned students'.
+      operationId: delete-extracurricular
+      parameters:
+        - description: ID of the extracurricular to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular to delete
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+    get:
+      description: Get an extracurricular with all of its achievements and notes. Students can read their own; counselors can read their assigned students'.
+      operationId: get-extracurricular
+      parameters:
+        - description: ID of the extracurricular to fetch
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular to fetch
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularDetail"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
     patch:
       description: Update fields on an extracurricular for the authenticated student.
       operationId: update-extracurricular
@@ -3021,6 +3402,220 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/achievements:
+    post:
+      description: Log an achievement on an extracurricular. Students can add to their own; counselors to their assigned students'.
+      operationId: create-extracurricular-achievement
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtracurricularAchievementRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularAchievement"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/achievements/{achievementId}:
+    delete:
+      description: Delete an achievement from an extracurricular. Students can delete their own; counselors their assigned students'.
+      operationId: delete-extracurricular-achievement
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the achievement
+          in: path
+          name: achievementId
+          required: true
+          schema:
+            description: ID of the achievement
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+    patch:
+      description: Edit an achievement on an extracurricular. Omitted fields keep their value.
+      operationId: update-extracurricular-achievement
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the achievement
+          in: path
+          name: achievementId
+          required: true
+          schema:
+            description: ID of the achievement
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtracurricularAchievementRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularAchievement"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/notes:
+    post:
+      description: Add a note to an extracurricular. Students can add to their own; counselors to their assigned students'.
+      operationId: create-extracurricular-note
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtracurricularNoteRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularNote"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/notes/{noteId}:
+    delete:
+      description: Delete a note from an extracurricular. Students can delete their own; counselors their assigned students'.
+      operationId: delete-extracurricular-note
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the note
+          in: path
+          name: noteId
+          required: true
+          schema:
+            description: ID of the note
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+    patch:
+      description: Edit a note on an extracurricular. Students can edit their own; counselors their assigned students'.
+      operationId: update-extracurricular-note
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the note
+          in: path
+          name: noteId
+          required: true
+          schema:
+            description: ID of the note
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtracurricularNoteRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularNote"
           description: OK
         default:
           content:

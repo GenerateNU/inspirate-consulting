@@ -5,16 +5,22 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { UpdatePersonalCollegeApplicationRequestBodyApplicationStatus } from './updatePersonalCollegeApplicationRequestBodyApplicationStatus';
 import type { UpdatePersonalCollegeApplicationRequestBodyApplicationType } from './updatePersonalCollegeApplicationRequestBodyApplicationType';
 import type { UpdatePersonalCollegeApplicationRequestBodyCategory } from './updatePersonalCollegeApplicationRequestBodyCategory';
+import type { UpdatePersonalCollegeApplicationRequestBodyInterest } from './updatePersonalCollegeApplicationRequestBodyInterest';
 
 export interface UpdatePersonalCollegeApplicationRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  /** Which deadline the student is applying by */
+  /** Where the student is in submitting this application */
+  application_status: UpdatePersonalCollegeApplicationRequestBodyApplicationStatus;
+  /** Which application cycle the student is applying by; the college must offer it */
   application_type: UpdatePersonalCollegeApplicationRequestBodyApplicationType;
   /** How the student categorizes this school */
   category: UpdatePersonalCollegeApplicationRequestBodyCategory;
   /** ID of the global college being applied to */
   global_college_id: number;
+  /** How interested the student is in this school; omit to clear */
+  interest?: UpdatePersonalCollegeApplicationRequestBodyInterest;
 }
