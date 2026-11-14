@@ -1,5 +1,37 @@
 components:
   schemas:
+    AskLLMInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/AskLLMInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        input:
+          description: The question to ask the model
+          minLength: 1
+          type: string
+      required:
+        - input
+      type: object
+    AskLLMOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/AskLLMOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        answer:
+          description: The model's response
+          type: string
+      required:
+        - answer
     Activity:
       additionalProperties: false
       properties:
@@ -3723,6 +3755,31 @@ paths:
           description: Error
       tags:
         - Greetings
+  /llm/ask:
+    post:
+      description: Ask the LLM a question. The model may search tasks or chats to answer it.
+      operationId: ask-llm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskLLMInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskLLMOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - LLM
   /media:
     get:
       description: Fetch all videos, through counselor view
