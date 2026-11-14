@@ -1,37 +1,5 @@
 components:
   schemas:
-    AskLLMInputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - http://localhost:8080/schemas/AskLLMInputBody.json
-          format: uri
-          readOnly: true
-          type: string
-        input:
-          description: The question to ask the model
-          minLength: 1
-          type: string
-      required:
-        - input
-      type: object
-    AskLLMOutputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - http://localhost:8080/schemas/AskLLMOutputBody.json
-          format: uri
-          readOnly: true
-          type: string
-        answer:
-          description: The model's response
-          type: string
-      required:
-        - answer
     Activity:
       additionalProperties: false
       properties:
@@ -73,6 +41,39 @@ components:
         - student_id
         - action
         - created_at
+      type: object
+    AskLLMInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/AskLLMInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        input:
+          description: The question to ask the model
+          minLength: 1
+          type: string
+      required:
+        - input
+      type: object
+    AskLLMOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/AskLLMOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        answer:
+          description: The model's response
+          type: string
+      required:
+        - answer
       type: object
     AssignCounselorInputBody:
       additionalProperties: false

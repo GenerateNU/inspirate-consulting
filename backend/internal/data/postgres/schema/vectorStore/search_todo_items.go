@@ -36,5 +36,4 @@ func (r *VectorRepository) SearchTodoItems(ctx context.Context, queryEmbedding [
 
 	return similarTodos, nil
 
-
 }
