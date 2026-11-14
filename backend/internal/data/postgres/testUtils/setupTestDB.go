@@ -55,9 +55,8 @@ func ensureContainerAndTemplate() error {
 			return
 		}
 
-		// Match Supabase: extensions live in the "extensions" schema, which is on the search path
+		// extensions live in the "extensions" schema, which is on the search path
 		// so types/operators like vector and <=> resolve without a schema prefix.
-		// Set on the role (not the database) so it carries over to DBs cloned from the template.
 		if _, err := adminPool.Exec(ctx, `ALTER ROLE test SET search_path = "$user", public, extensions`); err != nil {
 			setupErr = err
 			return
