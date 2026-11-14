@@ -61,8 +61,10 @@ export default function RecentActivity() {
     isLoading: activitiesLoading,
   } = useGetActivities(undefined, { query: { enabled: isCounselor } });
 
-  const { data: studentsData, error: studentsError } =
-    useListCounselorStudents(undefined, { query: { enabled: isCounselor } });
+  const { data: studentsData, error: studentsError } = useListCounselorStudents(
+    undefined,
+    { query: { enabled: isCounselor } },
+  );
 
   // Only counselors can see this panel - and the backend 403s anyone else,
   // so skip fetching and rendering entirely otherwise.
