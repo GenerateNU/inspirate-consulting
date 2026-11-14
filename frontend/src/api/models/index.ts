@@ -89,6 +89,7 @@ export * from './personalCollegeApplicationApplicationStatus';
 export * from './personalCollegeApplicationEssayProgress';
 export * from './personalCollegeApplicationInterest';
 export * from './presignUploadRequestBody';
+export * from './presignUploadRequestBodyContentType';
 export * from './presignUploadResponse';
 export * from './queueEmailNotificationRequestBody';
 export * from './queueEmailNotificationResponseBody';

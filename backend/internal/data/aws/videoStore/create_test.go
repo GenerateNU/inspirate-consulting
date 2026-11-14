@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	"inspirate-consulting/internal/models"
 )
 
 func TestPresignUpload(t *testing.T) {
@@ -15,7 +17,11 @@ func TestPresignUpload(t *testing.T) {
 	repo, _, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	result, err := repo.PresignUpload(ctx, "test-video.mp4")
+	result, err := repo.PresignUpload(ctx, models.PresignUploadRequestBody{
+		OriginalFilename: "test-video.mp4",
+		ContentType:      "video/mp4",
+		ContentLength:    1024,
+	})
 	if err != nil {
 		t.Fatalf("PresignUpload failed: %v", err)
 	}

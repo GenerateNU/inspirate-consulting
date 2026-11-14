@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { uploadVideo } from "../api/endpoints";
 import { errorMessage } from "../api/client";
+import { presignVideoBody, videoAccept } from "./video-file";
 
 export default function UploadVideo() {
   const [file, setFile] = useState<File | null>(null);
@@ -12,9 +13,7 @@ export default function UploadVideo() {
       // 1. get a presigned upload URL from backend
       // will need s3 key to store in database
       // const { s3_key, upload_url } = await uploadVideo(...);
-      const { upload_url } = await uploadVideo({
-        original_filename: file.name,
-      });
+      const { upload_url } = await uploadVideo(presignVideoBody(file));
 
       // 2. PUT the file to the fetched presigned URL (S3)
       const uploadResponse = await fetch(upload_url, {
@@ -45,7 +44,7 @@ export default function UploadVideo() {
           <label>Video File:</label>
           <input
             type="file"
-            accept="video/*"
+            accept={videoAccept}
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             required
           />
