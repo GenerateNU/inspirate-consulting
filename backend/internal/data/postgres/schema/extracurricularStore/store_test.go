@@ -12,6 +12,7 @@ func TestExtracurricularSQLFiles(t *testing.T) {
 
 	for _, filename := range []string{
 		"create_extracurricular.sql",
+		"get_student_id.sql",
 		"list_extracurriculars.sql",
 		"update_extracurricular.sql",
 		"get_extracurricular.sql",

@@ -316,6 +316,7 @@ func TestRoute_UpdateExtracurricular(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, int64(7)).Return(uuid.New(), nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, int64(7), mock.MatchedBy(func(in models.UpdateExtracurricularInput) bool {
 			b := in.Body
 			return in.ID == 7 && b.Name == nil &&
@@ -354,6 +355,7 @@ func TestRoute_UpdateExtracurricular(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, int64(7)).Return(uuid.New(), nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, int64(7), mock.MatchedBy(func(in models.UpdateExtracurricularInput) bool {
 			return in.Body.ReadyForApplication != nil && !*in.Body.ReadyForApplication
 		})).Return(&models.Extracurricular{ID: 7}, nil)
@@ -369,6 +371,7 @@ func TestRoute_UpdateExtracurricular(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, int64(7)).Return(uuid.New(), nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, int64(7), mock.MatchedBy(func(in models.UpdateExtracurricularInput) bool {
 			return in.Body == models.UpdateExtracurricularRequest{}
 		})).Return(&models.Extracurricular{ID: 7}, nil)
@@ -422,22 +425,25 @@ func TestRoute_UpdateExtracurricular(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
 
-	t.Run("counselor without student identity is unauthorized", func(t *testing.T) {
+	t.Run("not found from ownership lookup skips the update", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, int64(404)).Return(uuid.Nil, errs.NotFound("extracurricular", "id", int64(404)))
+
 		app, err := setupExtracurricularTestApp(mockRepo)
 		require.NoError(t, err)
 
-		resp, _ := doRequest(t, app, http.MethodPatch, "/extracurriculars/7", map[string]any{"goals": "x"},
-			map[string]string{"X-Counselor-ID": uuid.NewString()})
-		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+		resp, _ := doRequest(t, app, http.MethodPatch, "/extracurriculars/404", map[string]any{"goals": "x"})
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+		mockRepo.AssertNotCalled(t, "UpdateExtracurricular")
 	})
 
 	t.Run("repository error", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricularStudentID", mock.Anything, int64(7)).Return(uuid.New(), nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("database error"))
 
 		app, err := setupExtracurricularTestApp(mockRepo)

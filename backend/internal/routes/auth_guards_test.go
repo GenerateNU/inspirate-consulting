@@ -127,7 +127,7 @@ var routeTable = []routeAccess{
 	// extracurriculars
 	{http.MethodPost, "/extracurriculars", anyRole, nil},
 	{http.MethodGet, "/extracurriculars", anyRole, nil},
-	{http.MethodPatch, "/extracurriculars/{id}", anyRole, nil},
+	{http.MethodPatch, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodDelete, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
 
