@@ -25,6 +25,13 @@ export const categoryLabel = (category: string) =>
 export const interestLabel = (interest: string) =>
   interestOptions.find(({ value }) => value === interest)?.label ?? interest;
 
+// the same pill on a counselor's view of the list (always grey in the hi-fi)
+export const counselorEssayProgressLabel: Record<string, string> = {
+  [EssayProgress.not_started]: "Essays Not Started",
+  [EssayProgress.in_progress]: "Essays In Progress",
+  [EssayProgress.completed]: "Essays Completed",
+};
+
 // the pill next to a school's name on My List
 export const essayProgressTag: Record<
   string,

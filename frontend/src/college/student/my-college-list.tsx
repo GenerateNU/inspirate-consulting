@@ -13,11 +13,8 @@ import {
 import AddSchoolModal from "./add-school-modal";
 import ApplicationCard from "./application-card";
 import RemoveSchoolDialog from "./remove-school-dialog";
-import {
-  sortOptions,
-  useMyCollegeList,
-  type SortKey,
-} from "./use-my-college-list";
+import { sortOptions, type SortKey } from "../utils/sort-applications";
+import { useMyCollegeList } from "./use-my-college-list";
 
 // page frame with the "My List" heading; actions sit to the right of it
 function MyListShell({
@@ -128,6 +125,7 @@ export default function MyCollegeList() {
               app={app}
               college={list.collegeById.get(app.global_college_id)}
               collegeName={list.collegeName(app)}
+              detailPath={`/college-applications/${app.id}`}
               onRemove={() => list.requestRemoval(app)}
             />
           ))}

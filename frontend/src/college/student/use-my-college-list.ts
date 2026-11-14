@@ -16,33 +16,7 @@ import {
   type PersonalCollegeApplication,
 } from "../../api/models";
 import { useAuthContext } from "@/contexts/use-auth-context";
-import { cycleCloseDate, findCycle } from "../utils/shared";
-
-export const sortOptions = [
-  { value: "deadline", label: "Deadline" },
-  { value: "name", label: "Name" },
-  { value: "category", label: "Classification" },
-  { value: "interest", label: "Interest" },
-] as const;
-
-export type SortKey = (typeof sortOptions)[number]["value"];
-
-const categoryOrder: string[] = [
-  Category.reach,
-  Category.target,
-  Category.safety,
-];
-const interestOrder: string[] = [
-  Interest.top_choice,
-  Interest.strong_contender,
-  Interest.considering,
-];
-
-// position in a fixed order; values not in it (e.g. no interest) go last
-const orderOf = (order: string[], value: string | null) => {
-  const index = value == null ? -1 : order.indexOf(value);
-  return index === -1 ? order.length : index;
-};
+import { sortApplications, type SortKey } from "../utils/sort-applications";
 
 // one school picked in the Add School modal
 export interface NewSchool {
@@ -89,39 +63,7 @@ export function useMyCollegeList() {
   const collegeName = (app: PersonalCollegeApplication) =>
     collegeById.get(app.global_college_id)?.school_name ?? "Unknown college";
 
-  const byName = (
-    a: PersonalCollegeApplication,
-    b: PersonalCollegeApplication,
-  ) => collegeName(a).localeCompare(collegeName(b));
-
-  // closing date of the cycle the student picked; schools without one go last
-  const closeDate = (app: PersonalCollegeApplication) =>
-    cycleCloseDate(
-      findCycle(collegeById.get(app.global_college_id), app.application_type),
-    ) ?? Number.POSITIVE_INFINITY;
-
-  const sorted = (() => {
-    switch (sortKey) {
-      case "name":
-        return [...applications].sort(byName);
-      case "deadline":
-        return [...applications].sort(
-          (a, b) => closeDate(a) - closeDate(b) || byName(a, b),
-        );
-      case "category":
-        return [...applications].sort(
-          (a, b) =>
-            orderOf(categoryOrder, a.category) -
-              orderOf(categoryOrder, b.category) || byName(a, b),
-        );
-      case "interest":
-        return [...applications].sort(
-          (a, b) =>
-            orderOf(interestOrder, a.interest) -
-              orderOf(interestOrder, b.interest) || byName(a, b),
-        );
-    }
-  })();
+  const sorted = sortApplications(applications, sortKey, collegeById);
 
   // saves every school picked in the Add School modal. Create doesn't take
   // interest, so a picked interest is set with a follow-up update.

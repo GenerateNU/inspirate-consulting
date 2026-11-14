@@ -105,6 +105,10 @@ export default function CounselorStudents() {
             <Link to={`/counselor/students/${student.student_id}/essays`}>
               Essays
             </Link>
+            {" · "}
+            <Link to={`/counselor/students/${student.student_id}/colleges`}>
+              Colleges
+            </Link>
           </li>
         ))}
       </ul>
