@@ -12,9 +12,10 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, authorizer *auth.Authorizer) {
+func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
 	extracurricularHandler := extracurricular.NewHandler(repository.Extracurricular, authorizer)
 
+	//Register POST /extracurriculars handler
 	huma.Register(api, huma.Operation{
 		OperationID: "create-extracurricular",
 		Method:      http.MethodPost,
@@ -23,6 +24,7 @@ func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, autho
 		Tags:        []string{"Extracurriculars"},
 	}, extracurricularHandler.CreateExtracurricular)
 
+	//Register GET /extracurriculars handler
 	huma.Register(api, huma.Operation{
 		OperationID: "list-extracurriculars",
 		Method:      http.MethodGet,
@@ -37,8 +39,10 @@ func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, autho
 		return &models.ListExtracurricularsOutput{Body: list}, nil
 	})
 
+	//Register PATCH /extracurriculars/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-extracurricular",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/extracurriculars/{id}",
 		Description: "Update fields on an extracurricular for the authenticated student.",
