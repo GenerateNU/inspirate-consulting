@@ -14,16 +14,18 @@ import type {
 } from 'msw';
 
 import type {
-  Extracurricular
+  Extracurricular,
+  ExtracurricularDetail
 } from '../../models';
 
 import {
   getCreateExtracurricularResponseMock,
+  getGetExtracurricularResponseMock,
   getListExtracurricularsResponseMock,
   getUpdateExtracurricularResponseMock
 } from './extracurriculars.faker';
 
-export { getListExtracurricularsResponseMock, getCreateExtracurricularResponseMock, getUpdateExtracurricularResponseMock } from './extracurriculars.faker';
+export { getListExtracurricularsResponseMock, getCreateExtracurricularResponseMock, getGetExtracurricularResponseMock, getUpdateExtracurricularResponseMock } from './extracurriculars.faker';
 
 
 export const getListExtracurricularsMockHandler = (overrideResponse?: Extracurricular[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Extracurricular[] | null> | Extracurricular[] | null), options?: RequestHandlerOptions) => {
@@ -50,6 +52,28 @@ export const getCreateExtracurricularMockHandler = (overrideResponse?: Extracurr
   }, options)
 }
 
+export const getDeleteExtracurricularMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/extracurriculars/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
+export const getGetExtracurricularMockHandler = (overrideResponse?: ExtracurricularDetail | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ExtracurricularDetail> | ExtracurricularDetail), options?: RequestHandlerOptions) => {
+  return http.get('*/extracurriculars/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetExtracurricularResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getUpdateExtracurricularMockHandler = (overrideResponse?: Extracurricular | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Extracurricular> | Extracurricular), options?: RequestHandlerOptions) => {
   return http.patch('*/extracurriculars/:id', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
@@ -64,5 +88,7 @@ export const getUpdateExtracurricularMockHandler = (overrideResponse?: Extracurr
 export const getExtracurricularsMock = () => [
   getListExtracurricularsMockHandler(),
   getCreateExtracurricularMockHandler(),
+  getDeleteExtracurricularMockHandler(),
+  getGetExtracurricularMockHandler(),
   getUpdateExtracurricularMockHandler()
 ]

@@ -11,13 +11,23 @@ import type { UpdateExtracurricularRequestType } from './updateExtracurricularRe
 export interface UpdateExtracurricularRequest {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  application_description?: string;
   description?: string;
   end_date?: string;
+  goals?: string;
+  /** @minimum 0 */
+  hours_per_week?: number;
   leadership_role?: string;
   /** @minLength 1 */
   name?: string;
   organization?: string;
+  ready_for_application?: boolean;
   start_date?: string;
   status?: UpdateExtracurricularRequestStatus;
   type?: UpdateExtracurricularRequestType;
+  /**
+     * @minimum 0
+     * @maximum 52
+     */
+  weeks_per_year?: number;
 }
