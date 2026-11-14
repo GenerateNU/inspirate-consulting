@@ -9,6 +9,8 @@ type Config struct {
 	Supabase    supabase.SupabaseInterface
 	S3          S3
 	SQS         SQS
+	Gemini      Gemini
+	Cloudflare  Cloudflare
 	// TestMode=true will skip the auth middleware
 	TestMode bool
 }

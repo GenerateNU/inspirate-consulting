@@ -23,13 +23,12 @@ func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 	studentID uuid.UUID,
 	application models.CreatePersonalCollegeApplicationRequestBody,
 ) (*models.PersonalCollegeApplication, error) {
-	createdApplication := &models.PersonalCollegeApplication{}
-
 	insertQuery, err := schema.ReadSQLBaseScript("create_personal_college_application.sql", SqlPersonalCollegeApplicationFiles)
 	if err != nil {
 		return nil, err
 	}
 
+	var id int64
 	err = r.db.QueryRow(
 		ctx,
 		insertQuery,
@@ -37,16 +36,7 @@ func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 		application.GlobalCollegeID,
 		application.ApplicationType,
 		application.Category,
-	).Scan(
-		&createdApplication.ID,
-		&createdApplication.StudentID,
-		&createdApplication.GlobalCollegeID,
-		&createdApplication.ApplicationType,
-		&createdApplication.Category,
-		&createdApplication.CreatedAt,
-		&createdApplication.UpdatedAt,
-		&createdApplication.Rank,
-	)
+	).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -61,5 +51,5 @@ func (r *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication(
 		return nil, err
 	}
 
-	return createdApplication, nil
+	return getApplication(ctx, r.db, studentID, id)
 }

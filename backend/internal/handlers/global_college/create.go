@@ -9,6 +9,10 @@ import (
 // CreateGlobalCollege creates a new global college entry in the database
 func (h *Handler) CreateGlobalCollege(ctx context.Context, input models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
 
+	if err := validateCycles(input.Cycles); err != nil {
+		return nil, err
+	}
+
 	// allow for manual override of near duplicate check
 	if !input.ConfirmDuplicate {
 		if err := h.checkNearDuplicate(ctx, input.SchoolName, input.SchoolLocation, nil); err != nil {

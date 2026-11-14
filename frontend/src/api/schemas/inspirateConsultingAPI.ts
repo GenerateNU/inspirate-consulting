@@ -17,15 +17,23 @@ export const HealthCheckResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * List all college applications for the authenticated student.
+ * List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
  */
+export const ListPersonalCollegeApplicationsQueryParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose college list to return; required for counselors, defaults to the authenticated student'))
+})
+
 export const ListPersonalCollegeApplicationsResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_status": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'submitted']).check(/*#__PURE__*/ zod.describe('Where the student is in submitting this application')),
   "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
   "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "cycle_offered": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('False when the college no longer offers application_type (e.g. a counselor removed it); show a warning')),
+  "essay_progress": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'completed']).check(/*#__PURE__*/ zod.describe('Computed from the student\'s non-archived essays for this college: none, some not yet submitted, or all submitted')),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('top_choice'),/*#__PURE__*/ zod.literal('strong_contender'),/*#__PURE__*/ zod.literal('considering'),/*#__PURE__*/ zod.literal(null)])).check(/*#__PURE__*/ zod.describe('How interested the student is in this school, or null if not set')),
   "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
@@ -37,18 +45,22 @@ export const ListPersonalCollegeApplicationsResponse = /*#__PURE__*/ zod.array(L
  * Create a personal college application for the authenticated student.
  */
 export const CreatePersonalCollegeApplicationBody = /*#__PURE__*/ zod.object({
-  "application_type": /*#__PURE__*/ zod.enum(['EA', 'ED', 'RD']).check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by')),
+  "application_type": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Which application cycle the student is applying by; the college must offer it')),
   "category": /*#__PURE__*/ zod.enum(['safety', 'target', 'reach']).check(/*#__PURE__*/ zod.describe('How the student categorizes this school')),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to'))
 })
 
 export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_status": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'submitted']).check(/*#__PURE__*/ zod.describe('Where the student is in submitting this application')),
   "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
   "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "cycle_offered": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('False when the college no longer offers application_type (e.g. a counselor removed it); show a warning')),
+  "essay_progress": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'completed']).check(/*#__PURE__*/ zod.describe('Computed from the student\'s non-archived essays for this college: none, some not yet submitted, or all submitted')),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('top_choice'),/*#__PURE__*/ zod.literal('strong_contender'),/*#__PURE__*/ zod.literal('considering'),/*#__PURE__*/ zod.literal(null)])).check(/*#__PURE__*/ zod.describe('How interested the student is in this school, or null if not set')),
   "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
@@ -56,7 +68,7 @@ export const CreatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object
 
 
 /**
- * Delete a personal college application for the authenticated student.
+ * Remove a school from the authenticated student's list. Also deletes the essays the student started for that school (essays with review history are archived instead) and closes the gap in their ranking.
  */
 export const DeletePersonalCollegeApplicationParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to delete'))
@@ -66,25 +78,31 @@ export const DeletePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.void()
 
 
 /**
- * Update a personal college application for the authenticated student.
+ * Update a personal college application for the authenticated student: college, cycle, category, interest, and application status. Full replacement; omitting interest clears it.
  */
 export const UpdatePersonalCollegeApplicationParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the application to update'))
 })
 
 export const UpdatePersonalCollegeApplicationBody = /*#__PURE__*/ zod.object({
-  "application_type": /*#__PURE__*/ zod.enum(['EA', 'ED', 'RD']).check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by')),
+  "application_status": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'submitted']).check(/*#__PURE__*/ zod.describe('Where the student is in submitting this application')),
+  "application_type": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Which application cycle the student is applying by; the college must offer it')),
   "category": /*#__PURE__*/ zod.enum(['safety', 'target', 'reach']).check(/*#__PURE__*/ zod.describe('How the student categorizes this school')),
-  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to'))
+  "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
+  "interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['top_choice', 'strong_contender', 'considering'])).check(/*#__PURE__*/ zod.describe('How interested the student is in this school; omit to clear'))
 })
 
 export const UpdatePersonalCollegeApplicationResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_status": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'submitted']).check(/*#__PURE__*/ zod.describe('Where the student is in submitting this application')),
   "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
   "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "cycle_offered": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('False when the college no longer offers application_type (e.g. a counselor removed it); show a warning')),
+  "essay_progress": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'completed']).check(/*#__PURE__*/ zod.describe('Computed from the student\'s non-archived essays for this college: none, some not yet submitted, or all submitted')),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('top_choice'),/*#__PURE__*/ zod.literal('strong_contender'),/*#__PURE__*/ zod.literal('considering'),/*#__PURE__*/ zod.literal(null)])).check(/*#__PURE__*/ zod.describe('How interested the student is in this school, or null if not set')),
   "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
@@ -104,11 +122,15 @@ export const UpdatePersonalCollegeApplicationRankBody = /*#__PURE__*/ zod.object
 
 export const UpdatePersonalCollegeApplicationRankResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_status": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'submitted']).check(/*#__PURE__*/ zod.describe('Where the student is in submitting this application')),
   "application_type": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Which deadline the student is applying by: EA, ED, or RD')),
   "category": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('How the student categorizes this school: safety, target, or reach')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "cycle_offered": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('False when the college no longer offers application_type (e.g. a counselor removed it); show a warning')),
+  "essay_progress": /*#__PURE__*/ zod.enum(['not_started', 'in_progress', 'completed']).check(/*#__PURE__*/ zod.describe('Computed from the student\'s non-archived essays for this college: none, some not yet submitted, or all submitted')),
   "global_college_id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the global college being applied to')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the application')),
+  "interest": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('top_choice'),/*#__PURE__*/ zod.literal('strong_contender'),/*#__PURE__*/ zod.literal('considering'),/*#__PURE__*/ zod.literal(null)])).check(/*#__PURE__*/ zod.describe('How interested the student is in this school, or null if not set')),
   "rank": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Student\'s ranking of this application relative to others, or null if unranked')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the student who owns this application')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
@@ -186,10 +208,13 @@ export const SearchGlobalCollegesQueryParams = /*#__PURE__*/ zod.object({
 export const SearchGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
@@ -203,10 +228,13 @@ export const SearchGlobalCollegesResponse = /*#__PURE__*/ zod.array(SearchGlobal
 export const ListGlobalCollegesResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
@@ -215,13 +243,16 @@ export const ListGlobalCollegesResponse = /*#__PURE__*/ zod.array(ListGlobalColl
 
 
 /**
- * Create a global college with a name, location, and optional EA/ED/RD deadlines.
+ * Create a global college with a name, location, and the application cycles it offers (ED, ED2, REA, EA, RD, ROLLING).
  */
 export const CreateGlobalCollegeBody = /*#__PURE__*/ zod.object({
   "confirm_duplicate": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()).check(/*#__PURE__*/ zod.describe('Set true to create despite a detected near-duplicate warning')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('Application cycles this college offers')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college'))
 })
@@ -229,10 +260,13 @@ export const CreateGlobalCollegeBody = /*#__PURE__*/ zod.object({
 export const CreateGlobalCollegeResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
@@ -259,10 +293,13 @@ export const GetGlobalCollegeParams = /*#__PURE__*/ zod.object({
 export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
@@ -270,7 +307,7 @@ export const GetGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * Update a global college's details.
+ * Update a global college's name, location, and application cycles. cycles replaces the full set; applications under a removed cycle are kept and come back with cycle_offered=false.
  */
 export const UpdateGlobalCollegeParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the college to update'))
@@ -278,9 +315,12 @@ export const UpdateGlobalCollegeParams = /*#__PURE__*/ zod.object({
 
 export const UpdateGlobalCollegeBody = /*#__PURE__*/ zod.object({
   "confirm_duplicate": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()).check(/*#__PURE__*/ zod.describe('Set true to create despite a detected near-duplicate warning')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('The full set of application cycles this college offers; cycles left out are removed')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college'))
 })
@@ -288,10 +328,13 @@ export const UpdateGlobalCollegeBody = /*#__PURE__*/ zod.object({
 export const UpdateGlobalCollegeResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was created')),
-  "ea_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early admission deadline')),
-  "ed_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Early decision deadline')),
+  "cycles": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "cycle": /*#__PURE__*/ zod.enum(['ED', 'ED2', 'REA', 'EA', 'RD', 'ROLLING']).check(/*#__PURE__*/ zod.describe('Application cycle')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline for this cycle; omitted for rolling admissions')),
+  "rolling_end": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('End of the rolling admissions window (ROLLING only)')),
+  "rolling_start": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Start of the rolling admissions window (ROLLING only)'))
+}))).check(/*#__PURE__*/ zod.describe('Application cycles this college offers, in ED, ED2, REA, EA, RD, ROLLING order')),
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Unique identifier for the college')),
-  "rd_deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Regular decision deadline')),
   "school_location": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Location of the college')),
   "school_name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the college')),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}).check(/*#__PURE__*/ zod.describe('Timestamp when the college was last updated'))
@@ -522,19 +565,24 @@ export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.object({
  */
 export const ListExtracurricularsResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
-  "description": /*#__PURE__*/ zod.string(),
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "goals": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "hours_per_week": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.number()),
   "id": /*#__PURE__*/ zod.int(),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.string(),
+  "ready_for_application": /*#__PURE__*/ zod.boolean(),
   "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "status": /*#__PURE__*/ zod.string(),
   "student_id": /*#__PURE__*/ zod.string(),
   "type": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.string()
+  "user_id": /*#__PURE__*/ zod.string(),
+  "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int())
 })
 export const ListExtracurricularsResponse = /*#__PURE__*/ zod.array(ListExtracurricularsResponseItem)
 
@@ -542,35 +590,107 @@ export const ListExtracurricularsResponse = /*#__PURE__*/ zod.array(ListExtracur
 /**
  * Create a new extracurricular for the authenticated student.
  */
+export const createExtracurricularBodyHoursPerWeekMin = 0;
+
+
+export const createExtracurricularBodyWeeksPerYearMin = 0;
+export const createExtracurricularBodyWeeksPerYearMax = 52;
 
 
 
 export const CreateExtracurricularBody = /*#__PURE__*/ zod.object({
-  "description": /*#__PURE__*/ zod.string(),
+  "application_description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
+  "goals": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "hours_per_week": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.number().check(/*#__PURE__*/ zod.gte(createExtracurricularBodyHoursPerWeekMin))),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)),
   "organization": /*#__PURE__*/ zod.string(),
+  "ready_for_application": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()).check(/*#__PURE__*/ zod.describe('Defaults to false when omitted')),
   "start_date": /*#__PURE__*/ zod.iso.date(),
   "status": /*#__PURE__*/ zod.enum(['doing', 'have_done']),
-  "type": /*#__PURE__*/ zod.enum(['maintenance', 'investment'])
+  "type": /*#__PURE__*/ zod.enum(['maintenance', 'investment']),
+  "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(createExtracurricularBodyWeeksPerYearMin)).check(/*#__PURE__*/ zod.lte(createExtracurricularBodyWeeksPerYearMax)))
 })
 
 export const CreateExtracurricularResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
-  "description": /*#__PURE__*/ zod.string(),
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "goals": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "hours_per_week": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.number()),
   "id": /*#__PURE__*/ zod.int(),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.string(),
+  "ready_for_application": /*#__PURE__*/ zod.boolean(),
   "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "status": /*#__PURE__*/ zod.string(),
   "student_id": /*#__PURE__*/ zod.string(),
   "type": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.string()
+  "user_id": /*#__PURE__*/ zod.string(),
+  "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int())
+})
+
+
+/**
+ * Delete an extracurricular along with its achievements and notes. Students can delete their own; counselors can delete their assigned students'.
+ */
+export const DeleteExtracurricularParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular to delete'))
+})
+
+export const DeleteExtracurricularResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Get an extracurricular with all of its achievements and notes. Students can read their own; counselors can read their assigned students'.
+ */
+export const GetExtracurricularParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular to fetch'))
+})
+
+export const GetExtracurricularResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "achievements": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "entry_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+}))),
+  "application_description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "goals": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "hours_per_week": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.number()),
+  "id": /*#__PURE__*/ zod.int(),
+  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "name": /*#__PURE__*/ zod.string(),
+  "notes": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+}))),
+  "organization": /*#__PURE__*/ zod.string(),
+  "ready_for_application": /*#__PURE__*/ zod.boolean(),
+  "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "status": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "type": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string(),
+  "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int())
 })
 
 
@@ -581,35 +701,174 @@ export const UpdateExtracurricularParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular to update'))
 })
 
+export const updateExtracurricularBodyHoursPerWeekMin = 0;
+
+
+export const updateExtracurricularBodyWeeksPerYearMin = 0;
+export const updateExtracurricularBodyWeeksPerYearMax = 52;
 
 
 
 export const UpdateExtracurricularBody = /*#__PURE__*/ zod.object({
-  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
-  "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
-  "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "application_description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "description": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "end_date": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.iso.date()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "goals": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "hours_per_week": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.number().check(/*#__PURE__*/ zod.gte(updateExtracurricularBodyHoursPerWeekMin))).check(/*#__PURE__*/ zod.describe('Send null to clear')),
+  "leadership_role": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Send null to clear')),
   "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))),
   "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "ready_for_application": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()),
   "start_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date()),
   "status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['doing', 'have_done'])),
-  "type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['maintenance', 'investment']))
+  "type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['maintenance', 'investment'])),
+  "weeks_per_year": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(updateExtracurricularBodyWeeksPerYearMin)).check(/*#__PURE__*/ zod.lte(updateExtracurricularBodyWeeksPerYearMax))).check(/*#__PURE__*/ zod.describe('Send null to clear'))
 })
 
 export const UpdateExtracurricularResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "application_description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
-  "description": /*#__PURE__*/ zod.string(),
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "end_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "goals": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "hours_per_week": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.number()),
   "id": /*#__PURE__*/ zod.int(),
   "leadership_role": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
   "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "name": /*#__PURE__*/ zod.string(),
   "organization": /*#__PURE__*/ zod.string(),
+  "ready_for_application": /*#__PURE__*/ zod.boolean(),
   "start_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "status": /*#__PURE__*/ zod.string(),
   "student_id": /*#__PURE__*/ zod.string(),
   "type": /*#__PURE__*/ zod.string(),
-  "user_id": /*#__PURE__*/ zod.string()
+  "user_id": /*#__PURE__*/ zod.string(),
+  "weeks_per_year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int())
+})
+
+
+/**
+ * Log an achievement on an extracurricular. Students can add to their own; counselors to their assigned students'.
+ */
+export const CreateExtracurricularAchievementParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular'))
+})
+
+
+
+
+export const CreateExtracurricularAchievementBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)),
+  "entry_date": /*#__PURE__*/ zod.iso.date()
+})
+
+export const CreateExtracurricularAchievementResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "entry_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Delete an achievement from an extracurricular. Students can delete their own; counselors their assigned students'.
+ */
+export const DeleteExtracurricularAchievementParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "achievementId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the achievement'))
+})
+
+export const DeleteExtracurricularAchievementResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Edit an achievement on an extracurricular. Omitted fields keep their value.
+ */
+export const UpdateExtracurricularAchievementParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "achievementId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the achievement'))
+})
+
+
+
+
+export const UpdateExtracurricularAchievementBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))),
+  "entry_date": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.date())
+})
+
+export const UpdateExtracurricularAchievementResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "entry_date": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Add a note to an extracurricular. Students can add to their own; counselors to their assigned students'.
+ */
+export const CreateExtracurricularNoteParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular'))
+})
+
+
+
+
+export const CreateExtracurricularNoteBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))
+})
+
+export const CreateExtracurricularNoteResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * Delete a note from an extracurricular. Students can delete their own; counselors their assigned students'.
+ */
+export const DeleteExtracurricularNoteParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "noteId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the note'))
+})
+
+export const DeleteExtracurricularNoteResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Edit a note on an extracurricular. Students can edit their own; counselors their assigned students'.
+ */
+export const UpdateExtracurricularNoteParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the extracurricular')),
+  "noteId": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('ID of the note'))
+})
+
+
+
+
+export const UpdateExtracurricularNoteBody = /*#__PURE__*/ zod.object({
+  "body": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))
+})
+
+export const UpdateExtracurricularNoteResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "body": /*#__PURE__*/ zod.string(),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "extracurricular_id": /*#__PURE__*/ zod.int(),
+  "id": /*#__PURE__*/ zod.int(),
+  "modified_at": /*#__PURE__*/ zod.iso.datetime({"offset":true})
 })
 
 

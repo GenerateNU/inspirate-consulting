@@ -35,17 +35,17 @@ func TestListGlobalColleges(t *testing.T) {
 		{
 			SchoolName:     "Alpha University",
 			SchoolLocation: "Alpha City, AA",
-			EADeadline:     &eaDeadline,
+			Cycles:         []models.CollegeApplicationCycle{{Cycle: models.ApplicationCycleEA, Deadline: &eaDeadline}},
 		},
 		{
 			SchoolName:     "Beta College",
 			SchoolLocation: "Beta Town, BB",
-			EDDeadline:     &edDeadline,
+			Cycles:         []models.CollegeApplicationCycle{{Cycle: models.ApplicationCycleED, Deadline: &edDeadline}},
 		},
 		{
 			SchoolName:     "Gamma Institute",
 			SchoolLocation: "Gamma Village, CC",
-			RDDeadline:     &rdDeadline,
+			Cycles:         []models.CollegeApplicationCycle{{Cycle: models.ApplicationCycleRD, Deadline: &rdDeadline}},
 		},
 		{
 			SchoolName:     "Delta State",
@@ -95,16 +95,13 @@ func TestListGlobalColleges(t *testing.T) {
 
 	// Spot-check distinct fields were maintained
 	alpha := byID[created[0].ID]
-	if alpha.EADeadline == nil || !alpha.EADeadline.Equal(eaDeadline) {
-		t.Errorf("expected Alpha University EADeadline %v, got %v", eaDeadline, alpha.EADeadline)
-	}
-	if alpha.EDDeadline != nil || alpha.RDDeadline != nil {
-		t.Errorf("expected Alpha University ED/RD deadlines nil, got ED=%v RD=%v", alpha.EDDeadline, alpha.RDDeadline)
+	if len(alpha.Cycles) != 1 || alpha.Cycles[0].Cycle != models.ApplicationCycleEA ||
+		alpha.Cycles[0].Deadline == nil || !alpha.Cycles[0].Deadline.Equal(eaDeadline) {
+		t.Errorf("expected Alpha University to offer only EA on %v, got %+v", eaDeadline, alpha.Cycles)
 	}
 
 	delta := byID[created[3].ID]
-	if delta.EADeadline != nil || delta.EDDeadline != nil || delta.RDDeadline != nil {
-		t.Errorf("expected Delta State to have all nil deadlines, got EA=%v ED=%v RD=%v",
-			delta.EADeadline, delta.EDDeadline, delta.RDDeadline)
+	if len(delta.Cycles) != 0 {
+		t.Errorf("expected Delta State to offer no cycles, got %+v", delta.Cycles)
 	}
 }

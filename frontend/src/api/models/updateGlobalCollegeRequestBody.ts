@@ -5,18 +5,18 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { CollegeApplicationCycle } from './collegeApplicationCycle';
 
 export interface UpdateGlobalCollegeRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   /** Set true to create despite a detected near-duplicate warning */
   confirm_duplicate?: boolean;
-  /** Early admission deadline */
-  ea_deadline?: string;
-  /** Early decision deadline */
-  ed_deadline?: string;
-  /** Regular decision deadline */
-  rd_deadline?: string;
+  /**
+     * The full set of application cycles this college offers; cycles left out are removed
+     * @nullable
+     */
+  cycles: CollegeApplicationCycle[] | null;
   /** Location of the college */
   school_location: string;
   /** Name of the college */

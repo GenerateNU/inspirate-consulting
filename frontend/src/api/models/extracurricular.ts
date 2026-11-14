@@ -9,17 +9,22 @@
 export interface Extracurricular {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  application_description?: string;
   created_at: string;
-  description: string;
+  description?: string;
   end_date?: string;
+  goals?: string;
+  hours_per_week?: number;
   id: number;
   leadership_role?: string;
   modified_at: string;
   name: string;
   organization: string;
+  ready_for_application: boolean;
   start_date: string;
   status: string;
   student_id: string;
   type: string;
   user_id: string;
+  weeks_per_year?: number;
 }

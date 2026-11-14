@@ -3,8 +3,6 @@ package globalCollegeRepository
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
-
 	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
 )
@@ -22,7 +20,7 @@ func (r *GlobalCollegeRepository) ListGlobalColleges(ctx context.Context) ([]mod
 	}
 	defer rows.Close()
 
-	globalColleges, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.GlobalCollege])
+	globalColleges, err := collectColleges(ctx, r.db, rows)
 	if err != nil {
 		return nil, err
 	}

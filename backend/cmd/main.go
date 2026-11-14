@@ -74,6 +74,8 @@ func LoadConfig() (*config.Config, error) {
 		Supabase    supabase.Supabase
 		S3          config.S3
 		SQS         config.SQS
+		Gemini      config.Gemini
+		Cloudflare  config.Cloudflare
 	}
 
 	var cfg envConf
@@ -89,6 +91,8 @@ func LoadConfig() (*config.Config, error) {
 		Supabase:    &cfg.Supabase,
 		S3:          cfg.S3,
 		SQS:         cfg.SQS,
+		Cloudflare:  cfg.Cloudflare,
 		TestMode:    testMode == "true",
+		Gemini:      cfg.Gemini,
 	}, nil
 }

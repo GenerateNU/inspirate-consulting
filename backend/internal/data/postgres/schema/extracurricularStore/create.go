@@ -47,6 +47,11 @@ func (r *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, s
 		startDate,
 		endDate,
 		body.Organization,
+		body.HoursPerWeek,
+		body.WeeksPerYear,
+		body.Goals,
+		body.ReadyForApplication,
+		body.ApplicationDescription,
 	)
 	if err != nil {
 		return nil, err
@@ -77,9 +82,10 @@ func (r *ExtracurricularRepository) ListExtracurriculars(ctx context.Context, st
 	return pgx.CollectRows(rows, pgx.RowToStructByName[models.Extracurricular])
 }
 
-// UpdateExtracurricular updates an extracurricular
-// Fields left nil in the request keep their existing value via COALESCE.
-// The student ID is taken from the existing row, not the request.
+// UpdateExtracurricular applies a partial update to an extracurricular.
+// Required columns left nil keep their value via COALESCE. Nullable columns
+// carry a "was sent" flag alongside the value, so an explicit null clears the
+// column while an omitted field leaves it untouched.
 // Returns pgx.ErrNoRows if no extracurricular with the given id exists.
 func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, id int64, input models.UpdateExtracurricularInput) (*models.Extracurricular, error) {
 	body := input.Body
@@ -94,8 +100,8 @@ func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, i
 	}
 
 	var endDate *time.Time
-	if body.EndDate != nil {
-		parsed, err := models.ParseDate(*body.EndDate)
+	if v := body.EndDate.Ptr(); v != nil {
+		parsed, err := models.ParseDate(*v)
 		if err != nil {
 			return nil, err
 		}
@@ -113,11 +119,16 @@ func (r *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, i
 		body.Name,
 		body.Status,
 		body.Type,
-		body.Description,
-		body.LeadershipRole,
 		startDate,
-		endDate,
 		body.Organization,
+		body.ReadyForApplication,
+		body.Description.Set, body.Description.Ptr(),
+		body.LeadershipRole.Set, body.LeadershipRole.Ptr(),
+		body.EndDate.Set, endDate,
+		body.HoursPerWeek.Set, body.HoursPerWeek.Ptr(),
+		body.WeeksPerYear.Set, body.WeeksPerYear.Ptr(),
+		body.Goals.Set, body.Goals.Ptr(),
+		body.ApplicationDescription.Set, body.ApplicationDescription.Ptr(),
 		id,
 	)
 	if err != nil {

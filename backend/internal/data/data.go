@@ -43,6 +43,17 @@ type ExtracurricularRepository interface {
 	CreateExtracurricular(ctx context.Context, studentID string, userID string, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
 	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
 	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
+	GetExtracurricularStudentID(ctx context.Context, id int64) (uuid.UUID, error)
+	GetExtracurricular(ctx context.Context, id int64) (*models.ExtracurricularDetail, error)
+	DeleteExtracurricular(ctx context.Context, id int64, studentID string) error
+
+	CreateExtracurricularNote(ctx context.Context, extracurricularID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)
+	UpdateExtracurricularNote(ctx context.Context, extracurricularID, noteID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)
+	DeleteExtracurricularNote(ctx context.Context, extracurricularID, noteID int64) error
+
+	CreateExtracurricularAchievement(ctx context.Context, extracurricularID int64, input models.CreateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)
+	UpdateExtracurricularAchievement(ctx context.Context, extracurricularID, achievementID int64, input models.UpdateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)
+	DeleteExtracurricularAchievement(ctx context.Context, extracurricularID, achievementID int64) error
 }
 
 // Essay Repository
@@ -140,6 +151,7 @@ type MediaAccessRepository interface {
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
 	RevokeMediaAccess(ctx context.Context, id string) error
 	ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error)
+	GetMediaAccessStudentID(ctx context.Context, id string) (uuid.UUID, error)
 }
 
 // To represent the Essay Review Transaction schema
