@@ -102,10 +102,6 @@ func createTemplateDB(ctx context.Context) error {
 
 	applyFastSettings(pool)
 
-	if _, err := pool.Exec(ctx, `CREATE SCHEMA IF NOT EXISTS extensions`); err != nil {
-		return err
-	}
-
 	if err := runSQLDir(pool, "internal/supabase/migrations"); err != nil {
 		return fmt.Errorf("migrations failed: %w", err)
 	}
