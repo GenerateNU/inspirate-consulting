@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import type { GlobalCollege } from "../../../api/models";
-import { deadlineOptions, formatDate } from "../shared";
+import { cycleDateLabel } from "../shared";
 
 // one search result: name links to the college's page,
 // children go under the summary line, action on the right
@@ -19,7 +19,7 @@ export default function CollegeCard({
   action,
   children,
 }: CollegeCardProps) {
-  const deadlines = deadlineOptions.filter(({ key }) => college[key]);
+  const cycles = college.cycles ?? [];
 
   return (
     <li className="flex items-center gap-4 border border-black px-4 py-6">
@@ -31,10 +31,10 @@ export default function CollegeCard({
         </h3>
         <p className="mt-1 text-sm">
           {college.school_location}
-          {deadlines.map(({ value, key }) => (
-            <span key={value}>
+          {cycles.map((cycle) => (
+            <span key={cycle.cycle}>
               {" · "}
-              {value}: {formatDate(college[key]!)}
+              {cycle.cycle}: {cycleDateLabel(cycle)}
             </span>
           ))}
         </p>
