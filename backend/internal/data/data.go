@@ -137,7 +137,7 @@ type UserRepository interface {
 // Get and List generate fresh presigned URLs to avoid expiration issues
 type VideoRepository interface {
 	// generates a unique S3 key and a presigned PUT URL for a new video upload.
-	PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error)
+	PresignUpload(ctx context.Context, input models.PresignUploadRequestBody) (*models.PresignUploadResponse, error)
 	GetVideo(ctx context.Context, s3Key string) (*models.Video, error)
 	ListVideos(ctx context.Context) ([]models.Video, error)
 	DeleteVideo(ctx context.Context, s3Key string) error

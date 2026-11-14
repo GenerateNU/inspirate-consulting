@@ -2,6 +2,7 @@ import { useState } from "react";
 import { errorMessage } from "../api/client";
 import { useMutation } from "@tanstack/react-query";
 import { createMedia, uploadVideo } from "../api/endpoints";
+import { presignVideoBody, videoAccept } from "../video/video-file";
 
 // reads a video file's duration in the browser, rounded to whole minutes
 function getVideoDurationMins(file: File): Promise<number> {
@@ -31,9 +32,7 @@ export default function CreateMedia() {
   const { mutate, isPending, error } = useMutation({
     mutationFn: async (file: File) => {
       // get a unique S3 key and a presigned upload URL from the backend
-      const { s3_key, upload_url } = await uploadVideo({
-        original_filename: file.name,
-      });
+      const { s3_key, upload_url } = await uploadVideo(presignVideoBody(file));
 
       // PUT the file to the presigned URL (S3)
       const uploadResponse = await fetch(upload_url, {
@@ -99,7 +98,7 @@ export default function CreateMedia() {
           <input
             key={fileInputKey}
             type="file"
-            accept="video/*"
+            accept={videoAccept}
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             required
           />

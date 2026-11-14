@@ -6,8 +6,11 @@ import (
 )
 
 func (r *VideoRepository) DeleteVideo(ctx context.Context, s3Key string) error {
-	exists, err := r.s3.ObjectExists(ctx, s3Key)
+	if !isVideoKey(s3Key) {
+		return errs.NotFound("video", "s3Key", s3Key)
+	}
 
+	exists, err := r.s3.ObjectExists(ctx, s3Key)
 	if err != nil {
 		return err
 	}

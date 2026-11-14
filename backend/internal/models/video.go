@@ -9,6 +9,9 @@ type Video struct {
 // the info needed to generate a unique S3 key and presigned upload URL.
 type PresignUploadRequestBody struct {
 	OriginalFilename string `json:"original_filename" doc:"The filename of the video about to be uploaded"`
+	ContentType      string `json:"content_type" enum:"video/mp4,video/quicktime,video/webm" doc:"MIME type of the video; the upload must send this exact Content-Type header"`
+	// 5 GiB is the largest object a single S3 PUT accepts
+	ContentLength int64 `json:"content_length" minimum:"1" maximum:"5368709120" doc:"Size of the video in bytes; the upload must send exactly this many bytes"`
 }
 
 // what is returned after requesting an upload.
