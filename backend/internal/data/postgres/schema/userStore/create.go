@@ -36,7 +36,6 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 		query,
 		user.Body.Name,
 		supabase_id,
-		user.Body.PfpKey,
 		oneSecondAgo,
 		user.Body.Email,
 		user.Body.ExpiresAt,

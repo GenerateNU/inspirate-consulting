@@ -6,6 +6,7 @@ import (
 
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
+	pfpRepository "inspirate-consulting/internal/data/aws/pfpStore"
 	"inspirate-consulting/internal/data/aws/s3client"
 	videoRepository "inspirate-consulting/internal/data/aws/videoStore"
 )
@@ -19,5 +20,6 @@ func NewRepository(ctx context.Context, s3Config config.S3) *data.Repository {
 	}
 	return &data.Repository{
 		Video: videoRepository.NewVideoRepository(client),
+		Pfp:   pfpRepository.NewPfpRepository(client),
 	}
 }

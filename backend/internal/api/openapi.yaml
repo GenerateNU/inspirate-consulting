@@ -649,11 +649,6 @@ components:
         organization:
           description: organization of the student
           type: string
-        pfp_key:
-          description: pfp key of user
-          type:
-            - string
-            - "null"
         role:
           description: the type of user the counselor would like to create
           enum:
@@ -673,7 +668,6 @@ components:
           type: string
       required:
         - name
-        - pfp_key
         - email
         - role
       type: object
@@ -705,6 +699,11 @@ components:
           type:
             - string
             - "null"
+        pfp_url:
+          description: Presigned, time-limited URL for the user's profile picture, null when they have none
+          type:
+            - string
+            - "null"
         reset_time:
           format: date-time
           type:
@@ -725,6 +724,7 @@ components:
         - role
         - student_id
         - counselor_id
+        - pfp_url
         - id
         - name
         - email
@@ -1681,6 +1681,53 @@ components:
         - cycle_offered
         - essay_progress
       type: object
+    Pfp:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/Pfp.json
+          format: uri
+          readOnly: true
+          type: string
+        download_url:
+          description: A presigned, time-limited URL for the image. Re-fetch GET /user/me if the URL expires.
+          type: string
+        s3_key:
+          description: The profile picture's S3 object key
+          type: string
+      required:
+        - s3_key
+        - download_url
+      type: object
+    PresignPfpUploadRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/PresignPfpUploadRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        content_length:
+          description: Size of the image in bytes, at most 5 MiB; the upload must send exactly this many bytes
+          format: int64
+          maximum: 5242880
+          minimum: 1
+          type: integer
+        content_type:
+          description: MIME type of the image; the upload must send this exact Content-Type header
+          enum:
+            - image/jpeg
+            - image/png
+            - image/webp
+          type: string
+      required:
+        - content_type
+        - content_length
+      type: object
     PresignUploadRequestBody:
       additionalProperties: false
       properties:
@@ -1726,7 +1773,7 @@ components:
           description: The S3 key/path to store elsewhere, e.g. in a media table
           type: string
         upload_url:
-          description: A presigned URL the client PUTs the raw video bytes to
+          description: A presigned URL the client PUTs the raw file bytes to
           type: string
       required:
         - s3_key
@@ -2397,6 +2444,23 @@ components:
         - category
         - application_status
       type: object
+    UpdatePfpRequestBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdatePfpRequestBody.json
+          format: uri
+          readOnly: true
+          type: string
+        s3_key:
+          description: The s3_key returned by PUT /user/pfp, after the image was uploaded to its upload_url
+          minLength: 1
+          type: string
+      required:
+        - s3_key
+      type: object
     UpdateStatusBody:
       additionalProperties: false
       properties:
@@ -2525,9 +2589,6 @@ components:
           description: Name of the user
           maxLength: 200
           minLength: 1
-          type: string
-        pfp_key:
-          description: pfp key of user
           type: string
       type: object
     User:
@@ -4867,7 +4928,7 @@ paths:
         - Todo Items
   /user:
     patch:
-      description: Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
+      description: Update the authenticated user's name. Fields left out of the request are not changed. Use /user/pfp to change the profile picture.
       operationId: update-user
       requestBody:
         content:
@@ -4972,6 +5033,69 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CurrentUser"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+  /user/pfp:
+    delete:
+      description: Remove the logged-in user's profile picture.
+      operationId: delete-pfp
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+    patch:
+      description: Save an uploaded image as the logged-in user's profile picture. The previous picture is deleted.
+      operationId: update-pfp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePfpRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pfp"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - User
+    put:
+      description: Get a presigned URL to upload a new profile picture. PUT the image to upload_url, then send s3_key to PATCH /user/pfp to save it.
+      operationId: presign-pfp-upload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PresignPfpUploadRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresignUploadResponse"
           description: OK
         default:
           content:

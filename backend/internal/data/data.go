@@ -131,6 +131,8 @@ type UserRepository interface {
 	FetchSessionUserBySupabaseID(ctx context.Context, supabaseID uuid.UUID) (*models.SessionUser, error)
 	UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error
 	UpdateUser(ctx context.Context, id uuid.UUID, input models.UpdateUserBody) (*models.User, error)
+	// sets pfp_key (nil clears it) and returns the updated user and the key it replaced
+	SetPfpKey(ctx context.Context, id uuid.UUID, pfpKey *string) (*models.User, *string, error)
 }
 
 // To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos
@@ -141,6 +143,16 @@ type VideoRepository interface {
 	GetVideo(ctx context.Context, s3Key string) (*models.Video, error)
 	ListVideos(ctx context.Context) ([]models.Video, error)
 	DeleteVideo(ctx context.Context, s3Key string) error
+}
+
+// To represent the methods for interacting with AWS S3 for profile pictures
+// Upload, verify, and delete are scoped to one user's own pfps/{userID}/ keys
+type PfpRepository interface {
+	// generates a unique key under the user's prefix and a presigned PUT URL for it.
+	PresignUpload(ctx context.Context, userID uuid.UUID, input models.PresignPfpUploadRequestBody) (*models.PresignUploadResponse, error)
+	VerifyUpload(ctx context.Context, userID uuid.UUID, s3Key string) error
+	GetDownloadURL(ctx context.Context, s3Key string) (string, error)
+	DeletePfp(ctx context.Context, userID uuid.UUID, s3Key string) error
 }
 
 type MediaRepository interface {
@@ -231,6 +243,7 @@ type Repository struct {
 	MediaAccess                MediaAccessRepository
 	User                       UserRepository
 	Video                      VideoRepository
+	Pfp                        PfpRepository
 	EssayReview                EssayReviewRepository
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository

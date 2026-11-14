@@ -19,6 +19,11 @@ export interface CurrentUser {
   name: string;
   /** @nullable */
   pfp_key: string | null;
+  /**
+     * Presigned, time-limited URL for the user's profile picture, null when they have none
+     * @nullable
+     */
+  pfp_url: string | null;
   /** @nullable */
   reset_time: string | null;
   /** Role of the logged-in user */

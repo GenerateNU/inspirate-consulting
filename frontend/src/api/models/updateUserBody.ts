@@ -15,6 +15,4 @@ export interface UpdateUserBody {
      * @maxLength 200
      */
   name?: string;
-  /** pfp key of user */
-  pfp_key?: string;
 }

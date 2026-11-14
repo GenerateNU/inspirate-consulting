@@ -43,6 +43,7 @@ func InitApp(config config.Config) (*App, error) {
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video
+	repo.Pfp = awsRepo.Pfp
 
 	// Similarity search is optional: without Cloudflare credentials, repo.Embedding stays nil
 	embeddingClient, err := embeddingclient.NewEmbeddingClient(config.Cloudflare.AccountID, config.Cloudflare.APIToken)
@@ -168,6 +169,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole, authorizer)
 	SetupUserRoutes(api, repo, &config, verifyRole, accountSQSClient)
 	SetUpVideoRoutes(api, repo, verifyRole)
+	SetUpPfpRoutes(api, repo, verifyRole)
 	SetUpMediaRoutes(api, repo, verifyRole)
 	SetUpMediaAccessRoutes(api, repo, verifyRole, authorizer)
 	SetUpEssayReviewRoutes(api, repo, verifyRole, authorizer)

@@ -40,12 +40,10 @@ func TestCreateUser(t *testing.T) {
 	t.Parallel()
 
 	supabaseID := uuid.New()
-	key := "pfp-key"
 
 	input := models.CreateUserInput{}
 	input.Body.Name = "Aleng123"
 	input.Body.Email = "tt@gmail.com"
-	input.Body.PfpKey = &key
 	input.Body.Role = models.CounselorRole
 
 	db := testutils.SetupTestDB(t)
@@ -63,9 +61,6 @@ func TestCreateUser(t *testing.T) {
 	if output.Body.User.SupabaseID != supabaseID {
 		t.Errorf("expected supabase_id %q, got %q", supabaseID, output.Body.User.SupabaseID)
 	}
-	if output.Body.User.PfpKey == nil || *output.Body.User.PfpKey != key {
-		t.Errorf("expected pfp_key %q, got %v", key, output.Body.User.PfpKey)
-	}
 }
 
 func TestCreateUserNullPfpKey(t *testing.T) {
@@ -79,7 +74,6 @@ func TestCreateUserNullPfpKey(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "NoPfpUser"
 	input.Body.Email = "nopfp@gmail.com"
-	input.Body.PfpKey = nil
 	input.Body.Role = models.CounselorRole
 
 	db := testutils.SetupTestDB(t)

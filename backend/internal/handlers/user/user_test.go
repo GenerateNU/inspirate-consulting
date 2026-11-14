@@ -64,6 +64,15 @@ func (m *mockUserRepository) UpdateUser(ctx context.Context, id uuid.UUID, input
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
+func (m *mockUserRepository) SetPfpKey(ctx context.Context, id uuid.UUID, pfpKey *string) (*models.User, *string, error) {
+	args := m.Called(ctx, id, pfpKey)
+	if args.Get(0) == nil {
+		return nil, nil, args.Error(2)
+	}
+	previous, _ := args.Get(1).(*string)
+	return args.Get(0).(*models.User), previous, args.Error(2)
+}
+
 func TestHandler_CreateUser(t *testing.T) {
 	t.Parallel()
 
@@ -78,7 +87,7 @@ func TestHandler_CreateUser(t *testing.T) {
 		mockRepo.On("CreateUser", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		res, err := handler.CreateUser(context.Background(), input, &supabase.MockSupabase{})
 
 		assert.Error(t, err)
