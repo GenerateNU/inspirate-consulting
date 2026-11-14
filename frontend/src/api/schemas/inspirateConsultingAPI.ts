@@ -890,6 +890,22 @@ export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Ask the LLM a question. The model may search tasks or chats to answer it.
+ */
+
+
+
+export const AskLlmBody = /*#__PURE__*/ zod.object({
+  "input": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.describe('The question to ask the model'))
+})
+
+export const AskLlmResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "answer": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The model\'s response'))
+})
+
+
+/**
  * Fetch all videos, through counselor view
  */
 export const listMediaQueryLimitDefault = 20;
