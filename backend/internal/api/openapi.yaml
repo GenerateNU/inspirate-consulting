@@ -276,6 +276,26 @@ components:
       required:
         - name
       type: object
+    CreateExtracurricularAchievementRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/CreateExtracurricularAchievementRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          minLength: 1
+          type: string
+        entry_date:
+          format: date
+          type: string
+      required:
+        - entry_date
+        - body
+      type: object
     CreateExtracurricularRequest:
       additionalProperties: false
       properties:
@@ -987,6 +1007,13 @@ components:
     ExtracurricularAchievement:
       additionalProperties: false
       properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularAchievement.json
+          format: uri
+          readOnly: true
+          type: string
         body:
           type: string
         created_at:
@@ -1095,6 +1122,13 @@ components:
     ExtracurricularNote:
       additionalProperties: false
       properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularNote.json
+          format: uri
+          readOnly: true
+          type: string
         body:
           type: string
         created_at:
@@ -1115,6 +1149,22 @@ components:
         - body
         - created_at
         - modified_at
+      type: object
+    ExtracurricularNoteRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/ExtracurricularNoteRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          minLength: 1
+          type: string
+      required:
+        - body
       type: object
     FetchCounselorsBody:
       additionalProperties: false
@@ -1963,6 +2013,23 @@ components:
           description: Group to move the essay into, or null to remove it from its group
           type: string
       type: object
+    UpdateExtracurricularAchievementRequest:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateExtracurricularAchievementRequest.json
+          format: uri
+          readOnly: true
+          type: string
+        body:
+          minLength: 1
+          type: string
+        entry_date:
+          format: date
+          type: string
+      type: object
     UpdateExtracurricularRequest:
       additionalProperties: false
       properties:
@@ -1974,20 +2041,38 @@ components:
           readOnly: true
           type: string
         application_description:
-          type: string
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         description:
-          type: string
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         end_date:
+          description: Send null to clear
           format: date
-          type: string
+          type:
+            - string
+            - "null"
         goals:
-          type: string
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         hours_per_week:
+          description: Send null to clear
           format: double
           minimum: 0
-          type: number
+          type:
+            - number
+            - "null"
         leadership_role:
-          type: string
+          description: Send null to clear
+          type:
+            - string
+            - "null"
         name:
           minLength: 1
           type: string
@@ -2009,10 +2094,13 @@ components:
             - investment
           type: string
         weeks_per_year:
+          description: Send null to clear
           format: int32
           maximum: 52
           minimum: 0
-          type: integer
+          type:
+            - integer
+            - "null"
       type: object
     UpdateGlobalCollegeRequestBody:
       additionalProperties: false
@@ -3245,6 +3333,220 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Extracurricular"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/achievements:
+    post:
+      description: Log an achievement on an extracurricular. Students can add to their own; counselors to their assigned students'.
+      operationId: create-extracurricular-achievement
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtracurricularAchievementRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularAchievement"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/achievements/{achievementId}:
+    delete:
+      description: Delete an achievement from an extracurricular. Students can delete their own; counselors their assigned students'.
+      operationId: delete-extracurricular-achievement
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the achievement
+          in: path
+          name: achievementId
+          required: true
+          schema:
+            description: ID of the achievement
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+    patch:
+      description: Edit an achievement on an extracurricular. Omitted fields keep their value.
+      operationId: update-extracurricular-achievement
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the achievement
+          in: path
+          name: achievementId
+          required: true
+          schema:
+            description: ID of the achievement
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtracurricularAchievementRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularAchievement"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/notes:
+    post:
+      description: Add a note to an extracurricular. Students can add to their own; counselors to their assigned students'.
+      operationId: create-extracurricular-note
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtracurricularNoteRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularNote"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+  /extracurriculars/{id}/notes/{noteId}:
+    delete:
+      description: Delete a note from an extracurricular. Students can delete their own; counselors their assigned students'.
+      operationId: delete-extracurricular-note
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the note
+          in: path
+          name: noteId
+          required: true
+          schema:
+            description: ID of the note
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Extracurriculars
+    patch:
+      description: Edit a note on an extracurricular. Students can edit their own; counselors their assigned students'.
+      operationId: update-extracurricular-note
+      parameters:
+        - description: ID of the extracurricular
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the extracurricular
+            format: int64
+            type: integer
+        - description: ID of the note
+          in: path
+          name: noteId
+          required: true
+          schema:
+            description: ID of the note
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtracurricularNoteRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtracurricularNote"
           description: OK
         default:
           content:

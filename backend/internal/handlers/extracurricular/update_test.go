@@ -31,11 +31,11 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		input := &models.UpdateExtracurricularInput{
 			ID: id,
 			Body: models.UpdateExtracurricularRequest{
-				HoursPerWeek:           ptr(12.5),
-				WeeksPerYear:           ptr(int16(48)),
-				Goals:                  ptr("Become captain"),
+				HoursPerWeek:           models.NewNullable(12.5),
+				WeeksPerYear:           models.NewNullable(int16(48)),
+				Goals:                  models.NewNullable("Become captain"),
 				ReadyForApplication:    ptr(true),
-				ApplicationDescription: ptr("Updated blurb"),
+				ApplicationDescription: models.NewNullable("Updated blurb"),
 			},
 		}
 		expected := &models.Extracurricular{
@@ -92,7 +92,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
-		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: ptr("x")}}
+		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 
 		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(auth.WithUserID(context.Background(), userID), id, input)
 
@@ -106,7 +106,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 	t.Run("not found error is propagated", func(t *testing.T) {
 		t.Parallel()
 
-		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: ptr("x")}}
+		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(nil, pgx.ErrNoRows)
 
@@ -119,7 +119,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 	t.Run("repository error is propagated", func(t *testing.T) {
 		t.Parallel()
 
-		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: ptr("x")}}
+		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(nil, errors.New("database error"))
 

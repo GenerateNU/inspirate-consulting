@@ -51,16 +51,16 @@ func TestUpdateExtracurricular_AllFields(t *testing.T) {
 			Name:                   ptr("New name"),
 			Status:                 ptr(models.ExtracurricularStatusHaveDone),
 			Type:                   ptr(models.ExtracurricularTypeMaintenance),
-			Description:            ptr("New description"),
-			LeadershipRole:         ptr("President"),
+			Description:            models.NewNullable("New description"),
+			LeadershipRole:         models.NewNullable("President"),
 			StartDate:              ptr("2023-02-02"),
-			EndDate:                ptr("2025-05-05"),
+			EndDate:                models.NewNullable("2025-05-05"),
 			Organization:           ptr("New org"),
-			HoursPerWeek:           ptr(10.5),
-			WeeksPerYear:           ptr(int16(52)),
-			Goals:                  ptr("New goals"),
+			HoursPerWeek:           models.NewNullable(10.5),
+			WeeksPerYear:           models.NewNullable(int16(52)),
+			Goals:                  models.NewNullable("New goals"),
 			ReadyForApplication:    ptr(true),
-			ApplicationDescription: ptr("New application description"),
+			ApplicationDescription: models.NewNullable("New application description"),
 		},
 	}
 
@@ -162,8 +162,8 @@ func TestUpdateExtracurricular_PartialUpdates(t *testing.T) {
 		got, err := repo.UpdateExtracurricular(ctx, existing.ID, models.UpdateExtracurricularInput{
 			ID: existing.ID,
 			Body: models.UpdateExtracurricularRequest{
-				HoursPerWeek: ptr(6.25),
-				Goals:        ptr("Updated goals"),
+				HoursPerWeek: models.NewNullable(6.25),
+				Goals:        models.NewNullable("Updated goals"),
 			},
 		})
 		if err != nil {
@@ -236,10 +236,10 @@ func TestUpdateExtracurricular_SetFieldsThatWereNull(t *testing.T) {
 	got, err := repo.UpdateExtracurricular(context.Background(), existing.ID, models.UpdateExtracurricularInput{
 		ID: existing.ID,
 		Body: models.UpdateExtracurricularRequest{
-			Description:            ptr("Now described"),
-			WeeksPerYear:           ptr(int16(0)),
-			HoursPerWeek:           ptr(0.0),
-			ApplicationDescription: ptr("Now has an app blurb"),
+			Description:            models.NewNullable("Now described"),
+			WeeksPerYear:           models.NewNullable(int16(0)),
+			HoursPerWeek:           models.NewNullable(0.0),
+			ApplicationDescription: models.NewNullable("Now has an app blurb"),
 		},
 	})
 	if err != nil {
@@ -277,7 +277,7 @@ func TestUpdateExtracurricular_DoesNotTouchOtherRows(t *testing.T) {
 
 	if _, err := repo.UpdateExtracurricular(context.Background(), target.ID, models.UpdateExtracurricularInput{
 		ID:   target.ID,
-		Body: models.UpdateExtracurricularRequest{Goals: ptr("Only for target"), ReadyForApplication: ptr(true)},
+		Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("Only for target"), ReadyForApplication: ptr(true)},
 	}); err != nil {
 		t.Fatalf("UpdateExtracurricular failed: %v", err)
 	}
@@ -305,7 +305,7 @@ func TestUpdateExtracurricular_WeeksPerYearOutOfRange(t *testing.T) {
 
 	_, err := repo.UpdateExtracurricular(context.Background(), existing.ID, models.UpdateExtracurricularInput{
 		ID:   existing.ID,
-		Body: models.UpdateExtracurricularRequest{WeeksPerYear: ptr(int16(60))},
+		Body: models.UpdateExtracurricularRequest{WeeksPerYear: models.NewNullable(int16(60))},
 	})
 	if err == nil {
 		t.Error("expected check constraint error for weeks_per_year=60")
@@ -329,7 +329,7 @@ func TestUpdateExtracurricular_InvalidDates(t *testing.T) {
 		t.Error("expected error for malformed start_date")
 	}
 	if _, err := repo.UpdateExtracurricular(ctx, existing.ID, models.UpdateExtracurricularInput{
-		Body: models.UpdateExtracurricularRequest{EndDate: ptr("tomorrow")},
+		Body: models.UpdateExtracurricularRequest{EndDate: models.NewNullable("tomorrow")},
 	}); err == nil {
 		t.Error("expected error for malformed end_date")
 	}
@@ -350,5 +350,70 @@ func TestUpdateExtracurricular_NotFound(t *testing.T) {
 	})
 	if !errors.Is(err, pgx.ErrNoRows) {
 		t.Errorf("expected pgx.ErrNoRows, got %v", err)
+	}
+}
+
+// An explicit null clears each nullable column; required columns and
+// omitted nullable columns are left alone.
+func TestUpdateExtracurricular_NullClearsNullableFields(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, db := setupTestRepo(t)
+	existing := createTestExtracurricular(t, repo, uuid.NewString(), createTestUser(t, db), fullCreateInput())
+
+	got, err := repo.UpdateExtracurricular(context.Background(), existing.ID, models.UpdateExtracurricularInput{
+		ID: existing.ID,
+		Body: models.UpdateExtracurricularRequest{
+			Description:            models.Null[string](),
+			LeadershipRole:         models.Null[string](),
+			EndDate:                models.Null[string](),
+			HoursPerWeek:           models.Null[float64](),
+			WeeksPerYear:           models.Null[int16](),
+			Goals:                  models.Null[string](),
+			ApplicationDescription: models.Null[string](),
+		},
+	})
+	if err != nil {
+		t.Fatalf("UpdateExtracurricular failed: %v", err)
+	}
+
+	if got.Description != nil || got.LeadershipRole != nil || got.EndDate != nil ||
+		got.HoursPerWeek != nil || got.WeeksPerYear != nil || got.Goals != nil ||
+		got.ApplicationDescription != nil {
+		t.Errorf("nullable fields not cleared: %+v", *got)
+	}
+	if got.Name != existing.Name || got.Organization != existing.Organization ||
+		!got.StartDate.Equal(existing.StartDate) || got.ReadyForApplication != existing.ReadyForApplication {
+		t.Errorf("required fields changed:\nbefore %+v\nafter  %+v", existing, *got)
+	}
+}
+
+// Clearing one field leaves the other nullable fields untouched.
+func TestUpdateExtracurricular_ClearOnlyEndDate(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, db := setupTestRepo(t)
+	existing := createTestExtracurricular(t, repo, uuid.NewString(), createTestUser(t, db), fullCreateInput())
+
+	got, err := repo.UpdateExtracurricular(context.Background(), existing.ID, models.UpdateExtracurricularInput{
+		ID:   existing.ID,
+		Body: models.UpdateExtracurricularRequest{EndDate: models.Null[string]()},
+	})
+	if err != nil {
+		t.Fatalf("UpdateExtracurricular failed: %v", err)
+	}
+	if got.EndDate != nil {
+		t.Errorf("EndDate = %v, want nil", *got.EndDate)
+	}
+	if got.Goals == nil || *got.Goals != *existing.Goals ||
+		got.HoursPerWeek == nil || *got.HoursPerWeek != *existing.HoursPerWeek ||
+		got.Description == nil || *got.Description != *existing.Description {
+		t.Errorf("other nullable fields changed:\nbefore %+v\nafter  %+v", existing, *got)
 	}
 }

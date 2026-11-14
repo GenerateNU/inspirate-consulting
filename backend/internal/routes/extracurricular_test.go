@@ -319,11 +319,12 @@ func TestRoute_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("UpdateExtracurricular", mock.Anything, int64(7), mock.MatchedBy(func(in models.UpdateExtracurricularInput) bool {
 			b := in.Body
 			return in.ID == 7 && b.Name == nil &&
-				b.HoursPerWeek != nil && *b.HoursPerWeek == 9.5 &&
-				b.WeeksPerYear != nil && *b.WeeksPerYear == 50 &&
-				b.Goals != nil && *b.Goals == "New goals" &&
+				b.HoursPerWeek == models.NewNullable(9.5) &&
+				b.WeeksPerYear == models.NewNullable(int16(50)) &&
+				b.Goals == models.NewNullable("New goals") &&
 				b.ReadyForApplication != nil && *b.ReadyForApplication &&
-				b.ApplicationDescription != nil && *b.ApplicationDescription == "New blurb"
+				b.ApplicationDescription == models.NewNullable("New blurb") &&
+				!b.EndDate.Set && !b.Description.Set
 		})).Return(&models.Extracurricular{
 			ID: 7, Name: "Debate",
 			HoursPerWeek: extracurricularPtr(9.5), WeeksPerYear: extracurricularPtr(int16(50)),
@@ -362,6 +363,37 @@ func TestRoute_UpdateExtracurricular(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, body := doRequest(t, app, http.MethodPatch, "/extracurriculars/7", map[string]any{"ready_for_application": false})
+		assert.Equal(t, http.StatusOK, resp.StatusCode, string(body))
+	})
+
+	t.Run("explicit null on nullable fields reaches the repository as a clear", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("UpdateExtracurricular", mock.Anything, int64(7), mock.MatchedBy(func(in models.UpdateExtracurricularInput) bool {
+			b := in.Body
+			return b.EndDate == models.Null[string]() &&
+				b.Description == models.Null[string]() &&
+				b.LeadershipRole == models.Null[string]() &&
+				b.HoursPerWeek == models.Null[float64]() &&
+				b.WeeksPerYear == models.Null[int16]() &&
+				b.Goals == models.Null[string]() &&
+				b.ApplicationDescription == models.Null[string]() &&
+				b.Name == nil
+		})).Return(&models.Extracurricular{ID: 7}, nil)
+
+		app, err := setupExtracurricularTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doRequest(t, app, http.MethodPatch, "/extracurriculars/7", map[string]any{
+			"end_date":                nil,
+			"description":             nil,
+			"leadership_role":         nil,
+			"hours_per_week":          nil,
+			"weeks_per_year":          nil,
+			"goals":                   nil,
+			"application_description": nil,
+		})
 		assert.Equal(t, http.StatusOK, resp.StatusCode, string(body))
 	})
 

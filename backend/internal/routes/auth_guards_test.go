@@ -130,6 +130,12 @@ var routeTable = []routeAccess{
 	{http.MethodPatch, "/extracurriculars/{id}", anyRole, nil},
 	{http.MethodGet, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodDelete, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPost, "/extracurriculars/{id}/notes", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/extracurriculars/{id}/notes/{noteId}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/extracurriculars/{id}/notes/{noteId}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPost, "/extracurriculars/{id}/achievements", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/extracurriculars/{id}/achievements/{achievementId}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/extracurriculars/{id}/achievements/{achievementId}", guarded, []string{roleStudent, roleCounselor}},
 
 	// chat
 	{http.MethodPost, "/messages", anyRole, nil},

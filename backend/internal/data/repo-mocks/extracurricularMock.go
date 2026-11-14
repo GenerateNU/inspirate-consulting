@@ -45,6 +45,66 @@ func (_m *ExtracurricularRepository) CreateExtracurricular(ctx context.Context, 
 	return r0, r1
 }
 
+// CreateExtracurricularAchievement provides a mock function with given fields: ctx, extracurricularID, input
+func (_m *ExtracurricularRepository) CreateExtracurricularAchievement(ctx context.Context, extracurricularID int64, input models.CreateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error) {
+	ret := _m.Called(ctx, extracurricularID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateExtracurricularAchievement")
+	}
+
+	var r0 *models.ExtracurricularAchievement
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.CreateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)); ok {
+		return rf(ctx, extracurricularID, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.CreateExtracurricularAchievementRequest) *models.ExtracurricularAchievement); ok {
+		r0 = rf(ctx, extracurricularID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ExtracurricularAchievement)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, models.CreateExtracurricularAchievementRequest) error); ok {
+		r1 = rf(ctx, extracurricularID, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateExtracurricularNote provides a mock function with given fields: ctx, extracurricularID, input
+func (_m *ExtracurricularRepository) CreateExtracurricularNote(ctx context.Context, extracurricularID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error) {
+	ret := _m.Called(ctx, extracurricularID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateExtracurricularNote")
+	}
+
+	var r0 *models.ExtracurricularNote
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)); ok {
+		return rf(ctx, extracurricularID, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, models.ExtracurricularNoteRequest) *models.ExtracurricularNote); ok {
+		r0 = rf(ctx, extracurricularID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ExtracurricularNote)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, models.ExtracurricularNoteRequest) error); ok {
+		r1 = rf(ctx, extracurricularID, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteExtracurricular provides a mock function with given fields: ctx, id, studentID
 func (_m *ExtracurricularRepository) DeleteExtracurricular(ctx context.Context, id int64, studentID string) error {
 	ret := _m.Called(ctx, id, studentID)
@@ -56,6 +116,42 @@ func (_m *ExtracurricularRepository) DeleteExtracurricular(ctx context.Context, 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
 		r0 = rf(ctx, id, studentID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteExtracurricularAchievement provides a mock function with given fields: ctx, extracurricularID, achievementID
+func (_m *ExtracurricularRepository) DeleteExtracurricularAchievement(ctx context.Context, extracurricularID int64, achievementID int64) error {
+	ret := _m.Called(ctx, extracurricularID, achievementID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteExtracurricularAchievement")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = rf(ctx, extracurricularID, achievementID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteExtracurricularNote provides a mock function with given fields: ctx, extracurricularID, noteID
+func (_m *ExtracurricularRepository) DeleteExtracurricularNote(ctx context.Context, extracurricularID int64, noteID int64) error {
+	ret := _m.Called(ctx, extracurricularID, noteID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteExtracurricularNote")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = rf(ctx, extracurricularID, noteID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -146,6 +242,66 @@ func (_m *ExtracurricularRepository) UpdateExtracurricular(ctx context.Context, 
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, models.UpdateExtracurricularInput) error); ok {
 		r1 = rf(ctx, id, extracurricular)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateExtracurricularAchievement provides a mock function with given fields: ctx, extracurricularID, achievementID, input
+func (_m *ExtracurricularRepository) UpdateExtracurricularAchievement(ctx context.Context, extracurricularID int64, achievementID int64, input models.UpdateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error) {
+	ret := _m.Called(ctx, extracurricularID, achievementID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateExtracurricularAchievement")
+	}
+
+	var r0 *models.ExtracurricularAchievement
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64, models.UpdateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)); ok {
+		return rf(ctx, extracurricularID, achievementID, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64, models.UpdateExtracurricularAchievementRequest) *models.ExtracurricularAchievement); ok {
+		r0 = rf(ctx, extracurricularID, achievementID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ExtracurricularAchievement)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, int64, models.UpdateExtracurricularAchievementRequest) error); ok {
+		r1 = rf(ctx, extracurricularID, achievementID, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateExtracurricularNote provides a mock function with given fields: ctx, extracurricularID, noteID, input
+func (_m *ExtracurricularRepository) UpdateExtracurricularNote(ctx context.Context, extracurricularID int64, noteID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error) {
+	ret := _m.Called(ctx, extracurricularID, noteID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateExtracurricularNote")
+	}
+
+	var r0 *models.ExtracurricularNote
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64, models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)); ok {
+		return rf(ctx, extracurricularID, noteID, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64, models.ExtracurricularNoteRequest) *models.ExtracurricularNote); ok {
+		r0 = rf(ctx, extracurricularID, noteID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ExtracurricularNote)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, int64, models.ExtracurricularNoteRequest) error); ok {
+		r1 = rf(ctx, extracurricularID, noteID, input)
 	} else {
 		r1 = ret.Error(1)
 	}

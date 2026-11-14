@@ -60,8 +60,8 @@ func createTestExtracurricular(t *testing.T, repo *ExtracurricularRepository, st
 
 func ptr[T any](v T) *T { return &v }
 
-// insertAchievement adds an achievement row directly, since the store has no
-// create method for achievements, and returns its id.
+// insertAchievement adds an achievement row directly, bypassing the store, and
+// returns its id.
 func insertAchievement(t *testing.T, db *pgxpool.Pool, extracurricularID int64, entryDate, body string) int64 {
 	t.Helper()
 
