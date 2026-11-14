@@ -302,7 +302,10 @@ function SchoolDetailsBody({ app }: { app: PersonalCollegeApplication }) {
 export default function SchoolDetails() {
   const id = Number(useParams().id);
   const navigate = useNavigate();
-  const applicationsQuery = useListPersonalCollegeApplications();
+  const isStudent = useAuthContext().role === "student";
+  const applicationsQuery = useListPersonalCollegeApplications(undefined, {
+    query: { enabled: isStudent },
+  });
   const app = applicationsQuery.data?.find(
     (application) => application.id === id,
   );
@@ -312,7 +315,13 @@ export default function SchoolDetails() {
   const college = collegeQuery.data;
 
   let body;
-  if (applicationsQuery.isLoading) {
+  if (!isStudent) {
+    body = (
+      <p className="font-host text-sm">
+        School Details is for students. Log in as a student to see it.
+      </p>
+    );
+  } else if (applicationsQuery.isLoading) {
     body = <p className="font-host text-sm">Loading...</p>;
   } else if (applicationsQuery.error) {
     body = (

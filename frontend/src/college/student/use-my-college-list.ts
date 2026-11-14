@@ -14,6 +14,7 @@ import {
   type GlobalCollege,
   type PersonalCollegeApplication,
 } from "../../api/models";
+import { useAuthContext } from "@/contexts/use-auth-context";
 import { cycleCloseDate, findCycle } from "../utils/shared";
 
 export const sortOptions = [
@@ -52,12 +53,17 @@ export function useMyCollegeList() {
   const [pendingRemoval, setPendingRemoval] =
     useState<PersonalCollegeApplication | null>(null);
 
+  // only students have a list; a counselor calling this without student_id gets a 400
+  const isStudent = useAuthContext().role === "student";
+
   const {
     data: applicationsData,
     error,
     isLoading,
     refetch,
-  } = useListPersonalCollegeApplications();
+  } = useListPersonalCollegeApplications(undefined, {
+    query: { enabled: isStudent },
+  });
 
   const { data: collegesData, isLoading: collegesLoading } =
     useListGlobalColleges();
@@ -205,7 +211,8 @@ export function useMyCollegeList() {
 
   return {
     // loading the list
-    isLoading: isLoading || collegesLoading,
+    isStudent,
+    isLoading: isStudent && (isLoading || collegesLoading),
     error,
 
     // what's on the list

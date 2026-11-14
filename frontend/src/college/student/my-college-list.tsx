@@ -44,6 +44,16 @@ export default function MyCollegeList() {
   const list = useMyCollegeList();
   const [addOpen, setAddOpen] = useState(false);
 
+  if (!list.isStudent) {
+    return (
+      <MyListShell>
+        <p className="font-host text-sm text-dark-greyish-brown">
+          My List is for students. Log in as a student to see your list.
+        </p>
+      </MyListShell>
+    );
+  }
+
   if (list.isLoading) {
     return (
       <MyListShell>
