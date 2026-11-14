@@ -9,6 +9,7 @@ import (
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -106,11 +107,13 @@ func TestRoute_RevokeMediaAccess(t *testing.T) {
 	t.Parallel()
 
 	accessID := uuid.NewString()
+	studentID := uuid.New()
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewMediaAccessRepository(t)
+		mockRepo.On("GetMediaAccessStudentID", mock.Anything, accessID).Return(studentID, nil)
 		mockRepo.On("RevokeMediaAccess", mock.Anything, accessID).Return(nil)
 
 		app, err := setupMediaAccessTestApp(mockRepo)
@@ -126,6 +129,7 @@ func TestRoute_RevokeMediaAccess(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewMediaAccessRepository(t)
+		mockRepo.On("GetMediaAccessStudentID", mock.Anything, accessID).Return(studentID, nil)
 		mockRepo.On("RevokeMediaAccess", mock.Anything, accessID).
 			Return(errors.New("database error"))
 
@@ -134,6 +138,21 @@ func TestRoute_RevokeMediaAccess(t *testing.T) {
 
 		resp, _ := doRequest(t, app, http.MethodDelete, "/media-access/"+accessID, nil)
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		// RevokeMediaAccess should NOT be called when the media access row does not exist
+		mockRepo := mocks.NewMediaAccessRepository(t)
+		mockRepo.On("GetMediaAccessStudentID", mock.Anything, accessID).
+			Return(uuid.Nil, errs.NotFound("media_access", "id", accessID))
+
+		app, err := setupMediaAccessTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodDelete, "/media-access/"+accessID, nil)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
 

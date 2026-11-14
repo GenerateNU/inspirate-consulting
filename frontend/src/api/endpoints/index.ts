@@ -1,3 +1,4 @@
+export * from './activity/activity';
 export * from './chat/chat';
 export * from './counselors/counselors';
 export * from './essay-groups/essay-groups';
@@ -7,6 +8,7 @@ export * from './extracurriculars/extracurriculars';
 export * from './global-colleges/global-colleges';
 export * from './greetings/greetings';
 export * from './health/health';
+export * from './llm/llm';
 export * from './login/login';
 export * from './logout/logout';
 export * from './media/media';

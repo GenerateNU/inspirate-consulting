@@ -10,12 +10,12 @@ import (
 // updates the global college ID, category, and/or deadline of a personal college application entry in the database
 func (h *Handler) UpdatePersonalCollegeApplication(ctx context.Context, id int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error) {
 
-	// validate requested deadline exists
+	// validate the college offers the requested cycle
 	college, err := h.GlobalCollegeRepository.GetGlobalCollege(ctx, input.GlobalCollegeID)
 	if err != nil {
 		return nil, err
 	}
-	err = ValidateApplicationDeadline(college, input.ApplicationType)
+	err = ValidateApplicationCycle(college, input.ApplicationType)
 	if err != nil {
 		return nil, err
 	}

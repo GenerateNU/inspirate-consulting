@@ -205,6 +205,7 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 
 		// completed: true must reach the repository as a non-nil timestamp
 		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).Return(stubStudentID, nil)
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, itemID, mock.MatchedBy(func(at *time.Time) bool {
 			return at != nil
 		})).Return(&models.TodoItem{
@@ -232,6 +233,7 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 
 		// completed: false must reach the repository as a nil timestamp
 		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).Return(stubStudentID, nil)
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, itemID, (*time.Time)(nil)).
 			Return(&models.TodoItem{ID: itemID, TodoDescription: "Request transcripts"}, nil)
 
@@ -252,6 +254,8 @@ func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewTodoItemRepository(t)
+		// the ownership lookup must succeed so the failure comes from the update step
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).Return(stubStudentID, nil)
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, itemID, mock.Anything).
 			Return(nil, errors.New("database error"))
 

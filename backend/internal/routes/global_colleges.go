@@ -23,7 +23,7 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyR
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/colleges",
-		Description: "Create a global college with a name, location, and optional EA/ED/RD deadlines.",
+		Description: "Create a global college with a name, location, and the application cycles it offers (ED, ED2, REA, EA, RD, ROLLING).",
 		Tags:        []string{"Global Colleges"},
 	}, func(ctx context.Context, input *models.CreateGlobalCollegeInput) (*models.CreateGlobalCollegeOutput, error) {
 		created, err := globalCollegeHandler.CreateGlobalCollege(ctx, input.Body)
@@ -69,7 +69,7 @@ func SetUpGlobalCollegeRoutes(api huma.API, repository *data.Repository, verifyR
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPut,
 		Path:        "/colleges/{id}",
-		Description: "Update a global college's details.",
+		Description: "Update a global college's name, location, and application cycles. cycles replaces the full set; applications under a removed cycle are kept and come back with cycle_offered=false.",
 		Tags:        []string{"Global Colleges"},
 	}, func(ctx context.Context, input *models.UpdateGlobalCollegeInput) (*models.UpdateGlobalCollegeOutput, error) {
 		updated, err := globalCollegeHandler.UpdateGlobalCollege(ctx, input.ID, input.Body)

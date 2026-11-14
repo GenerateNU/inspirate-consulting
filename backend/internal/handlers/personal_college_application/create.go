@@ -9,12 +9,12 @@ import (
 
 // CreatePersonalCollegeApplication creates a new personal college application entry in the database
 func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input models.CreatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error) {
-	// validate requested deadline exists
+	// validate the college offers the requested cycle
 	college, err := h.GlobalCollegeRepository.GetGlobalCollege(ctx, input.GlobalCollegeID)
 	if err != nil {
 		return nil, err
 	}
-	err = ValidateApplicationDeadline(college, input.ApplicationType)
+	err = ValidateApplicationCycle(college, input.ApplicationType)
 	if err != nil {
 		return nil, err
 	}

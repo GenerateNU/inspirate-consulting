@@ -5,6 +5,7 @@ import (
 	"time"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	activityRepository "inspirate-consulting/internal/data/postgres/schema/activityStore"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
@@ -21,6 +22,7 @@ import (
 	studentRepository "inspirate-consulting/internal/data/postgres/schema/studentStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
+	vectorRepository "inspirate-consulting/internal/data/postgres/schema/vectorStore"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/pagination"
 
@@ -29,6 +31,11 @@ import (
 )
 
 // For each schema, their interfaces are to be defined here
+type ActivityRepository interface {
+	CreateActivity(ctx context.Context, studentID uuid.UUID, body models.CreateActivityBody) error
+	GetActivitiesForCounselor(ctx context.Context, counselorID uuid.UUID, studentID *uuid.UUID) ([]models.Activity, error)
+}
+
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
@@ -37,6 +44,17 @@ type ExtracurricularRepository interface {
 	CreateExtracurricular(ctx context.Context, studentID string, userID string, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
 	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
 	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
+	GetExtracurricularStudentID(ctx context.Context, id int64) (uuid.UUID, error)
+	GetExtracurricular(ctx context.Context, id int64) (*models.ExtracurricularDetail, error)
+	DeleteExtracurricular(ctx context.Context, id int64, studentID string) error
+
+	CreateExtracurricularNote(ctx context.Context, extracurricularID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)
+	UpdateExtracurricularNote(ctx context.Context, extracurricularID, noteID int64, input models.ExtracurricularNoteRequest) (*models.ExtracurricularNote, error)
+	DeleteExtracurricularNote(ctx context.Context, extracurricularID, noteID int64) error
+
+	CreateExtracurricularAchievement(ctx context.Context, extracurricularID int64, input models.CreateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)
+	UpdateExtracurricularAchievement(ctx context.Context, extracurricularID, achievementID int64, input models.UpdateExtracurricularAchievementRequest) (*models.ExtracurricularAchievement, error)
+	DeleteExtracurricularAchievement(ctx context.Context, extracurricularID, achievementID int64) error
 }
 
 // Essay Repository
@@ -48,12 +66,14 @@ type EssayRepository interface {
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
 	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
 	DeleteEssay(ctx context.Context, essayID uuid.UUID, studentID uuid.UUID) error
+	GetEssayStudentID(ctx context.Context, essayID uuid.UUID) (uuid.UUID, error)
 }
 
 // Essay Group Repository
 type EssayGroupRepository interface {
 	CreateEssayGroup(ctx context.Context, studentID uuid.UUID, group models.CreateEssayGroupBody) (*models.EssayGroups, error)
 	ListEssayGroups(ctx context.Context, studentID uuid.UUID) ([]models.EssayGroups, error)
+	GetEssayGroupStudentID(ctx context.Context, groupID uuid.UUID) (uuid.UUID, error)
 }
 
 // To represent Todo Item schema
@@ -64,6 +84,7 @@ type TodoItemRepository interface {
 	DeleteTodoItem(ctx context.Context, id string) error
 	UpdateTodoItemDescription(ctx context.Context, id string, newDescription string) (*models.TodoItem, error)
 	UpdateTodoItemDeadline(ctx context.Context, id string, newDeadline *time.Time) (*models.TodoItem, error)
+	GetTodoItemStudentID(ctx context.Context, todoItemID string) (uuid.UUID, error)
 }
 
 // To represent the Notification Log schema
@@ -146,6 +167,7 @@ type MediaAccessRepository interface {
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
 	RevokeMediaAccess(ctx context.Context, id string) error
 	ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error)
+	GetMediaAccessStudentID(ctx context.Context, id string) (uuid.UUID, error)
 }
 
 // To represent the Essay Review Transaction schema
@@ -189,10 +211,25 @@ type StudentRepository interface {
 	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
 }
 
+// To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)
+type VectorRepository interface {
+	SearchChatMessages(ctx context.Context, queryEmbedding []float32, userID uuid.UUID, limit int) ([]models.ChatMessageSearchResult, error)
+	SearchTodoItems(ctx context.Context, queryEmbedding []float32, studentIDs []uuid.UUID, limit int) ([]models.TodoItemSearchResult, error)
+}
+
+// Cloudflare client
+type EmbeddingClient interface {
+	// embed stored content for comparison against search prompts
+	Embed(ctx context.Context, text string) ([]float32, error)
+	// embed search prompts for comparison against stored content
+	EmbedQuery(ctx context.Context, query string) ([]float32, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
 	// For each interface, add a field here
+	Activity                   ActivityRepository
 	Greeting                   GreetingRepository
 	Extracurricular            ExtracurricularRepository
 	Essay                      EssayRepository
@@ -211,6 +248,9 @@ type Repository struct {
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository
 	Student                    StudentRepository
+	Vector                     VectorRepository
+	// set in InitApp only when Cloudflare is configured; nil disables similarity search
+	Embedding EmbeddingClient
 }
 
 // Close closes the database connection pool
@@ -228,6 +268,7 @@ func (r *Repository) GetDB() *pgxpool.Pool {
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db:                         db,
+		Activity:                   activityRepository.NewActivityRepository(db),
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
 		Extracurricular:            extracurricularRepository.NewExtracurricularRepository(db),
 		Essay:                      essayRepository.NewEssayRepository(db),
@@ -244,5 +285,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
 		Counselor:                  counselorRepository.NewCounselorRepository(db),
 		Student:                    studentRepository.NewStudentRepository(db),
+		Vector:                     vectorRepository.NewVectorRepository(db),
 	}
 }

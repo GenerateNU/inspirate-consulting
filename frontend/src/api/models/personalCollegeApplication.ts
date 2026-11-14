@@ -5,19 +5,33 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { PersonalCollegeApplicationApplicationStatus } from './personalCollegeApplicationApplicationStatus';
+import type { PersonalCollegeApplicationEssayProgress } from './personalCollegeApplicationEssayProgress';
+import type { PersonalCollegeApplicationInterest } from './personalCollegeApplicationInterest';
 
 export interface PersonalCollegeApplication {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /** Where the student is in submitting this application */
+  application_status: PersonalCollegeApplicationApplicationStatus;
   /** Which deadline the student is applying by: EA, ED, or RD */
   application_type: string;
   /** How the student categorizes this school: safety, target, or reach */
   category: string;
   created_at: string;
+  /** False when the college no longer offers application_type (e.g. a counselor removed it); show a warning */
+  cycle_offered: boolean;
+  /** Computed from the student's non-archived essays for this college: none, some not yet submitted, or all submitted */
+  essay_progress: PersonalCollegeApplicationEssayProgress;
   /** ID of the global college being applied to */
   global_college_id: number;
   /** Unique identifier for the application */
   id: number;
+  /**
+     * How interested the student is in this school, or null if not set
+     * @nullable
+     */
+  interest: PersonalCollegeApplicationInterest;
   /**
      * Student's ranking of this application relative to others, or null if unranked
      * @nullable

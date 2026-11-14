@@ -11,13 +11,24 @@ import type { CreateExtracurricularRequestType } from './createExtracurricularRe
 export interface CreateExtracurricularRequest {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  description: string;
+  application_description?: string;
+  description?: string;
   end_date?: string;
+  goals?: string;
+  /** @minimum 0 */
+  hours_per_week?: number;
   leadership_role?: string;
   /** @minLength 1 */
   name: string;
   organization: string;
+  /** Defaults to false when omitted */
+  ready_for_application?: boolean;
   start_date: string;
   status: CreateExtracurricularRequestStatus;
   type: CreateExtracurricularRequestType;
+  /**
+     * @minimum 0
+     * @maximum 52
+     */
+  weeks_per_year?: number;
 }

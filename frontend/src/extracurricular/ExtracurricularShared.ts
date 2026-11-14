@@ -65,7 +65,7 @@ export function toFormValues(item: Extracurricular): ExtracurricularFormValues {
     status: isStatus(item.status) ? item.status : emptyFormValues.status,
     start_date: toDateInput(item.start_date),
     end_date: toDateInput(item.end_date),
-    description: item.description,
+    description: item.description ?? "",
   };
 }
 

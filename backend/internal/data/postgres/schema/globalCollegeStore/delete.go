@@ -19,7 +19,7 @@ func (r *GlobalCollegeRepository) DeleteGlobalCollege(ctx context.Context, id in
 	commandTag, err := r.db.Exec(ctx, deleteQuery, id)
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		if errors.As(err, &pgErr) && pgErr.Code == pgForeignKeyViolationCode {
 			return errs.BadRequest("cannot delete: this college is still in use")
 		}
 		return err

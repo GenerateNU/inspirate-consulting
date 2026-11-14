@@ -38,7 +38,7 @@ func TestHandler_CreateEssay(t *testing.T) {
 		mockRepo.On("CreateEssay", mock.Anything, studentID, input.Body).Return(nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		res, err := handler.CreateEssay(ctx, input)
 
 		// Verify result
@@ -54,7 +54,7 @@ func TestHandler_CreateEssay(t *testing.T) {
 		mockRepo.On("CreateEssay", mock.Anything, studentID, input.Body).Return(errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		res, err := handler.CreateEssay(ctx, input)
 
 		// Verify error propagation

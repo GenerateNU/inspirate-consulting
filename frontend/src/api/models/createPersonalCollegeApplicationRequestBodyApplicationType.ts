@@ -7,13 +7,16 @@
  */
 
 /**
- * Which deadline the student is applying by
+ * Which application cycle the student is applying by; the college must offer it
  */
 export type CreatePersonalCollegeApplicationRequestBodyApplicationType = typeof CreatePersonalCollegeApplicationRequestBodyApplicationType[keyof typeof CreatePersonalCollegeApplicationRequestBodyApplicationType];
 
 
 export const CreatePersonalCollegeApplicationRequestBodyApplicationType = {
-  EA: 'EA',
   ED: 'ED',
+  ED2: 'ED2',
+  REA: 'REA',
+  EA: 'EA',
   RD: 'RD',
+  ROLLING: 'ROLLING',
 } as const;

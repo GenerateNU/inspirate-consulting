@@ -1,195 +1,105 @@
-import { useState, type ReactNode } from "react";
-import { MapPin, Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 
-import {
-  CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
-  CreatePersonalCollegeApplicationRequestBodyCategory as Category,
-  type GlobalCollege,
-  type PersonalCollegeApplication,
+import type {
+  GlobalCollege,
+  PersonalCollegeApplication,
 } from "../../api/models";
-import { smallButtonClassName } from "../utils/shared";
+import locationPinIcon from "@/assets/college/location-pin.svg";
+import schoolIcon from "@/assets/college/school.svg";
+import trashIcon from "@/assets/college/trash.svg";
+import Tag from "../utils/components/tag";
+import { cycleLabel } from "../utils/shared";
 import {
-  applicationTypes,
-  categories,
-  categoryClassName,
   categoryLabel,
-  deadlineClassName,
-  typeLabel,
+  essayProgressTag,
+  interestLabel,
 } from "./application-labels";
-
-interface TagProps {
-  className: string;
-  children: ReactNode;
-}
-
-function Tag({ className, children }: TagProps) {
-  return (
-    <span className={`rounded-full border px-5 py-0.5 text-sm ${className}`}>
-      {children}
-    </span>
-  );
-}
 
 interface ApplicationCardProps {
   app: PersonalCollegeApplication;
   college: GlobalCollege | undefined;
   collegeName: string;
-  busy: boolean;
-  saving: boolean;
-  isEditing: boolean;
-  isDragging: boolean;
-  draggable: boolean;
-  rankControls: ReactNode;
-  onDragStart: () => void;
-  onDragEnd: () => void;
-  onDrop: () => void;
-  onStartEdit: () => void;
-  onCancelEdit: () => void;
-  onSave: (applicationType: ApplicationType, category: Category) => void;
   onRemove: () => void;
 }
 
-// one application on My List
-// the page owns which card is being edited and all the mutations, the card holds the fields
+// one school on My List; the name opens its School Details page
 export default function ApplicationCard({
   app,
   college,
   collegeName,
-  busy,
-  saving,
-  isEditing,
-  isDragging,
-  draggable,
-  rankControls,
-  onDragStart,
-  onDragEnd,
-  onDrop,
-  onStartEdit,
-  onCancelEdit,
-  onSave,
   onRemove,
 }: ApplicationCardProps) {
-  const [editType, setEditType] = useState<ApplicationType>(ApplicationType.RD);
-  const [editCategory, setEditCategory] = useState<Category>(Category.target);
-
-  const startEditing = () => {
-    setEditType(app.application_type as ApplicationType);
-    setEditCategory(app.category as Category);
-    onStartEdit();
-  };
+  const progress = essayProgressTag[app.essay_progress];
 
   return (
-    <li
-      draggable={draggable}
-      onDragStart={(e) => {
-        e.dataTransfer.setData("text/plain", String(app.id));
-        onDragStart();
-      }}
-      onDragEnd={onDragEnd}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDrop();
-      }}
-      className={`flex items-start gap-4 border border-black px-6 py-8 ${
-        draggable ? "cursor-grab" : ""
-      } ${isDragging ? "opacity-50" : ""}`}
-    >
-      <span className="mt-1 w-8 shrink-0 text-xl text-gray-400">
-        {app.rank ?? "–"}
-      </span>
+    <li className="relative flex min-h-[168px] w-full items-center gap-4 overflow-clip rounded-lg border border-cream bg-white py-6 pr-6 pl-8 shadow-card">
+      <div
+        aria-hidden="true"
+        className="absolute top-[-1px] bottom-[-1px] left-[-1px] w-1.5 bg-mint"
+      />
 
-      <div className="min-w-0 flex-1">
-        {/* TODO: link the name to the application's page once it exists */}
-        <h3 className="text-3xl font-medium">{collegeName}</h3>
+      <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-lightest-green">
+        <div className="relative size-6">
+          <img
+            src={schoolIcon}
+            alt=""
+            width={22}
+            height={21.0009}
+            className="absolute top-px left-px max-w-none"
+          />
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex min-w-0 items-center gap-5">
+          <Link
+            to={`/college-applications/${app.id}`}
+            className="max-w-[560px] truncate font-jakarta text-xl leading-[normal] font-medium text-charcoal hover:underline"
+          >
+            {collegeName}
+          </Link>
+          {progress && <Tag tone={progress.tone}>{progress.label}</Tag>}
+        </div>
+
         {college && (
-          <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
-            <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
+          <p className="flex h-4 items-center gap-px font-host text-[13px] leading-4 tracking-[0.5px] text-warm-grey">
+            <img
+              src={locationPinIcon}
+              alt=""
+              width={16}
+              height={16}
+              className="shrink-0"
+            />
             {college.school_location}
           </p>
         )}
 
-        {isEditing ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <select
-              aria-label="Application type"
-              value={editType}
-              onChange={(e) => setEditType(e.target.value as ApplicationType)}
-              className={`rounded-full border px-3 py-0.5 text-sm ${deadlineClassName}`}
-            >
-              {applicationTypes.map((type) => (
-                <option key={type} value={type}>
-                  {typeLabel(type)}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="Category"
-              value={editCategory}
-              onChange={(e) => setEditCategory(e.target.value as Category)}
-              className={`rounded-full border px-3 py-0.5 text-sm ${categoryClassName[editCategory]}`}
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {categoryLabel(category)}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Tag className={deadlineClassName}>
-              {typeLabel(app.application_type)}
-            </Tag>
-            <Tag className={categoryClassName[app.category] ?? ""}>
-              {categoryLabel(app.category)}
-            </Tag>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Tag tone="blue">{cycleLabel(app.application_type)}</Tag>
+          {app.interest && (
+            <Tag tone="green">{interestLabel(app.interest)}</Tag>
+          )}
+          <Tag tone="yellow">{categoryLabel(app.category)}</Tag>
+        </div>
+
+        {!app.cycle_offered && (
+          <p role="status" className="font-host text-xs text-danger">
+            {collegeName} no longer offers {cycleLabel(app.application_type)}.
+            Open the school to pick another cycle.
+          </p>
         )}
       </div>
 
-      <div className="flex shrink-0 flex-col items-end gap-2">
-        {isEditing ? (
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => onSave(editType, editCategory)}
-              className={smallButtonClassName}
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
-            <button
-              type="button"
-              onClick={onCancelEdit}
-              className={smallButtonClassName}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onRemove}
-              className="text-xs text-red-600 hover:underline disabled:opacity-40"
-            >
-              Remove
-            </button>
-          </div>
-        ) : (
-          <>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={startEditing}
-              className={`flex items-center gap-1 ${smallButtonClassName}`}
-            >
-              <Pencil aria-hidden="true" className="h-3 w-3" />
-              Edit
-            </button>
-            {rankControls}
-          </>
-        )}
-      </div>
+      <button
+        type="button"
+        data-slot="icon-button"
+        aria-label={`Remove ${collegeName} from your list`}
+        title="Remove from list"
+        onClick={onRemove}
+        className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-off-white"
+      >
+        <img src={trashIcon} alt="" width={18} height={18} />
+      </button>
     </li>
   );
 }

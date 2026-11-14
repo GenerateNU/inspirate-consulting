@@ -5,10 +5,14 @@ import (
 )
 
 func (h *Handler) RevokeMediaAccess(ctx context.Context, id string) error {
-	err := h.MediaAccessRepository.RevokeMediaAccess(ctx, id)
+	studentID, err := h.MediaAccessRepository.GetMediaAccessStudentID(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	if err := h.Authorizer.CanAccessStudent(ctx, studentID); err != nil {
+		return err
+	}
+
+	return h.MediaAccessRepository.RevokeMediaAccess(ctx, id)
 }

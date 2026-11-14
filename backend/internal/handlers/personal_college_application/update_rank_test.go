@@ -34,7 +34,7 @@ func TestHandler_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, applicationID, intPtr(1)).Return(expected, nil)
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplicationRank(ctx, applicationID, models.UpdatePersonalCollegeApplicationRankRequestBody{
 			Rank: intPtr(1),
 		})
@@ -53,7 +53,7 @@ func TestHandler_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, applicationID, (*int)(nil)).Return(expected, nil)
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplicationRank(ctx, applicationID, models.UpdatePersonalCollegeApplicationRankRequestBody{
 			Rank: nil,
 		})
@@ -69,7 +69,7 @@ func TestHandler_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, applicationID, intPtr(1)).
 			Return(nil, errors.New("personal college application not found"))
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplicationRank(ctx, applicationID, models.UpdatePersonalCollegeApplicationRankRequestBody{
 			Rank: intPtr(1),
 		})
@@ -84,7 +84,7 @@ func TestHandler_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// UpdateApplicationRank is not called without a student id
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplicationRank(context.Background(), applicationID, models.UpdatePersonalCollegeApplicationRankRequestBody{
 			Rank: intPtr(1),
 		})

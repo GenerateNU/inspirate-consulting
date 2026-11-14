@@ -26,7 +26,7 @@ func TestHandler_DeletePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, studentID, applicationID).Return(nil)
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		err := handler.DeletePersonalCollegeApplication(ctx, applicationID)
 
 		assert.NoError(t, err)
@@ -39,7 +39,7 @@ func TestHandler_DeletePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, studentID, applicationID).
 			Return(errors.New("personal college application not found"))
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		err := handler.DeletePersonalCollegeApplication(ctx, applicationID)
 
 		assert.Error(t, err)
@@ -52,7 +52,7 @@ func TestHandler_DeletePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// DeletePersonalCollegeApplication is not called without a student id
 
-		handler := NewHandler(mockPCARepo, nil)
+		handler := NewHandler(mockPCARepo, nil, nil)
 		err := handler.DeletePersonalCollegeApplication(context.Background(), applicationID)
 
 		assert.ErrorIs(t, err, auth.ErrNoStudentID)
