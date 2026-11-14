@@ -14,8 +14,11 @@
   # Production ships only when a GitHub Release is published, the same gate the
   # backend uses -- so Git pushes to main must not auto-publish the frontend.
   # `ignore` cannot be scoped per context, so it branches on $CONTEXT itself:
-  # exit 0 skips the build. Deploy previews return non-zero and build normally.
-  ignore = "[ \"$CONTEXT\" = \"production\" ]"
+  # exit 0 skips the build. Deploy previews build only when frontend/ changed
+  # since the last build (Netlify's own default, which a custom `ignore`
+  # replaces), so backend-only pushes don't spend a deploy. If the cached
+  # commit is missing, git diff errors and the preview builds.
+  ignore = "[ \"$CONTEXT\" = \"production\" ] || git diff --quiet \"$CACHED_COMMIT_REF\" \"$COMMIT_REF\" -- ."
 
 [build.environment]
   # Matches the bun that wrote frontend/bun.lock (lockfileVersion 1).
