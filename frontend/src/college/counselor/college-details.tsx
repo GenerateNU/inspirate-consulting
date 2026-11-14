@@ -10,7 +10,7 @@ import { cycleDateLabel, cycleLabel } from "../utils/shared";
 import CyclesEditor, { editorCycleOrder } from "./cycles-editor";
 import { useCollegeEditForm } from "./use-college-edit-form";
 
-const primaryButtonClassName =
+export const primaryButtonClassName =
   "rounded-lg bg-dark-green px-4 py-2 font-host text-xs leading-[normal] text-white hover:bg-dark-green/90 disabled:cursor-not-allowed disabled:opacity-50";
 const secondaryButtonClassName =
   "rounded-[7px] border border-greyish-brown bg-off-white px-[21px] py-[7px] font-host text-xs leading-[18px] text-dark-greyish-brown hover:bg-white disabled:cursor-not-allowed disabled:opacity-50";
@@ -146,14 +146,15 @@ function TextField({
   );
 }
 
-function SchoolEditor({
+// the add/edit form from the hi-fi; college is null when adding a new school
+export function SchoolEditor({
   college,
   onSaved,
-  onExit,
+  onDiscard,
 }: {
-  college: GlobalCollege;
-  onSaved: () => Promise<unknown>;
-  onExit: () => void;
+  college: GlobalCollege | null;
+  onSaved: (saved: GlobalCollege) => Promise<unknown> | void;
+  onDiscard: () => void;
 }) {
   const form = useCollegeEditForm(college, onSaved);
 
@@ -162,21 +163,18 @@ function SchoolEditor({
       className="contents"
       onSubmit={(e) => {
         e.preventDefault();
-        form.save(onExit);
+        form.save();
       }}
     >
       <Header
-        title={college.school_name}
+        title={college?.school_name ?? "Add College"}
         actions={
           <>
             <button
               type="button"
               data-slot="secondary-action"
               disabled={form.saving}
-              onClick={() => {
-                form.discard();
-                onExit();
-              }}
+              onClick={onDiscard}
               className={secondaryButtonClassName}
             >
               Discard
@@ -206,7 +204,7 @@ function SchoolEditor({
               type="button"
               data-slot="secondary-action"
               disabled={form.saving}
-              onClick={() => form.save(onExit, true)}
+              onClick={() => form.save(true)}
               className={secondaryButtonClassName}
             >
               Save anyway
@@ -284,8 +282,11 @@ export default function CounselorCollegeDetails() {
       <SchoolEditor
         key={college.updated_at}
         college={college}
-        onSaved={refetch}
-        onExit={() => setEditing(false)}
+        onSaved={async () => {
+          await refetch();
+          setEditing(false);
+        }}
+        onDiscard={() => setEditing(false)}
       />
     );
   } else {
@@ -311,6 +312,16 @@ export default function CounselorCollegeDetails() {
     );
   }
 
+  return <SchoolPageFrame editing={editing}>{content}</SchoolPageFrame>;
+}
+
+export function SchoolPageFrame({
+  editing,
+  children,
+}: {
+  editing: boolean;
+  children: ReactNode;
+}) {
   return (
     <div
       className={cn(
@@ -318,7 +329,7 @@ export default function CounselorCollegeDetails() {
         editing ? "gap-[47px]" : "gap-5",
       )}
     >
-      {content}
+      {children}
     </div>
   );
 }

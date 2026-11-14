@@ -1,7 +1,10 @@
 import { useState } from "react";
 
 import type { ApiError } from "../../api/client";
-import { useUpdateGlobalCollege } from "../../api/endpoints";
+import {
+  useCreateGlobalCollege,
+  useUpdateGlobalCollege,
+} from "../../api/endpoints";
 import type { GlobalCollege } from "../../api/models";
 import {
   cyclesDraftError,
@@ -10,36 +13,31 @@ import {
   type CyclesDraft,
 } from "./cycles-editor";
 
-// fields and save for the counselor's School Details edit mode
+// fields and save for the counselor's add/edit school form.
+// college is null when adding a new one
 export function useCollegeEditForm(
-  college: GlobalCollege,
-  // refetches the college after a save
-  onSaved: () => Promise<unknown>,
+  college: GlobalCollege | null,
+  // runs after a successful save with the saved college (e.g. refetch or navigate)
+  onSaved: (saved: GlobalCollege) => Promise<unknown> | void,
 ) {
-  const [name, setName] = useState(college.school_name);
-  const [location, setLocation] = useState(college.school_location);
+  const [name, setName] = useState(college?.school_name ?? "");
+  const [location, setLocation] = useState(college?.school_location ?? "");
   const [cycles, setCycles] = useState<CyclesDraft>(() =>
-    draftFromCycles(college.cycles),
+    draftFromCycles(college?.cycles),
   );
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const create = useCreateGlobalCollege();
   const update = useUpdateGlobalCollege();
+  const mutation = college ? update : create;
 
-  // 409 means the edit is a near-duplicate of another college
-  const isDuplicateWarning = (update.error as ApiError | null)?.status === 409;
+  // 409 means the school is a near-duplicate of another college
+  const isDuplicateWarning =
+    (mutation.error as ApiError | null)?.status === 409;
 
-  // back to the saved values
-  const discard = () => {
-    setName(college.school_name);
-    setLocation(college.school_location);
-    setCycles(draftFromCycles(college.cycles));
-    setValidationError(null);
-    update.reset();
-  };
-
-  // saves, refetches, then calls onDone (e.g. to leave edit mode)
-  const save = (onDone: () => void, confirmDuplicate = false) => {
-    update.reset();
+  // saves, then calls onSaved with the result
+  const save = (confirmDuplicate = false) => {
+    mutation.reset();
     const problem =
       !name.trim() || !location.trim()
         ? "School name and location are required."
@@ -47,24 +45,20 @@ export function useCollegeEditForm(
     setValidationError(problem);
     if (problem) return;
 
-    update.mutate(
-      {
-        id: college.id,
-        data: {
-          school_name: name.trim(),
-          school_location: location.trim(),
-          // the full set: cycles left out are removed
-          cycles: cyclesFromDraft(cycles),
-          confirm_duplicate: confirmDuplicate,
-        },
-      },
-      {
-        onSuccess: async () => {
-          await onSaved();
-          onDone();
-        },
-      },
-    );
+    const data = {
+      school_name: name.trim(),
+      school_location: location.trim(),
+      // the full set: on edit, cycles left out are removed
+      cycles: cyclesFromDraft(cycles),
+      confirm_duplicate: confirmDuplicate,
+    };
+    const handlers = { onSuccess: (saved: GlobalCollege) => onSaved(saved) };
+
+    if (college) {
+      update.mutate({ id: college.id, data }, handlers);
+    } else {
+      create.mutate({ data }, handlers);
+    }
   };
 
   // any edit clears the last "fix this first" message
@@ -82,11 +76,10 @@ export function useCollegeEditForm(
     setLocation: edited(setLocation),
     cycles,
     setCycles: edited(setCycles),
-    discard,
     save,
-    saving: update.isPending,
+    saving: mutation.isPending,
     validationError,
     isDuplicateWarning,
-    error: isDuplicateWarning ? null : update.error,
+    error: isDuplicateWarning ? null : mutation.error,
   };
 }

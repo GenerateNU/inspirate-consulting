@@ -13,6 +13,7 @@ import EditExtracurricular from "./extracurricular/EditExtracurricular";
 import Essay from "./essays/essays";
 import CounselorCollegeList from "./college/counselor/college-list.tsx";
 import CounselorCollegeDetails from "./college/counselor/college-details.tsx";
+import CounselorAddCollege from "./college/counselor/add-college.tsx";
 import CounselorStudentCollegeList from "./college/counselor/student-college-list.tsx";
 import MyCollegeList from "./college/student/my-college-list";
 import SchoolDetails from "./college/student/school-details";
@@ -83,6 +84,10 @@ createRoot(document.getElementById("root")!).render(
               <Route
                 path="/counselor-college-list"
                 element={<CounselorCollegeList />}
+              />
+              <Route
+                path="/counselor-college-list/new"
+                element={<CounselorAddCollege />}
               />
               <Route
                 path="/counselor-college-list/:id"

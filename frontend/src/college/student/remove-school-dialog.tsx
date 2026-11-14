@@ -11,6 +11,8 @@ interface RemoveSchoolDialogProps {
   collegeName: string | null;
   removing: boolean;
   error: unknown;
+  // defaults to the student's "removed from your list" wording
+  description?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -20,6 +22,7 @@ export default function RemoveSchoolDialog({
   collegeName,
   removing,
   error,
+  description = "It will be removed from your list, along with the essays you started for it.",
   onCancel,
   onConfirm,
 }: RemoveSchoolDialogProps) {
@@ -37,8 +40,7 @@ export default function RemoveSchoolDialog({
             Remove {collegeName}?
           </DialogTitle>
           <DialogDescription className="font-host text-sm leading-5 text-[#575c57]">
-            It will be removed from your list, along with the essays you started
-            for it.
+            {description}
           </DialogDescription>
           {error != null && (
             <p role="alert" className="font-host text-sm text-danger">

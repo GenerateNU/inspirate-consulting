@@ -1,84 +1,131 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { errorMessage } from "../../api/client";
-import { useDeleteGlobalCollege } from "../../api/endpoints";
+import {
+  useDeleteGlobalCollege,
+  useListGlobalColleges,
+} from "../../api/endpoints";
 import type { GlobalCollege } from "../../api/models";
-import CollegeSearch from "../utils/college-search";
-import CircleButton from "../utils/components/circle-button";
-import CollegeCard from "../utils/components/college-card";
-import { primaryButtonClassName } from "../utils/shared";
-import { useCollegeSearch } from "../utils/use-college-search";
-import AddCollegeModal from "./add-college-modal";
+import trashIcon from "@/assets/college/trash.svg";
+import RemoveSchoolDialog from "../student/remove-school-dialog";
+import SchoolCard from "../utils/components/school-card";
+import Tag from "../utils/components/tag";
+import { cycleLabel } from "../utils/shared";
+import { editorCycleOrder } from "./cycles-editor";
+import { primaryButtonClassName } from "./college-details";
 
+// counselor's "Colleges" page: every global college with the cycles it offers
 export default function CounselorCollegeList() {
-  const search = useCollegeSearch();
-
+  const collegesQuery = useListGlobalColleges();
   const deleteCollege = useDeleteGlobalCollege();
+  const [pendingDelete, setPendingDelete] = useState<GlobalCollege | null>(
+    null,
+  );
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  const colleges = [...(collegesQuery.data ?? [])].sort((a, b) =>
+    a.school_name.localeCompare(b.school_name),
+  );
 
-  // delete a college, then refetch to show the updated list
-  const handleDelete = (college: GlobalCollege) => {
-    if (!window.confirm(`Delete ${college.school_name}?`)) return;
-
-    deleteCollege.reset();
-
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
     deleteCollege.mutate(
-      { id: college.id },
-      { onSuccess: () => search.refetch() },
+      { id: pendingDelete.id },
+      {
+        onSuccess: async () => {
+          await collegesQuery.refetch();
+          setPendingDelete(null);
+        },
+      },
     );
   };
 
-  return (
-    <>
-      <CollegeSearch
-        title="Global Colleges"
-        search={search}
-        renderCollege={(college) => (
-          <CollegeCard
+  let body;
+  if (collegesQuery.isLoading) {
+    body = <p className="font-host text-sm">Loading...</p>;
+  } else if (collegesQuery.error) {
+    body = (
+      <p className="font-host text-sm">
+        Error: {errorMessage(collegesQuery.error)}
+      </p>
+    );
+  } else if (colleges.length === 0) {
+    body = (
+      <p className="font-host text-sm text-dark-greyish-brown">
+        No colleges yet. Choose Add College to add one.
+      </p>
+    );
+  } else {
+    body = (
+      <ul className="flex w-full flex-col gap-5">
+        {colleges.map((college) => (
+          <SchoolCard
             key={college.id}
-            college={college}
+            name={college.school_name}
             detailPath={`/counselor-college-list/${college.id}`}
+            location={college.school_location}
+            tags={
+              (college.cycles ?? []).length === 0 ? (
+                <span className="font-host text-xs text-warm-grey-dark">
+                  No application cycles yet
+                </span>
+              ) : (
+                editorCycleOrder
+                  .filter((cycle) =>
+                    college.cycles?.some((c) => c.cycle === cycle),
+                  )
+                  .map((cycle) => (
+                    <Tag key={cycle} tone="blue">
+                      {cycleLabel(cycle)}
+                    </Tag>
+                  ))
+              )
+            }
             action={
-              <CircleButton
-                label={`Delete ${college.school_name}`}
+              <button
+                type="button"
+                data-slot="icon-button"
+                aria-label={`Delete ${college.school_name}`}
                 title="Delete college"
-                disabled={deleteCollege.isPending}
-                onClick={() => handleDelete(college)}
+                onClick={() => {
+                  deleteCollege.reset();
+                  setPendingDelete(college);
+                }}
+                className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-off-white"
               >
-                <X aria-hidden="true" className="h-4 w-4" />
-              </CircleButton>
+                <img src={trashIcon} alt="" width={18} height={18} />
+              </button>
             }
           />
-        )}
-        notice={
-          deleteCollege.error && (
-            <p role="alert" className="mt-3 text-sm text-red-600">
-              Error: {errorMessage(deleteCollege.error)}
-            </p>
-          )
-        }
-        footer={
-          <>
-            <p className="text-xs">Missing a school?</p>
-            <button
-              type="button"
-              onClick={() => setShowAddModal(true)}
-              className={primaryButtonClassName}
-            >
-              Add a college
-            </button>
-          </>
-        }
-      />
+        ))}
+      </ul>
+    );
+  }
 
-      {showAddModal && (
-        <AddCollegeModal
-          onClose={() => setShowAddModal(false)}
-          onCreated={search.refetch}
-        />
-      )}
-    </>
+  return (
+    <div className="flex min-h-full w-full flex-col gap-5 bg-off-white py-12 pr-20 pl-[58px] max-lg:px-6">
+      <div className="flex w-full items-start gap-9 pl-[59px] max-lg:pl-0">
+        <h1 className="min-w-0 flex-1 font-jakarta text-2xl leading-[normal] font-bold text-charcoal">
+          Colleges
+        </h1>
+        <Link
+          to="/counselor-college-list/new"
+          data-slot="primary-action"
+          className={primaryButtonClassName}
+        >
+          Add College
+        </Link>
+      </div>
+      <div className="flex w-full flex-col pl-[57px] max-lg:pl-0">{body}</div>
+
+      <RemoveSchoolDialog
+        collegeName={pendingDelete?.school_name ?? null}
+        description="It will be removed from the college list. A school that's on a student's list or has essays can't be deleted."
+        removing={deleteCollege.isPending}
+        error={deleteCollege.error}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
+    </div>
   );
 }
