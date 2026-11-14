@@ -40,7 +40,7 @@ func TestHandler_DeleteEssay(t *testing.T) {
 		mockRepo.On("DeleteEssay", mock.Anything, essayID, studentID).Return(nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		err := handler.DeleteEssay(ctx, essayID)
 
 		// Verify result
@@ -57,7 +57,7 @@ func TestHandler_DeleteEssay(t *testing.T) {
 		mockRepo.On("GetEssay", mock.Anything, essayID).Return(essay, nil)
 		mockRepo.On("DeleteEssay", mock.Anything, essayID, studentID).Return(nil)
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		err := handler.DeleteEssay(ctx, essayID)
 
 		assert.NoError(t, err)
@@ -71,7 +71,7 @@ func TestHandler_DeleteEssay(t *testing.T) {
 		mockRepo := mocks.NewEssayRepository(t)
 		mockRepo.On("GetEssay", mock.Anything, essayID).Return(nil, notFound)
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		err := handler.DeleteEssay(context.Background(), essayID)
 
 		// Verify error propagation
@@ -89,7 +89,7 @@ func TestHandler_DeleteEssay(t *testing.T) {
 		mockRepo.On("GetEssay", mock.Anything, essayID).Return(essay, nil)
 		mockRepo.On("DeleteEssay", mock.Anything, essayID, studentID).Return(errors.New("database error"))
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		err := handler.DeleteEssay(ctx, essayID)
 
 		// Verify error propagation

@@ -1,4 +1,4 @@
-package globalCollegeRepository
+epackage globalCollegeRepository
 
 import (
 	"context"

@@ -13,7 +13,7 @@ import (
 )
 
 func SetUpEssayRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
-	essayHandler := essays.NewHandler(repository.Essay, authorizer)
+	essayHandler := essays.NewHandler(repository.Essay, authorizer, repository.EssayGroup)
 
 	// GET route that shows all of a students essay
 	huma.Register(api, huma.Operation{
