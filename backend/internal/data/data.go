@@ -37,6 +37,7 @@ type ExtracurricularRepository interface {
 	CreateExtracurricular(ctx context.Context, studentID string, userID string, extracurricular models.CreateExtracurricularInput) (*models.CreateExtracurricularOutput, error)
 	ListExtracurriculars(ctx context.Context, studentID string) ([]models.Extracurricular, error)
 	UpdateExtracurricular(ctx context.Context, id int64, extracurricular models.UpdateExtracurricularInput) (*models.Extracurricular, error)
+	GetExtracurricularStudentID(ctx context.Context, id int64) (uuid.UUID, error)
 	GetExtracurricular(ctx context.Context, id int64) (*models.ExtracurricularDetail, error)
 	DeleteExtracurricular(ctx context.Context, id int64, studentID string) error
 }

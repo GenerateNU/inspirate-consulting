@@ -61,6 +61,12 @@ func TestCreatePersonalCollegeApplication(t *testing.T) {
 	if created.Rank != nil {
 		t.Error("expected Rank to be null")
 	}
+	if created.Interest != nil {
+		t.Errorf("expected Interest to be null, got %q", *created.Interest)
+	}
+	if created.ApplicationStatus != models.ApplicationStatusNotStarted {
+		t.Errorf("expected ApplicationStatus %q, got %q", models.ApplicationStatusNotStarted, created.ApplicationStatus)
+	}
 }
 
 // to test application creation with an invalid application_type
