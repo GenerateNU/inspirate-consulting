@@ -6,6 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './askLLMInputBody';
+export * from './askLLMOutputBody';
 export * from './assignCounselorInputBody';
 export * from './chatMessage';
 export * from './chatMessagePage';
