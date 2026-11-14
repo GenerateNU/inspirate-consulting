@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Bell,
+  Camera,
   ChevronRight,
   IdCard,
   LogIn,
@@ -18,6 +19,12 @@ type PageOption = {
 };
 
 const accountPages: PageOption[] = [
+  {
+    label: "Profile Picture",
+    description: "Upload or remove your photo",
+    icon: Camera,
+    to: "/profile/picture",
+  },
   {
     label: "Notification Preferences",
     description: "Choose which emails you receive",
