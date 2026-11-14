@@ -178,6 +178,7 @@ mocks:
 	@go run github.com/vektra/mockery/v2@v2.53.7 --name=GreetingRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=greetingMock.go
 	@go run github.com/vektra/mockery/v2@v2.53.7 --name=VideoRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=videoMock.go
 	@go run github.com/vektra/mockery/v2@v2.53.7 --name=EssayRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=essayMock.go
+	@go run github.com/vektra/mockery/v2@v2.53.7 --name=ExtracurricularRepository --dir=internal/data --output=internal/data/repo-mocks --outpkg=mocks --filename=extracurricularMock.go
 	@echo "$(GREEN)Mocks generated in internal/data/repo-mocks/$(NC)"
 
 # ------------------------
