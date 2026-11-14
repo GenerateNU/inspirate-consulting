@@ -47,6 +47,36 @@ func (_m *EssayGroupRepository) CreateEssayGroup(ctx context.Context, studentID 
 	return r0, r1
 }
 
+// GetEssayGroupStudentID provides a mock function with given fields: ctx, groupID
+func (_m *EssayGroupRepository) GetEssayGroupStudentID(ctx context.Context, groupID uuid.UUID) (uuid.UUID, error) {
+	ret := _m.Called(ctx, groupID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEssayGroupStudentID")
+	}
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) (uuid.UUID, error)); ok {
+		return rf(ctx, groupID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) uuid.UUID); ok {
+		r0 = rf(ctx, groupID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, groupID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListEssayGroups provides a mock function with given fields: ctx, studentID
 func (_m *EssayGroupRepository) ListEssayGroups(ctx context.Context, studentID uuid.UUID) ([]models.EssayGroups, error) {
 	ret := _m.Called(ctx, studentID)

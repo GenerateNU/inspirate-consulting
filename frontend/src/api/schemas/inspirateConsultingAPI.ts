@@ -8,6 +8,27 @@
 import * as zod from 'zod/mini';
 
 /**
+ * Get activity across the authenticated counselor's students, newest first. Optionally scope to one student.
+ */
+export const GetActivitiesQueryParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Optional: scope to one student assigned to the caller'))
+})
+
+export const GetActivitiesResponseItem = /*#__PURE__*/ zod.object({
+  "action": /*#__PURE__*/ zod.enum(['added_school', 'removed_school', 'essay_status_changed', 'added_extracurricular', 'removed_extracurricular', 'task_past_due']),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "essay_status": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['Submitted', 'Draft', 'Review', 'Archived'])),
+  "extracurricular_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()),
+  "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "todo_item_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string())
+})
+export const GetActivitiesResponse = /*#__PURE__*/ zod.array(GetActivitiesResponseItem)
+
+
+/**
  * Report whether the API is running.
  */
 export const HealthCheckResponse = /*#__PURE__*/ zod.object({
@@ -886,6 +907,22 @@ export const CreateGreetingBody = /*#__PURE__*/ zod.object({
 export const CreateGreetingResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "greeting": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Greeting message'))
+})
+
+
+/**
+ * Ask the LLM a question. The model may search tasks or chats to answer it.
+ */
+
+
+
+export const AskLlmBody = /*#__PURE__*/ zod.object({
+  "input": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.describe('The question to ask the model'))
+})
+
+export const AskLlmResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "answer": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The model\'s response'))
 })
 
 
@@ -1846,7 +1883,13 @@ export const ListVideosResponse = /*#__PURE__*/ zod.array(ListVideosResponseItem
 /**
  * Upload a new video to the S3 bucket.
  */
+export const uploadVideoBodyContentLengthMax = 5368709120;
+
+
+
 export const UploadVideoBody = /*#__PURE__*/ zod.object({
+  "content_length": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(uploadVideoBodyContentLengthMax)).check(/*#__PURE__*/ zod.describe('Size of the video in bytes; the upload must send exactly this many bytes')),
+  "content_type": /*#__PURE__*/ zod.enum(['video/mp4', 'video/quicktime', 'video/webm']).check(/*#__PURE__*/ zod.describe('MIME type of the video; the upload must send this exact Content-Type header')),
   "original_filename": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The filename of the video about to be uploaded'))
 })
 

@@ -3,15 +3,18 @@ package todoitem
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 	"time"
 
 	mocks "inspirate-consulting/internal/data/repo-mocks"
+	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 // Unit tests for the UpdateTodoItemCompletedAt handler logic without HTTP or database dependencies.
@@ -21,6 +24,7 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 
 	ctx := context.Background()
 	id := uuid.NewString()
+	studentID := uuid.New()
 
 	t.Run("completed true sets completed_at", func(t *testing.T) {
 		t.Parallel()
@@ -34,6 +38,7 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 
 		// completed=true should hand the repository a non-nil, current timestamp
 		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, id, mock.MatchedBy(func(ts *time.Time) bool {
 			return ts != nil && time.Since(*ts) < time.Minute
 		})).Return(expectedOutput, nil)
@@ -59,6 +64,7 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 
 		// completed=false should hand the repository a nil timestamp, which reopens the item
 		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, id, (*time.Time)(nil)).Return(expectedOutput, nil)
 
 		// Execute handler
@@ -76,6 +82,8 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewTodoItemRepository(t)
+		// the ownership lookup must succeed so the failure comes from the update step
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateTodoItemCompletedAt", mock.Anything, id, mock.Anything).Return(nil, errors.New("database error"))
 
 		// Execute handler
@@ -86,6 +94,41 @@ func TestHandler_UpdateTodoItemCompletedAt(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")
+	})
+
+	t.Run("todo item not found", func(t *testing.T) {
+		t.Parallel()
+
+		// a failed ownership lookup must stop the handler before any update
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, id).
+			Return(uuid.Nil, errs.NotFound("todo items", "id", id))
+
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.UpdateTodoItemCompletedAt(ctx, id, true)
+
+		assert.Nil(t, res)
+		var httpErr errs.HTTPError
+		require.ErrorAs(t, err, &httpErr)
+		assert.Equal(t, http.StatusNotFound, httpErr.GetStatus())
+		mockRepo.AssertNotCalled(t, "UpdateTodoItemCompletedAt", mock.Anything, mock.Anything, mock.Anything)
+	})
+
+	t.Run("student cannot update another student's todo item", func(t *testing.T) {
+		t.Parallel()
+
+		// the item belongs to a different student, so the real authorizer must reject it
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, id).Return(uuid.New(), nil)
+
+		handler := NewHandler(mockRepo, realAuthorizer())
+		res, err := handler.UpdateTodoItemCompletedAt(studentRoleCtx(studentID), id, true)
+
+		assert.Nil(t, res)
+		var httpErr errs.HTTPError
+		require.ErrorAs(t, err, &httpErr)
+		assert.Equal(t, http.StatusForbidden, httpErr.GetStatus())
+		mockRepo.AssertNotCalled(t, "UpdateTodoItemCompletedAt", mock.Anything, mock.Anything, mock.Anything)
 	})
 }
 

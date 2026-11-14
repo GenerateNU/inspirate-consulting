@@ -64,7 +64,7 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/essays", guarded, []string{roleStudent}},
 	{http.MethodPatch, "/essays/{essay_id}/status", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/essay-groups/{essay_group_id}/essays", anyRole, nil},
-	{http.MethodPatch, "/essays/{essay_id}/group", anyRole, nil},
+	{http.MethodPatch, "/essays/{essay_id}/group", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPost, "/essay-groups", anyRole, nil},
 	{http.MethodGet, "/students/{student_id}/essay-groups", anyRole, nil},
 	{http.MethodPost, "/reviews", guarded, []string{roleStudent}},
@@ -80,11 +80,17 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
+	// activity
+	{http.MethodGet, "/activity", guarded, []string{roleCounselor}},
+
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
+
+	// llm
+	{http.MethodPost, "/llm/ask", guarded, []string{roleCounselor}},
 
 	// colleges & applications
 	{http.MethodPost, "/colleges", guarded, []string{roleCounselor}},
@@ -311,6 +317,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"POST /colleges",
 		"POST /videos",
 		"DELETE /videos",
+		"GET /activity",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
 		"PUT /colleges/{id}",
@@ -323,6 +330,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"PATCH /todo-items/{id}/description",
 		"DELETE /media-access/{id}",
 		"DELETE /media/{id}",
+		"POST /llm/ask",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",

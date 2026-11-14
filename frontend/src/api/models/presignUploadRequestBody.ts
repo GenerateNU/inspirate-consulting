@@ -5,10 +5,19 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { PresignUploadRequestBodyContentType } from './presignUploadRequestBodyContentType';
 
 export interface PresignUploadRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /**
+     * Size of the video in bytes; the upload must send exactly this many bytes
+     * @minimum 1
+     * @maximum 5368709120
+     */
+  content_length: number;
+  /** MIME type of the video; the upload must send this exact Content-Type header */
+  content_type: PresignUploadRequestBodyContentType;
   /** The filename of the video about to be uploaded */
   original_filename: string;
 }
