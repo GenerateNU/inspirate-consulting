@@ -30,7 +30,7 @@ import {
   NoteRow,
   SectionCard,
   Toggle,
-} from "./EditSections";
+} from "./sections";
 import {
   APPLICATION_WORD_LIMIT,
   categoryLabel,

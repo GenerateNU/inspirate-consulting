@@ -12,9 +12,9 @@ import {
   AchievementsSection,
   NotesSection,
   type AchievementItem,
-  type ItemStore,
+  type SectionItemSource,
   type NoteItem,
-} from "./EditSections";
+} from "./sections";
 import {
   emptyActivityValues,
   toCreateRequestBody,
@@ -27,7 +27,7 @@ export type CreateNotice = { notice: string };
 // as local drafts and posted right after the activity is created.
 function useDraftStore<TItem extends { id: number }, TData>(
   toItem: (data: TData, id: number) => TItem,
-): ItemStore<TItem, TData> {
+): SectionItemSource<TItem, TData> {
   const [items, setItems] = useState<TItem[]>([]);
   const [nextId, setNextId] = useState(1);
   return {

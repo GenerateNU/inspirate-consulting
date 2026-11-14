@@ -15,7 +15,7 @@ import {
   NotesSection,
   useServerAchievements,
   useServerNotes,
-} from "./EditSections";
+} from "./sections";
 import {
   toActivityFormValues,
   toUpdateRequestBody,

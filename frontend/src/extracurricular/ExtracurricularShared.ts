@@ -34,7 +34,6 @@ export const statusLabel = (value: string) =>
 export const toDateInput = (value?: string | null) =>
   value ? value.slice(0, 10) : "";
 
-// "2024 – Present" / "2023 – 2025" / "2024" for the list card's date pill.
 export function dateRangeLabel(item: Extracurricular) {
   const start = item.start_date?.slice(0, 4);
   if (!start) return "";
@@ -43,8 +42,6 @@ export function dateRangeLabel(item: Extracurricular) {
   return end && end !== start ? `${start} – ${end}` : start;
 }
 
-// The create/edit page's main form. Fields are strings so inputs stay
-// controlled; optional ones use "". Notes and achievements save separately.
 export type ActivityFormValues = {
   name: string;
   leadership_role: string;

@@ -27,14 +27,14 @@ import {
   wordCount,
   type ActivityFormValues,
 } from "./ExtracurricularShared";
-import { CategoryIcon, SectionCard, Toggle } from "./EditSections";
+import { CategoryIcon, SectionCard, Toggle } from "./sections";
 
 const FORM_ID = "ec-activity-form";
 
 export const activityPageClass =
   "flex min-h-full flex-1 flex-col gap-4 bg-[#fbfaf7] px-6 py-12 font-host-grotesk md:px-[114px]";
 
-type Props = {
+interface ActivityFormProps {
   title: string;
   // The edit design shows a category icon beside the title; create doesn't.
   showTitleIcon?: boolean;
@@ -52,10 +52,8 @@ type Props = {
   // Notes and achievements save on their own, so each page supplies them.
   achievements: ReactNode;
   notes: ReactNode;
-};
+}
 
-// Shared layout for creating and editing an extracurricular
-// (Figma: Extracurricular - Edit Activity).
 export default function ActivityForm({
   title,
   showTitleIcon = false,
@@ -69,7 +67,7 @@ export default function ActivityForm({
   onSubmit,
   achievements,
   notes,
-}: Props) {
+}: ActivityFormProps) {
   const [values, setValues] = useState(initialValues);
   const [formError, setFormError] = useState<string | null>(null);
 
