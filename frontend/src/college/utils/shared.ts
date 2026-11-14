@@ -14,14 +14,6 @@ export const cycleOptions = [
   { value: Cycle.ROLLING, label: "Rolling Admissions" },
 ] as const;
 
-// TODO(PR 4): legacy shape still imported by the counselor college pages; remove
-// once they edit cycles. Kept so those modules still load at runtime.
-export const deadlineOptions = [
-  { value: Cycle.EA, key: "ea_deadline", label: "Early Action" },
-  { value: Cycle.ED, key: "ed_deadline", label: "Early Decision" },
-  { value: Cycle.RD, key: "rd_deadline", label: "Regular Decision" },
-] as const;
-
 export const cycleLabel = (cycle: string) =>
   cycleOptions.find(({ value }) => value === cycle)?.label ?? cycle;
 

@@ -19,7 +19,10 @@ interface ApplicationCardProps {
   app: PersonalCollegeApplication;
   college: GlobalCollege | undefined;
   collegeName: string;
-  onRemove: () => void;
+  // where the name links; plain text when left out
+  detailPath?: string;
+  // shows the trash button; left out on read-only lists
+  onRemove?: () => void;
 }
 
 // one school on My List; the name opens its School Details page
@@ -27,8 +30,12 @@ export default function ApplicationCard({
   app,
   college,
   collegeName,
+  detailPath,
   onRemove,
 }: ApplicationCardProps) {
+  const nameClassName =
+    "max-w-[560px] truncate font-jakarta text-xl leading-[normal] font-medium text-charcoal";
+
   const progress = essayProgressTag[app.essay_progress];
 
   return (
@@ -52,12 +59,16 @@ export default function ApplicationCard({
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex min-w-0 items-center gap-5">
-          <Link
-            to={`/college-applications/${app.id}`}
-            className="max-w-[560px] truncate font-jakarta text-xl leading-[normal] font-medium text-charcoal hover:underline"
-          >
-            {collegeName}
-          </Link>
+          {detailPath ? (
+            <Link
+              to={detailPath}
+              className={`${nameClassName} hover:underline`}
+            >
+              {collegeName}
+            </Link>
+          ) : (
+            <p className={nameClassName}>{collegeName}</p>
+          )}
           {progress && <Tag tone={progress.tone}>{progress.label}</Tag>}
         </div>
 
@@ -85,21 +96,23 @@ export default function ApplicationCard({
         {!app.cycle_offered && (
           <p role="status" className="font-host text-xs text-danger">
             {collegeName} no longer offers {cycleLabel(app.application_type)}.
-            Open the school to pick another cycle.
+            {onRemove && " Open the school to pick another cycle."}
           </p>
         )}
       </div>
 
-      <button
-        type="button"
-        data-slot="icon-button"
-        aria-label={`Remove ${collegeName} from your list`}
-        title="Remove from list"
-        onClick={onRemove}
-        className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-off-white"
-      >
-        <img src={trashIcon} alt="" width={18} height={18} />
-      </button>
+      {onRemove && (
+        <button
+          type="button"
+          data-slot="icon-button"
+          aria-label={`Remove ${collegeName} from your list`}
+          title="Remove from list"
+          onClick={onRemove}
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-off-white"
+        >
+          <img src={trashIcon} alt="" width={18} height={18} />
+        </button>
+      )}
     </li>
   );
 }

@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { errorMessage, type ApiError } from "../../api/client";
 import { useCreateGlobalCollege } from "../../api/endpoints";
 import Field from "../utils/components/field";
-import {
-  deadlineOptions,
-  inputClassName,
-  primaryButtonClassName,
-  toISODateTime,
-} from "../utils/shared";
+import { inputClassName, primaryButtonClassName } from "../utils/shared";
+import CyclesEditor, {
+  cyclesDraftError,
+  cyclesFromDraft,
+  draftFromCycles,
+  type CyclesDraft,
+} from "./cycles-editor";
 
 // popup form for adding a global college
 interface AddCollegeModalProps {
@@ -22,11 +23,10 @@ export default function AddCollegeModal({
 }: AddCollegeModalProps) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-  const [deadlines, setDeadlines] = useState({
-    ea_deadline: "",
-    ed_deadline: "",
-    rd_deadline: "",
-  });
+  const [cycles, setCycles] = useState<CyclesDraft>(() =>
+    draftFromCycles(null),
+  );
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -43,15 +43,16 @@ export default function AddCollegeModal({
 
   const create = (confirmDuplicate = false) => {
     createCollege.reset();
+    const problem = cyclesDraftError(cycles);
+    setValidationError(problem);
+    if (problem) return;
 
     createCollege.mutate(
       {
         data: {
           school_name: name,
           school_location: location,
-          ea_deadline: toISODateTime(deadlines.ea_deadline),
-          ed_deadline: toISODateTime(deadlines.ed_deadline),
-          rd_deadline: toISODateTime(deadlines.rd_deadline),
+          cycles: cyclesFromDraft(cycles),
           confirm_duplicate: confirmDuplicate,
         },
       },
@@ -68,7 +69,7 @@ export default function AddCollegeModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="m-auto w-full max-w-xl border border-black p-6 backdrop:bg-black/40"
+      className="m-auto w-full max-w-3xl border border-black p-6 backdrop:bg-black/40"
     >
       <form
         onSubmit={(e) => {
@@ -97,22 +98,23 @@ export default function AddCollegeModal({
               className={inputClassName}
             />
           </Field>
-          {deadlineOptions.map(({ value, key, label }) => (
-            <Field key={value} label={`${label} (${value})`}>
-              <input
-                type="date"
-                value={deadlines[key]}
-                onChange={(e) =>
-                  setDeadlines({ ...deadlines, [key]: e.target.value })
-                }
-                className={inputClassName}
-              />
-            </Field>
-          ))}
         </dl>
 
+        <h4 className="mt-6 mb-2 font-host text-sm font-medium">
+          Application cycles &amp; deadlines
+        </h4>
+        <CyclesEditor
+          draft={cycles}
+          disabled={createCollege.isPending}
+          onChange={setCycles}
+        />
+
         {/* The backend's 409 message is developer-facing, so show our own wording */}
-        {isDuplicateWarning ? (
+        {validationError ? (
+          <p role="alert" className="mt-3 text-sm text-red-600">
+            {validationError}
+          </p>
+        ) : isDuplicateWarning ? (
           <p
             role="alert"
             className="mt-3 border border-amber-300 bg-amber-100 p-3 text-sm text-amber-700"

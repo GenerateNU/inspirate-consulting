@@ -13,6 +13,7 @@ import EditExtracurricular from "./extracurricular/EditExtracurricular";
 import Essay from "./essays/essays";
 import CounselorCollegeList from "./college/counselor/college-list.tsx";
 import CounselorCollegeDetails from "./college/counselor/college-details.tsx";
+import CounselorStudentCollegeList from "./college/counselor/student-college-list.tsx";
 import MyCollegeList from "./college/student/my-college-list";
 import SchoolDetails from "./college/student/school-details";
 import UploadVideo from "./video/upload-video";
@@ -126,6 +127,10 @@ createRoot(document.getElementById("root")!).render(
               <Route
                 path="/counselor/students/:studentId/essays"
                 element={<StudentEssays />}
+              />
+              <Route
+                path="/counselor/students/:studentId/colleges"
+                element={<CounselorStudentCollegeList />}
               />
               <Route path="/search" element={<SearchStudents />} />
               <Route path="/assign-task" element={<AssignTaskForm />} />
