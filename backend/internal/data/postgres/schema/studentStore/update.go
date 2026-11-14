@@ -29,7 +29,17 @@ func (r *StudentRepository) UpdateStudent(ctx context.Context, id uuid.UUID, inp
 		input.Organization,
 		input.GPA,
 		input.Interest,
-	).Scan(&Student.ID, &Student.UserID, &Student.Year, &Student.Organization, &Student.GPA, &Student.ReviewBalance, &Student.CounselorID, &Student.Interest)
+		input.HighSchool,
+		input.StandardizedTestScore,
+		input.IntendedMajor,
+		input.IntendedMinor,
+		input.GeographicPreferences,
+	).Scan(
+		&Student.ID, &Student.UserID, &Student.Year, &Student.Organization, &Student.GPA,
+		&Student.ReviewBalance, &Student.CounselorID, &Student.Interest,
+		&Student.HighSchool, &Student.StandardizedTestScore, &Student.IntendedMajor,
+		&Student.IntendedMinor, &Student.GeographicPreferences,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errs.NotFound("student", "id", id.String())

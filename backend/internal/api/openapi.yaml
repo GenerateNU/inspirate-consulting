@@ -1585,11 +1585,27 @@ components:
           type: string
         counselor_id:
           type: string
+        geographic_preferences:
+          type:
+            - string
+            - "null"
         gpa:
           format: int64
           type: integer
+        high_school:
+          type:
+            - string
+            - "null"
         id:
           type: string
+        intended_major:
+          type:
+            - string
+            - "null"
+        intended_minor:
+          type:
+            - string
+            - "null"
         organization:
           type:
             - string
@@ -1597,6 +1613,10 @@ components:
         review_balance:
           format: int64
           type: integer
+        standardized_test_score:
+          type:
+            - string
+            - "null"
         student_interest:
           type:
             - string
@@ -1614,6 +1634,11 @@ components:
         - gpa
         - review_balance
         - counselor_id
+        - high_school
+        - standardized_test_score
+        - intended_major
+        - intended_minor
+        - geographic_preferences
       type: object
     StudentListItem:
       additionalProperties: false
@@ -1991,12 +2016,27 @@ components:
           format: uri
           readOnly: true
           type: string
+        geographic_preferences:
+          description: Geographic preferences for colleges
+          type: string
         gpa:
           description: GPA of the student
           format: int64
           type: integer
+        high_school:
+          description: High school the student attends
+          type: string
+        intended_major:
+          description: Intended major of the student
+          type: string
+        intended_minor:
+          description: Intended minor of the student
+          type: string
         organization:
           description: Organization of the student
+          type: string
+        standardized_test_score:
+          description: SAT or ACT score of the student
           type: string
         student_interest:
           description: Interest of the student

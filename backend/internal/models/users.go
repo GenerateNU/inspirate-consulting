@@ -35,14 +35,19 @@ type User struct {
 }
 
 type Student struct {
-	ID            uuid.UUID  `json:"id"`
-	UserID        uuid.UUID  `json:"user_id"`
-	Year          Year       `json:"year"`
-	Interest      *string    `json:"student_interest"`
-	Organization  *string    `json:"organization"`
-	GPA           int        `json:"gpa"`
-	ReviewBalance int        `json:"review_balance"`
-	CounselorID   *uuid.UUID `json:"counselor_id"`
+	ID                    uuid.UUID  `json:"id"`
+	UserID                uuid.UUID  `json:"user_id"`
+	Year                  Year       `json:"year"`
+	Interest              *string    `json:"student_interest"`
+	Organization          *string    `json:"organization"`
+	GPA                   int        `json:"gpa"`
+	ReviewBalance         int        `json:"review_balance"`
+	CounselorID           *uuid.UUID `json:"counselor_id"`
+	HighSchool            *string    `json:"high_school"`
+	StandardizedTestScore *string    `json:"standardized_test_score"`
+	IntendedMajor         *string    `json:"intended_major"`
+	IntendedMinor         *string    `json:"intended_minor"`
+	GeographicPreferences *string    `json:"geographic_preferences"`
 }
 
 type Counselor struct {

@@ -33,12 +33,22 @@ func TestUpdateStudent(t *testing.T) {
 	gpa := 4
 	organization := "Robotics"
 	interest := "Engineering"
+	highSchool := "Brookline High School"
+	testScore := "1350"
+	major := "Design"
+	minor := "Economics"
+	geoPrefs := "Northeast"
 
 	updated, err := repo.UpdateStudent(ctx, created.ID, models.UpdateStudentBody{
-		Year:         &year,
-		GPA:          &gpa,
-		Organization: &organization,
-		Interest:     &interest,
+		Year:                  &year,
+		GPA:                   &gpa,
+		Organization:          &organization,
+		Interest:              &interest,
+		HighSchool:            &highSchool,
+		StandardizedTestScore: &testScore,
+		IntendedMajor:         &major,
+		IntendedMinor:         &minor,
+		GeographicPreferences: &geoPrefs,
 	})
 	if err != nil {
 		t.Fatalf("UpdateStudent failed: %v", err)
@@ -55,6 +65,21 @@ func TestUpdateStudent(t *testing.T) {
 	}
 	if updated.Interest == nil || *updated.Interest != interest {
 		t.Errorf("expected Interest %q, got %v", interest, updated.Interest)
+	}
+	if updated.HighSchool == nil || *updated.HighSchool != highSchool {
+		t.Errorf("expected HighSchool %q, got %v", highSchool, updated.HighSchool)
+	}
+	if updated.StandardizedTestScore == nil || *updated.StandardizedTestScore != testScore {
+		t.Errorf("expected StandardizedTestScore %q, got %v", testScore, updated.StandardizedTestScore)
+	}
+	if updated.IntendedMajor == nil || *updated.IntendedMajor != major {
+		t.Errorf("expected IntendedMajor %q, got %v", major, updated.IntendedMajor)
+	}
+	if updated.IntendedMinor == nil || *updated.IntendedMinor != minor {
+		t.Errorf("expected IntendedMinor %q, got %v", minor, updated.IntendedMinor)
+	}
+	if updated.GeographicPreferences == nil || *updated.GeographicPreferences != geoPrefs {
+		t.Errorf("expected GeographicPreferences %q, got %v", geoPrefs, updated.GeographicPreferences)
 	}
 	// fields not in the update body are untouched
 	if updated.ReviewBalance != created.ReviewBalance {
