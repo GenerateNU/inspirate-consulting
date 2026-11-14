@@ -12,7 +12,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, authorizer *auth.Authorizer) {
+func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
 	extracurricularHandler := extracurricular.NewHandler(repository.Extracurricular, authorizer)
 
 	huma.Register(api, huma.Operation{
@@ -49,5 +49,34 @@ func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, autho
 			return nil, err
 		}
 		return &models.UpdateExtracurricularOutput{Body: *updated}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "get-extracurricular",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Method:      http.MethodGet,
+		Path:        "/extracurriculars/{id}",
+		Description: "Get an extracurricular with all of its achievements and notes. Students can read their own; counselors can read their assigned students'.",
+		Tags:        []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.GetExtracurricularInput) (*models.GetExtracurricularOutput, error) {
+		detail, err := extracurricularHandler.GetExtracurricular(ctx, input.ID)
+		if err != nil {
+			return nil, err
+		}
+		return &models.GetExtracurricularOutput{Body: *detail}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "delete-extracurricular",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Method:      http.MethodDelete,
+		Path:        "/extracurriculars/{id}",
+		Description: "Delete an extracurricular along with its achievements and notes. Students can delete their own; counselors can delete their assigned students'.",
+		Tags:        []string{"Extracurriculars"},
+	}, func(ctx context.Context, input *models.DeleteExtracurricularInput) (*struct{}, error) {
+		if err := extracurricularHandler.DeleteExtracurricular(ctx, input.ID); err != nil {
+			return nil, err
+		}
+		return nil, nil
 	})
 }

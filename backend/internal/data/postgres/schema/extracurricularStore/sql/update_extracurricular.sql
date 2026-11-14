@@ -7,8 +7,13 @@ UPDATE public.extracurriculars SET
     start_date      = COALESCE($6, start_date),
     end_date        = COALESCE($7, end_date),
     organization    = COALESCE($8, organization),
+    hours_per_week          = COALESCE($9, hours_per_week),
+    weeks_per_year          = COALESCE($10, weeks_per_year),
+    goals                   = COALESCE($11, goals),
+    ready_for_application   = COALESCE($12, ready_for_application),
+    application_description = COALESCE($13, application_description),
     modified_at     = now()
-WHERE id = $9
+WHERE id = $14
 RETURNING
     id,
     created_at,
@@ -22,4 +27,9 @@ RETURNING
     leadership_role,
     start_date,
     end_date,
-    organization;
+    organization,
+    hours_per_week,
+    weeks_per_year,
+    goals,
+    ready_for_application,
+    application_description;

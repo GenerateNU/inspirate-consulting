@@ -41,11 +41,17 @@ type Extracurricular struct {
 	Name           string                `json:"name"                      db:"name"`
 	Status         ExtracurricularStatus `json:"status"                    db:"status"`
 	Type           ExtracurricularType   `json:"type"                      db:"type"`
-	Description    string                `json:"description"               db:"description"`
+	Description    *string               `json:"description,omitempty"     db:"description"`
 	LeadershipRole *string               `json:"leadership_role,omitempty" db:"leadership_role"`
 	StartDate      time.Time             `json:"start_date"                db:"start_date"`
 	EndDate        *time.Time            `json:"end_date,omitempty"        db:"end_date"`
 	Organization   string                `json:"organization"              db:"organization"`
+
+	HoursPerWeek           *float64 `json:"hours_per_week,omitempty"          db:"hours_per_week"`
+	WeeksPerYear           *int16   `json:"weeks_per_year,omitempty"          db:"weeks_per_year"`
+	Goals                  *string  `json:"goals,omitempty"                   db:"goals"`
+	ReadyForApplication    bool     `json:"ready_for_application"             db:"ready_for_application"`
+	ApplicationDescription *string  `json:"application_description,omitempty" db:"application_description"`
 }
 
 // CreateExtracurricularRequest is the body shape for creating an extracurricular.
@@ -56,11 +62,17 @@ type CreateExtracurricularRequest struct {
 	Name           string                `json:"name"                      minLength:"1"`
 	Status         ExtracurricularStatus `json:"status"                    enum:"doing,have_done"`
 	Type           ExtracurricularType   `json:"type"                      enum:"maintenance,investment"`
-	Description    string                `json:"description"`
+	Description    *string               `json:"description,omitempty"`
 	LeadershipRole *string               `json:"leadership_role,omitempty"`
 	StartDate      string                `json:"start_date"                format:"date"`
 	EndDate        *string               `json:"end_date,omitempty"        format:"date"`
 	Organization   string                `json:"organization"`
+
+	HoursPerWeek           *float64 `json:"hours_per_week,omitempty"          minimum:"0"`
+	WeeksPerYear           *int16   `json:"weeks_per_year,omitempty"          minimum:"0" maximum:"52"`
+	Goals                  *string  `json:"goals,omitempty"`
+	ReadyForApplication    *bool    `json:"ready_for_application,omitempty"   doc:"Defaults to false when omitted"`
+	ApplicationDescription *string  `json:"application_description,omitempty"`
 }
 
 // CreateExtracurricularInput is the request payload shape for creating a new extracurricular record.
@@ -94,6 +106,12 @@ type UpdateExtracurricularRequest struct {
 	StartDate      *string                `json:"start_date,omitempty"      format:"date"`
 	EndDate        *string                `json:"end_date,omitempty"        format:"date"`
 	Organization   *string                `json:"organization,omitempty"`
+
+	HoursPerWeek           *float64 `json:"hours_per_week,omitempty"          minimum:"0"`
+	WeeksPerYear           *int16   `json:"weeks_per_year,omitempty"          minimum:"0" maximum:"52"`
+	Goals                  *string  `json:"goals,omitempty"`
+	ReadyForApplication    *bool    `json:"ready_for_application,omitempty"`
+	ApplicationDescription *string  `json:"application_description,omitempty"`
 }
 
 // UpdateExtracurricularInput updates a student's extracurricular entry.
@@ -105,4 +123,46 @@ type UpdateExtracurricularInput struct {
 // UpdateExtracurricularOutput is the updated record returned after a save.
 type UpdateExtracurricularOutput struct {
 	Body Extracurricular
+}
+
+// ExtracurricularAchievement is a dated accomplishment logged against an extracurricular.
+type ExtracurricularAchievement struct {
+	ID                int64     `json:"id"                 db:"id"`
+	ExtracurricularID int64     `json:"extracurricular_id" db:"extracurricular_id"`
+	EntryDate         time.Time `json:"entry_date"         db:"entry_date"`
+	Body              string    `json:"body"               db:"body"`
+	CreatedAt         time.Time `json:"created_at"         db:"created_at"`
+	ModifiedAt        time.Time `json:"modified_at"        db:"modified_at"`
+}
+
+// ExtracurricularNote is a free-form note attached to an extracurricular.
+type ExtracurricularNote struct {
+	ID                int64     `json:"id"                 db:"id"`
+	ExtracurricularID int64     `json:"extracurricular_id" db:"extracurricular_id"`
+	Body              string    `json:"body"               db:"body"`
+	CreatedAt         time.Time `json:"created_at"         db:"created_at"`
+	ModifiedAt        time.Time `json:"modified_at"        db:"modified_at"`
+}
+
+// ExtracurricularDetail is a single extracurricular with all of its
+// achievements and notes. Both lists are always present (empty, not null).
+type ExtracurricularDetail struct {
+	Extracurricular
+	Achievements []ExtracurricularAchievement `json:"achievements"`
+	Notes        []ExtracurricularNote        `json:"notes"`
+}
+
+// GetExtracurricularInput fetches one extracurricular by id.
+type GetExtracurricularInput struct {
+	ID int64 `path:"id" doc:"ID of the extracurricular to fetch"`
+}
+
+// GetExtracurricularOutput is the extracurricular with its achievements and notes.
+type GetExtracurricularOutput struct {
+	Body ExtracurricularDetail
+}
+
+// DeleteExtracurricularInput deletes one extracurricular by id.
+type DeleteExtracurricularInput struct {
+	ID int64 `path:"id" doc:"ID of the extracurricular to delete"`
 }
