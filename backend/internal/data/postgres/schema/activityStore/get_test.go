@@ -33,7 +33,7 @@ func TestGetActivitiesForCounselor_ScopedToOwnStudents(t *testing.T) {
 		t.Fatalf("failed to create activity for studentB: %v", err)
 	}
 
-	activities, err := repo.GetActivitiesForCounselor(ctx, counselorA)
+	activities, err := repo.GetActivitiesForCounselor(ctx, counselorA, nil)
 	if err != nil {
 		t.Fatalf("GetActivitiesForCounselor failed: %v", err)
 	}
@@ -79,7 +79,7 @@ func TestGetActivitiesForCounselor_SortedByCreatedAtDesc(t *testing.T) {
 	insertWithTimestamp(studentOne, models.ActionAddedSchool, older)
 	insertWithTimestamp(studentTwo, models.ActionTaskPastDue, newer)
 
-	activities, err := repo.GetActivitiesForCounselor(ctx, counselorID)
+	activities, err := repo.GetActivitiesForCounselor(ctx, counselorID, nil)
 	if err != nil {
 		t.Fatalf("GetActivitiesForCounselor failed: %v", err)
 	}
@@ -108,11 +108,76 @@ func TestGetActivitiesForCounselor_NoActivity(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	createTestStudent(t, db, counselorID)
 
-	activities, err := repo.GetActivitiesForCounselor(ctx, counselorID)
+	activities, err := repo.GetActivitiesForCounselor(ctx, counselorID, nil)
 	if err != nil {
 		t.Fatalf("GetActivitiesForCounselor failed: %v", err)
 	}
 	if len(activities) != 0 {
 		t.Errorf("expected no activities, got %d", len(activities))
+	}
+}
+
+// test that the studentID filter scopes results to just that student
+func TestGetActivitiesForCounselor_FilteredByStudentID(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, db := setupTestRepo(t)
+	ctx := context.Background()
+
+	counselorID := createTestCounselor(t, db)
+	studentOne := createTestStudent(t, db, counselorID)
+	studentTwo := createTestStudent(t, db, counselorID)
+
+	if err := repo.CreateActivity(ctx, studentOne, models.CreateActivityBody{Action: models.ActionAddedSchool}); err != nil {
+		t.Fatalf("failed to create activity for studentOne: %v", err)
+	}
+	if err := repo.CreateActivity(ctx, studentTwo, models.CreateActivityBody{Action: models.ActionTaskPastDue}); err != nil {
+		t.Fatalf("failed to create activity for studentTwo: %v", err)
+	}
+
+	activities, err := repo.GetActivitiesForCounselor(ctx, counselorID, &studentOne)
+	if err != nil {
+		t.Fatalf("GetActivitiesForCounselor failed: %v", err)
+	}
+
+	if len(activities) != 1 {
+		t.Fatalf("expected 1 activity scoped to studentOne, got %d", len(activities))
+	}
+	if activities[0].StudentID != studentOne {
+		t.Errorf("expected activity for studentOne (%s), got %s", studentOne, activities[0].StudentID)
+	}
+}
+
+// test the access-control case: passing a studentID that belongs to a
+// different counselor must return nothing, not that counselor's data
+func TestGetActivitiesForCounselor_StudentIDFromAnotherCounselorReturnsNothing(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, db := setupTestRepo(t)
+	ctx := context.Background()
+
+	counselorA := createTestCounselor(t, db)
+	createTestStudent(t, db, counselorA)
+
+	counselorB := createTestCounselor(t, db)
+	studentB := createTestStudent(t, db, counselorB)
+	if err := repo.CreateActivity(ctx, studentB, models.CreateActivityBody{Action: models.ActionAddedSchool}); err != nil {
+		t.Fatalf("failed to create activity for studentB: %v", err)
+	}
+
+	// counselorA asks for studentB's activity - studentB isn't theirs
+	activities, err := repo.GetActivitiesForCounselor(ctx, counselorA, &studentB)
+	if err != nil {
+		t.Fatalf("GetActivitiesForCounselor failed: %v", err)
+	}
+
+	if len(activities) != 0 {
+		t.Errorf("expected no activities when requesting another counselor's student, got %d", len(activities))
 	}
 }
