@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500&family=Plus+Jakarta+Sans:wght@500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300..800&family=Plus+Jakarta+Sans:wght@400..800&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -17,6 +17,7 @@
   --color-paper: #faf9f6;
   --color-mist: #c3cfd9;
   --font-inter: "Inter", sans-serif;
+  --font-host-grotesk: "Host Grotesk", sans-serif;
 
   /* Hi-fi design tokens (Figma "Color/..." and type styles) */
   --color-dark-green: #19664c;
