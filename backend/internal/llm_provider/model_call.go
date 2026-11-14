@@ -2,16 +2,16 @@ package llmprovider
 
 import (
 	"context"
+	"fmt"
 	"inspirate-consulting/internal/config"
 )
 
 // Example: find me what student x said about science class sucking..
-func (l *LLMProvider) modelCall(ctx context.Context, cfg config.Config, provider LLMProvider) (*string, error) {
-
-	switch provider.Model {
+func (l *LLMProvider) ModelCall(ctx context.Context, cfg config.Config) (*string, error) {
+	switch l.Model {
 	case GeminiModel:
-		callGemini(ctx, cfg, provider)
+		return callGemini(ctx, cfg, *l)
+	default:
+		return nil, fmt.Errorf("unsupported model: %q", l.Model)
 	}
-
-	return nil, nil
 }
