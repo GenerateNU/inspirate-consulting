@@ -40,8 +40,10 @@ func NewEmbeddingClientWithHTTP(httpClient *http.Client, baseURL, accountID, api
 	return &EmbeddingClient{httpClient: httpClient, baseURL: baseURL, accountID: accountID, apiToken: apiToken}
 }
 
+// "text" is for stored content, "queries" adds a retrieval instruction for search prompts.
 type embedRequest struct {
-	Text string `json:"text"`
+	Text    string `json:"text,omitempty"`
+	Queries string `json:"queries,omitempty"`
 }
 
 type embedResponse struct {
@@ -56,13 +58,24 @@ type embedResponse struct {
 	} `json:"result"`
 }
 
-// Embed returns the 1024-dimensional embedding for a single string.
+// returns the 1024-dimensional embedding for stored content (a message, a todo description).
 func (c *EmbeddingClient) Embed(ctx context.Context, text string) ([]float32, error) {
 	if text == "" {
 		return nil, fmt.Errorf("embeddingclient: text must not be empty")
 	}
+	return c.run(ctx, embedRequest{Text: text})
+}
 
-	body, err := json.Marshal(embedRequest{Text: text})
+// returns the 1024-dimensional embedding for a search prompt, to compare against stored content.
+func (c *EmbeddingClient) EmbedQuery(ctx context.Context, query string) ([]float32, error) {
+	if query == "" {
+		return nil, fmt.Errorf("embeddingclient: query must not be empty")
+	}
+	return c.run(ctx, embedRequest{Queries: query})
+}
+
+func (c *EmbeddingClient) run(ctx context.Context, request embedRequest) ([]float32, error) {
+	body, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
