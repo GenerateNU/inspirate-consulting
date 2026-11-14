@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *StudentRepository) AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error) {
+func (r *StudentRepository) AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID *uuid.UUID) (*models.Student, error) {
 	query, err := schema.ReadSQLBaseScript("assign_student_to_counselor.sql", SqlStudentFiles)
 	if err != nil {
 		return nil, err

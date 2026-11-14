@@ -165,8 +165,8 @@ type FetchCounselorsBody struct {
 
 type AssignCounselorInput struct {
 	Body struct {
-		CounselorID uuid.UUID `json:"counselor_id" db:"counselor_id" doc:"id of the counselor to assign"`
-		UserID      uuid.UUID `json:"user_id" db:"user_id" doc:"user id of the student being assigned"`
+		CounselorID *uuid.UUID `json:"counselor_id" db:"counselor_id" nullable:"true" doc:"id of the counselor to assign"`
+		UserID      uuid.UUID  `json:"user_id" db:"user_id" doc:"user id of the student being assigned"`
 	}
 }
 

@@ -20,7 +20,7 @@ func TestAssignCounselor(t *testing.T) {
 	_, newCounselorID := createNamedTestCounselor(t, db, "New Counselor")
 	studentUserID := createAssignedTestStudent(t, db, "Assign Student", oldCounselorID)
 
-	updated, err := repo.AssignCounselor(ctx, studentUserID, newCounselorID)
+	updated, err := repo.AssignCounselor(ctx, studentUserID, &newCounselorID)
 	if err != nil {
 		t.Fatalf("AssignCounselor failed: %v", err)
 	}
@@ -36,6 +36,40 @@ func TestAssignCounselor(t *testing.T) {
 	}
 }
 
+func TestAssignCounselor_Unassign(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	repo, db := setupTestRepo(t)
+	ctx := context.Background()
+
+	_, counselorID := createNamedTestCounselor(t, db, "Counselor")
+	studentUserID := createAssignedTestStudent(t, db, "Unassign Student", counselorID)
+
+	updated, err := repo.AssignCounselor(ctx, studentUserID, nil)
+	if err != nil {
+		t.Fatalf("AssignCounselor (unassign) failed: %v", err)
+	}
+
+	if updated.UserID != studentUserID {
+		t.Errorf("expected UserID %v, got %v", studentUserID, updated.UserID)
+	}
+	if updated.CounselorID != nil {
+		t.Errorf("expected no counselor, got %v", *updated.CounselorID)
+	}
+
+	var stored *uuid.UUID
+	if err := db.QueryRow(ctx,
+		`SELECT counselor_id FROM public.student WHERE user_id = $1`, studentUserID).Scan(&stored); err != nil {
+		t.Fatalf("failed to read student's counselor: %v", err)
+	}
+	if stored != nil {
+		t.Errorf("expected stored counselor to be NULL, got %v", *stored)
+	}
+}
+
 func TestAssignCounselor_UnknownStudent(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
@@ -47,7 +81,7 @@ func TestAssignCounselor_UnknownStudent(t *testing.T) {
 
 	_, counselorID := createNamedTestCounselor(t, db, "Counselor")
 
-	updated, err := repo.AssignCounselor(ctx, uuid.New(), counselorID)
+	updated, err := repo.AssignCounselor(ctx, uuid.New(), &counselorID)
 	if err == nil {
 		t.Fatalf("expected an error for an unknown student, got %+v", updated)
 	}
@@ -68,7 +102,8 @@ func TestAssignCounselor_UnknownCounselor(t *testing.T) {
 	_, counselorID := createNamedTestCounselor(t, db, "Counselor")
 	studentUserID := createAssignedTestStudent(t, db, "Assign Student", counselorID)
 
-	updated, err := repo.AssignCounselor(ctx, studentUserID, uuid.New())
+	unknownCounselorID := uuid.New()
+	updated, err := repo.AssignCounselor(ctx, studentUserID, &unknownCounselorID)
 	if err == nil {
 		t.Fatalf("expected an error for an unknown counselor, got %+v", updated)
 	}
@@ -93,7 +128,7 @@ func TestAssignCounselor_CounselorToCounselor(t *testing.T) {
 	counselorUserID, _ := createNamedTestCounselor(t, db, "Assignee Counselor")
 	_, otherCounselorID := createNamedTestCounselor(t, db, "Other Counselor")
 
-	updated, err := repo.AssignCounselor(ctx, counselorUserID, otherCounselorID)
+	updated, err := repo.AssignCounselor(ctx, counselorUserID, &otherCounselorID)
 	if err == nil {
 		t.Fatalf("expected an error when assigning a counselor to a counselor, got %+v", updated)
 	}
