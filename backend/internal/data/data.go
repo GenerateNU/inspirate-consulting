@@ -208,7 +208,8 @@ type StudentRepository interface {
 	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
 	UpdateStudent(ctx context.Context, id uuid.UUID, input models.UpdateStudentBody) (*models.Student, error)
 	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error)
-	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
+	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID *uuid.UUID) (*models.Student, error)
+	GetStudentIDByUserID(ctx context.Context, userID uuid.UUID) (uuid.UUID, error)
 }
 
 // To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)

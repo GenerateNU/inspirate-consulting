@@ -9,8 +9,11 @@
 export interface AssignCounselorInputBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  /** id of the counselor to assign */
-  counselor_id: string;
+  /**
+     * id of the counselor to assign
+     * @nullable
+     */
+  counselor_id: string | null;
   /** user id of the student being assigned */
   user_id: string;
 }

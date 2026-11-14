@@ -87,7 +87,9 @@ components:
           type: string
         counselor_id:
           description: id of the counselor to assign
-          type: string
+          type:
+            - string
+            - "null"
         user_id:
           description: user id of the student being assigned
           type: string
