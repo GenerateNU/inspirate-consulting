@@ -60,9 +60,10 @@ func createGeminiInteraction(ctx context.Context, cfg config.Config, input strin
 	return client.Interactions.Create(ctx, operations.CreateInteractionRequest{
 		Body: operations.NewCreateInteractionRequestBody(
 			interactions.CreateModelInteraction{
-				Model: interactions.Model(cfg.Gemini.Model),
-				Input: genai.Ptr(interactions.NewInteractionsInput(input)),
-				Tools: tools,
+				Model:             interactions.Model(cfg.Gemini.Model),
+				SystemInstruction: genai.Ptr(systemPrompt),
+				Input:             genai.Ptr(interactions.NewInteractionsInput(input)),
+				Tools:             tools,
 				GenerationConfig: &interactions.GenerationConfig{
 					ToolChoice: genai.Ptr(interactions.NewToolChoice(interactions.ToolChoiceTypeAny)),
 				},

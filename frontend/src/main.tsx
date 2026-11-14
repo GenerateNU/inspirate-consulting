@@ -46,6 +46,7 @@ import AssignTaskForm from "./task/assign-task-form.tsx";
 import CounselorStudentTasks from "./counselor/counselor-student-tasks.tsx";
 import ProfilePages from "./profile/profile-pages.tsx";
 import Chats from "./chat/chats.tsx";
+import AssistantCli from "./assistant/assistant-cli.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -64,6 +65,7 @@ createRoot(document.getElementById("root")!).render(
               path="/counselor/login"
               element={<LogIn audience="counselor" />}
             />
+            <Route path="/assistant" element={<AssistantCli />} />
             <Route element={<Layout />}>
               <Route path="/" element={<App />} />
               <Route path="/greeting" element={<Greeting />} />
