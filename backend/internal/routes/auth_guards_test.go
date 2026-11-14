@@ -118,10 +118,10 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/media", anyRole, nil},
 	{http.MethodGet, "/media/{id}", anyRole, nil},
 	{http.MethodGet, "/media", anyRole, nil},
-	{http.MethodDelete, "/media/{id}", anyRole, nil},
+	{http.MethodDelete, "/media/{id}", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/media/{id}", anyRole, nil},
 	{http.MethodPost, "/media-access", anyRole, nil},
-	{http.MethodDelete, "/media-access/{id}", anyRole, nil},
+	{http.MethodDelete, "/media-access/{id}", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/media-access", anyRole, nil},
 
 	// extracurriculars
@@ -313,6 +313,8 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"GET /students/fetchall",
 		"PATCH /students/assign",
 		"PATCH /todo-items/{id}/description",
+		"DELETE /media-access/{id}",
+		"DELETE /media/{id}",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",
