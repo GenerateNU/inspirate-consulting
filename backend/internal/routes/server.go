@@ -8,9 +8,11 @@ import (
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/aws"
 	"inspirate-consulting/internal/data/aws/sqsclient"
+	"inspirate-consulting/internal/data/cloudflare/embeddingclient"
 	"inspirate-consulting/internal/data/postgres"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -41,6 +43,14 @@ func InitApp(config config.Config) (*App, error) {
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video
+
+	// Similarity search is optional: without Cloudflare credentials, repo.Embedding stays nil
+	embeddingClient, err := embeddingclient.NewEmbeddingClient(config.Cloudflare.AccountID, config.Cloudflare.APIToken)
+	if err != nil {
+		slog.Warn("similarity search disabled: Cloudflare credentials not set")
+	} else {
+		repo.Embedding = embeddingClient
+	}
 
 	app, humaAPI, err := SetupApp(config, repo, sqsClient, accountSQSClient)
 	if err != nil {

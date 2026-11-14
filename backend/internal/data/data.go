@@ -22,6 +22,7 @@ import (
 	studentRepository "inspirate-consulting/internal/data/postgres/schema/studentStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
+	vectorRepository "inspirate-consulting/internal/data/postgres/schema/vectorStore"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/pagination"
 
@@ -198,6 +199,20 @@ type StudentRepository interface {
 	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
 }
 
+// To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)
+type VectorRepository interface {
+	SearchChatMessages(ctx context.Context, queryEmbedding []float32, userID uuid.UUID, limit int) ([]models.ChatMessageSearchResult, error)
+	SearchTodoItems(ctx context.Context, queryEmbedding []float32, studentIDs []uuid.UUID, limit int) ([]models.TodoItemSearchResult, error)
+}
+
+// Cloudflare client
+type EmbeddingClient interface {
+	// embed stored content for comparison against search prompts
+	Embed(ctx context.Context, text string) ([]float32, error)
+	// embed search prompts for comparison against stored content
+	EmbedQuery(ctx context.Context, query string) ([]float32, error)
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 
@@ -220,6 +235,9 @@ type Repository struct {
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository
 	Student                    StudentRepository
+	Vector                     VectorRepository
+	// set in InitApp only when Cloudflare is configured; nil disables similarity search
+	Embedding EmbeddingClient
 }
 
 // Close closes the database connection pool
@@ -254,5 +272,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
 		Counselor:                  counselorRepository.NewCounselorRepository(db),
 		Student:                    studentRepository.NewStudentRepository(db),
+		Vector:                     vectorRepository.NewVectorRepository(db),
 	}
 }
