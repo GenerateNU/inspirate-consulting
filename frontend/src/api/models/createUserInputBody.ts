@@ -27,11 +27,6 @@ export interface CreateUserInputBody {
   name: string;
   /** organization of the student */
   organization?: string;
-  /**
-     * pfp key of user
-     * @nullable
-     */
-  pfp_key: string | null;
   /** the type of user the counselor would like to create */
   role: CreateUserInputBodyRole;
   /** interest of the student */

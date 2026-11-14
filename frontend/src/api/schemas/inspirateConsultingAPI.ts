@@ -1407,15 +1407,14 @@ export const UpdateTodoItemDescriptionResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
+ * Update the authenticated user's name. Fields left out of the request are not changed. Use /user/pfp to change the profile picture.
  */
 export const updateUserBodyNameMax = 200;
 
 
 
 export const UpdateUserBody = /*#__PURE__*/ zod.object({
-  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(updateUserBodyNameMax))).check(/*#__PURE__*/ zod.describe('Name of the user')),
-  "pfp_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user'))
+  "name": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(updateUserBodyNameMax))).check(/*#__PURE__*/ zod.describe('Name of the user'))
 })
 
 export const UpdateUserResponse = /*#__PURE__*/ zod.object({
@@ -1444,7 +1443,6 @@ export const CreateUserBody = /*#__PURE__*/ zod.object({
   "gpa": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('gpa of the student; required when role is student')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createUserBodyNameMax)).check(/*#__PURE__*/ zod.describe('Name of the user')),
   "organization": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('organization of the student')),
-  "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('pfp key of user')),
   "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('the type of user the counselor would like to create')),
   "student_interest": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('interest of the student')),
   "year": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['freshman', 'sophomore', 'junior', 'senior'])).check(/*#__PURE__*/ zod.describe('year of the student; required when role is student'))
@@ -1504,10 +1502,53 @@ export const GetCurrentUserResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "pfp_url": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Presigned, time-limited URL for the user\'s profile picture, null when they have none')),
   "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "role": /*#__PURE__*/ zod.enum(['student', 'counselor']).check(/*#__PURE__*/ zod.describe('Role of the logged-in user')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student profile ID, null unless the user is a student')),
   "supabase_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * Remove the logged-in user's profile picture.
+ */
+export const DeletePfpResponse = /*#__PURE__*/ zod.void()
+
+
+/**
+ * Save an uploaded image as the logged-in user's profile picture. The previous picture is deleted.
+ */
+
+
+
+export const UpdatePfpBody = /*#__PURE__*/ zod.object({
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.describe('The s3_key returned by PUT /user/pfp, after the image was uploaded to its upload_url'))
+})
+
+export const UpdatePfpResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "download_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned, time-limited URL for the image. Re-fetch GET /user/me if the URL expires.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The profile picture\'s S3 object key'))
+})
+
+
+/**
+ * Get a presigned URL to upload a new profile picture. PUT the image to upload_url, then send s3_key to PATCH /user/pfp to save it.
+ */
+export const presignPfpUploadBodyContentLengthMax = 5242880;
+
+
+
+export const PresignPfpUploadBody = /*#__PURE__*/ zod.object({
+  "content_length": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(presignPfpUploadBodyContentLengthMax)).check(/*#__PURE__*/ zod.describe('Size of the image in bytes, at most 5 MiB; the upload must send exactly this many bytes')),
+  "content_type": /*#__PURE__*/ zod.enum(['image/jpeg', 'image/png', 'image/webp']).check(/*#__PURE__*/ zod.describe('MIME type of the image; the upload must send this exact Content-Type header'))
+})
+
+export const PresignPfpUploadResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The S3 key/path to store elsewhere, e.g. in a media table')),
+  "upload_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned URL the client PUTs the raw file bytes to'))
 })
 
 
@@ -1600,7 +1641,7 @@ export const UploadVideoBody = /*#__PURE__*/ zod.object({
 export const UploadVideoResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "s3_key": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The S3 key/path to store elsewhere, e.g. in a media table')),
-  "upload_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned URL the client PUTs the raw video bytes to'))
+  "upload_url": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('A presigned URL the client PUTs the raw file bytes to'))
 })
 
 

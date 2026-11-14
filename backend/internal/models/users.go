@@ -58,7 +58,6 @@ type Counselor struct {
 type CreateUserInput struct {
 	Body struct {
 		Name      string     `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey    *string    `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
 		Email     string     `json:"email" doc:"email of user for supabase signup"`
 		Role      Role       `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
 		ExpiresAt *time.Time `json:"expires_at,omitempty" required:"false" doc:"when the account expires; omit for no expiration"`
@@ -91,9 +90,9 @@ type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
 
+// pfp_key is changed only through /user/pfp, which checks the key belongs to the user
 type UpdateUserBody struct {
-	Name   *string `json:"name,omitempty" required:"false" minLength:"1" maxLength:"200" doc:"Name of the user"`
-	PfpKey *string `json:"pfp_key,omitempty" required:"false" doc:"pfp key of user"`
+	Name *string `json:"name,omitempty" required:"false" minLength:"1" maxLength:"200" doc:"Name of the user"`
 }
 
 // user id is derived from session, users can only edit themselves
@@ -179,6 +178,7 @@ type CurrentUser struct {
 	Role        Role       `json:"role" enum:"student,counselor" doc:"Role of the logged-in user"`
 	StudentID   *uuid.UUID `json:"student_id" doc:"Student profile ID, null unless the user is a student"`
 	CounselorID *uuid.UUID `json:"counselor_id" doc:"Counselor profile ID, null unless the user is a counselor"`
+	PfpURL      *string    `json:"pfp_url" doc:"Presigned, time-limited URL for the user's profile picture, null when they have none"`
 }
 
 type GetCurrentUserOutput struct {

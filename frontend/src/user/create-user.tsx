@@ -48,7 +48,6 @@ export default function CreateUser() {
           name,
           email,
           role,
-          pfp_key: null,
           ...(isStudent
             ? {
                 year,

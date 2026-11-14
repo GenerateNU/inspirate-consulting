@@ -18,7 +18,7 @@ type PresignUploadRequestBody struct {
 // separated from Video because the URL is for uploading (PUT), not downloading (GET)
 type PresignUploadResponse struct {
 	S3Key     string `json:"s3_key" doc:"The S3 key/path to store elsewhere, e.g. in a media table"`
-	UploadURL string `json:"upload_url" doc:"A presigned URL the client PUTs the raw video bytes to"`
+	UploadURL string `json:"upload_url" doc:"A presigned URL the client PUTs the raw file bytes to"`
 }
 
 // identifies a video by its S3 key.

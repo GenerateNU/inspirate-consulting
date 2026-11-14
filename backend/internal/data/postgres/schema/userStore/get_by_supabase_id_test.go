@@ -17,12 +17,10 @@ func TestFetchUserBySupabaseID(t *testing.T) {
 	t.Parallel()
 
 	supabaseID := uuid.New()
-	key := "pfp-key"
 
 	input := models.CreateUserInput{}
 	input.Body.Name = "FetchMeBySupabase"
 	input.Body.Email = "fetchmebysupabase@gmail.com"
-	input.Body.PfpKey = &key
 	input.Body.Role = models.CounselorRole
 
 	db := testutils.SetupTestDB(t)

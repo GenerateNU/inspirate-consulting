@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/google/uuid"
@@ -29,7 +30,7 @@ func TestHandler_GetCurrentUser(t *testing.T) {
 		mockRepo.On("FetchUser", mock.Anything, models.FetchUserInput{ID: userID}).
 			Return(&models.FetchUserOutput{Body: &models.User{ID: userID, Name: "Test Counselor"}}, nil)
 
-		res, err := NewHandler(mockRepo, nil).GetCurrentUser(ctx)
+		res, err := NewHandler(mockRepo, nil, nil).GetCurrentUser(ctx)
 
 		require.NoError(t, err)
 		assert.Equal(t, userID, res.Body.ID)
@@ -50,7 +51,7 @@ func TestHandler_GetCurrentUser(t *testing.T) {
 		mockRepo.On("FetchUser", mock.Anything, models.FetchUserInput{ID: userID}).
 			Return(&models.FetchUserOutput{Body: &models.User{ID: userID, Name: "Test Student"}}, nil)
 
-		res, err := NewHandler(mockRepo, nil).GetCurrentUser(ctx)
+		res, err := NewHandler(mockRepo, nil, nil).GetCurrentUser(ctx)
 
 		require.NoError(t, err)
 		assert.Equal(t, models.StudentRole, res.Body.Role)
@@ -64,11 +65,51 @@ func TestHandler_GetCurrentUser(t *testing.T) {
 
 		mockRepo := mocks.NewUserRepository(t)
 
-		res, err := NewHandler(mockRepo, nil).GetCurrentUser(context.Background())
+		res, err := NewHandler(mockRepo, nil, nil).GetCurrentUser(context.Background())
 
 		assert.Nil(t, res)
 		require.Error(t, err)
 		assert.Equal(t, 401, err.(errs.HTTPError).Code)
 		mockRepo.AssertNotCalled(t, "FetchUser", mock.Anything, mock.Anything)
+	})
+
+	t.Run("user with a picture gets a download url", func(t *testing.T) {
+		t.Parallel()
+
+		userID := uuid.New()
+		ctx := auth.WithUserID(context.Background(), userID)
+		key := "pfps/" + userID.String() + "/a.jpg"
+
+		mockRepo := mocks.NewUserRepository(t)
+		mockRepo.On("FetchUser", mock.Anything, models.FetchUserInput{ID: userID}).
+			Return(&models.FetchUserOutput{Body: &models.User{ID: userID, PfpKey: &key}}, nil)
+		pfpRepo := mocks.NewPfpRepository(t)
+		pfpRepo.On("GetDownloadURL", ctx, key).Return("https://bucket/a.jpg", nil)
+
+		res, err := NewHandler(mockRepo, nil, pfpRepo).GetCurrentUser(ctx)
+
+		require.NoError(t, err)
+		require.NotNil(t, res.Body.PfpURL)
+		assert.Equal(t, "https://bucket/a.jpg", *res.Body.PfpURL)
+	})
+
+	t.Run("failed presign still returns the user", func(t *testing.T) {
+		t.Parallel()
+
+		userID := uuid.New()
+		ctx := auth.WithUserID(context.Background(), userID)
+		key := "pfps/" + userID.String() + "/a.jpg"
+
+		mockRepo := mocks.NewUserRepository(t)
+		mockRepo.On("FetchUser", mock.Anything, models.FetchUserInput{ID: userID}).
+			Return(&models.FetchUserOutput{Body: &models.User{ID: userID, PfpKey: &key}}, nil)
+		pfpRepo := mocks.NewPfpRepository(t)
+		pfpRepo.On("GetDownloadURL", ctx, key).Return("", errors.New("s3 unavailable"))
+
+		res, err := NewHandler(mockRepo, nil, pfpRepo).GetCurrentUser(ctx)
+
+		require.NoError(t, err)
+		assert.Equal(t, userID, res.Body.ID)
+		assert.Nil(t, res.Body.PfpURL)
 	})
 }

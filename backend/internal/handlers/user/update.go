@@ -7,7 +7,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-// updates the logged-in user's name and pfp_key
+// updates the logged-in user's name
 func (h *Handler) UpdateUser(ctx context.Context, input models.UpdateUserBody) (*models.User, error) {
 	userID, err := auth.GetUserID(ctx)
 	if err != nil {

@@ -110,6 +110,31 @@ func (c *Client) Raw() *s3.Client {
 	return c.s3Client
 }
 
+// the stored headers of an object, as S3 recorded them at upload
+type ObjectMetadata struct {
+	ContentType   string
+	ContentLength int64
+}
+
+// returns the object's metadata, or nil when no object exists at the key.
+func (c *Client) GetObjectMetadata(ctx context.Context, key string) (*ObjectMetadata, error) {
+	output, err := c.s3Client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		var notFound *types.NotFound
+		if errors.As(err, &notFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("s3client: failed to read object metadata: %w", err)
+	}
+	return &ObjectMetadata{
+		ContentType:   aws.ToString(output.ContentType),
+		ContentLength: aws.ToInt64(output.ContentLength),
+	}, nil
+}
+
 // reports whether an object exists at the key.
 func (c *Client) ObjectExists(ctx context.Context, key string) (bool, error) {
 	_, err := c.s3Client.HeadObject(ctx, &s3.HeadObjectInput{

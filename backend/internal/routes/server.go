@@ -41,6 +41,7 @@ func InitApp(config config.Config) (*App, error) {
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video
+	repo.Pfp = awsRepo.Pfp
 
 	app, humaAPI, err := SetupApp(config, repo, sqsClient, accountSQSClient)
 	if err != nil {
@@ -158,6 +159,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole)
 	SetupUserRoutes(api, repo, &config, verifyRole, accountSQSClient)
 	SetUpVideoRoutes(api, repo, verifyRole)
+	SetUpPfpRoutes(api, repo, verifyRole)
 	SetUpMediaRoutes(api, repo)
 	SetUpMediaAccessRoutes(api, repo, authorizer)
 	SetUpEssayReviewRoutes(api, repo, verifyRole, authorizer)

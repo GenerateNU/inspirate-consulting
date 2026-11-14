@@ -56,6 +56,11 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
 
+	// profile pictures
+	{http.MethodPut, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+
 	// greeting
 	{http.MethodPost, "/greeting", guarded, []string{roleCounselor}},
 
