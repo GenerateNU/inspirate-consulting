@@ -14,29 +14,7 @@ type Gemini struct {
 }
 
 func callGemini(ctx context.Context, cfg config.Config, provider LLMProvider) (*string, error) {
-
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey:  cfg.Gemini.APIKey,
-		Backend: genai.BackendGeminiAPI,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Interactions.Create(ctx, operations.CreateInteractionRequest{
-		Body: operations.NewCreateInteractionRequestBody(
-			interactions.CreateModelInteraction{
-				Model: interactions.Model(cfg.Gemini.Model),
-				Input: genai.Ptr(interactions.NewInteractionsInput(provider.UserInput)),
-				Tools: tools,
-				GenerationConfig: &interactions.GenerationConfig{
-					ToolChoice: genai.Ptr(interactions.NewToolChoice(interactions.ToolChoiceTypeAny)),
-				},
-			},
-		),
-	})
-
+	resp, err := createGeminiInteraction(ctx, cfg, provider.UserInput)
 	if err != nil {
 		return nil, err
 	}
@@ -67,4 +45,28 @@ func callGemini(ctx context.Context, cfg config.Config, provider LLMProvider) (*
 	}
 
 	return res, nil
+}
+
+// Sends the user's input and tools to Gemini, which must respond with a tool call.
+func createGeminiInteraction(ctx context.Context, cfg config.Config, input string) (*operations.CreateInteractionResponse, error) {
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:  cfg.Gemini.APIKey,
+		Backend: genai.BackendGeminiAPI,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Interactions.Create(ctx, operations.CreateInteractionRequest{
+		Body: operations.NewCreateInteractionRequestBody(
+			interactions.CreateModelInteraction{
+				Model: interactions.Model(cfg.Gemini.Model),
+				Input: genai.Ptr(interactions.NewInteractionsInput(input)),
+				Tools: tools,
+				GenerationConfig: &interactions.GenerationConfig{
+					ToolChoice: genai.Ptr(interactions.NewToolChoice(interactions.ToolChoiceTypeAny)),
+				},
+			},
+		),
+	})
 }
