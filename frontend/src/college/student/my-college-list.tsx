@@ -87,12 +87,7 @@ export default function MyCollegeList() {
         </button>
       }
     >
-      <div className="-mt-1 flex w-full items-center justify-end gap-3">
-        {list.sortKey === "rank" && list.applications.length > 1 && (
-          <p className="font-host text-xs text-warm-grey-dark">
-            Drag schools to reorder your ranking.
-          </p>
-        )}
+      <div className="-mt-1 flex w-full items-center justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -121,12 +116,6 @@ export default function MyCollegeList() {
         </DropdownMenu>
       </div>
 
-      {list.mutationError && !list.pendingRemoval && !addOpen && (
-        <p role="alert" className="font-host text-sm text-danger">
-          Error: {errorMessage(list.mutationError)}
-        </p>
-      )}
-
       {list.applications.length === 0 ? (
         <p className="font-host text-sm text-dark-greyish-brown">
           Your list is empty. Choose + Add a School to start your list.
@@ -139,11 +128,6 @@ export default function MyCollegeList() {
               app={app}
               college={list.collegeById.get(app.global_college_id)}
               collegeName={list.collegeName(app)}
-              draggable={list.canReorder}
-              isDragging={list.draggedId === app.id}
-              onDragStart={() => list.setDraggedId(app.id)}
-              onDragEnd={() => list.setDraggedId(null)}
-              onDrop={() => list.handleDrop(app)}
               onRemove={() => list.requestRemoval(app)}
             />
           ))}
@@ -156,7 +140,7 @@ export default function MyCollegeList() {
         addedCollegeIds={list.addedCollegeIds}
         adding={list.adding}
         error={list.addError}
-        onAdd={list.addSchool}
+        onSave={list.addSchools}
       />
 
       <RemoveSchoolDialog
