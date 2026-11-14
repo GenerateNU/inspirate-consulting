@@ -7,7 +7,6 @@ import type {
 import locationPinIcon from "@/assets/college/location-pin.svg";
 import schoolIcon from "@/assets/college/school.svg";
 import trashIcon from "@/assets/college/trash.svg";
-import { cn } from "@/lib/utils";
 import Tag from "../utils/components/tag";
 import { cycleLabel } from "../utils/shared";
 import {
@@ -20,11 +19,6 @@ interface ApplicationCardProps {
   app: PersonalCollegeApplication;
   college: GlobalCollege | undefined;
   collegeName: string;
-  draggable: boolean;
-  isDragging: boolean;
-  onDragStart: () => void;
-  onDragEnd: () => void;
-  onDrop: () => void;
   onRemove: () => void;
 }
 
@@ -33,34 +27,12 @@ export default function ApplicationCard({
   app,
   college,
   collegeName,
-  draggable,
-  isDragging,
-  onDragStart,
-  onDragEnd,
-  onDrop,
   onRemove,
 }: ApplicationCardProps) {
   const progress = essayProgressTag[app.essay_progress];
 
   return (
-    <li
-      draggable={draggable}
-      onDragStart={(e) => {
-        e.dataTransfer.setData("text/plain", String(app.id));
-        onDragStart();
-      }}
-      onDragEnd={onDragEnd}
-      onDragOver={(e) => draggable && e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDrop();
-      }}
-      className={cn(
-        "relative flex min-h-[168px] w-full items-center gap-4 overflow-clip rounded-lg border border-cream bg-white py-6 pr-6 pl-8 shadow-card",
-        draggable && "cursor-grab",
-        isDragging && "opacity-50",
-      )}
-    >
+    <li className="relative flex min-h-[168px] w-full items-center gap-4 overflow-clip rounded-lg border border-cream bg-white py-6 pr-6 pl-8 shadow-card">
       <div
         aria-hidden="true"
         className="absolute top-[-1px] bottom-[-1px] left-[-1px] w-1.5 bg-mint"

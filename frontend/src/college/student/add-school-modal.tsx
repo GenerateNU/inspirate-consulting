@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
 
 import { errorMessage } from "../../api/client";
 import {
   CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
   CreatePersonalCollegeApplicationRequestBodyCategory as Category,
+  UpdatePersonalCollegeApplicationRequestBodyInterest as Interest,
   type GlobalCollege,
 } from "../../api/models";
 import chatCircleIcon from "@/assets/college/chat-circle.svg";
@@ -18,19 +20,33 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import ChoiceChips from "../utils/components/choice-chips";
 import Tag from "../utils/components/tag";
 import { cycleLabel } from "../utils/shared";
 import { useCollegeSearch } from "../utils/use-college-search";
-import { categoryOptions } from "./application-labels";
+import { categoryOptions, interestOptions } from "./application-labels";
+import type { NewSchool } from "./use-my-college-list";
 
 // what the student has picked on one search result
 interface Selection {
   cycle: ApplicationType | null;
   category: Category | null;
+  interest: Interest | null;
+  // marked with + to be added on Save Changes
+  picked: boolean;
 }
 
-const emptySelection: Selection = { cycle: null, category: null };
+const emptySelection: Selection = {
+  cycle: null,
+  category: null,
+  interest: null,
+  picked: false,
+};
+
+// a school can be added once it has a cycle and a classification; interest is optional
+const isComplete = (selection: Selection) =>
+  selection.cycle != null && selection.category != null;
 
 interface AddSchoolModalProps {
   open: boolean;
@@ -38,55 +54,76 @@ interface AddSchoolModalProps {
   addedCollegeIds: Set<number>;
   adding: boolean;
   error: unknown;
-  onAdd: (
-    globalCollegeId: number,
-    applicationType: ApplicationType,
-    category: Category,
-    onSuccess: () => void,
-  ) => void;
+  // resolves with the schools that failed to save
+  onSave: (schools: NewSchool[]) => Promise<NewSchool[]>;
 }
 
-// search for a school, pick the cycle (then classification) and add it to My List
-// stays open so several schools can be added in a row
+// search for schools, pick the cycle -> classification -> interest for each,
+// mark them with +, then Save Changes adds them all to My List
 export default function AddSchoolModal({
   open,
   onOpenChange,
   addedCollegeIds,
   adding,
   error,
-  onAdd,
+  onSave,
 }: AddSchoolModalProps) {
   const search = useCollegeSearch();
   const navigate = useNavigate();
   const [selections, setSelections] = useState<Record<number, Selection>>({});
-  const [addingId, setAddingId] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const selectionFor = (id: number) => selections[id] ?? emptySelection;
   const select = (id: number, change: Partial<Selection>) =>
-    setSelections((prev) => ({
-      ...prev,
-      [id]: { ...selectionFor(id), ...change },
-    }));
+    setSelections((prev) => {
+      const next = { ...(prev[id] ?? emptySelection), ...change };
+      // un-picking an earlier step clears the steps after it, which also unmarks the school
+      if (next.cycle == null) next.category = null;
+      if (next.category == null) next.interest = null;
+      if (!isComplete(next)) next.picked = false;
+      return { ...prev, [id]: next };
+    });
 
-  const add = (college: GlobalCollege) => {
-    const { cycle, category } = selectionFor(college.id);
-    if (!cycle || !category) return;
-    setAddingId(college.id);
-    onAdd(college.id, cycle, category, () =>
-      setSelections((prev) => {
-        const next = { ...prev };
-        delete next[college.id];
-        return next;
-      }),
+  const pickedSchools: NewSchool[] = Object.entries(selections).flatMap(
+    ([id, selection]) =>
+      selection.picked && isComplete(selection)
+        ? [
+            {
+              globalCollegeId: Number(id),
+              applicationType: selection.cycle!,
+              category: selection.category!,
+              interest: selection.interest,
+            },
+          ]
+        : [],
+  );
+
+  const close = (nextOpen: boolean) => {
+    if (!nextOpen) setSelections({});
+    onOpenChange(nextOpen);
+  };
+
+  const save = async () => {
+    const failed = await onSave(pickedSchools);
+    if (failed.length === 0) {
+      close(false);
+      return;
+    }
+    // keep only the schools that didn't save, still marked, so the student can retry
+    const failedIds = new Set(failed.map((school) => school.globalCollegeId));
+    setSelections((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).filter(([id]) => failedIds.has(Number(id))),
+      ),
     );
   };
 
   const renderResult = (college: GlobalCollege) => {
-    const { cycle, category } = selectionFor(college.id);
+    const selection = selectionFor(college.id);
+    const { cycle, category, interest, picked } = selection;
     const offered = college.cycles ?? [];
     const added = addedCollegeIds.has(college.id);
-    const ready = cycle != null && category != null;
+    const complete = isComplete(selection);
 
     return (
       <li key={college.id} className="flex flex-col gap-2.5">
@@ -114,6 +151,8 @@ export default function AddSchoolModal({
                     label: cycleLabel(value),
                   }))}
                   value={cycle}
+                  allowDeselect
+                  disabled={adding}
                   onChange={(value) => select(college.id, { cycle: value })}
                 />
                 {cycle && (
@@ -121,10 +160,24 @@ export default function AddSchoolModal({
                     label={`Classification for ${college.school_name}`}
                     options={categoryOptions}
                     value={category}
+                    allowDeselect
+                    disabled={adding}
                     onChange={(value) =>
                       select(college.id, { category: value })
                     }
                     chipClassName="min-w-[60px]"
+                  />
+                )}
+                {category && (
+                  <ChoiceChips
+                    label={`Interest in ${college.school_name}`}
+                    options={interestOptions}
+                    value={interest}
+                    allowDeselect
+                    disabled={adding}
+                    onChange={(value) =>
+                      select(college.id, { interest: value })
+                    }
                   />
                 )}
               </>
@@ -137,16 +190,30 @@ export default function AddSchoolModal({
             <button
               type="button"
               data-slot="icon-button"
-              aria-label={`Add ${college.school_name} to your list`}
-              title={
-                ready ? "Add to your list" : "Pick a cycle and classification"
+              aria-pressed={picked}
+              aria-label={
+                picked
+                  ? `Don't add ${college.school_name}`
+                  : `Add ${college.school_name} to your list`
               }
-              disabled={!ready || adding}
-              onClick={() => add(college)}
-              className="flex size-8 shrink-0 items-center justify-center rounded-full border border-greyish-brown bg-off-white hover:bg-lightest-green disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-off-white"
+              title={
+                complete
+                  ? picked
+                    ? "Will be added when you save"
+                    : "Add to your list"
+                  : "Pick a cycle and classification first"
+              }
+              disabled={!complete || adding}
+              onClick={() => select(college.id, { picked: !picked })}
+              className={cn(
+                "flex size-8 shrink-0 items-center justify-center rounded-full border disabled:cursor-not-allowed disabled:opacity-40",
+                picked
+                  ? "border-dark-green bg-dark-green text-white hover:bg-dark-green/90"
+                  : "border-greyish-brown bg-off-white hover:bg-lightest-green disabled:hover:bg-off-white",
+              )}
             >
-              {adding && addingId === college.id ? (
-                <span className="font-host text-[10px]">...</span>
+              {picked ? (
+                <Check aria-hidden="true" className="size-4" />
               ) : (
                 <img src={plusIcon} alt="" width={16} height={16} />
               )}
@@ -182,7 +249,7 @@ export default function AddSchoolModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={close}>
       <DialogContent
         showCloseButton={false}
         // start in the search box instead of on the close button
@@ -208,11 +275,11 @@ export default function AddSchoolModal({
           Add School
         </DialogTitle>
         <DialogDescription className="sr-only">
-          Search for a school, pick how you&apos;re applying, and add it to your
-          list.
+          Search for schools, pick how you&apos;re applying to each, mark them
+          with the plus button, then save to add them to your list.
         </DialogDescription>
 
-        <div className="flex h-[500px] max-h-[60vh] w-full flex-col gap-2.5 px-[30px] py-2.5">
+        <div className="flex h-[500px] max-h-[55vh] w-full flex-col gap-2.5 px-[30px] py-2.5">
           <label className="flex h-10 w-full shrink-0 items-center gap-2 rounded-full border border-greyish-brown bg-white px-3">
             <span className="flex size-4 shrink-0 items-center justify-center">
               <img src={searchIcon} alt="" width={12.6667} height={12.6667} />
@@ -231,7 +298,7 @@ export default function AddSchoolModal({
 
           {error != null && (
             <p role="alert" className="font-host text-sm text-danger">
-              Error: {errorMessage(error)}
+              Couldn&apos;t add every school: {errorMessage(error)}
             </p>
           )}
 
@@ -250,10 +317,22 @@ export default function AddSchoolModal({
             type="button"
             data-slot="chat-counselor"
             onClick={() => navigate("/chats")}
-            className="flex items-center justify-center gap-[3px] rounded-[10px] border border-white bg-black px-4 py-2 font-host text-[13px] leading-[normal] text-white hover:bg-black/85"
+            className="flex h-[29px] items-center justify-center gap-[3px] rounded-[10px] border border-white bg-light-black px-4 py-2 font-host text-[13px] leading-[normal] text-white hover:bg-light-black/85"
           >
             <img src={chatCircleIcon} alt="" width={15} height={15} />
             Chat with your counselor
+          </button>
+        </div>
+
+        <div className="flex w-full justify-end px-[27px] py-5">
+          <button
+            type="button"
+            data-slot="primary-action"
+            disabled={pickedSchools.length === 0 || adding}
+            onClick={save}
+            className="rounded-lg bg-dark-green px-4 py-2 font-host text-xs leading-[normal] text-white hover:bg-dark-green/90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {adding ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </DialogContent>
