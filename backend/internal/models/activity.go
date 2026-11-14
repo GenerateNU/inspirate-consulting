@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -24,4 +26,14 @@ type Activity struct {
 	GlobalCollegeID   *int64     `json:"global_college_id,omitempty"`
 	ExtracurricularID *int64     `json:"extracurricular_id,omitempty"`
 	TodoItemID        *uuid.UUID `json:"todo_item_id,omitempty"`
+	CreatedAt         time.Time  `json:"created_at"`
+}
+
+type CreateActivityBody struct {
+	Action            Action     `json:"action" enum:"added_school,removed_school,essay_status_changed,added_extracurricular,removed_extracurricular,task_past_due"`
+	EssayID           *uuid.UUID `json:"essay_id,omitempty" required:"false"`
+	EssayStatus       *Status    `json:"essay_status,omitempty" required:"false" enum:"Submitted,Draft,Review,Archived"`
+	GlobalCollegeID   *int64     `json:"global_college_id,omitempty" required:"false"`
+	ExtracurricularID *int64     `json:"extracurricular_id,omitempty" required:"false"`
+	TodoItemID        *uuid.UUID `json:"todo_item_id,omitempty" required:"false"`
 }
