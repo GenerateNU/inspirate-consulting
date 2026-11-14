@@ -32,7 +32,7 @@ import (
 // For each schema, their interfaces are to be defined here
 type ActivityRepository interface {
 	CreateActivity(ctx context.Context, studentID uuid.UUID, body models.CreateActivityBody) error
-	GetActivitiesForCounselor(ctx context.Context, counselorID uuid.UUID) ([]models.Activity, error)
+	GetActivitiesForCounselor(ctx context.Context, counselorID uuid.UUID, studentID *uuid.UUID) ([]models.Activity, error)
 }
 
 type GreetingRepository interface {
