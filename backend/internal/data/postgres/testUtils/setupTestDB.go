@@ -25,8 +25,9 @@ func ensureContainerAndTemplate() error {
 
 		log.Println("Starting reusable PostgreSQL container...")
 
+		// pgvector image = postgres 15 + the vector extension (Supabase ships it built in)
 		pg, err := postgres.Run(ctx,
-			"postgres:15-alpine",
+			"pgvector/pgvector:0.8.0-pg15",
 			postgres.WithDatabase("postgres"),
 			postgres.WithUsername("test"),
 			postgres.WithPassword("test"),
@@ -50,6 +51,14 @@ func ensureContainerAndTemplate() error {
 
 		adminPool, err = pgxpool.New(ctx, connStr)
 		if err != nil {
+			setupErr = err
+			return
+		}
+
+		// Match Supabase: extensions live in the "extensions" schema, which is on the search path
+		// so types/operators like vector and <=> resolve without a schema prefix.
+		// Set on the role (not the database) so it carries over to DBs cloned from the template.
+		if _, err := adminPool.Exec(ctx, `ALTER ROLE test SET search_path = "$user", public, extensions`); err != nil {
 			setupErr = err
 			return
 		}
@@ -93,6 +102,10 @@ func createTemplateDB(ctx context.Context) error {
 	defer pool.Close()
 
 	applyFastSettings(pool)
+
+	if _, err := pool.Exec(ctx, `CREATE SCHEMA IF NOT EXISTS extensions`); err != nil {
+		return err
+	}
 
 	if err := runSQLDir(pool, "internal/supabase/migrations"); err != nil {
 		return fmt.Errorf("migrations failed: %w", err)
