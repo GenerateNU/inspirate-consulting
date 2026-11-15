@@ -28,7 +28,7 @@ func (r *GlobalCollegeRepository) GetGlobalCollege(ctx context.Context, id int64
 	}
 	defer rows.Close()
 
-	globalCollege, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[models.GlobalCollege])
+	row, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[collegeRow])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errs.NotFound("global college", "id", strconv.FormatInt(id, 10))
@@ -36,5 +36,10 @@ func (r *GlobalCollegeRepository) GetGlobalCollege(ctx context.Context, id int64
 		return nil, err
 	}
 
-	return &globalCollege, nil
+	colleges := []models.GlobalCollege{row.toModel()}
+	if err := attachCycles(ctx, r.db, colleges); err != nil {
+		return nil, err
+	}
+
+	return &colleges[0], nil
 }

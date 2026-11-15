@@ -8,9 +8,15 @@ INSERT INTO public.extracurriculars (
     leadership_role,
     start_date,
     end_date,
-    organization
+    organization,
+    hours_per_week,
+    weeks_per_year,
+    goals,
+    ready_for_application,
+    application_description
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+    $11, $12, $13, COALESCE($14, false), $15
 )
 RETURNING
     id,
@@ -25,4 +31,9 @@ RETURNING
     leadership_role,
     start_date,
     end_date,
-    organization;
+    organization,
+    hours_per_week,
+    weeks_per_year,
+    goals,
+    ready_for_application,
+    application_description;

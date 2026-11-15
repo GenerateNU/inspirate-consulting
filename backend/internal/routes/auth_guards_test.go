@@ -56,6 +56,11 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
 
+	// profile pictures
+	{http.MethodPut, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+
 	// greeting
 	{http.MethodPost, "/greeting", guarded, []string{roleCounselor}},
 
@@ -64,7 +69,7 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/essays", guarded, []string{roleStudent}},
 	{http.MethodPatch, "/essays/{essay_id}/status", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/essay-groups/{essay_group_id}/essays", anyRole, nil},
-	{http.MethodPatch, "/essays/{essay_id}/group", anyRole, nil},
+	{http.MethodPatch, "/essays/{essay_id}/group", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPost, "/essay-groups", anyRole, nil},
 	{http.MethodGet, "/students/{student_id}/essay-groups", anyRole, nil},
 	{http.MethodPost, "/reviews", guarded, []string{roleStudent}},
@@ -80,11 +85,17 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
+	// activity
+	{http.MethodGet, "/activity", guarded, []string{roleCounselor}},
+
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
+
+	// llm
+	{http.MethodPost, "/llm/ask", guarded, []string{roleCounselor}},
 
 	// colleges & applications
 	{http.MethodPost, "/colleges", guarded, []string{roleCounselor}},
@@ -94,7 +105,7 @@ var routeTable = []routeAccess{
 	{http.MethodDelete, "/colleges/{id}", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/college-search", anyRole, nil},
 	{http.MethodPost, "/applications", guarded, []string{roleStudent}},
-	{http.MethodGet, "/applications", guarded, []string{roleStudent}},
+	{http.MethodGet, "/applications", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodDelete, "/applications/{id}", guarded, []string{roleStudent}},
 	{http.MethodPut, "/applications/{id}", guarded, []string{roleStudent}},
 	{http.MethodPut, "/applications/{id}/rank", guarded, []string{roleStudent}},
@@ -118,16 +129,24 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/media", anyRole, nil},
 	{http.MethodGet, "/media/{id}", anyRole, nil},
 	{http.MethodGet, "/media", anyRole, nil},
-	{http.MethodDelete, "/media/{id}", anyRole, nil},
+	{http.MethodDelete, "/media/{id}", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/media/{id}", anyRole, nil},
 	{http.MethodPost, "/media-access", anyRole, nil},
-	{http.MethodDelete, "/media-access/{id}", anyRole, nil},
+	{http.MethodDelete, "/media-access/{id}", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/media-access", anyRole, nil},
 
 	// extracurriculars
 	{http.MethodPost, "/extracurriculars", anyRole, nil},
 	{http.MethodGet, "/extracurriculars", anyRole, nil},
-	{http.MethodPatch, "/extracurriculars/{id}", anyRole, nil},
+	{http.MethodPatch, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodGet, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/extracurriculars/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPost, "/extracurriculars/{id}/notes", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/extracurriculars/{id}/notes/{noteId}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/extracurriculars/{id}/notes/{noteId}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPost, "/extracurriculars/{id}/achievements", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/extracurriculars/{id}/achievements/{achievementId}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/extracurriculars/{id}/achievements/{achievementId}", guarded, []string{roleStudent, roleCounselor}},
 
 	// chat
 	{http.MethodPost, "/messages", anyRole, nil},
@@ -303,6 +322,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"POST /colleges",
 		"POST /videos",
 		"DELETE /videos",
+		"GET /activity",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
 		"PUT /colleges/{id}",
@@ -313,12 +333,14 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"GET /students/fetchall",
 		"PATCH /students/assign",
 		"PATCH /todo-items/{id}/description",
+		"DELETE /media-access/{id}",
+		"DELETE /media/{id}",
+		"POST /llm/ask",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",
 		"POST /reviews",
 		"POST /applications",
-		"GET /applications",
 		"DELETE /applications/{id}",
 		"PUT /applications/{id}",
 		"PUT /applications/{id}/rank",

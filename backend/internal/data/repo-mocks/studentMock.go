@@ -20,7 +20,7 @@ type StudentRepository struct {
 }
 
 // AssignCounselor provides a mock function with given fields: ctx, studentUserID, counselorID
-func (_m *StudentRepository) AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error) {
+func (_m *StudentRepository) AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID *uuid.UUID) (*models.Student, error) {
 	ret := _m.Called(ctx, studentUserID, counselorID)
 
 	if len(ret) == 0 {
@@ -29,10 +29,10 @@ func (_m *StudentRepository) AssignCounselor(ctx context.Context, studentUserID 
 
 	var r0 *models.Student
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, uuid.UUID) (*models.Student, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *uuid.UUID) (*models.Student, error)); ok {
 		return rf(ctx, studentUserID, counselorID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, uuid.UUID) *models.Student); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *uuid.UUID) *models.Student); ok {
 		r0 = rf(ctx, studentUserID, counselorID)
 	} else {
 		if ret.Get(0) != nil {
@@ -40,7 +40,7 @@ func (_m *StudentRepository) AssignCounselor(ctx context.Context, studentUserID 
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, uuid.UUID) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, *uuid.UUID) error); ok {
 		r1 = rf(ctx, studentUserID, counselorID)
 	} else {
 		r1 = ret.Error(1)
@@ -72,6 +72,36 @@ func (_m *StudentRepository) GetStudent(ctx context.Context, id uuid.UUID) (*mod
 
 	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
 		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetStudentIDByUserID provides a mock function with given fields: ctx, userID
+func (_m *StudentRepository) GetStudentIDByUserID(ctx context.Context, userID uuid.UUID) (uuid.UUID, error) {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStudentIDByUserID")
+	}
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) (uuid.UUID, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) uuid.UUID); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

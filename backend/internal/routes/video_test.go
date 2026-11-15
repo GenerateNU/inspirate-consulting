@@ -38,7 +38,11 @@ func TestRoute_UploadVideo(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewVideoRepository(t)
-		mockRepo.On("PresignUpload", mock.Anything, "common-app-tips.mp4").Return(&models.PresignUploadResponse{
+		mockRepo.On("PresignUpload", mock.Anything, models.PresignUploadRequestBody{
+			OriginalFilename: "common-app-tips.mp4",
+			ContentType:      "video/mp4",
+			ContentLength:    1024,
+		}).Return(&models.PresignUploadResponse{
 			S3Key:     "videos/uuid-common-app-tips.mp4",
 			UploadURL: "https://bucket.s3.amazonaws.com/videos/uuid-common-app-tips.mp4?X-Amz-...",
 		}, nil)
@@ -46,7 +50,11 @@ func TestRoute_UploadVideo(t *testing.T) {
 		app, err := setupTestAppWithVideo(mockRepo)
 		require.NoError(t, err)
 
-		payload := map[string]string{"original_filename": "common-app-tips.mp4"}
+		payload := map[string]any{
+			"original_filename": "common-app-tips.mp4",
+			"content_type":      "video/mp4",
+			"content_length":    1024,
+		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
 
@@ -71,29 +79,41 @@ func TestRoute_UploadVideo(t *testing.T) {
 		assert.Equal(t, "videos/uuid-common-app-tips.mp4", output.S3Key)
 	})
 
-	t.Run("validation error : missing original_filename", func(t *testing.T) {
+	t.Run("validation errors", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo := mocks.NewVideoRepository(t)
-		// Mock should not be called when Huma validation fails.
+		cases := map[string]map[string]any{
+			"missing original_filename": {"content_type": "video/mp4", "content_length": 1024},
+			"missing content_type":      {"original_filename": "a.mp4", "content_length": 1024},
+			"non-video content_type":    {"original_filename": "a.png", "content_type": "image/png", "content_length": 1024},
+			"missing content_length":    {"original_filename": "a.mp4", "content_type": "video/mp4"},
+			"zero content_length":       {"original_filename": "a.mp4", "content_type": "video/mp4", "content_length": 0},
+			"content_length over 5 GiB": {"original_filename": "a.mp4", "content_type": "video/mp4", "content_length": 5368709121},
+		}
+		for name, payload := range cases {
+			t.Run(name, func(t *testing.T) {
+				t.Parallel()
 
-		app, err := setupTestAppWithVideo(mockRepo)
-		require.NoError(t, err)
+				// Mock should not be called when Huma validation fails.
+				app, err := setupTestAppWithVideo(mocks.NewVideoRepository(t))
+				require.NoError(t, err)
 
-		bodyBytes, err := json.Marshal(map[string]string{})
-		require.NoError(t, err)
+				bodyBytes, err := json.Marshal(payload)
+				require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPost, "/videos", bytes.NewReader(bodyBytes))
-		require.NoError(t, err)
-		req.Header.Set("Content-Type", "application/json")
+				req, err := http.NewRequest(http.MethodPost, "/videos", bytes.NewReader(bodyBytes))
+				require.NoError(t, err)
+				req.Header.Set("Content-Type", "application/json")
 
-		resp, err := app.Test(req)
-		require.NoError(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
+				resp, err := app.Test(req)
+				require.NoError(t, err)
+				defer func() {
+					_ = resp.Body.Close()
+				}()
 
-		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+				assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+			})
+		}
 	})
 }
 

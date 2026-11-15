@@ -50,7 +50,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 		t.Parallel()
 
 		edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
-		college := &models.GlobalCollege{ID: 1, SchoolName: "Northeastern University", EDDeadline: &edDeadline}
+		college := &models.GlobalCollege{ID: 1, SchoolName: "Northeastern University", Cycles: []models.CollegeApplicationCycle{{Cycle: "ED", Deadline: &edDeadline}}}
 		expectedApplication := &models.PersonalCollegeApplication{
 			ID:              1,
 			StudentID:       studentID,
@@ -105,7 +105,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		// College only offers ED; EADeadline is nil.
 		edDeadline := time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)
-		college := &models.GlobalCollege{ID: 1, SchoolName: "Northeastern University", EDDeadline: &edDeadline}
+		college := &models.GlobalCollege{ID: 1, SchoolName: "Northeastern University", Cycles: []models.CollegeApplicationCycle{{Cycle: "ED", Deadline: &edDeadline}}}
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
@@ -277,7 +277,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 		t.Parallel()
 
 		deadline := time.Now().Add(24 * time.Hour)
-		college := &models.GlobalCollege{ID: 1, SchoolName: "Test U", RDDeadline: &deadline}
+		college := &models.GlobalCollege{ID: 1, SchoolName: "Test U", Cycles: []models.CollegeApplicationCycle{{Cycle: "RD", Deadline: &deadline}}}
 
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
@@ -289,7 +289,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
 		require.NoError(t, err)
 
-		payload := map[string]any{"global_college_id": 1, "application_type": "RD", "category": "safety"}
+		payload := map[string]any{"global_college_id": 1, "application_type": "RD", "category": "safety", "application_status": "not_started"}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
 
@@ -314,7 +314,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
 		require.NoError(t, err)
 
-		payload := map[string]any{"global_college_id": 1, "application_type": "BOGUS", "category": "safety"}
+		payload := map[string]any{"global_college_id": 1, "application_type": "BOGUS", "category": "safety", "application_status": "not_started"}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
 

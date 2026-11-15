@@ -29,6 +29,10 @@ import type {
   CreateUserInputBody,
   CurrentUser,
   ErrorModel,
+  Pfp,
+  PresignPfpUploadRequestBody,
+  PresignUploadResponse,
+  UpdatePfpRequestBody,
   UpdateUserBody,
   User
 } from '../../models';
@@ -88,7 +92,7 @@ export const getUpdateUserUrl = () => {
 }
 
 /**
- * Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.
+ * Update the authenticated user's name. Fields left out of the request are not changed. Use /user/pfp to change the profile picture.
  */
 export const updateUser = async (updateUserBody: NonReadonly<UpdateUserBody>, options?: RequestInit): Promise<User> => {
 
@@ -386,7 +390,287 @@ export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUs
 
 
 
-export const getFetchUserUrl = (id: string,) => {
+export const getDeletePfpUrl = () => {
+
+
+
+
+  return `/api/user/pfp`
+}
+
+/**
+ * Remove the logged-in user's profile picture.
+ */
+export const deletePfp = async ( options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeletePfpUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeletePfpMutationKey = () => ['deletePfp'] as const;
+
+export const getDeletePfpMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePfp>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePfp>>, TError,void, TContext> => {
+
+const mutationKey = getDeletePfpMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePfp>>, void> = () => {
+
+
+          return  deletePfp(fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePfpMutationResult = NonNullable<Awaited<ReturnType<typeof deletePfp>>>
+
+    export type DeletePfpMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+
+
+    export const useDeletePfp = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePfp>>, TError,void, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePfp>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeletePfpMutationOptions(options), queryClient);
+    }
+    export const getUpdatePfpUrl = () => {
+
+
+
+
+  return `/api/user/pfp`
+}
+
+/**
+ * Save an uploaded image as the logged-in user's profile picture. The previous picture is deleted.
+ */
+export const updatePfp = async (updatePfpRequestBody: NonReadonly<UpdatePfpRequestBody>, options?: RequestInit): Promise<Pfp> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdatePfpUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updatePfpRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: Pfp, status?: number} = new globalThis.Error();
+    const data : Pfp = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Pfp = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdatePfpMutationKey = () => ['updatePfp'] as const;
+
+export const getUpdatePfpMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePfp>>, TError,UpdatePfpMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePfp>>, TError,UpdatePfpMutationVariables, TContext> => {
+
+const mutationKey = getUpdatePfpMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePfp>>, UpdatePfpMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updatePfp(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePfpMutationResult = NonNullable<Awaited<ReturnType<typeof updatePfp>>>
+    export type UpdatePfpMutationBody = NonReadonly<UpdatePfpRequestBody>
+    export type UpdatePfpMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdatePfpMutationVariables = {data: NonReadonly<UpdatePfpRequestBody>}
+
+    export const useUpdatePfp = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePfp>>, TError,UpdatePfpMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePfp>>,
+        TError,
+        UpdatePfpMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdatePfpMutationOptions(options), queryClient);
+    }
+    export const getPresignPfpUploadUrl = () => {
+
+
+
+
+  return `/api/user/pfp`
+}
+
+/**
+ * Get a presigned URL to upload a new profile picture. PUT the image to upload_url, then send s3_key to PATCH /user/pfp to save it.
+ */
+export const presignPfpUpload = async (presignPfpUploadRequestBody: NonReadonly<PresignPfpUploadRequestBody>, options?: RequestInit): Promise<PresignUploadResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getPresignPfpUploadUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(presignPfpUploadRequestBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: PresignUploadResponse, status?: number} = new globalThis.Error();
+    const data : PresignUploadResponse = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: PresignUploadResponse = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getPresignPfpUploadMutationKey = () => ['presignPfpUpload'] as const;
+
+export const getPresignPfpUploadMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof presignPfpUpload>>, TError,PresignPfpUploadMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof presignPfpUpload>>, TError,PresignPfpUploadMutationVariables, TContext> => {
+
+const mutationKey = getPresignPfpUploadMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof presignPfpUpload>>, PresignPfpUploadMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  presignPfpUpload(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PresignPfpUploadMutationResult = NonNullable<Awaited<ReturnType<typeof presignPfpUpload>>>
+    export type PresignPfpUploadMutationBody = NonReadonly<PresignPfpUploadRequestBody>
+    export type PresignPfpUploadMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type PresignPfpUploadMutationVariables = {data: NonReadonly<PresignPfpUploadRequestBody>}
+
+    export const usePresignPfpUpload = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof presignPfpUpload>>, TError,PresignPfpUploadMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof presignPfpUpload>>,
+        TError,
+        PresignPfpUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPresignPfpUploadMutationOptions(options), queryClient);
+    }
+    export const getFetchUserUrl = (id: string,) => {
 
 
 

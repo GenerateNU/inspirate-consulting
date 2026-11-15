@@ -12,8 +12,13 @@ func TestExtracurricularSQLFiles(t *testing.T) {
 
 	for _, filename := range []string{
 		"create_extracurricular.sql",
+		"get_student_id.sql",
 		"list_extracurriculars.sql",
 		"update_extracurricular.sql",
+		"get_extracurricular.sql",
+		"list_extracurricular_achievements.sql",
+		"list_extracurricular_notes.sql",
+		"delete_extracurricular.sql",
 	} {
 		t.Run(filename, func(t *testing.T) {
 			t.Parallel()

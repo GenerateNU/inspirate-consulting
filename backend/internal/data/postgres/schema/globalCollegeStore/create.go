@@ -3,8 +3,8 @@ package globalCollegeRepository
 import (
 	"context"
 	"errors"
-	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"inspirate-consulting/internal/data/postgres/schema"
@@ -12,45 +12,45 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
+// creates a global college and its application cycles in one transaction
 func (r *GlobalCollegeRepository) CreateGlobalCollege(ctx context.Context, inputGlobalCollege models.CreateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
-
-	createdGlobalCollege := &models.GlobalCollege{}
-
 	insertQuery, err := schema.ReadSQLBaseScript("create_global_college.sql", SqlGlobalCollegeFiles)
 	if err != nil {
-		fmt.Println("[db] ReadSQLBaseScript error:", err)
-		err := errs.InternalServerError("Failed to read base query: ", err.Error())
-		return nil, err
+		return nil, errs.InternalServerError("Failed to read base query: ", err.Error())
 	}
 
-	err = r.db.QueryRow(
-		ctx,
-		insertQuery,
-		inputGlobalCollege.SchoolName,
-		inputGlobalCollege.SchoolLocation,
-		inputGlobalCollege.EADeadline,
-		inputGlobalCollege.EDDeadline,
-		inputGlobalCollege.RDDeadline,
-	).Scan(
-		&createdGlobalCollege.ID,
-		&createdGlobalCollege.CreatedAt,
-		&createdGlobalCollege.UpdatedAt,
-		&createdGlobalCollege.SchoolName,
-		&createdGlobalCollege.SchoolLocation,
-		&createdGlobalCollege.EADeadline,
-		&createdGlobalCollege.EDDeadline,
-		&createdGlobalCollege.RDDeadline,
-	)
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	rows, err := tx.Query(ctx, insertQuery, inputGlobalCollege.SchoolName, inputGlobalCollege.SchoolLocation)
+	if err != nil {
+		return nil, err
+	}
+	row, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[collegeRow])
 	if err != nil {
 		var pgErr *pgconn.PgError
 
 		// to return a conflict error if the school_name and school_location combination already exists (exact case-insensitive match)
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		if errors.As(err, &pgErr) && pgErr.Code == pgUniqueViolationCode {
 			return nil, errs.Conflict("global college", "school_name/school_location", inputGlobalCollege.SchoolName+" / "+inputGlobalCollege.SchoolLocation)
 		}
-
 		return nil, err
 	}
 
-	return createdGlobalCollege, nil
+	if err := replaceCycles(ctx, tx, row.ID, inputGlobalCollege.Cycles); err != nil {
+		return nil, mapCycleError(err)
+	}
+
+	colleges := []models.GlobalCollege{row.toModel()}
+	if err := attachCycles(ctx, tx, colleges); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return &colleges[0], nil
 }

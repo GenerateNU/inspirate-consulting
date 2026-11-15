@@ -21,11 +21,9 @@ func TestUpdateUser(t *testing.T) {
 	repo := NewUserRepository(db)
 	ctx := context.Background()
 
-	key := "old-key"
 	input := models.CreateUserInput{}
 	input.Body.Name = "Old Name"
 	input.Body.Email = "updateme@gmail.com"
-	input.Body.PfpKey = &key
 	input.Body.Role = models.CounselorRole
 
 	created, err := repo.CreateUser(ctx, input, uuid.New())
@@ -34,17 +32,13 @@ func TestUpdateUser(t *testing.T) {
 	}
 
 	name := "New Name"
-	newKey := "new-key"
-	updated, err := repo.UpdateUser(ctx, created.Body.User.ID, models.UpdateUserBody{Name: &name, PfpKey: &newKey})
+	updated, err := repo.UpdateUser(ctx, created.Body.User.ID, models.UpdateUserBody{Name: &name})
 	if err != nil {
 		t.Fatalf("UpdateUser failed: %v", err)
 	}
 
 	if updated.Name != name {
 		t.Errorf("expected name %q, got %q", name, updated.Name)
-	}
-	if updated.PfpKey == nil || *updated.PfpKey != newKey {
-		t.Errorf("expected pfp_key %q, got %v", newKey, updated.PfpKey)
 	}
 	if updated.Email != input.Body.Email {
 		t.Errorf("expected email %q to be unchanged, got %q", input.Body.Email, updated.Email)
@@ -62,11 +56,9 @@ func TestUpdateUser_Partial(t *testing.T) {
 	repo := NewUserRepository(db)
 	ctx := context.Background()
 
-	key := "kept-key"
 	input := models.CreateUserInput{}
 	input.Body.Name = "Old Name"
 	input.Body.Email = "partial@gmail.com"
-	input.Body.PfpKey = &key
 	input.Body.Role = models.CounselorRole
 
 	created, err := repo.CreateUser(ctx, input, uuid.New())
@@ -74,17 +66,13 @@ func TestUpdateUser_Partial(t *testing.T) {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	name := "New Name"
-	updated, err := repo.UpdateUser(ctx, created.Body.User.ID, models.UpdateUserBody{Name: &name})
+	updated, err := repo.UpdateUser(ctx, created.Body.User.ID, models.UpdateUserBody{})
 	if err != nil {
 		t.Fatalf("UpdateUser failed: %v", err)
 	}
 
-	if updated.Name != name {
-		t.Errorf("expected name %q, got %q", name, updated.Name)
-	}
-	if updated.PfpKey == nil || *updated.PfpKey != key {
-		t.Errorf("expected pfp_key %q to be unchanged, got %v", key, updated.PfpKey)
+	if updated.Name != input.Body.Name {
+		t.Errorf("expected name %q to be unchanged, got %q", input.Body.Name, updated.Name)
 	}
 }
 

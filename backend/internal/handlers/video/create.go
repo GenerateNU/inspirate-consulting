@@ -7,9 +7,9 @@ import (
 )
 
 // UploadVideo uploads a new video to the S3 bucket
-func (h *Handler) UploadVideo(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error) {
+func (h *Handler) UploadVideo(ctx context.Context, input models.PresignUploadRequestBody) (*models.PresignUploadResponse, error) {
 
-	presignUploadResponse, err := h.VideoRepository.PresignUpload(ctx, originalFilename)
+	presignUploadResponse, err := h.VideoRepository.PresignUpload(ctx, input)
 	if err != nil {
 		return nil, err
 	}

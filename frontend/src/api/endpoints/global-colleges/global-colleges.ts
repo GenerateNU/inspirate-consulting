@@ -316,7 +316,7 @@ export const getCreateGlobalCollegeUrl = () => {
 }
 
 /**
- * Create a global college with a name, location, and optional EA/ED/RD deadlines.
+ * Create a global college with a name, location, and the application cycles it offers (ED, ED2, REA, EA, RD, ROLLING).
  */
 export const createGlobalCollege = async (createGlobalCollegeRequestBody: NonReadonly<CreateGlobalCollegeRequestBody>, options?: RequestInit): Promise<GlobalCollege> => {
 
@@ -609,7 +609,7 @@ export const getUpdateGlobalCollegeUrl = (id: number,) => {
 }
 
 /**
- * Update a global college's details.
+ * Update a global college's name, location, and application cycles. cycles replaces the full set; applications under a removed cycle are kept and come back with cycle_offered=false.
  */
 export const updateGlobalCollege = async (id: number,
     updateGlobalCollegeRequestBody: NonReadonly<UpdateGlobalCollegeRequestBody>, options?: RequestInit): Promise<GlobalCollege> => {

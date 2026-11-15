@@ -5,6 +5,7 @@ import {
   useSetStudentReviewBalance,
 } from "../api/endpoints";
 import { Link } from "react-router-dom";
+import RecentActivity from "./recent-activity";
 
 export default function Counselor() {
   // Complete a review
@@ -48,6 +49,9 @@ export default function Counselor() {
       <Link to="/assign-task" className="rounded bg-black px-6 py-2 text-white">
         Assign Task →
       </Link>
+
+      <RecentActivity />
+
       <h2>Complete a Review</h2>
       <form onSubmit={handleComplete}>
         <div className="form-group">

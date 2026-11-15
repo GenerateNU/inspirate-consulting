@@ -25,9 +25,9 @@ func TestCreateGlobalCollege(t *testing.T) {
 	input := models.CreateGlobalCollegeRequestBody{
 		SchoolName:     "Test University",
 		SchoolLocation: "Test City, TS",
-		EADeadline:     nil,
-		EDDeadline:     &edDeadline,
-		RDDeadline:     nil,
+		Cycles: []models.CollegeApplicationCycle{
+			{Cycle: models.ApplicationCycleED, Deadline: &edDeadline},
+		},
 	}
 
 	output, err := repo.CreateGlobalCollege(ctx, input)
@@ -45,17 +45,14 @@ func TestCreateGlobalCollege(t *testing.T) {
 	if created.SchoolLocation != input.SchoolLocation {
 		t.Errorf("expected SchoolLocation %q, got %q", input.SchoolLocation, created.SchoolLocation)
 	}
-	if created.EADeadline != nil {
-		t.Errorf("expected nil EADeadline, got %v", created.EADeadline)
+	if len(created.Cycles) != 1 {
+		t.Fatalf("expected 1 cycle, got %d", len(created.Cycles))
 	}
-	if created.RDDeadline != nil {
-		t.Errorf("expected nil RDDeadline, got %v", created.RDDeadline)
+	if created.Cycles[0].Cycle != models.ApplicationCycleED {
+		t.Errorf("expected cycle ED, got %q", created.Cycles[0].Cycle)
 	}
-	if created.EDDeadline == nil {
-		t.Fatal("expected non-nil EDDeadline")
-	}
-	if !created.EDDeadline.Equal(edDeadline) {
-		t.Errorf("expected EDDeadline %v, got %v", edDeadline, *created.EDDeadline)
+	if created.Cycles[0].Deadline == nil || !created.Cycles[0].Deadline.Equal(edDeadline) {
+		t.Errorf("expected ED deadline %v, got %v", edDeadline, created.Cycles[0].Deadline)
 	}
 	if created.CreatedAt.IsZero() {
 		t.Error("expected CreatedAt to be set")
@@ -65,7 +62,7 @@ func TestCreateGlobalCollege(t *testing.T) {
 	}
 }
 
-func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
+func TestCreateGlobalCollege_NoCycles(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
@@ -82,13 +79,12 @@ func TestCreateGlobalCollege_AllDeadlinesNull(t *testing.T) {
 
 	output, err := repo.CreateGlobalCollege(ctx, input)
 	if err != nil {
-		t.Fatalf("expected create with all-nil deadlines to succeed, got error: %v", err)
+		t.Fatalf("expected create with no cycles to succeed, got error: %v", err)
 	}
 	created := output
 
-	if created.EADeadline != nil || created.EDDeadline != nil || created.RDDeadline != nil {
-		t.Errorf("expected all deadlines nil, got EA=%v ED=%v RD=%v",
-			created.EADeadline, created.EDDeadline, created.RDDeadline)
+	if created.Cycles == nil || len(created.Cycles) != 0 {
+		t.Errorf("expected an empty (non-nil) cycles list, got %v", created.Cycles)
 	}
 }
 

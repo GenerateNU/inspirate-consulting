@@ -5,8 +5,6 @@ import (
 
 	"inspirate-consulting/internal/data/postgres/schema"
 	"inspirate-consulting/internal/models"
-
-	"github.com/jackc/pgx/v5"
 )
 
 // matches query against either school_name OR school_location
@@ -21,7 +19,7 @@ func (r *GlobalCollegeRepository) SearchGlobalColleges(ctx context.Context, quer
 		return nil, err
 	}
 
-	colleges, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.GlobalCollege])
+	colleges, err := collectColleges(ctx, r.db, rows)
 	if err != nil {
 		return nil, err
 	}

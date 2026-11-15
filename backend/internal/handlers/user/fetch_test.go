@@ -38,7 +38,7 @@ func TestHandler_FetchUser(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("FetchUser", mock.Anything, input).Return(&expectedOutput, nil)
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		res, err := handler.FetchUser(ctx, &input)
 
 		assert.NoError(t, err)
@@ -53,7 +53,7 @@ func TestHandler_FetchUser(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		mockRepo.On("FetchUser", mock.Anything, input).Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockRepo, nil)
+		handler := NewHandler(mockRepo, nil, nil)
 		res, err := handler.FetchUser(ctx, &input)
 
 		assert.Error(t, err)

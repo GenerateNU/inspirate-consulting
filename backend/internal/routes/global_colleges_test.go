@@ -55,7 +55,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 			UpdatedAt:      createdAt,
 			SchoolName:     "Northeastern University",
 			SchoolLocation: "Boston, MA",
-			EDDeadline:     &edDeadline,
+			Cycles:         []models.CollegeApplicationCycle{{Cycle: "ED", Deadline: &edDeadline}},
 		}, nil)
 
 		app, err := setupTestAppWithGlobalCollege(mockRepo)
@@ -64,7 +64,7 @@ func TestRoute_CreateGlobalCollege(t *testing.T) {
 		payload := map[string]any{
 			"school_name":     "Northeastern University",
 			"school_location": "Boston, MA",
-			"ed_deadline":     edDeadline,
+			"cycles":          []map[string]any{{"cycle": "ED", "deadline": edDeadline}},
 		}
 		bodyBytes, err := json.Marshal(payload)
 		require.NoError(t, err)
@@ -295,7 +295,7 @@ func TestRoute_CreateGlobalCollege_NearDuplicate(t *testing.T) {
 func TestRoute_UpdateGlobalCollege(t *testing.T) {
 	t.Parallel()
 
-	payload := map[string]any{"school_name": "Updated U", "school_location": "Updated City, UC"}
+	payload := map[string]any{"school_name": "Updated U", "school_location": "Updated City, UC", "cycles": []map[string]any{}}
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()

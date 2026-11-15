@@ -12,7 +12,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-// updates a user's name and pfp_key, leaving any nil field unchanged
+// updates a user's name, leaving any nil field unchanged
 func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, input models.UpdateUserBody) (*models.User, error) {
 	updatedUser := &models.User{}
 
@@ -27,7 +27,6 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, input mod
 		query,
 		id,
 		input.Name,
-		input.PfpKey,
 	).Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.SupabaseID, &updatedUser.PfpKey, &updatedUser.ResetTime, &updatedUser.Email, &updatedUser.ExpiresAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

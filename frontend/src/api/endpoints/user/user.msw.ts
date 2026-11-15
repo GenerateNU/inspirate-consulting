@@ -16,6 +16,8 @@ import type {
 import type {
   CreateUserBody,
   CurrentUser,
+  Pfp,
+  PresignUploadResponse,
   User
 } from '../../models';
 
@@ -23,10 +25,12 @@ import {
   getCreateUserResponseMock,
   getFetchUserResponseMock,
   getGetCurrentUserResponseMock,
+  getPresignPfpUploadResponseMock,
+  getUpdatePfpResponseMock,
   getUpdateUserResponseMock
 } from './user.faker';
 
-export { getUpdateUserResponseMock, getCreateUserResponseMock, getGetCurrentUserResponseMock, getFetchUserResponseMock } from './user.faker';
+export { getUpdateUserResponseMock, getCreateUserResponseMock, getGetCurrentUserResponseMock, getUpdatePfpResponseMock, getPresignPfpUploadResponseMock, getFetchUserResponseMock } from './user.faker';
 
 
 export const getUpdateUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
@@ -65,6 +69,40 @@ export const getGetCurrentUserMockHandler = (overrideResponse?: CurrentUser | ((
   }, options)
 }
 
+export const getDeletePfpMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/user/pfp', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 204
+      })
+  }, options)
+}
+
+export const getUpdatePfpMockHandler = (overrideResponse?: Pfp | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Pfp> | Pfp), options?: RequestHandlerOptions) => {
+  return http.patch('*/user/pfp', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdatePfpResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPresignPfpUploadMockHandler = (overrideResponse?: PresignUploadResponse | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<PresignUploadResponse> | PresignUploadResponse), options?: RequestHandlerOptions) => {
+  return http.put('*/user/pfp', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPresignPfpUploadResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getFetchUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
   return http.get('*/user/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
@@ -80,5 +118,8 @@ export const getUserMock = () => [
   getUpdateUserMockHandler(),
   getCreateUserMockHandler(),
   getGetCurrentUserMockHandler(),
+  getDeletePfpMockHandler(),
+  getUpdatePfpMockHandler(),
+  getPresignPfpUploadMockHandler(),
   getFetchUserMockHandler()
 ]

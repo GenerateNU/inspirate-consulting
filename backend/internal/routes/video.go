@@ -26,7 +26,7 @@ func SetUpVideoRoutes(api huma.API, repository *data.Repository, verifyRole auth
 		Description: "Upload a new video to the S3 bucket.",
 		Tags:        []string{"Videos"},
 	}, func(ctx context.Context, input *models.PresignUploadInput) (*models.PresignUploadOutput, error) {
-		created, err := videoHandler.UploadVideo(ctx, input.Body.OriginalFilename)
+		created, err := videoHandler.UploadVideo(ctx, input.Body)
 		if err != nil {
 			return nil, err
 		}

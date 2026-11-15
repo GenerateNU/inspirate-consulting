@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 import inspirateLogo from "@/assets/inspirate-logo.svg";
 import inspirateIcon from "@/assets/inspirate-icon.svg";
+import { useAuthContext } from "@/contexts/use-auth-context";
 import { useActiveIndicator } from "./use-active-indicator";
 
 type NavItemConfig = {
@@ -40,7 +41,7 @@ type NavItemConfig = {
 
 const mainLinks: NavItemConfig[] = [
   { to: "/student-tasks", label: "Task Dashboard", icon: ListTodo },
-  { to: "/student-college-list", label: "Colleges", icon: School },
+  { to: "/college-applications", label: "Colleges", icon: School },
   { to: "/essay", label: "Essays", icon: FileText },
   { to: "/extracurriculars", label: "Extracurriculars", icon: Palette },
   { to: "/videos", label: "Modules", icon: SquarePlay },
@@ -109,8 +110,16 @@ export default function NavBar() {
   const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const { pathname } = useLocation();
   const collapsed = state === "collapsed" && !isMobile;
+  const { role } = useAuthContext();
 
-  const activePath = [...mainLinks, ...footerLinks].find((item) =>
+  // My List is student-only; counselors manage the shared college list instead
+  const links = mainLinks.map((item) =>
+    item.label === "Colleges" && role === "counselor"
+      ? { ...item, to: "/counselor-college-list" }
+      : item,
+  );
+
+  const activePath = [...links, ...footerLinks].find((item) =>
     isActivePath(item.to, pathname),
   )?.to;
   const { containerRef, indicator, ready } = useActiveIndicator(activePath);
@@ -192,7 +201,7 @@ export default function NavBar() {
         />
 
         <SidebarContent className="px-3 pt-6">
-          <SidebarMenu className="gap-5">{renderItems(mainLinks)}</SidebarMenu>
+          <SidebarMenu className="gap-5">{renderItems(links)}</SidebarMenu>
         </SidebarContent>
 
         <SidebarFooter className="px-3 pt-3 pb-6">

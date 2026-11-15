@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/data"
 	media "inspirate-consulting/internal/handlers/media"
 	"inspirate-consulting/internal/models"
@@ -11,7 +12,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func SetUpMediaRoutes(api huma.API, repository *data.Repository) {
+func SetUpMediaRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	mediaHandler := media.NewHandler(repository.Media)
 
 	//Register POST /media handler
@@ -62,6 +63,7 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository) {
 	//Register DELETE media/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-media",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodDelete,
 		Path:        "/media/{id}",
 		Description: "Delete a video, through counselor view",

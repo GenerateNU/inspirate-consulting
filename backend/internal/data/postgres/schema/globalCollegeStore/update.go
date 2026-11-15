@@ -12,38 +12,27 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// updates a global college's name, location, and deadlines
+// updates a global college's name and location, and replaces its application cycles, in one transaction
 func (r *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id int64, input models.UpdateGlobalCollegeRequestBody) (*models.GlobalCollege, error) {
-
-	updatedCollege := &models.GlobalCollege{}
-
 	updateQuery, err := schema.ReadSQLBaseScript("update_global_college.sql", SqlGlobalCollegeFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.db.QueryRow(
-		ctx,
-		updateQuery,
-		id,
-		input.SchoolName,
-		input.SchoolLocation,
-		input.EADeadline,
-		input.EDDeadline,
-		input.RDDeadline,
-	).Scan(
-		&updatedCollege.ID,
-		&updatedCollege.SchoolName,
-		&updatedCollege.SchoolLocation,
-		&updatedCollege.EADeadline,
-		&updatedCollege.EDDeadline,
-		&updatedCollege.RDDeadline,
-		&updatedCollege.CreatedAt,
-		&updatedCollege.UpdatedAt,
-	)
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	rows, err := tx.Query(ctx, updateQuery, id, input.SchoolName, input.SchoolLocation)
+	if err != nil {
+		return nil, err
+	}
+	row, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByPos[collegeRow])
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		if errors.As(err, &pgErr) && pgErr.Code == pgUniqueViolationCode {
 			return nil, errs.Conflict("global college", "school_name/school_location", input.SchoolName+" / "+input.SchoolLocation)
 		}
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -52,5 +41,18 @@ func (r *GlobalCollegeRepository) UpdateGlobalCollege(ctx context.Context, id in
 		return nil, err
 	}
 
-	return updatedCollege, nil
+	// existing applications under a removed cycle are kept; they come back with cycle_offered=false
+	if err := replaceCycles(ctx, tx, id, input.Cycles); err != nil {
+		return nil, mapCycleError(err)
+	}
+
+	colleges := []models.GlobalCollege{row.toModel()}
+	if err := attachCycles(ctx, tx, colleges); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return &colleges[0], nil
 }
