@@ -80,6 +80,3 @@ const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const isUUID = (value: string) => UUID_PATTERN.test(value);
-
-// Route id for the pinned AI assistant chat (/chats/assistant).
-export const ASSISTANT_CHAT_ID = "assistant";

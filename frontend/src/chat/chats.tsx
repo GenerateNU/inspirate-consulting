@@ -5,14 +5,11 @@ import { useAuthContext } from "../contexts/use-auth-context";
 import { cn } from "../lib/utils";
 import ChatList from "./chat-list";
 import Conversation from "./conversation";
-import AssistantConversation from "./assistant-conversation";
-import { ASSISTANT_CHAT_ID, POLL_INTERVAL_MS } from "./chat-utils";
+import { POLL_INTERVAL_MS } from "./chat-utils";
 
 export default function Chats() {
   const { userId } = useParams();
-  const { userID: currentUserId, role } = useAuthContext();
-  const isCounselor = role === "counselor";
-  const isAssistant = userId === ASSISTANT_CHAT_ID;
+  const { userID: currentUserId } = useAuthContext();
 
   const chatsQuery = useListChats({
     query: { refetchInterval: POLL_INTERVAL_MS },
@@ -22,9 +19,7 @@ export default function Chats() {
 
   // A brand-new conversation isn't in the chat list yet, so look the name up.
   const userQuery = useFetchUser(userId ?? "", {
-    query: {
-      enabled: !!userId && !isAssistant && !chatsQuery.isLoading && !selected,
-    },
+    query: { enabled: !!userId && !chatsQuery.isLoading && !selected },
   });
   const otherUserName = selected?.other_user_name ?? userQuery.data?.name ?? "";
 
@@ -39,7 +34,6 @@ export default function Chats() {
         <ChatList
           chats={chats}
           currentUserId={currentUserId}
-          showAssistant={isCounselor}
           isLoading={chatsQuery.isLoading}
           error={chatsQuery.error ? errorMessage(chatsQuery.error) : null}
         />
@@ -51,9 +45,7 @@ export default function Chats() {
           userId ? "flex" : "hidden",
         )}
       >
-        {isAssistant ? (
-          <AssistantConversation canUse={isCounselor} />
-        ) : userId ? (
+        {userId ? (
           <Conversation
             key={userId}
             currentUserId={currentUserId}

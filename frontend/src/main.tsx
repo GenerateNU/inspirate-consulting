@@ -64,10 +64,6 @@ createRoot(document.getElementById("root")!).render(
               path="/counselor/login"
               element={<LogIn audience="counselor" />}
             />
-            <Route
-              path="/assistant"
-              element={<Navigate to="/chats/assistant" replace />}
-            />
             <Route element={<Layout />}>
               <Route path="/" element={<App />} />
               <Route path="/greeting" element={<Greeting />} />
