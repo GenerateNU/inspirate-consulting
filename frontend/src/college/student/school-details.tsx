@@ -165,7 +165,7 @@ function EssayCard({ essay }: { essay: Essays }) {
 function SchoolDetailsBody({ app }: { app: PersonalCollegeApplication }) {
   const { studentID } = useAuthContext();
   const collegeQuery = useGetGlobalCollege(app.global_college_id);
-  const essaysQuery = useGetEssaysFromStudent(studentID ?? "", {
+  const essaysQuery = useGetEssaysFromStudent(studentID ?? "", { college_id: app.global_college_id }, {
     query: { enabled: !!studentID },
   });
   const { refetch } = useListPersonalCollegeApplications();

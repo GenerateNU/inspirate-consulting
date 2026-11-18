@@ -24,6 +24,11 @@ type Essays struct {
 
 type GetEssaysFromStudentInput struct {
 	StudentID uuid.UUID `path:"student_id" doc:"Student whose essays to list"`
+	CollegeID int64     `query:"college_id" required:"false" minimum:"1" doc:"Only return essays for this college"`
+}
+
+type GetEssaysFromStudentFilter struct {
+	CollegeID *int64
 }
 
 type EssayListBody struct {

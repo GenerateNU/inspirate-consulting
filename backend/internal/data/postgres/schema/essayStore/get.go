@@ -13,20 +13,19 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error) {
+func (r *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID, filter models.GetEssaysFromStudentFilter) ([]models.Essays, error) {
 	selectQuery, err := schema.ReadSQLBaseScript("get_essays_from_student.sql", SqlEssayFiles)
 	if err != nil {
 		return nil, errs.InternalServerError("Failed to read base query: ", err.Error())
 	}
 
-	rows, err := r.db.Query(ctx, selectQuery, studentID)
+	rows, err := r.db.Query(ctx, selectQuery, studentID, filter.CollegeID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	essays, err := pgx.CollectRows(rows, pgx.RowToStructByPos[models.Essays])
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to collect essays: %w", err)
 	}

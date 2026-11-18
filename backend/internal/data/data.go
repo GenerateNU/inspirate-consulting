@@ -61,7 +61,7 @@ type ExtracurricularRepository interface {
 type EssayRepository interface {
 	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
 	UpdateEssayGroup(ctx context.Context, essayID uuid.UUID, essayGroupID *uuid.UUID) (*models.Essays, error)
-	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID, input models.GetEssaysFromStudentFilter) ([]models.Essays, error)
 	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
 	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
@@ -210,6 +210,20 @@ type StudentRepository interface {
 	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error)
 	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID *uuid.UUID) (*models.Student, error)
 	GetStudentIDByUserID(ctx context.Context, userID uuid.UUID) (uuid.UUID, error)
+}
+
+// To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)
+type VectorRepository interface {
+	SearchChatMessages(ctx context.Context, queryEmbedding []float32, userID uuid.UUID, limit int) ([]models.ChatMessageSearchResult, error)
+	SearchTodoItems(ctx context.Context, queryEmbedding []float32, studentIDs []uuid.UUID, limit int) ([]models.TodoItemSearchResult, error)
+}
+
+// Cloudflare client
+type EmbeddingClient interface {
+	// embed stored content for comparison against search prompts
+	Embed(ctx context.Context, text string) ([]float32, error)
+	// embed search prompts for comparison against stored content
+	EmbedQuery(ctx context.Context, query string) ([]float32, error)
 }
 
 // To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)
