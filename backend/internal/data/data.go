@@ -226,20 +226,6 @@ type EmbeddingClient interface {
 	EmbedQuery(ctx context.Context, query string) ([]float32, error)
 }
 
-// To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)
-type VectorRepository interface {
-	SearchChatMessages(ctx context.Context, queryEmbedding []float32, userID uuid.UUID, limit int) ([]models.ChatMessageSearchResult, error)
-	SearchTodoItems(ctx context.Context, queryEmbedding []float32, studentIDs []uuid.UUID, limit int) ([]models.TodoItemSearchResult, error)
-}
-
-// Cloudflare client
-type EmbeddingClient interface {
-	// embed stored content for comparison against search prompts
-	Embed(ctx context.Context, text string) ([]float32, error)
-	// embed search prompts for comparison against stored content
-	EmbedQuery(ctx context.Context, query string) ([]float32, error)
-}
-
 type Repository struct {
 	db *pgxpool.Pool
 
