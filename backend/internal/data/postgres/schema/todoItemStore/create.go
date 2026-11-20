@@ -41,6 +41,10 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID strin
 		&createdItem.EssayID,
 		&createdItem.MediaID,
 		&createdItem.GlobalCollegeID,
+		&createdItem.Title,
+		&createdItem.ExtracurricularID,
+		&createdItem.LinkType,
+		&createdItem.AssignmentID,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
