@@ -5,10 +5,12 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { TodoItemLinkType } from './todoItemLinkType';
 
 export interface TodoItem {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  assignment_id: string;
   /** @nullable */
   completed_at: string | null;
   created_at: string;
@@ -17,11 +19,16 @@ export interface TodoItem {
   /** @nullable */
   essay_id: string | null;
   /** @nullable */
+  extracurricular_id: number | null;
+  /** @nullable */
   global_college_id: number | null;
   id: string;
   /** @nullable */
+  link_type: TodoItemLinkType;
+  /** @nullable */
   media_id: string | null;
   student_id: string;
+  title: string;
   todo_description: string;
   updated_at: string;
   user_id: string;
