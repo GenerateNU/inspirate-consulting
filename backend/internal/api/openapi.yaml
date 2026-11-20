@@ -2088,6 +2088,8 @@ components:
           format: uri
           readOnly: true
           type: string
+        assignment_id:
+          type: string
         completed_at:
           format: date-time
           type:
@@ -2105,6 +2107,11 @@ components:
           type:
             - string
             - "null"
+        extracurricular_id:
+          format: int64
+          type:
+            - integer
+            - "null"
         global_college_id:
           format: int64
           type:
@@ -2112,11 +2119,22 @@ components:
             - "null"
         id:
           type: string
+        link_type:
+          enum:
+            - college
+            - essay
+            - extracurricular
+            - module
+          type:
+            - string
+            - "null"
         media_id:
           type:
             - string
             - "null"
         student_id:
+          type: string
+        title:
           type: string
         todo_description:
           type: string
@@ -2137,6 +2155,10 @@ components:
         - essay_id
         - media_id
         - global_college_id
+        - title
+        - extracurricular_id
+        - link_type
+        - assignment_id
       type: object
     TodoItemPage:
       additionalProperties: false
