@@ -100,8 +100,8 @@ func createTestTodoItem(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID, dea
 
 	_, err := db.Exec(
 		context.Background(),
-		`INSERT INTO public.todo_items (student_id, user_id, todo_description, deadline, completed_at)
-		VALUES ($1, $1, 'test todo', $2, $3)`,
+		`INSERT INTO public.todo_items (student_id, user_id, todo_description, deadline, completed_at, title)
+		VALUES ($1, $1, 'test todo', $2, $3, 'test todo')`,
 		studentID,
 		deadline,
 		completedAt,

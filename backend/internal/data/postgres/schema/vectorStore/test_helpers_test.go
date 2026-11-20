@@ -72,7 +72,7 @@ func createTestTodo(t *testing.T, db *pgxpool.Pool, studentID uuid.UUID, descrip
 
 	var id uuid.UUID
 	if err := db.QueryRow(context.Background(),
-		`INSERT INTO public.todo_items (student_id, user_id, todo_description) VALUES ($1, $1, $2) RETURNING id`,
+		`INSERT INTO public.todo_items (student_id, user_id, todo_description, title) VALUES ($1, $1, $2, left($2, 80)) RETURNING id`,
 		studentID, description).Scan(&id); err != nil {
 		t.Fatalf("setup createTestTodo failed: %v", err)
 	}
