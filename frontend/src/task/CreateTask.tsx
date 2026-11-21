@@ -34,6 +34,8 @@ export default function CreateTask() {
       body.deadline = new Date(
         `${deadline}T${deadlineTime || DEFAULT_DUE_TIME}`,
       ).toISOString();
+    // The backend requires link_type with any link id; videos are linked as "module"
+    if (linkType) body.link_type = linkType === "media" ? "module" : linkType;
     if (linkType === "essay") body.essay_id = linkId;
     if (linkType === "media") body.media_id = linkId;
     if (linkType === "college") body.global_college_id = Number(linkId);
