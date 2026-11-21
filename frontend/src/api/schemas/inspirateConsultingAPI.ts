@@ -435,7 +435,10 @@ export const ListCounselorStudentsResponseItem = /*#__PURE__*/ zod.object({
   "has_pending_review": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an essay review that is still open')),
   "is_falling_behind": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an incomplete to-do item past its deadline')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the student')),
+  "open_task_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of the student\'s incomplete to-do items')),
+  "pending_review_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of the student\'s essay reviews that are still open')),
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('The student\'s unique ID')),
+  "unread_message_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of messages from the student that the counselor hasn\'t read')),
   "year": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('School year of the student'))
 })
 export const ListCounselorStudentsResponse = /*#__PURE__*/ zod.array(ListCounselorStudentsResponseItem)
@@ -1489,6 +1492,49 @@ export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * edit tasks in an assignment, and add or remove students
+ */
+export const UpdateTodoAssignmentParams = /*#__PURE__*/ zod.object({
+  "assignment_id": /*#__PURE__*/ zod.string()
+})
+
+export const updateTodoAssignmentBodyTitleMax = 200;
+
+
+
+export const UpdateTodoAssignmentBody = /*#__PURE__*/ zod.object({
+  "add_student_ids": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.string())).check(/*#__PURE__*/ zod.describe('Students to add to the assignment')),
+  "college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('New deadline for every task in the assignment')),
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('New description for every task in the assignment')),
+  "link_type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['college', 'module'])).check(/*#__PURE__*/ zod.describe('New link; when set, the college and media ids are replaced too')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()),
+  "remove_student_ids": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.string())).check(/*#__PURE__*/ zod.describe('Students to remove; completed tasks are kept')),
+  "title": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(updateTodoAssignmentBodyTitleMax))).check(/*#__PURE__*/ zod.describe('New title for every task in the assignment'))
+})
+
+export const UpdateTodoAssignmentResponseItem = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+export const UpdateTodoAssignmentResponse = /*#__PURE__*/ zod.array(UpdateTodoAssignmentResponseItem)
+
+
+/**
  * Get a student's to-do items, with optional filters, sorting, and cursor pagination
  */
 export const getTodoItemsQueryStatusDefault = `all`;
@@ -1505,7 +1551,7 @@ export const GetTodoItemsQueryParams = /*#__PURE__*/ zod.object({
   "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this essay')),
   "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this media')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Only return items linked to this college')),
-  "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['essay', 'media', 'college'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
+  "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['college', 'essay', 'extracurricular', 'media', 'module'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
   "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['created_at', 'deadline', 'completed_at', 'updated_at']), getTodoItemsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
   "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), getTodoItemsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction')),
   "cursor": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('next_cursor from the previous page; omit to get the first page')),
@@ -1539,13 +1585,20 @@ export const GetTodoItemsResponse = /*#__PURE__*/ zod.object({
 /**
  * Create a to-do item with a description and optional deadline
  */
+export const createTodoItemBodyTitleMax = 200;
+
+
+
 export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
   "completed_at": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Essay this task is for; at most one of essay_id, media_id, global_college_id')),
+  "extracurricular_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Extracurricular this task is linked to')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College this task is for; at most one of essay_id, media_id, global_college_id')),
+  "link_type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['college', 'essay', 'extracurricular', 'module'])).check(/*#__PURE__*/ zod.describe('What kind of item this task is linked to')),
   "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Media this task is for; at most one of essay_id, media_id, global_college_id')),
   "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student the task is for; required for counselors, defaults to the authenticated student')),
+  "title": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(createTodoItemBodyTitleMax)).check(/*#__PURE__*/ zod.describe('Short title of the task')),
   "todo_description": /*#__PURE__*/ zod.string()
 })
 
@@ -1570,6 +1623,49 @@ export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Assign the same task to several of a counselors students at once
+ */
+export const bulkCreateTodoItemsBodyTitleMax = 200;
+
+
+
+export const BulkCreateTodoItemsBody = /*#__PURE__*/ zod.object({
+  "all": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.boolean()).check(/*#__PURE__*/ zod.describe('Assign every one of the counselor\'s students')),
+  "college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College to link, when link_type is college')),
+  "deadline": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the task is due')),
+  "description": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Full description of the task')),
+  "graduation_years": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.int())).check(/*#__PURE__*/ zod.describe('Assign every student graduating in these years')),
+  "link_type": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['college', 'essay', 'extracurricular', 'module'])).check(/*#__PURE__*/ zod.describe('What kind of item this task is linked to')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Video to link, when link_type is module')),
+  "student_ids": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.string())).check(/*#__PURE__*/ zod.describe('Students to assign individually')),
+  "title": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(bulkCreateTodoItemsBodyTitleMax)).check(/*#__PURE__*/ zod.describe('Short title of the task'))
+})
+
+export const BulkCreateTodoItemsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
+  "items": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})))
+})
+
+
+/**
  * Search a student's to-do items by description, with the same filters as listing
  */
 export const searchTodoItemsQueryStatusDefault = `all`;
@@ -1588,7 +1684,7 @@ export const SearchTodoItemsQueryParams = /*#__PURE__*/ zod.object({
   "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this essay')),
   "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Only return items linked to this media')),
   "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Only return items linked to this college')),
-  "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['essay', 'media', 'college'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
+  "linked_to": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.enum(['college', 'essay', 'extracurricular', 'media', 'module'])).check(/*#__PURE__*/ zod.describe('Only return items linked to any item of this type')),
   "sort_by": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['created_at', 'deadline', 'completed_at', 'updated_at']), searchTodoItemsQuerySortByDefault).check(/*#__PURE__*/ zod.describe('Field to sort by')),
   "sort_order": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.enum(['asc', 'desc']), searchTodoItemsQuerySortOrderDefault).check(/*#__PURE__*/ zod.describe('Sort direction')),
   "q": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(searchTodoItemsQueryQMax)).check(/*#__PURE__*/ zod.describe('Text to search for in to-do descriptions')),

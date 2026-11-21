@@ -4,13 +4,14 @@ import { useCreateTodoItem } from "../api/endpoints";
 import type { CreateTodoItemRequestBody } from "../api/models";
 import {
   DEFAULT_DUE_TIME,
-  LINK_TYPES,
+  LINKABLE_TYPES,
   LINK_TYPE_LABELS,
   useTodoLinkOptions,
   type LinkType,
 } from "./todoShared";
 
 export default function CreateTask() {
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
   const [deadlineTime, setDeadlineTime] = useState("");
@@ -25,7 +26,10 @@ export default function CreateTask() {
     event.preventDefault();
     setStatus("");
 
-    const body: CreateTodoItemRequestBody = { todo_description: description };
+    const body: CreateTodoItemRequestBody = {
+      title,
+      todo_description: description,
+    };
     if (deadline)
       body.deadline = new Date(
         `${deadline}T${deadlineTime || DEFAULT_DUE_TIME}`,
@@ -38,7 +42,8 @@ export default function CreateTask() {
       { data: body },
       {
         onSuccess: (todo) => {
-          setStatus(`Created: ${todo.todo_description}`);
+          setStatus(`Created: ${todo.title}`);
+          setTitle("");
           setDescription("");
           setDeadline("");
           setDeadlineTime("");
@@ -53,6 +58,16 @@ export default function CreateTask() {
     <div className="form-container">
       <h2>Create Task</h2>
       <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Title:</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={200}
+            required
+          />
+        </div>
         <div className="form-group">
           <label>Description:</label>
           <input
@@ -87,7 +102,7 @@ export default function CreateTask() {
             }}
           >
             <option value="">Nothing</option>
-            {LINK_TYPES.map((type) => (
+            {LINKABLE_TYPES.map((type) => (
               <option key={type} value={type}>
                 {LINK_TYPE_LABELS[type]}
               </option>

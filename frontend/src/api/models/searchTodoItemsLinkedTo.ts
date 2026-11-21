@@ -10,7 +10,9 @@ export type SearchTodoItemsLinkedTo = typeof SearchTodoItemsLinkedTo[keyof typeo
 
 
 export const SearchTodoItemsLinkedTo = {
-  essay: 'essay',
-  media: 'media',
   college: 'college',
+  essay: 'essay',
+  extracurricular: 'extracurricular',
+  media: 'media',
+  module: 'module',
 } as const;

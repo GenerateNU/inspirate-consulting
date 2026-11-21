@@ -17,11 +17,11 @@ import { LINK_TYPES, type LinkType } from "./todoShared";
 
 const PAGE_SIZE = 5;
 
-const LINK_ID_PARAMS = {
+const LINK_ID_PARAMS: Partial<Record<LinkType, string>> = {
   essay: "essay_id",
   media: "media_id",
   college: "global_college_id",
-} as const;
+};
 
 type TodoFilters = Omit<GetTodoItemsParams, "cursor" | "limit">;
 
@@ -33,12 +33,14 @@ const oneOf = <T extends string>(
 export function useTaskFilterParams() {
   const [params, setParams] = useSearchParams();
 
-  const linkedType = LINK_TYPES.find((t) => params.get(LINK_ID_PARAMS[t]));
+  const linkedType = LINK_TYPES.find((t) => {
+    const param = LINK_ID_PARAMS[t];
+    return param ? params.get(param) : false;
+  });
   const linkType: LinkType | "" =
     linkedType ?? LINK_TYPES.find((t) => t === params.get("linked_to")) ?? "";
-  const linkId = linkedType
-    ? (params.get(LINK_ID_PARAMS[linkedType]) ?? "")
-    : "";
+  const linkIdParam = linkedType ? LINK_ID_PARAMS[linkedType] : undefined;
+  const linkId = linkIdParam ? (params.get(linkIdParam) ?? "") : "";
 
   const filters: TodoFilters = {
     status:

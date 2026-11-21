@@ -13,8 +13,14 @@ export interface CounselorStudent {
   is_falling_behind: boolean;
   /** Name of the student */
   name: string;
+  /** Number of the student's incomplete to-do items */
+  open_task_count: number;
+  /** Number of the student's essay reviews that are still open */
+  pending_review_count: number;
   /** The student's unique ID */
   student_id: string;
+  /** Number of messages from the student that the counselor hasn't read */
+  unread_message_count: number;
   /** School year of the student */
   year: string;
 }
