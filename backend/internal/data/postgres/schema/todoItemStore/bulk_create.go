@@ -31,7 +31,7 @@ func (r *TodoItemRepository) BulkCreateTodoItems(ctx context.Context, p models.B
 	if err != nil {
 		return uuid.Nil, nil, err
 	}
-	defer tx.Rollback(ctx) // does nothing once committed
+	defer func() { _ = tx.Rollback(ctx) }() // does nothing once committed
 
 	// Empty slices instead of nil, so Postgres gets empty arrays rather than NULL
 	studentIDs := p.StudentIDs

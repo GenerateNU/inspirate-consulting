@@ -49,7 +49,7 @@ func (r *TodoItemRepository) UpdateTodoAssignment(ctx context.Context, p models.
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// The assignment must exist and belong to this counselor
 	var count int
