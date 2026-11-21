@@ -18,8 +18,19 @@ SELECT student.id, users.name, student.year,
        AND message.recipient_id = (SELECT counselor.user_id
        FROM public.counselor AS counselor
        WHERE counselor.id = $1)
-       AND message.read_at IS NULL) AS unread_message_count
+       AND message.read_at IS NULL) AS unread_message_count,
+
+       -- The student's most recent activity (null if they have none)
+       latest.action::text AS latest_activity_action,
+       latest.created_at AS latest_activity_at
 
 FROM public.student AS student
 JOIN public.users AS users ON users.id = student.user_id
+LEFT JOIN LATERAL (
+    SELECT activity.action, activity.created_at
+    FROM public.activity AS activity
+    WHERE activity.student_id = student.id
+    ORDER BY activity.created_at DESC, activity.id DESC
+    LIMIT 1
+) AS latest ON true
 WHERE student.counselor_id = $1

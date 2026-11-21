@@ -128,6 +128,15 @@ func TestListStudents_Counts(t *testing.T) {
 		t.Fatalf("failed to insert chat messages: %v", err)
 	}
 
+	// Two activities: the newer one should be returned
+	if _, err := db.Exec(ctx,
+		`INSERT INTO public.activity (student_id, action, created_at)
+		 VALUES ($1, 'added_school', now() - interval '1 day'),
+		        ($1, 'added_extracurricular', now())`,
+		studentID); err != nil {
+		t.Fatalf("failed to insert activities: %v", err)
+	}
+
 	students, err := repo.ListStudents(ctx, counselorID)
 	if err != nil {
 		t.Fatalf("ListStudents failed: %v", err)
@@ -145,5 +154,43 @@ func TestListStudents_Counts(t *testing.T) {
 	}
 	if got.PendingReviewCount != 1 {
 		t.Errorf("expected PendingReviewCount 1, got %d", got.PendingReviewCount)
+	}
+	if got.LatestActivityAction == nil {
+		t.Fatal("expected LatestActivityAction to be set, got nil")
+	}
+	if *got.LatestActivityAction != models.ActionAddedExtracurricular {
+		t.Errorf("expected LatestActivityAction %q, got %q", models.ActionAddedExtracurricular, *got.LatestActivityAction)
+	}
+	if got.LatestActivityAt == nil {
+		t.Error("expected LatestActivityAt to be set, got nil")
+	}
+}
+
+// test a student with no activity is still listed, with nil latest-activity fields
+func TestListStudents_NoActivity(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	db := testutils.SetupTestDB(t)
+	repo := NewCounselorRepository(db)
+	ctx := context.Background()
+
+	counselorID := createTestCounselor(t, db)
+	createTestStudent(t, db, counselorID, "Alice", "junior")
+
+	students, err := repo.ListStudents(ctx, counselorID)
+	if err != nil {
+		t.Fatalf("ListStudents failed: %v", err)
+	}
+	if len(students) != 1 {
+		t.Fatalf("expected 1 student, got %d", len(students))
+	}
+	if students[0].LatestActivityAction != nil {
+		t.Errorf("expected LatestActivityAction nil, got %q", *students[0].LatestActivityAction)
+	}
+	if students[0].LatestActivityAt != nil {
+		t.Errorf("expected LatestActivityAt nil, got %v", *students[0].LatestActivityAt)
 	}
 }
