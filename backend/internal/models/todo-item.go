@@ -268,4 +268,3 @@ type UpdateTodoAssignmentParams struct {
 	AddStudentIDs    []uuid.UUID
 	RemoveStudentIDs []uuid.UUID
 }
-

@@ -138,14 +138,14 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 	huma.Register(api, huma.Operation{
 		OperationID: "bulk-create-todo-items",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
-		Method: http.MethodPost,
-		Path: "/todo-items/bulk",
+		Method:      http.MethodPost,
+		Path:        "/todo-items/bulk",
 		Description: "Assign the same task to several of a counselors students at once",
-		Tags: []string{"Todo Items"},
-	}, func(ctx context.Context, input *models.BulkCreateTodoItemsInput)(*models.BulkCreateTodoItemsOutput,error){
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.BulkCreateTodoItemsInput) (*models.BulkCreateTodoItemsOutput, error) {
 		result, err := todoItemHandler.BulkCreateTodoItems(ctx, input)
 		if err != nil {
-		return nil, err
+			return nil, err
 		}
 		return &models.BulkCreateTodoItemsOutput{Body: *result}, nil
 	})
@@ -154,11 +154,11 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-assignment",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
-		Method: http.MethodPatch,
-		Path: "/todo-assignments/{assignment_id}",
+		Method:      http.MethodPatch,
+		Path:        "/todo-assignments/{assignment_id}",
 		Description: "edit tasks in an assignment, and add or remove students",
-		Tags: []string{"Todo Items"},
-	}, func(ctx context.Context, input *models.UpdateTodoAssignmentInput)(*models.UpdateTodoAssignmentOutput, error){
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoAssignmentInput) (*models.UpdateTodoAssignmentOutput, error) {
 		items, err := todoItemHandler.UpdateTodoAssignment(ctx, input)
 		if err != nil {
 			return nil, err
