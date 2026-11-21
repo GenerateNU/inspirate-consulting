@@ -133,4 +133,20 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		}
 		return &models.UpdateTodoItemDescriptionOutput{Body: *updated}, err
 	})
+
+	//Register POST /todo-items/bulk handler for bulk creating todo items
+	huma.Register(api, huma.Operation{
+		OperationID: "bulk-create-todo-items",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method: http.MethodPost,
+		Path: "/todo-items/bulk",
+		Description: "Assign the same task to several of a counselors students at once",
+		Tags: []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.BulkCreateTodoItemsInput)(*models.BulkCreateTodoItemsOutput,error){
+		result, err := todoItemHandler.BulkCreateTodoItems(ctx, input)
+		if err != nil {
+		return nil, err
+		}
+		return &models.BulkCreateTodoItemsOutput{Body: *result}, nil
+	})
 }

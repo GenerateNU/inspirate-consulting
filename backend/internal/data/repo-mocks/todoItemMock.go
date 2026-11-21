@@ -19,6 +19,45 @@ type TodoItemRepository struct {
 	mock.Mock
 }
 
+// BulkCreateTodoItems provides a mock function with given fields: ctx, p
+func (_m *TodoItemRepository) BulkCreateTodoItems(ctx context.Context, p models.BulkCreateTodoItemsParams) (uuid.UUID, []models.TodoItem, error) {
+	ret := _m.Called(ctx, p)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BulkCreateTodoItems")
+	}
+
+	var r0 uuid.UUID
+	var r1 []models.TodoItem
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.BulkCreateTodoItemsParams) (uuid.UUID, []models.TodoItem, error)); ok {
+		return rf(ctx, p)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, models.BulkCreateTodoItemsParams) uuid.UUID); ok {
+		r0 = rf(ctx, p)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, models.BulkCreateTodoItemsParams) []models.TodoItem); ok {
+		r1 = rf(ctx, p)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).([]models.TodoItem)
+		}
+	}
+
+	if rf, ok := ret.Get(2).(func(context.Context, models.BulkCreateTodoItemsParams) error); ok {
+		r2 = rf(ctx, p)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // CreateTodoItem provides a mock function with given fields: ctx, studentID, userID, item
 func (_m *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID string, userID string, item models.CreateTodoItemRequestBody) (*models.TodoItem, error) {
 	ret := _m.Called(ctx, studentID, userID, item)

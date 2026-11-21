@@ -194,3 +194,42 @@ type UpdateTodoItemDeadlineInput struct {
 type UpdateTodoItemDeadlineOutput struct {
 	Body TodoItem
 }
+
+type BulkCreateTodoItemsBody struct {
+	Title           string        `json:"title" minLength:"1" maxLength:"200" doc:"Short title of the task"`
+	Description     string        `json:"description" doc:"Full description of the task"`
+	Deadline        *time.Time    `json:"deadline,omitempty" required:"false" doc:"When the task is due"`
+	LinkType        *TodoLinkType `json:"link_type,omitempty" required:"false" enum:"college,essay,extracurricular,module" doc:"What kind of item this task is linked to"`
+	CollegeID       *int64        `json:"college_id,omitempty" required:"false" doc:"College to link, when link_type is college"`
+	MediaID         *string       `json:"media_id,omitempty" required:"false" format:"uuid" doc:"Video to link, when link_type is module"`
+	StudentIDs      []uuid.UUID   `json:"student_ids,omitempty" required:"false" doc:"Students to assign individually"`
+	GraduationYears []int         `json:"graduation_years,omitempty" required:"false" doc:"Assign every student graduating in these years"`
+	All             bool          `json:"all,omitempty" required:"false" doc:"Assign every one of the counselor's students"`
+}
+
+type BulkCreateTodoItemsInput struct {
+	Body BulkCreateTodoItemsBody
+}
+
+type BulkCreateTodoItemsResponse struct {
+	AssignmentID uuid.UUID  `json:"assignment_id"`
+	Items        []TodoItem `json:"items"`
+}
+
+type BulkCreateTodoItemsOutput struct {
+	Body BulkCreateTodoItemsResponse
+}
+
+type BulkCreateTodoItemsParams struct {
+	CounselorID uuid.UUID
+	UserID      uuid.UUID
+	Title       string
+	Description string
+	Deadline    *time.Time
+	LinkType    *TodoLinkType
+	CollegeID   *int64
+	MediaID     *string
+	StudentIDs  []uuid.UUID
+	Years       []string
+	All         bool
+}
