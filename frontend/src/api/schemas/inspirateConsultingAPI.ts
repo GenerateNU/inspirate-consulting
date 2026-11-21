@@ -1474,6 +1474,13 @@ export const GetEssaysFromStudentParams = /*#__PURE__*/ zod.object({
   "student_id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Student whose essays to list'))
 })
 
+
+
+
+export const GetEssaysFromStudentQueryParams = /*#__PURE__*/ zod.object({
+  "college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1))).check(/*#__PURE__*/ zod.describe('Only return essays for this college'))
+})
+
 export const GetEssaysFromStudentResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "essays": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({

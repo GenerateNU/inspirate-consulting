@@ -33,7 +33,7 @@ func TestDeleteEssay(t *testing.T) {
 		t.Fatalf("DeleteEssay failed: %v", err)
 	}
 
-	essays, err := repo.GetEssaysFromStudent(ctx, studentID)
+	essays, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{})
 	if err != nil {
 		t.Fatalf("GetEssaysFromStudent failed: %v", err)
 	}
@@ -97,7 +97,7 @@ func TestDeleteEssay_WrongStudent(t *testing.T) {
 	}
 
 	// The owner's essay must survive the attempt.
-	essays, err := repo.GetEssaysFromStudent(ctx, ownerID)
+	essays, err := repo.GetEssaysFromStudent(ctx, ownerID, models.GetEssaysFromStudentFilter{})
 	if err != nil {
 		t.Fatalf("GetEssaysFromStudent failed: %v", err)
 	}

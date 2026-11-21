@@ -54,7 +54,7 @@ func TestRoute_GetEssaysFromStudent(t *testing.T) {
 
 		// Mock the repository call expected for valid input
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID).Return([]models.Essays{
+		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID, models.GetEssaysFromStudentFilter{}).Return([]models.Essays{
 			{
 				ID:            uuid.New(),
 				StudentID:     studentID,
