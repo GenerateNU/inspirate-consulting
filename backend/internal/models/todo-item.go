@@ -233,3 +233,39 @@ type BulkCreateTodoItemsParams struct {
 	Years       []string
 	All         bool
 }
+
+type UpdateTodoAssignmentBody struct {
+	Title            *string       `json:"title,omitempty" required:"false" minLength:"1" maxLength:"200" doc:"New title for every task in the assignment"`
+	Description      *string       `json:"description,omitempty" required:"false" doc:"New description for every task in the assignment"`
+	Deadline         *time.Time    `json:"deadline,omitempty" required:"false" doc:"New deadline for every task in the assignment"`
+	LinkType         *TodoLinkType `json:"link_type,omitempty" required:"false" enum:"college,module" doc:"New link; when set, the college and media ids are replaced too"`
+	CollegeID        *int64        `json:"college_id,omitempty" required:"false"`
+	MediaID          *string       `json:"media_id,omitempty" required:"false" format:"uuid"`
+	AddStudentIDs    []uuid.UUID   `json:"add_student_ids,omitempty" required:"false" doc:"Students to add to the assignment"`
+	RemoveStudentIDs []uuid.UUID   `json:"remove_student_ids,omitempty" required:"false" doc:"Students to remove; completed tasks are kept"`
+}
+
+type UpdateTodoAssignmentInput struct {
+	AssignmentID uuid.UUID `path:"assignment_id"`
+	Body         UpdateTodoAssignmentBody
+}
+
+type UpdateTodoAssignmentOutput struct {
+	Body []TodoItem
+}
+
+// Passed from the handler to the store; not part of the API.
+type UpdateTodoAssignmentParams struct {
+	AssignmentID     uuid.UUID
+	CounselorID      uuid.UUID
+	UserID           uuid.UUID
+	Title            *string
+	Description      *string
+	Deadline         *time.Time
+	LinkType         *TodoLinkType
+	CollegeID        *int64
+	MediaID          *string
+	AddStudentIDs    []uuid.UUID
+	RemoveStudentIDs []uuid.UUID
+}
+

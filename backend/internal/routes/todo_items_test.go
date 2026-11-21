@@ -573,3 +573,49 @@ func TestRoute_BulkCreateTodoItems(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	})
 }
+
+// Route tests for PATCH /todo-assignments/{assignment_id}.
+func TestRoute_UpdateTodoAssignment(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		counselorID := uuid.New()
+		assignmentID := uuid.New()
+
+		// the path id and counselor id must reach the repository
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("UpdateTodoAssignment", mock.Anything, mock.MatchedBy(func(p models.UpdateTodoAssignmentParams) bool {
+			return p.AssignmentID == assignmentID && p.CounselorID == counselorID &&
+				p.Title != nil && *p.Title == "Request official transcripts"
+		})).Return([]models.TodoItem{{Title: "Request official transcripts"}}, nil)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodPatch, "/todo-assignments/"+assignmentID.String(), map[string]any{
+			"title": "Request official transcripts",
+		}, map[string]string{"X-Counselor-ID": counselorID.String()})
+		assert.Equal(t, http.StatusOK, resp.StatusCode, string(respBody))
+
+		var out []models.TodoItem
+		require.NoError(t, json.Unmarshal(respBody, &out))
+		require.Len(t, out, 1)
+		assert.Equal(t, "Request official transcripts", out[0].Title)
+	})
+
+	t.Run("without a counselor id is unauthorized", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-assignments/"+uuid.NewString(), map[string]any{
+			"title": "Request official transcripts",
+		})
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	})
+}

@@ -166,6 +166,36 @@ func (_m *TodoItemRepository) ListTodoItems(ctx context.Context, query models.To
 	return r0, r1
 }
 
+// UpdateTodoAssignment provides a mock function with given fields: ctx, p
+func (_m *TodoItemRepository) UpdateTodoAssignment(ctx context.Context, p models.UpdateTodoAssignmentParams) ([]models.TodoItem, error) {
+	ret := _m.Called(ctx, p)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateTodoAssignment")
+	}
+
+	var r0 []models.TodoItem
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, models.UpdateTodoAssignmentParams) ([]models.TodoItem, error)); ok {
+		return rf(ctx, p)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, models.UpdateTodoAssignmentParams) []models.TodoItem); ok {
+		r0 = rf(ctx, p)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.TodoItem)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, models.UpdateTodoAssignmentParams) error); ok {
+		r1 = rf(ctx, p)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateTodoItemCompletedAt provides a mock function with given fields: ctx, id, completedAt
 func (_m *TodoItemRepository) UpdateTodoItemCompletedAt(ctx context.Context, id string, completedAt *time.Time) (*models.TodoItem, error) {
 	ret := _m.Called(ctx, id, completedAt)

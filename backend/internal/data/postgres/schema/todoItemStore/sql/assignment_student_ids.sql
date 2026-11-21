@@ -1,0 +1,1 @@
+SELECT student_id FROM public.todo_items WHERE assignment_id = $1

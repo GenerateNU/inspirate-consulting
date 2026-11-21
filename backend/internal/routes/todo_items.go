@@ -149,4 +149,20 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		}
 		return &models.BulkCreateTodoItemsOutput{Body: *result}, nil
 	})
+
+	//Register PATCH /todo-assignments/{assignment_id} handler for changing/editing tasks in an assignment
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-assignment",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method: http.MethodPatch,
+		Path: "/todo-assignments/{assignment_id}",
+		Description: "edit tasks in an assignment, and add or remove students",
+		Tags: []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoAssignmentInput)(*models.UpdateTodoAssignmentOutput, error){
+		items, err := todoItemHandler.UpdateTodoAssignment(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateTodoAssignmentOutput{Body: items}, nil
+	})
 }
