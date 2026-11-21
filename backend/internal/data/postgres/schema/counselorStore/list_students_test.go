@@ -3,6 +3,7 @@ package counselorRepository
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -79,5 +80,70 @@ func TestListStudents_NoStudents(t *testing.T) {
 
 	if len(results) != 0 {
 		t.Errorf("expected 0 students, got %d", len(results))
+	}
+}
+
+// test list function returns the per-student pending review, open task, and unread message counts
+func TestListStudents_Counts(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	db := testutils.SetupTestDB(t)
+	repo := NewCounselorRepository(db)
+	ctx := context.Background()
+
+	counselorID := createTestCounselor(t, db)
+	studentID := createTestStudent(t, db, counselorID, "Alice", "junior")
+
+	var counselorUserID, studentUserID uuid.UUID
+	if err := db.QueryRow(ctx,
+		`SELECT user_id FROM public.counselor WHERE id = $1`, counselorID).Scan(&counselorUserID); err != nil {
+		t.Fatalf("failed to look up counselor user id: %v", err)
+	}
+	if err := db.QueryRow(ctx,
+		`SELECT user_id FROM public.student WHERE id = $1`, studentID).Scan(&studentUserID); err != nil {
+		t.Fatalf("failed to look up student user id: %v", err)
+	}
+
+	// Two todos: one open, one completed
+	now := time.Now()
+	createTestTodoItem(t, db, studentID, nil, nil)
+	createTestTodoItem(t, db, studentID, nil, &now)
+
+	// Two reviews: one open, one completed
+	essayID := createTestEssay(t, db, studentID, "personal-statement")
+	createTestReview(t, db, studentID, essayID, false)
+	createTestReview(t, db, studentID, essayID, true)
+
+	// Messages from the student to the counselor: one unread, one already read.
+	// A message from the counselor to the student shouldn't count either.
+	if _, err := db.Exec(ctx,
+		`INSERT INTO public.chat_messages (sender_id, recipient_id, message, read_at)
+		 VALUES ($1, $2, 'Hi, can you look at my essay?', NULL),
+		        ($1, $2, 'Thanks!', now()),
+		        ($2, $1, 'Sure, sending notes soon', NULL)`,
+		studentUserID, counselorUserID); err != nil {
+		t.Fatalf("failed to insert chat messages: %v", err)
+	}
+
+	students, err := repo.ListStudents(ctx, counselorID)
+	if err != nil {
+		t.Fatalf("ListStudents failed: %v", err)
+	}
+	if len(students) != 1 {
+		t.Fatalf("expected 1 student, got %d", len(students))
+	}
+
+	got := students[0]
+	if got.OpenTaskCount != 1 {
+		t.Errorf("expected OpenTaskCount 1, got %d", got.OpenTaskCount)
+	}
+	if got.UnreadMessageCount != 1 {
+		t.Errorf("expected UnreadMessageCount 1, got %d", got.UnreadMessageCount)
+	}
+	if got.PendingReviewCount != 1 {
+		t.Errorf("expected PendingReviewCount 1, got %d", got.PendingReviewCount)
 	}
 }

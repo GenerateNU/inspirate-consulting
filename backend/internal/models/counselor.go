@@ -19,9 +19,12 @@ type PendingReview struct {
 
 // To represent one of a counselor's students as stored in the database.
 type CounselorStudentRow struct {
-	StudentID uuid.UUID `json:"student_id" doc:"The student's unique ID"`
-	Name      string    `json:"name" example:"Jane Doe" doc:"Name of the student"`
-	Year      Year      `json:"year" example:"junior" doc:"School year of the student"`
+	StudentID          uuid.UUID `json:"student_id" doc:"The student's unique ID"`
+	Name               string    `json:"name" example:"Jane Doe" doc:"Name of the student"`
+	Year               Year      `json:"year" example:"junior" doc:"School year of the student"`
+	PendingReviewCount int       `json:"pending_review_count" doc:"Number of the student's essay reviews that are still open"`
+	OpenTaskCount      int       `json:"open_task_count" doc:"Number of the student's incomplete to-do items"`
+	UnreadMessageCount int       `json:"unread_message_count" doc:"Number of messages from the student that the counselor hasn't read"`
 }
 
 // To represent one of a counselor's students, flagged for the counselor's student list
