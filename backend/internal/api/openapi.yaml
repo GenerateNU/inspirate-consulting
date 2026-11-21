@@ -97,6 +97,88 @@ components:
         - counselor_id
         - user_id
       type: object
+    BulkCreateTodoItemsBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/BulkCreateTodoItemsBody.json
+          format: uri
+          readOnly: true
+          type: string
+        all:
+          description: Assign every one of the counselor's students
+          type: boolean
+        college_id:
+          description: College to link, when link_type is college
+          format: int64
+          type: integer
+        deadline:
+          description: When the task is due
+          format: date-time
+          type: string
+        description:
+          description: Full description of the task
+          type: string
+        graduation_years:
+          description: Assign every student graduating in these years
+          items:
+            format: int64
+            type: integer
+          type:
+            - array
+            - "null"
+        link_type:
+          description: What kind of item this task is linked to
+          enum:
+            - college
+            - essay
+            - extracurricular
+            - module
+          type: string
+        media_id:
+          description: Video to link, when link_type is module
+          format: uuid
+          type: string
+        student_ids:
+          description: Students to assign individually
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        title:
+          description: Short title of the task
+          maxLength: 200
+          minLength: 1
+          type: string
+      required:
+        - title
+        - description
+      type: object
+    BulkCreateTodoItemsResponse:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/BulkCreateTodoItemsResponse.json
+          format: uri
+          readOnly: true
+          type: string
+        assignment_id:
+          type: string
+        items:
+          items:
+            $ref: "#/components/schemas/TodoItem"
+          type:
+            - array
+            - "null"
+      required:
+        - assignment_id
+        - items
+      type: object
     ChatMessage:
       additionalProperties: false
       properties:
@@ -292,9 +374,21 @@ components:
           examples:
             - Jane Doe
           type: string
+        open_task_count:
+          description: Number of the student's incomplete to-do items
+          format: int64
+          type: integer
+        pending_review_count:
+          description: Number of the student's essay reviews that are still open
+          format: int64
+          type: integer
         student_id:
           description: The student's unique ID
           type: string
+        unread_message_count:
+          description: Number of messages from the student that the counselor hasn't read
+          format: int64
+          type: integer
         year:
           description: School year of the student
           examples:
@@ -306,6 +400,9 @@ components:
         - student_id
         - name
         - year
+        - pending_review_count
+        - open_task_count
+        - unread_message_count
       type: object
     CreateChatMessageRequestBody:
       additionalProperties: false
@@ -587,10 +684,22 @@ components:
           description: Essay this task is for; at most one of essay_id, media_id, global_college_id
           format: uuid
           type: string
+        extracurricular_id:
+          description: Extracurricular this task is linked to
+          format: int64
+          type: integer
         global_college_id:
           description: College this task is for; at most one of essay_id, media_id, global_college_id
           format: int64
           type: integer
+        link_type:
+          description: What kind of item this task is linked to
+          enum:
+            - college
+            - essay
+            - extracurricular
+            - module
+          type: string
         media_id:
           description: Media this task is for; at most one of essay_id, media_id, global_college_id
           format: uuid
@@ -599,10 +708,16 @@ components:
           description: Student the task is for; required for counselors, defaults to the authenticated student
           format: uuid
           type: string
+        title:
+          description: Short title of the task
+          maxLength: 200
+          minLength: 1
+          type: string
         todo_description:
           type: string
       required:
         - todo_description
+        - title
       type: object
     CreateUserBody:
       additionalProperties: false
@@ -2548,6 +2663,55 @@ components:
             - sophomore
             - junior
             - senior
+          type: string
+      type: object
+    UpdateTodoAssignmentBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoAssignmentBody.json
+          format: uri
+          readOnly: true
+          type: string
+        add_student_ids:
+          description: Students to add to the assignment
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        college_id:
+          format: int64
+          type: integer
+        deadline:
+          description: New deadline for every task in the assignment
+          format: date-time
+          type: string
+        description:
+          description: New description for every task in the assignment
+          type: string
+        link_type:
+          description: New link; when set, the college and media ids are replaced too
+          enum:
+            - college
+            - module
+          type: string
+        media_id:
+          format: uuid
+          type: string
+        remove_student_ids:
+          description: Students to remove; completed tasks are kept
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        title:
+          description: New title for every task in the assignment
+          maxLength: 200
+          minLength: 1
           type: string
       type: object
     UpdateTodoItemCompletedAtInputBody:
@@ -4568,6 +4732,41 @@ paths:
           description: Error
       tags:
         - Essays
+  /todo-assignments/{assignment_id}:
+    patch:
+      description: edit tasks in an assignment, and add or remove students
+      operationId: update-todo-assignment
+      parameters:
+        - in: path
+          name: assignment_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoAssignmentBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/TodoItem"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
   /todo-items:
     get:
       description: Get a student's to-do items, with optional filters, sorting, and cursor pagination
@@ -4624,9 +4823,11 @@ paths:
           schema:
             description: Only return items linked to any item of this type
             enum:
-              - essay
-              - media
               - college
+              - essay
+              - extracurricular
+              - media
+              - module
             type: string
         - description: Field to sort by
           explode: false
@@ -4709,6 +4910,31 @@ paths:
           description: Error
       tags:
         - Todo Items
+  /todo-items/bulk:
+    post:
+      description: Assign the same task to several of a counselors students at once
+      operationId: bulk-create-todo-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkCreateTodoItemsBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkCreateTodoItemsResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
   /todo-items/search:
     get:
       description: Search a student's to-do items by description, with the same filters as listing
@@ -4765,9 +4991,11 @@ paths:
           schema:
             description: Only return items linked to any item of this type
             enum:
-              - essay
-              - media
               - college
+              - essay
+              - extracurricular
+              - media
+              - module
             type: string
         - description: Field to sort by
           explode: false
