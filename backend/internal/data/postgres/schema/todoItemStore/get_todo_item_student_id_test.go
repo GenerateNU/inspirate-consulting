@@ -25,6 +25,7 @@ func TestGetTodoItemStudentID(t *testing.T) {
 	studentID := uuid.New()
 	created, err := repo.CreateTodoItem(ctx, studentID.String(), uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Finish the Common App essay",
+		Title:           "Test task",
 	})
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)

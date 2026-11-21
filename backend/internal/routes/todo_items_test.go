@@ -75,6 +75,7 @@ func TestRoute_CreateTodoItem(t *testing.T) {
 
 	// Every field of the request body is required by Huma, so send them all.
 	payload := map[string]any{
+		"title":            "Test task",
 		"todo_description": "Finish the Common App essay",
 		"completed_at":     nil,
 		"deadline":         nil,

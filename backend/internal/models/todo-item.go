@@ -60,7 +60,7 @@ type TodoItemFilters struct {
 	EssayID         string `query:"essay_id" required:"false" format:"uuid" doc:"Only return items linked to this essay"`
 	MediaID         string `query:"media_id" required:"false" format:"uuid" doc:"Only return items linked to this media"`
 	GlobalCollegeID int64  `query:"global_college_id" required:"false" doc:"Only return items linked to this college"`
-	LinkedTo        string `query:"linked_to" enum:"essay,media,college" required:"false" doc:"Only return items linked to any item of this type"`
+	LinkedTo        string `query:"linked_to" enum:"college,essay,extracurricular,media,module" required:"false" doc:"Only return items linked to any item of this type"`
 	SortBy          string `query:"sort_by" enum:"created_at,deadline,completed_at,updated_at" default:"created_at" doc:"Field to sort by"`
 	SortOrder       string `query:"sort_order" enum:"asc,desc" default:"desc" doc:"Sort direction"`
 }
