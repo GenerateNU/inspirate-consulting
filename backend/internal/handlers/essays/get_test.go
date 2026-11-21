@@ -45,7 +45,7 @@ func TestHandler_GetEssaysFromStudent(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID).Return(storedEssays, nil)
+		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID, models.GetEssaysFromStudentFilter{}).Return(storedEssays, nil)
 
 		// Execute handler
 		handler := NewHandler(mockRepo, nil, nil)
@@ -61,7 +61,7 @@ func TestHandler_GetEssaysFromStudent(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewEssayRepository(t)
-		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID).Return(nil, errors.New("database error"))
+		mockRepo.On("GetEssaysFromStudent", mock.Anything, studentID, models.GetEssaysFromStudentFilter{}).Return(nil, errors.New("database error"))
 
 		// Execute handler
 		handler := NewHandler(mockRepo, nil, nil)

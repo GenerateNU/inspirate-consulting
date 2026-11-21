@@ -64,6 +64,7 @@ export * from './fetchCounselorsParams';
 export * from './fetchStudentsBody';
 export * from './fetchStudentsParams';
 export * from './getActivitiesParams';
+export * from './getEssaysFromStudentParams';
 export * from './getMediaAccessParams';
 export * from './getTodoItemsLinkedTo';
 export * from './getTodoItemsParams';

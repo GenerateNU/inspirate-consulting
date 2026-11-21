@@ -38,7 +38,7 @@ func TestGetEssaysFromStudent(t *testing.T) {
 		t.Fatalf("setup CreateEssay failed: %v", err)
 	}
 
-	essays, err := repo.GetEssaysFromStudent(ctx, studentID)
+	essays, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{})
 	if err != nil {
 		t.Fatalf("GetEssaysFromStudent failed: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestGetEssaysFromStudent_NoGroup(t *testing.T) {
 		t.Fatalf("setup CreateEssay failed: %v", err)
 	}
 
-	essays, err := repo.GetEssaysFromStudent(ctx, studentID)
+	essays, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{})
 	if err != nil {
 		t.Fatalf("GetEssaysFromStudent failed: %v", err)
 	}
@@ -96,6 +96,86 @@ func TestGetEssaysFromStudent_NoGroup(t *testing.T) {
 	}
 	if essays[0].EssayGroupID != nil {
 		t.Errorf("expected nil EssayGroupID, got %v", *essays[0].EssayGroupID)
+	}
+}
+
+func TestGetEssaysFromStudent_FilterByCollege(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	db := testutils.SetupTestDB(t)
+	repo := NewEssayRepository(db)
+	ctx := context.Background()
+
+	studentID := uuid.New()
+	collegeID := insertCollege(t, db)
+	otherCollegeID := insertCollege(t, db)
+
+	essaysToCreate := []models.CreateEssayBody{
+		{Type: "why-us", LinkToContent: "https://example.com/1", CollegeID: &collegeID},
+		{Type: "community", LinkToContent: "https://example.com/2", CollegeID: &collegeID},
+		{Type: "why-us", LinkToContent: "https://example.com/3", CollegeID: &otherCollegeID},
+		{Type: "personal-statement", LinkToContent: "https://example.com/4"},
+	}
+	for _, essay := range essaysToCreate {
+		if err := repo.CreateEssay(ctx, studentID, essay); err != nil {
+			t.Fatalf("setup CreateEssay(%q) failed: %v", essay.Type, err)
+		}
+	}
+
+	essays, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{CollegeID: &collegeID})
+	if err != nil {
+		t.Fatalf("GetEssaysFromStudent failed: %v", err)
+	}
+
+	if len(essays) != 2 {
+		t.Fatalf("expected 2 essays for college %d, got %d", collegeID, len(essays))
+	}
+	for _, e := range essays {
+		if e.CollegeID == nil || *e.CollegeID != collegeID {
+			t.Errorf("expected every essay to belong to college %d, got %v", collegeID, e.CollegeID)
+		}
+	}
+}
+
+func TestGetEssaysFromStudent_FilterByCollege_NoMatch(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	t.Parallel()
+
+	db := testutils.SetupTestDB(t)
+	repo := NewEssayRepository(db)
+	ctx := context.Background()
+
+	studentID := uuid.New()
+
+	for _, essay := range []models.CreateEssayBody{
+		{Type: "personal-statement", LinkToContent: "https://example.com/1"},
+		{Type: "activities", LinkToContent: "https://example.com/2"},
+	} {
+		if err := repo.CreateEssay(ctx, studentID, essay); err != nil {
+			t.Fatalf("setup CreateEssay(%q) failed: %v", essay.Type, err)
+		}
+	}
+
+	all, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{})
+	if err != nil {
+		t.Fatalf("unfiltered GetEssaysFromStudent failed: %v", err)
+	}
+	if len(all) != 2 {
+		t.Fatalf("expected 2 essays without a filter, got %d", len(all))
+	}
+
+	missingCollegeID := int64(999999)
+	filtered, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{CollegeID: &missingCollegeID})
+	if err != nil {
+		t.Fatalf("filtered GetEssaysFromStudent failed: %v", err)
+	}
+	if len(filtered) != 0 {
+		t.Errorf("expected no essays for an unmatched college, got %d", len(filtered))
 	}
 }
 

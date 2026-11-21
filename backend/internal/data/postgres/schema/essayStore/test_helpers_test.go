@@ -38,7 +38,7 @@ func createEssay(t *testing.T, repo *EssayRepository, studentID uuid.UUID, body 
 		t.Fatalf("setup CreateEssay failed: %v", err)
 	}
 
-	essays, err := repo.GetEssaysFromStudent(ctx, studentID)
+	essays, err := repo.GetEssaysFromStudent(ctx, studentID, models.GetEssaysFromStudentFilter{})
 	if err != nil {
 		t.Fatalf("setup GetEssaysFromStudent failed: %v", err)
 	}
@@ -47,4 +47,18 @@ func createEssay(t *testing.T, repo *EssayRepository, studentID uuid.UUID, body 
 	}
 
 	return essays[0]
+}
+
+func insertCollege(t *testing.T, db *pgxpool.Pool) int64 {
+	t.Helper()
+
+	var id int64
+	err := db.QueryRow(context.Background(),
+		`INSERT INTO public.global_colleges (school_name, school_location) VALUES ($1, $2) RETURNING id`,
+		"Test College "+uuid.NewString(), "Boston",
+	).Scan(&id)
+	if err != nil {
+		t.Fatalf("insertCollege failed: %v", err)
+	}
+	return id
 }

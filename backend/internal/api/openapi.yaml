@@ -4717,6 +4717,15 @@ paths:
           schema:
             description: Student whose essays to list
             type: string
+        - description: Only return essays for this college
+          explode: false
+          in: query
+          name: college_id
+          schema:
+            description: Only return essays for this college
+            format: int64
+            minimum: 1
+            type: integer
       responses:
         "200":
           content:

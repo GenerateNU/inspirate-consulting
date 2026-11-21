@@ -30,7 +30,7 @@ export default function StudentEssays() {
   const { studentId = "" } = useParams();
   const queryClient = useQueryClient();
 
-  const essaysQuery = useGetEssaysFromStudent(studentId, {
+  const essaysQuery = useGetEssaysFromStudent(studentId, undefined, {
     query: { enabled: !!studentId },
   });
   const groupsQuery = useGetEssayGroupsFromStudent(studentId, {

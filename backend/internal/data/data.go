@@ -61,7 +61,7 @@ type ExtracurricularRepository interface {
 type EssayRepository interface {
 	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
 	UpdateEssayGroup(ctx context.Context, essayID uuid.UUID, essayGroupID *uuid.UUID) (*models.Essays, error)
-	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID, input models.GetEssaysFromStudentFilter) ([]models.Essays, error)
 	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
 	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
