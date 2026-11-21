@@ -23,6 +23,7 @@ export * from './collegeApplicationCycleCycle';
 export * from './counselor';
 export * from './counselorListItem';
 export * from './counselorStudent';
+export * from './counselorStudentLatestActivityAction';
 export * from './createChatMessageRequestBody';
 export * from './createEssayBody';
 export * from './createEssayGroupBody';

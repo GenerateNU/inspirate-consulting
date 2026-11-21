@@ -434,6 +434,8 @@ export const ListCounselorStudentsQueryParams = /*#__PURE__*/ zod.object({
 export const ListCounselorStudentsResponseItem = /*#__PURE__*/ zod.object({
   "has_pending_review": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an essay review that is still open')),
   "is_falling_behind": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('True when the student has an incomplete to-do item past its deadline')),
+  "latest_activity_action": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('added_school'),/*#__PURE__*/ zod.literal('removed_school'),/*#__PURE__*/ zod.literal('essay_status_changed'),/*#__PURE__*/ zod.literal('added_extracurricular'),/*#__PURE__*/ zod.literal('removed_extracurricular'),/*#__PURE__*/ zod.literal('task_past_due'),/*#__PURE__*/ zod.literal(null)])).check(/*#__PURE__*/ zod.describe('The student\'s most recent activity; null if they have none')),
+  "latest_activity_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the student\'s most recent activity happened; null if they have none')),
   "name": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('Name of the student')),
   "open_task_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of the student\'s incomplete to-do items')),
   "pending_review_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of the student\'s essay reviews that are still open')),

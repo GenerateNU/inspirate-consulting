@@ -5,12 +5,23 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { CounselorStudentLatestActivityAction } from './counselorStudentLatestActivityAction';
 
 export interface CounselorStudent {
   /** True when the student has an essay review that is still open */
   has_pending_review: boolean;
   /** True when the student has an incomplete to-do item past its deadline */
   is_falling_behind: boolean;
+  /**
+     * The student's most recent activity; null if they have none
+     * @nullable
+     */
+  latest_activity_action: CounselorStudentLatestActivityAction;
+  /**
+     * When the student's most recent activity happened; null if they have none
+     * @nullable
+     */
+  latest_activity_at: string | null;
   /** Name of the student */
   name: string;
   /** Number of the student's incomplete to-do items */

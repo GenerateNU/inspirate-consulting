@@ -369,6 +369,24 @@ components:
         is_falling_behind:
           description: True when the student has an incomplete to-do item past its deadline
           type: boolean
+        latest_activity_action:
+          description: The student's most recent activity; null if they have none
+          enum:
+            - added_school
+            - removed_school
+            - essay_status_changed
+            - added_extracurricular
+            - removed_extracurricular
+            - task_past_due
+          type:
+            - string
+            - "null"
+        latest_activity_at:
+          description: When the student's most recent activity happened; null if they have none
+          format: date-time
+          type:
+            - string
+            - "null"
         name:
           description: Name of the student
           examples:
@@ -403,6 +421,8 @@ components:
         - pending_review_count
         - open_task_count
         - unread_message_count
+        - latest_activity_action
+        - latest_activity_at
       type: object
     CreateChatMessageRequestBody:
       additionalProperties: false
