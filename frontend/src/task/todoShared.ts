@@ -15,8 +15,17 @@ export const LINK_TYPE_LABELS: Record<LinkType, string> = {
   essay: "Essay",
   media: "Video",
   college: "College",
+  extracurricular: "Extracurricular",
+  module: "Module",
 };
 export const LINK_TYPES = Object.values(GetTodoItemsLinkedTo);
+
+// Link types a task can be pointed at a specific item of from this UI
+export const LINKABLE_TYPES = [
+  GetTodoItemsLinkedTo.essay,
+  GetTodoItemsLinkedTo.media,
+  GetTodoItemsLinkedTo.college,
+] as const;
 
 export const formatDate = (value: string) =>
   new Date(value).toLocaleDateString();
@@ -43,6 +52,8 @@ export function useTodoLinkOptions() {
       id: String(c.id),
       label: c.school_name,
     })),
+    extracurricular: [],
+    module: [],
   };
 
   const labelFor = (task: TodoItem) => {
@@ -52,7 +63,11 @@ export function useTodoLinkOptions() {
         ? ["media", task.media_id]
         : task.global_college_id != null
           ? ["college", String(task.global_college_id)]
-          : null;
+          : task.extracurricular_id != null
+            ? ["extracurricular", String(task.extracurricular_id)]
+            : task.link_type === "module"
+              ? ["module", ""]
+              : null;
     if (!link) return null;
     const [type, id] = link;
     const name = options[type].find((o) => o.id === id)?.label;

@@ -22,9 +22,7 @@ WITH filtered AS (
       AND ($5::bigint IS NULL OR global_college_id = $5)
       AND (
         $6::text IS NULL
-        OR ($6 = 'essay' AND essay_id IS NOT NULL)
-        OR ($6 = 'media' AND media_id IS NOT NULL)
-        OR ($6 = 'college' AND global_college_id IS NOT NULL)
+        OR link_type::text = CASE $6 WHEN 'media' THEN 'module' ELSE $6 END
       )
       AND ($7::text IS NULL OR todo_description ILIKE '%' || $7 || '%')
 )

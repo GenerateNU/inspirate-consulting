@@ -26,6 +26,7 @@ func TestHandler_CreateTodoItem(t *testing.T) {
 
 	input := &models.CreateTodoItemRequestBody{
 		TodoDescription: "Finish the Common App essay",
+		Title:           "Test task",
 		Deadline:        &deadline,
 	}
 	expectedOutput := &models.TodoItem{

@@ -10,7 +10,9 @@ export type GetTodoItemsLinkedTo = typeof GetTodoItemsLinkedTo[keyof typeof GetT
 
 
 export const GetTodoItemsLinkedTo = {
-  essay: 'essay',
-  media: 'media',
   college: 'college',
+  essay: 'essay',
+  extracurricular: 'extracurricular',
+  media: 'media',
+  module: 'module',
 } as const;

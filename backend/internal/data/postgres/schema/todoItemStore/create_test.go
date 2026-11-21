@@ -25,6 +25,7 @@ func TestCreateTodoItem(t *testing.T) {
 	userID := uuid.NewString()
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Finish the Common App essay",
+		Title:           "Test task",
 		Deadline:        &deadline,
 	}
 
@@ -74,6 +75,7 @@ func TestCreateTodoItem_NilDeadline(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Someday task with no deadline",
+		Title:           "Test task",
 	}
 
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
@@ -101,6 +103,7 @@ func TestCreateTodoItem_InvalidStudentID(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Should never be inserted",
+		Title:           "Test task",
 	}
 
 	_, err := repo.CreateTodoItem(ctx, "not-a-uuid", uuid.NewString(), input)

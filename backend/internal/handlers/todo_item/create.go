@@ -20,18 +20,25 @@ func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoIt
 	if err != nil {
 		return nil, errs.Unauthorized()
 	}
+	hasEssay := input.EssayID != nil
+	hasMedia := input.MediaID != nil
+	hasCollege := input.GlobalCollegeID != nil
+	hasExtracurricular := input.ExtracurricularID != nil
+
+	//todo item links to one thing at a time
 	linked := 0
-	if input.EssayID != nil {
-		linked++
-	}
-	if input.MediaID != nil {
-		linked++
-	}
-	if input.GlobalCollegeID != nil {
-		linked++
+	for _, isSet := range []bool{hasEssay, hasMedia, hasCollege, hasExtracurricular} {
+		if isSet {
+			linked++
+		}
 	}
 	if linked > 1 {
-		return nil, errs.BadRequest("a todo item can be linked to at most one of essay, media, or college")
+		return nil, errs.BadRequest("a todo item can be linked to at most one of essay, media, college, or extracurricular")
+	}
+
+	// If it links to something, link_type must say what
+	if err := validateLink(input.LinkType, hasEssay, hasMedia, hasCollege, hasExtracurricular); err != nil {
+		return nil, err
 	}
 
 	createdTodoItem, err := h.TodoItemRepository.CreateTodoItem(ctx, studentID.String(), userID.String(), *input)

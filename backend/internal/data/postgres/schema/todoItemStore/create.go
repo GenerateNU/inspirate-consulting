@@ -29,6 +29,9 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID strin
 		item.EssayID,
 		item.MediaID,
 		item.GlobalCollegeID,
+		item.Title,
+		item.ExtracurricularID,
+		item.LinkType,
 	).Scan(
 		&createdItem.ID,
 		&createdItem.CreatedAt,

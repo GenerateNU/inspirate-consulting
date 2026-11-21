@@ -34,13 +34,16 @@ type TodoItem struct {
 }
 
 type CreateTodoItemRequestBody struct {
-	StudentID       string     `json:"student_id,omitempty" required:"false" format:"uuid" doc:"Student the task is for; required for counselors, defaults to the authenticated student"`
-	TodoDescription string     `json:"todo_description"`
-	CompletedAt     *time.Time `json:"completed_at,omitempty"`
-	Deadline        *time.Time `json:"deadline,omitempty"`
-	EssayID         *string    `json:"essay_id,omitempty" format:"uuid" doc:"Essay this task is for; at most one of essay_id, media_id, global_college_id"`
-	MediaID         *string    `json:"media_id,omitempty" format:"uuid" doc:"Media this task is for; at most one of essay_id, media_id, global_college_id"`
-	GlobalCollegeID *int64     `json:"global_college_id,omitempty" doc:"College this task is for; at most one of essay_id, media_id, global_college_id"`
+	StudentID         string        `json:"student_id,omitempty" required:"false" format:"uuid" doc:"Student the task is for; required for counselors, defaults to the authenticated student"`
+	TodoDescription   string        `json:"todo_description"`
+	CompletedAt       *time.Time    `json:"completed_at,omitempty"`
+	Deadline          *time.Time    `json:"deadline,omitempty"`
+	EssayID           *string       `json:"essay_id,omitempty" format:"uuid" doc:"Essay this task is for; at most one of essay_id, media_id, global_college_id"`
+	MediaID           *string       `json:"media_id,omitempty" format:"uuid" doc:"Media this task is for; at most one of essay_id, media_id, global_college_id"`
+	GlobalCollegeID   *int64        `json:"global_college_id,omitempty" doc:"College this task is for; at most one of essay_id, media_id, global_college_id"`
+	Title             string        `json:"title" minLength:"1" maxLength:"200" doc:"Short title of the task"`
+	ExtracurricularID *int64        `json:"extracurricular_id,omitempty" required:"false" doc:"Extracurricular this task is linked to"`
+	LinkType          *TodoLinkType `json:"link_type,omitempty" required:"false" enum:"college,essay,extracurricular,module" doc:"What kind of item this task is linked to"`
 }
 
 type CreateTodoItemInput struct {
@@ -57,7 +60,7 @@ type TodoItemFilters struct {
 	EssayID         string `query:"essay_id" required:"false" format:"uuid" doc:"Only return items linked to this essay"`
 	MediaID         string `query:"media_id" required:"false" format:"uuid" doc:"Only return items linked to this media"`
 	GlobalCollegeID int64  `query:"global_college_id" required:"false" doc:"Only return items linked to this college"`
-	LinkedTo        string `query:"linked_to" enum:"essay,media,college" required:"false" doc:"Only return items linked to any item of this type"`
+	LinkedTo        string `query:"linked_to" enum:"college,essay,extracurricular,media,module" required:"false" doc:"Only return items linked to any item of this type"`
 	SortBy          string `query:"sort_by" enum:"created_at,deadline,completed_at,updated_at" default:"created_at" doc:"Field to sort by"`
 	SortOrder       string `query:"sort_order" enum:"asc,desc" default:"desc" doc:"Sort direction"`
 }
@@ -190,4 +193,78 @@ type UpdateTodoItemDeadlineInput struct {
 
 type UpdateTodoItemDeadlineOutput struct {
 	Body TodoItem
+}
+
+type BulkCreateTodoItemsBody struct {
+	Title           string        `json:"title" minLength:"1" maxLength:"200" doc:"Short title of the task"`
+	Description     string        `json:"description" doc:"Full description of the task"`
+	Deadline        *time.Time    `json:"deadline,omitempty" required:"false" doc:"When the task is due"`
+	LinkType        *TodoLinkType `json:"link_type,omitempty" required:"false" enum:"college,essay,extracurricular,module" doc:"What kind of item this task is linked to"`
+	CollegeID       *int64        `json:"college_id,omitempty" required:"false" doc:"College to link, when link_type is college"`
+	MediaID         *string       `json:"media_id,omitempty" required:"false" format:"uuid" doc:"Video to link, when link_type is module"`
+	StudentIDs      []uuid.UUID   `json:"student_ids,omitempty" required:"false" doc:"Students to assign individually"`
+	GraduationYears []int         `json:"graduation_years,omitempty" required:"false" doc:"Assign every student graduating in these years"`
+	All             bool          `json:"all,omitempty" required:"false" doc:"Assign every one of the counselor's students"`
+}
+
+type BulkCreateTodoItemsInput struct {
+	Body BulkCreateTodoItemsBody
+}
+
+type BulkCreateTodoItemsResponse struct {
+	AssignmentID uuid.UUID  `json:"assignment_id"`
+	Items        []TodoItem `json:"items"`
+}
+
+type BulkCreateTodoItemsOutput struct {
+	Body BulkCreateTodoItemsResponse
+}
+
+type BulkCreateTodoItemsParams struct {
+	CounselorID uuid.UUID
+	UserID      uuid.UUID
+	Title       string
+	Description string
+	Deadline    *time.Time
+	LinkType    *TodoLinkType
+	CollegeID   *int64
+	MediaID     *string
+	StudentIDs  []uuid.UUID
+	Years       []string
+	All         bool
+}
+
+type UpdateTodoAssignmentBody struct {
+	Title            *string       `json:"title,omitempty" required:"false" minLength:"1" maxLength:"200" doc:"New title for every task in the assignment"`
+	Description      *string       `json:"description,omitempty" required:"false" doc:"New description for every task in the assignment"`
+	Deadline         *time.Time    `json:"deadline,omitempty" required:"false" doc:"New deadline for every task in the assignment"`
+	LinkType         *TodoLinkType `json:"link_type,omitempty" required:"false" enum:"college,module" doc:"New link; when set, the college and media ids are replaced too"`
+	CollegeID        *int64        `json:"college_id,omitempty" required:"false"`
+	MediaID          *string       `json:"media_id,omitempty" required:"false" format:"uuid"`
+	AddStudentIDs    []uuid.UUID   `json:"add_student_ids,omitempty" required:"false" doc:"Students to add to the assignment"`
+	RemoveStudentIDs []uuid.UUID   `json:"remove_student_ids,omitempty" required:"false" doc:"Students to remove; completed tasks are kept"`
+}
+
+type UpdateTodoAssignmentInput struct {
+	AssignmentID uuid.UUID `path:"assignment_id"`
+	Body         UpdateTodoAssignmentBody
+}
+
+type UpdateTodoAssignmentOutput struct {
+	Body []TodoItem
+}
+
+// Passed from the handler to the store; not part of the API.
+type UpdateTodoAssignmentParams struct {
+	AssignmentID     uuid.UUID
+	CounselorID      uuid.UUID
+	UserID           uuid.UUID
+	Title            *string
+	Description      *string
+	Deadline         *time.Time
+	LinkType         *TodoLinkType
+	CollegeID        *int64
+	MediaID          *string
+	AddStudentIDs    []uuid.UUID
+	RemoveStudentIDs []uuid.UUID
 }
