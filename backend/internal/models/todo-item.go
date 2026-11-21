@@ -1,19 +1,36 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type TodoLinkType string
+
+const (
+	TodoLinkCollege         TodoLinkType = "college"
+	TodoLinkEssay           TodoLinkType = "essay"
+	TodoLinkExtracurricular TodoLinkType = "extracurricular"
+	TodoLinkModule          TodoLinkType = "module"
+)
 
 type TodoItem struct {
-	ID              string     `json:"id"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
-	StudentID       string     `json:"student_id"`
-	UserID          string     `json:"user_id"`
-	TodoDescription string     `json:"todo_description"`
-	CompletedAt     *time.Time `json:"completed_at"`
-	Deadline        *time.Time `json:"deadline"`
-	EssayID         *string    `json:"essay_id"`
-	MediaID         *string    `json:"media_id"`
-	GlobalCollegeID *int64     `json:"global_college_id"`
+	ID                string        `json:"id"`
+	CreatedAt         time.Time     `json:"created_at"`
+	UpdatedAt         time.Time     `json:"updated_at"`
+	StudentID         string        `json:"student_id"`
+	UserID            string        `json:"user_id"`
+	TodoDescription   string        `json:"todo_description"`
+	CompletedAt       *time.Time    `json:"completed_at"`
+	Deadline          *time.Time    `json:"deadline"`
+	EssayID           *string       `json:"essay_id"`
+	MediaID           *string       `json:"media_id"`
+	GlobalCollegeID   *int64        `json:"global_college_id"`
+	Title             string        `json:"title"`
+	ExtracurricularID *int64        `json:"extracurricular_id"`
+	LinkType          *TodoLinkType `json:"link_type" enum:"college,essay,extracurricular,module"`
+	AssignmentID      *uuid.UUID    `json:"assignment_id"`
 }
 
 type CreateTodoItemRequestBody struct {

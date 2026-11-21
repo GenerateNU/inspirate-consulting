@@ -11,6 +11,10 @@ SELECT
     ti.essay_id,
     ti.media_id,
     ti.global_college_id,
+    ti.title,
+    ti.extracurricular_id,
+    ti.link_type,
+    ti.assignment_id,
     1 - (vt.embedding <=> $1::extensions.vector) AS similarity
 FROM public.vector_table vt
 JOIN public.vector_relationship vr ON vr.vector_id = vt.vector_id

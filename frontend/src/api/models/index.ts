@@ -112,6 +112,7 @@ export * from './setStudentReviewBalanceRequestBody';
 export * from './student';
 export * from './studentListItem';
 export * from './todoItem';
+export * from './todoItemLinkType';
 export * from './todoItemPage';
 export * from './updateChatMessageReadInputBody';
 export * from './updateCounselorBody';

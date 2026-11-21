@@ -1523,14 +1523,18 @@ export const GetTodoItemsResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "items": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
   "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
@@ -1554,14 +1558,18 @@ export const CreateTodoItemBody = /*#__PURE__*/ zod.object({
 
 export const CreateTodoItemResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
   "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
@@ -1599,14 +1607,18 @@ export const SearchTodoItemsResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "items": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.array(/*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
   "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
@@ -1638,14 +1650,18 @@ export const UpdateTodoItemCompletedBody = /*#__PURE__*/ zod.object({
 
 export const UpdateTodoItemCompletedResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
   "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
@@ -1665,14 +1681,18 @@ export const UpdateTodoItemDeadlineBody = /*#__PURE__*/ zod.object({
 
 export const UpdateTodoItemDeadlineResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
   "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
@@ -1695,14 +1715,18 @@ export const UpdateTodoItemDescriptionBody = /*#__PURE__*/ zod.object({
 
 export const UpdateTodoItemDescriptionResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
   "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
   "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
   "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
   "todo_description": /*#__PURE__*/ zod.string(),
   "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
   "user_id": /*#__PURE__*/ zod.string()
