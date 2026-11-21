@@ -33,6 +33,7 @@ func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoIt
 	if linked > 1 {
 		return nil, errs.BadRequest("a todo item can be linked to at most one of essay, media, or college")
 	}
+	
 
 	createdTodoItem, err := h.TodoItemRepository.CreateTodoItem(ctx, studentID.String(), userID.String(), *input)
 	if err != nil {

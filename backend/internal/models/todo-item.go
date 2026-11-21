@@ -34,13 +34,16 @@ type TodoItem struct {
 }
 
 type CreateTodoItemRequestBody struct {
-	StudentID       string     `json:"student_id,omitempty" required:"false" format:"uuid" doc:"Student the task is for; required for counselors, defaults to the authenticated student"`
-	TodoDescription string     `json:"todo_description"`
-	CompletedAt     *time.Time `json:"completed_at,omitempty"`
-	Deadline        *time.Time `json:"deadline,omitempty"`
-	EssayID         *string    `json:"essay_id,omitempty" format:"uuid" doc:"Essay this task is for; at most one of essay_id, media_id, global_college_id"`
-	MediaID         *string    `json:"media_id,omitempty" format:"uuid" doc:"Media this task is for; at most one of essay_id, media_id, global_college_id"`
-	GlobalCollegeID *int64     `json:"global_college_id,omitempty" doc:"College this task is for; at most one of essay_id, media_id, global_college_id"`
+	StudentID         string        `json:"student_id,omitempty" required:"false" format:"uuid" doc:"Student the task is for; required for counselors, defaults to the authenticated student"`
+	TodoDescription   string        `json:"todo_description"`
+	CompletedAt       *time.Time    `json:"completed_at,omitempty"`
+	Deadline          *time.Time    `json:"deadline,omitempty"`
+	EssayID           *string       `json:"essay_id,omitempty" format:"uuid" doc:"Essay this task is for; at most one of essay_id, media_id, global_college_id"`
+	MediaID           *string       `json:"media_id,omitempty" format:"uuid" doc:"Media this task is for; at most one of essay_id, media_id, global_college_id"`
+	GlobalCollegeID   *int64        `json:"global_college_id,omitempty" doc:"College this task is for; at most one of essay_id, media_id, global_college_id"`
+	Title             string        `json:"title" minLength:"1" maxLength:"200" doc:"Short title of the task"`
+	ExtracurricularID *int64        `json:"extracurricular_id,omitempty" required:"false" doc:"Extracurricular this task is linked to"`
+	LinkType          *TodoLinkType `json:"link_type,omitempty" required:"false" enum:"college,essay,extracurricular,module" doc:"What kind of item this task is linked to"`
 }
 
 type CreateTodoItemInput struct {
