@@ -57,9 +57,10 @@ type ListCounselorStudentsOutput struct {
 	Body []CounselorStudent
 }
 
-// the counselor table has no profile fields yet
-// to make one editable: add it here, to update_counselor.sql, and to the Counselor model
-type UpdateCounselorBody struct{}
+type UpdateCounselorBody struct {
+	CustomLink Nullable[string]    `json:"custom_link,omitempty" format:"uri" doc:"Counselor's custom link; send null to clear"`
+	ExpiresAt  Nullable[time.Time] `json:"expires_at,omitempty" doc:"When the counselor's account expires; send null to remove expiration"`
+}
 
 // counselor id is derived from session, counselors can only edit themselves
 type UpdateCounselorInput struct {

@@ -54,7 +54,7 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/counselors",
-		Description: "Update the authenticated counselor's profile. The counselor has no editable fields yet.",
+		Description: "Update the authenticated counselor's custom link and account expiration. Omit a field to keep it, send null to clear it.",
 		Tags:        []string{"Counselors"},
 	}, func(ctx context.Context, input *models.UpdateCounselorInput) (*models.UpdateCounselorOutput, error) {
 		updatedCounselor, err := counselorHandler.UpdateCounselor(ctx, input.Body)
