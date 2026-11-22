@@ -3607,6 +3607,33 @@ paths:
           description: Error
       tags:
         - Counselors
+  /counselors/{id}:
+    get:
+      description: Get a counselor's profile
+      operationId: get-counselor
+      parameters:
+        - description: ID of the counselor
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the counselor
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Counselor"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
   /essay-groups:
     post:
       description: Creates an essay group for a student
