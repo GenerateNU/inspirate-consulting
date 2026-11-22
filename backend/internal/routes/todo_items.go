@@ -183,4 +183,26 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 
 		return &models.UpdateTodoItemTitleOutput{Body: item}, nil
 	})
+
+	//Register PATCH /todo-items{id}/link handler for changing/editing a item's link
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-item-link",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}/link",
+		Description: "Change what a todo item links to: an essay, college, extracurricular, or module, or nothing",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoItemLinkInput) (*models.UpdateTodoItemLinkOutput, error) {
+		item, err := todoItemHandler.UpdateTodoItemLink(ctx, input.ID, models.TodoItemLink{
+			LinkType:          input.Body.LinkType,
+			EssayID:           input.Body.EssayID,
+			MediaID:           input.Body.MediaID,
+			GlobalCollegeID:   input.Body.GlobalCollegeID,
+			ExtracurricularID: input.Body.ExtracurricularID,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateTodoItemLinkOutput{Body: item}, nil
+	})
 }
