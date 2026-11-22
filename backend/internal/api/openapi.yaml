@@ -333,6 +333,15 @@ components:
           format: uri
           readOnly: true
           type: string
+        custom_link:
+          type:
+            - string
+            - "null"
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
         id:
           type: string
         user_id:
@@ -340,6 +349,8 @@ components:
       required:
         - id
         - user_id
+        - custom_link
+        - expires_at
       type: object
     CounselorListItem:
       additionalProperties: false
@@ -2349,6 +2360,18 @@ components:
           format: uri
           readOnly: true
           type: string
+        custom_link:
+          description: Counselor's custom link; send null to clear
+          format: uri
+          type:
+            - string
+            - "null"
+        expires_at:
+          description: When the counselor's account expires; send null to remove expiration
+          format: date-time
+          type:
+            - string
+            - "null"
       type: object
     UpdateEssayGroupBody:
       additionalProperties: false
@@ -3427,7 +3450,7 @@ paths:
         - Global Colleges
   /counselors:
     patch:
-      description: Update the authenticated counselor's profile. The counselor has no editable fields yet.
+      description: Update the authenticated counselor's custom link and account expiration. Omit a field to keep it, send null to clear it.
       operationId: update-counselor
       requestBody:
         content:
