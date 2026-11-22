@@ -92,7 +92,7 @@ export const getUpdateCounselorUrl = () => {
 }
 
 /**
- * Update the authenticated counselor's profile. The counselor has no editable fields yet.
+ * Update the authenticated counselor's custom link and account expiration. Omit a field to keep it, send null to clear it.
  */
 export const updateCounselor = async (updateCounselorBody: NonReadonly<UpdateCounselorBody>, options?: RequestInit): Promise<Counselor> => {
 

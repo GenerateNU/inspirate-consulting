@@ -18,7 +18,7 @@ import type {
 } from '../../models';
 
 
-export const getUpdateCounselorResponseMock = (overrideResponse: Partial<Extract<Counselor, object>> = {}): Counselor => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), user_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+export const getUpdateCounselorResponseMock = (overrideResponse: Partial<Extract<Counselor, object>> = {}): Counselor => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), custom_link: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), expires_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), id: faker.string.alpha({length: {min: 10, max: 20}}), user_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
 export const getFetchCounselorsResponseMock = (overrideResponse: Partial<Extract<FetchCounselorsBody, object>> = {}): FetchCounselorsBody => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), counselors: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), user_id: faker.string.alpha({length: {min: 10, max: 20}})})), null]), next_cursor: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), ...overrideResponse})
 

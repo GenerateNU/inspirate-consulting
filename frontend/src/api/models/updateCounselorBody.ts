@@ -9,4 +9,14 @@
 export interface UpdateCounselorBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /**
+     * Counselor's custom link; send null to clear
+     * @nullable
+     */
+  custom_link?: string | null;
+  /**
+     * When the counselor's account expires; send null to remove expiration
+     * @nullable
+     */
+  expires_at?: string | null;
 }
