@@ -14,7 +14,7 @@ import (
 
 // SetUpPersonalCollegeApplicationRoutes registers the personal college application endpoints:
 // create and list by student ID, delete, update rank, and update application details.
-// Counselors can read a student's list (GET with student_id); every write is student-only.
+// Any counselor can read a student's list (GET with student_id); every write is student-only.
 func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
 	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege, authorizer)
 
@@ -40,7 +40,7 @@ func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Reposi
 		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/applications",
-		Description: "List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.",
+		Description: "List a student's college applications, ranked first. Students get their own; counselors must pass student_id and can view any student. Each application includes cycle_offered and essay_progress.",
 		Tags:        []string{"Personal College Applications"},
 	}, func(ctx context.Context, input *models.ListPersonalCollegeApplicationsInput) (*models.ListPersonalCollegeApplicationsOutput, error) {
 		applications, err := personalCollegeApplicationHandler.ListPersonalCollegeApplicationsByStudentID(ctx, input.StudentID)
