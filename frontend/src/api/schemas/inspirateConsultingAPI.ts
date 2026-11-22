@@ -1832,6 +1832,76 @@ export const UpdateTodoItemDescriptionResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Change what a todo item links to: an essay, college, extracurricular, or module, or nothing
+ */
+export const UpdateTodoItemLinkParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.uuid().check(/*#__PURE__*/ zod.describe('ID of the todo item to update'))
+})
+
+export const UpdateTodoItemLinkBody = /*#__PURE__*/ zod.object({
+  "essay_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Essay to link, when link_type is essay')),
+  "extracurricular_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('Extracurricular to link, when link_type is extracurricular')),
+  "global_college_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()).check(/*#__PURE__*/ zod.describe('College to link, when link_type is college')),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])).check(/*#__PURE__*/ zod.describe('What the task links to, or null to remove its link')),
+  "media_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Video to link, when link_type is module'))
+})
+
+export const UpdateTodoItemLinkResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
+ * edit the title of a task
+ */
+export const UpdateTodoItemTitleParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.uuid().check(/*#__PURE__*/ zod.describe('ID of the todo item to update'))
+})
+
+export const updateTodoItemTitleBodyTitleMax = 200;
+
+
+
+export const UpdateTodoItemTitleBody = /*#__PURE__*/ zod.object({
+  "title": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1)).check(/*#__PURE__*/ zod.maxLength(updateTodoItemTitleBodyTitleMax)).check(/*#__PURE__*/ zod.describe('New title of the task'))
+})
+
+export const UpdateTodoItemTitleResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "assignment_id": /*#__PURE__*/ zod.string(),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "created_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "deadline": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "essay_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "extracurricular_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "global_college_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "id": /*#__PURE__*/ zod.string(),
+  "link_type": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.union([/*#__PURE__*/ zod.literal('college'),/*#__PURE__*/ zod.literal('essay'),/*#__PURE__*/ zod.literal('extracurricular'),/*#__PURE__*/ zod.literal('module'),/*#__PURE__*/ zod.literal(null)])),
+  "media_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "student_id": /*#__PURE__*/ zod.string(),
+  "title": /*#__PURE__*/ zod.string(),
+  "todo_description": /*#__PURE__*/ zod.string(),
+  "updated_at": /*#__PURE__*/ zod.iso.datetime({"offset":true}),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Update the authenticated user's name. Fields left out of the request are not changed. Use /user/pfp to change the profile picture.
  */
 export const updateUserBodyNameMax = 200;

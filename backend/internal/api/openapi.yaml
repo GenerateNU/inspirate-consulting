@@ -2783,6 +2783,63 @@ components:
       required:
         - new_description
       type: object
+    UpdateTodoItemLinkBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemLinkBody.json
+          format: uri
+          readOnly: true
+          type: string
+        essay_id:
+          description: Essay to link, when link_type is essay
+          format: uuid
+          type: string
+        extracurricular_id:
+          description: Extracurricular to link, when link_type is extracurricular
+          format: int64
+          type: integer
+        global_college_id:
+          description: College to link, when link_type is college
+          format: int64
+          type: integer
+        link_type:
+          description: What the task links to, or null to remove its link
+          enum:
+            - college
+            - essay
+            - extracurricular
+            - module
+          type:
+            - string
+            - "null"
+        media_id:
+          description: Video to link, when link_type is module
+          format: uuid
+          type: string
+      required:
+        - link_type
+      type: object
+    UpdateTodoItemTitleBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UpdateTodoItemTitleBody.json
+          format: uri
+          readOnly: true
+          type: string
+        title:
+          description: New title of the task
+          maxLength: 200
+          minLength: 1
+          type: string
+      required:
+        - title
+      type: object
     UpdateUserBody:
       additionalProperties: false
       properties:
@@ -5191,6 +5248,74 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateTodoItemDescriptionInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}/link:
+    patch:
+      description: "Change what a todo item links to: an essay, college, extracurricular, or module, or nothing"
+      operationId: update-todo-item-link
+      parameters:
+        - description: ID of the todo item to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the todo item to update
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemLinkBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItem"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/{id}/title:
+    patch:
+      description: edit the title of a task
+      operationId: update-todo-item-title
+      parameters:
+        - description: ID of the todo item to update
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the todo item to update
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoItemTitleBody"
         required: true
       responses:
         "200":
