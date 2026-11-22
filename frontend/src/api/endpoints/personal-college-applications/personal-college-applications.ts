@@ -95,7 +95,7 @@ export const getListPersonalCollegeApplicationsUrl = (params?: ListPersonalColle
 }
 
 /**
- * List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
+ * List a student's college applications, ranked first. Students get their own; counselors must pass student_id and can view any student. Each application includes cycle_offered and essay_progress.
  */
 export const listPersonalCollegeApplications = async (params?: ListPersonalCollegeApplicationsParams, options?: RequestInit): Promise<PersonalCollegeApplication[] | null> => {
 
