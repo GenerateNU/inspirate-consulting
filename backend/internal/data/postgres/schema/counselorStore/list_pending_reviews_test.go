@@ -21,8 +21,8 @@ func TestListPendingReviews(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	otherCounselorID := createTestCounselor(t, db)
 
-	student := createTestStudent(t, db, counselorID, "Alice", "junior")
-	otherStudent := createTestStudent(t, db, otherCounselorID, "Bob", "senior")
+	student := createTestStudent(t, db, counselorID, "Alice", 2028)
+	otherStudent := createTestStudent(t, db, otherCounselorID, "Bob", 2027)
 
 	essayA := createTestEssay(t, db, student, "personal-statement")
 	essayB := createTestEssay(t, db, student, "supplemental")
@@ -78,7 +78,7 @@ func TestListPendingReviews_NoReviews(t *testing.T) {
 	ctx := context.Background()
 
 	counselorID := createTestCounselor(t, db)
-	createTestStudent(t, db, counselorID, "Alice", "junior")
+	createTestStudent(t, db, counselorID, "Alice", 2028)
 
 	results, err := repo.ListPendingReviews(ctx, counselorID)
 	if err != nil {

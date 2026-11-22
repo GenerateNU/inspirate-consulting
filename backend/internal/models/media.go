@@ -1,5 +1,14 @@
 package models
 
+type Year string
+
+const (
+	Freshman  Year = "freshman"
+	Sophomore Year = "sophomore"
+	Junior    Year = "junior"
+	Senior    Year = "senior"
+)
+
 type Media struct {
 	ID           string `json:"id"`
 	Title        string `json:"title"`

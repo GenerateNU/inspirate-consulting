@@ -13,15 +13,15 @@ type GetStudentOutput struct {
 // fields left out of the request are not changed
 // counselor_id and review_balance have their own endpoints
 type UpdateStudentBody struct {
-	Year                  *Year   `json:"year,omitempty" required:"false" enum:"freshman,sophomore,junior,senior" doc:"School year of the student"`
-	GPA                   *int    `json:"gpa,omitempty" required:"false" doc:"GPA of the student"`
-	Organization          *string `json:"organization,omitempty" required:"false" doc:"Organization of the student"`
-	Interest              *string `json:"student_interest,omitempty" required:"false" doc:"Interest of the student"`
-	HighSchool            *string `json:"high_school,omitempty" required:"false" doc:"High school the student attends"`
-	StandardizedTestScore *string `json:"standardized_test_score,omitempty" required:"false" doc:"SAT or ACT score of the student"`
-	IntendedMajor         *string `json:"intended_major,omitempty" required:"false" doc:"Intended major of the student"`
-	IntendedMinor         *string `json:"intended_minor,omitempty" required:"false" doc:"Intended minor of the student"`
-	GeographicPreferences *string `json:"geographic_preferences,omitempty" required:"false" doc:"Geographic preferences for colleges"`
+	GraduationYear        *int     `json:"graduation_year,omitempty" required:"false" minimum:"2000" maximum:"2100" doc:"Year the student graduates high school"`
+	GPA                   *float64 `json:"gpa,omitempty" required:"false" minimum:"0" maximum:"5" doc:"GPA of the student"`
+	Organization          *string  `json:"organization,omitempty" required:"false" doc:"Organization of the student"`
+	Interest              *string  `json:"student_interest,omitempty" required:"false" doc:"Interest of the student"`
+	HighSchool            *string  `json:"high_school,omitempty" required:"false" doc:"High school the student attends"`
+	StandardizedTestScore *string  `json:"standardized_test_score,omitempty" required:"false" doc:"SAT or ACT score of the student"`
+	IntendedMajor         *string  `json:"intended_major,omitempty" required:"false" doc:"Intended major of the student"`
+	IntendedMinor         *string  `json:"intended_minor,omitempty" required:"false" doc:"Intended minor of the student"`
+	GeographicPreferences *string  `json:"geographic_preferences,omitempty" required:"false" doc:"Geographic preferences for colleges"`
 }
 
 type UpdateStudentInput struct {

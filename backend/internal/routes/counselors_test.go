@@ -138,9 +138,9 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: carolID, Name: "Carol", Year: models.Freshman},
-				{StudentID: bobID, Name: "Bob", Year: models.Senior},
-				{StudentID: aliceID, Name: "Alice", Year: models.Junior},
+				{StudentID: carolID, Name: "Carol", GraduationYear: 2030},
+				{StudentID: bobID, Name: "Bob", GraduationYear: 2027},
+				{StudentID: aliceID, Name: "Alice", GraduationYear: 2028},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{{TransactionID: uuid.New(), StudentID: aliceID, StudentName: "Alice"}}, nil)
@@ -191,8 +191,8 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: bobID, Name: "Bob", Year: models.Senior},
-				{StudentID: aliceID, Name: "Alice", Year: models.Junior},
+				{StudentID: bobID, Name: "Bob", GraduationYear: 2027},
+				{StudentID: aliceID, Name: "Alice", GraduationYear: 2028},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{{TransactionID: uuid.New(), StudentID: aliceID, StudentName: "Alice"}}, nil)
@@ -222,14 +222,14 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		assert.Equal(t, "Alice", output[0].Name)
 	})
 
-	t.Run("filters by year", func(t *testing.T) {
+	t.Run("filters by graduation year", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: uuid.New(), Name: "Bob", Year: models.Senior},
-				{StudentID: uuid.New(), Name: "Alice", Year: models.Junior},
+				{StudentID: uuid.New(), Name: "Bob", GraduationYear: 2027},
+				{StudentID: uuid.New(), Name: "Alice", GraduationYear: 2028},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
@@ -239,7 +239,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/counselors/students?year=senior", nil)
+		req, err := http.NewRequest(http.MethodGet, "/counselors/students?graduation_year=2027", nil)
 		require.NoError(t, err)
 		req.Header.Set("X-Counselor-ID", counselorID.String())
 
@@ -259,15 +259,15 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		assert.Equal(t, "Bob", output[0].Name)
 	})
 
-	t.Run("sorts by year desc", func(t *testing.T) {
+	t.Run("sorts by graduation year desc", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: uuid.New(), Name: "Carol", Year: models.Freshman},
-				{StudentID: uuid.New(), Name: "Bob", Year: models.Senior},
-				{StudentID: uuid.New(), Name: "Alice", Year: models.Junior},
+				{StudentID: uuid.New(), Name: "Carol", GraduationYear: 2030},
+				{StudentID: uuid.New(), Name: "Bob", GraduationYear: 2027},
+				{StudentID: uuid.New(), Name: "Alice", GraduationYear: 2028},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
@@ -277,7 +277,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/counselors/students?sort_by=year&sort_order=desc", nil)
+		req, err := http.NewRequest(http.MethodGet, "/counselors/students?sort_by=graduation_year&sort_order=desc", nil)
 		require.NoError(t, err)
 		req.Header.Set("X-Counselor-ID", counselorID.String())
 
@@ -294,9 +294,9 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		err = json.Unmarshal(respBody, &output)
 		require.NoError(t, err)
 		require.Len(t, output, 3)
-		assert.Equal(t, "Bob", output[0].Name)
+		assert.Equal(t, "Carol", output[0].Name)
 		assert.Equal(t, "Alice", output[1].Name)
-		assert.Equal(t, "Carol", output[2].Name)
+		assert.Equal(t, "Bob", output[2].Name)
 	})
 
 	t.Run("no matches returns an empty list", func(t *testing.T) {
@@ -305,7 +305,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: uuid.New(), Name: "Alice", Year: models.Junior},
+				{StudentID: uuid.New(), Name: "Alice", GraduationYear: 2028},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
@@ -315,7 +315,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/counselors/students?year=sophomore", nil)
+		req, err := http.NewRequest(http.MethodGet, "/counselors/students?graduation_year=2029", nil)
 		require.NoError(t, err)
 		req.Header.Set("X-Counselor-ID", counselorID.String())
 
@@ -330,7 +330,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		assert.JSONEq(t, "[]", string(respBody))
 	})
 
-	t.Run("validation error : invalid year", func(t *testing.T) {
+	t.Run("validation error : invalid graduation year", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewCounselorRepository(t)
@@ -339,7 +339,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/counselors/students?year=graduate", nil)
+		req, err := http.NewRequest(http.MethodGet, "/counselors/students?graduation_year=senior", nil)
 		require.NoError(t, err)
 		req.Header.Set("X-Counselor-ID", counselorID.String())
 

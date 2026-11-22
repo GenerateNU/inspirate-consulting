@@ -1,3 +1,4 @@
+import { graduationYearLabel } from "@/lib/graduation-year";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle, ExternalLink, IdCard } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -92,8 +93,8 @@ export default function StudentEssays() {
                 {student?.name ?? "Student"}
               </h1>
               {student && (
-                <p className="text-sm text-muted-foreground capitalize">
-                  {student.year}
+                <p className="text-sm text-muted-foreground">
+                  {graduationYearLabel(student.graduation_year)}
                 </p>
               )}
             </div>

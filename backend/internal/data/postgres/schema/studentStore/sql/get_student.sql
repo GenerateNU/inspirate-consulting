@@ -1,3 +1,3 @@
-SELECT id, user_id ,year, organization, gpa, review_balance, counselor_id, student_interest
+SELECT id, user_id ,graduation_year, organization, gpa, review_balance, counselor_id, student_interest
 FROM public.student 
 WHERE id = $1

@@ -13,6 +13,7 @@ export interface Student {
   /** @nullable */
   geographic_preferences: string | null;
   gpa: number;
+  graduation_year: number;
   /** @nullable */
   high_school: string | null;
   id: string;
@@ -28,5 +29,4 @@ export interface Student {
   /** @nullable */
   student_interest: string | null;
   user_id: string;
-  year: string;
 }

@@ -70,12 +70,12 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		// Send valid JSON payload
 		payload := map[string]any{
-			"email":        email,
-			"name":         name,
-			"role":         "student",
-			"year":         "senior",
-			"gpa":          4,
-			"counselor_id": counselorID,
+			"email":           email,
+			"name":            name,
+			"role":            "student",
+			"graduation_year": 2027,
+			"gpa":             4,
+			"counselor_id":    counselorID,
 		}
 		bodyBytes, err := json.Marshal(payload)
 		println(bodyBytes)
@@ -272,11 +272,11 @@ func TestRoute_CreateUser_RoleFields(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, _ := doJSON(t, app, http.MethodPost, "/user", map[string]any{
-			"name":  "No Counselor",
-			"email": "nocounselor@example.com",
-			"role":  "student",
-			"year":  "junior",
-			"gpa":   3,
+			"name":            "No Counselor",
+			"email":           "nocounselor@example.com",
+			"role":            "student",
+			"graduation_year": 2028,
+			"gpa":             3,
 		})
 
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)

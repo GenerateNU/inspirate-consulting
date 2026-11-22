@@ -29,17 +29,17 @@ func createTestCounselor(t *testing.T, db *pgxpool.Pool) uuid.UUID {
 }
 
 // inserts a user and a student assigned to the given counselor, and returns the student id.
-func createTestStudent(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, name string, year string) uuid.UUID {
+func createTestStudent(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, name string, graduationYear int) uuid.UUID {
 	t.Helper()
 
 	var id uuid.UUID
 	err := db.QueryRow(
 		context.Background(),
 		`WITH new_user AS (INSERT INTO public.users (name, email) VALUES ($1, gen_random_uuid()::text || '@test.com') RETURNING id)
-		INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
+		INSERT INTO public.student (user_id, graduation_year, gpa, review_balance, counselor_id)
 		SELECT id, $2, 4, 5, $3 FROM new_user RETURNING id`,
 		name,
-		year,
+		graduationYear,
 		counselorID,
 	).Scan(&id)
 	if err != nil {

@@ -56,7 +56,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.CreateUserI
 			ctx,
 			studentQuery,
 			createdUser.ID,
-			user.Body.Year,
+			user.Body.GraduationYear,
 			user.Body.Organization,
 			user.Body.GPA,
 			user.Body.CounselorID,

@@ -25,7 +25,7 @@ func (r *EssayReviewRepository) LockStudent(ctx context.Context, db dbinterface.
 	err = db.QueryRow(ctx, lockQuery, id).Scan(
 		&student.ID,
 		&student.UserID,
-		&student.Year,
+		&student.GraduationYear,
 		&student.Organization,
 		&student.GPA,
 		&student.ReviewBalance,

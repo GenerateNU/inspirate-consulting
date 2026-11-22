@@ -17,7 +17,7 @@ func (r *StudentRepository) AssignCounselor(ctx context.Context, studentUserID u
 
 	student := &models.Student{}
 	err = r.db.QueryRow(ctx, query, studentUserID, counselorID).Scan(
-		&student.ID, &student.UserID, &student.Year, &student.Organization, &student.GPA, &student.ReviewBalance, &student.CounselorID,
+		&student.ID, &student.UserID, &student.GraduationYear, &student.Organization, &student.GPA, &student.ReviewBalance, &student.CounselorID,
 	)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-SELECT student.id, users.name, student.year,
+SELECT student.id, users.name, student.graduation_year,
 
         (SELECT count(*)::int
         FROM public.essay_review_transaction AS review

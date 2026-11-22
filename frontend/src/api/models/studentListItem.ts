@@ -9,6 +9,7 @@
 export interface StudentListItem {
   counselor_id: string;
   gpa: number;
+  graduation_year: number;
   id: string;
   name: string;
   /** @nullable */
@@ -17,5 +18,4 @@ export interface StudentListItem {
   pfp_key: string | null;
   review_balance: number;
   user_id: string;
-  year: string;
 }

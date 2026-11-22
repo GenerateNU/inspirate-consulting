@@ -28,7 +28,7 @@ func TestHandler_UpdateStudent(t *testing.T) {
 		t.Parallel()
 
 		studentID := uuid.New()
-		gpa := 4
+		gpa := 3.85
 		input := models.UpdateStudentBody{GPA: &gpa}
 
 		mockStudentRepo := mocks.NewStudentRepository(t)
@@ -65,7 +65,7 @@ func TestHandler_UpdateStudent(t *testing.T) {
 		t.Parallel()
 
 		studentID := uuid.New()
-		gpa := 4
+		gpa := 3.85
 		input := models.UpdateStudentBody{GPA: &gpa}
 		studentCtx := auth.WithStudentID(withRole(ctx, models.StudentRole), studentID)
 

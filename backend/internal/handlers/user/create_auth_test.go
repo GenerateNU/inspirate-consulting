@@ -26,10 +26,10 @@ func createInput(name, email string, role models.Role) *models.CreateUserInput {
 	in.Body.Email = email
 	in.Body.Role = role
 	if role == models.StudentRole {
-		year := models.Senior
-		gpa := 4
+		year := 2027
+		gpa := 3.85
 		counselorID := uuid.New()
-		in.Body.Year = &year
+		in.Body.GraduationYear = &year
 		in.Body.GPA = &gpa
 		in.Body.CounselorID = &counselorID
 	}
@@ -71,7 +71,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 	}
 
 	missingFields := map[string]func(in *models.CreateUserInput){
-		"year":         func(in *models.CreateUserInput) { in.Body.Year = nil },
+		"year":         func(in *models.CreateUserInput) { in.Body.GraduationYear = nil },
 		"gpa":          func(in *models.CreateUserInput) { in.Body.GPA = nil },
 		"counselor_id": func(in *models.CreateUserInput) { in.Body.CounselorID = nil },
 	}
@@ -92,7 +92,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 
 			out, err := NewHandler(repo, nil, nil).CreateUser(ctx, in, sb)
 			assert.Nil(t, out)
-			assert.Equal(t, errs.BadRequest("year, gpa, and counselor_id are required for students"), err)
+			assert.Equal(t, errs.BadRequest("graduation_year, gpa, and counselor_id are required for students"), err)
 			assert.False(t, signedUp, "no Supabase account should be created for an invalid request")
 		})
 	}
