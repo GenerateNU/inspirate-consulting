@@ -165,4 +165,22 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		}
 		return &models.UpdateTodoAssignmentOutput{Body: items}, nil
 	})
+
+	//Register PATCH /todo-items/{id}/title handler for changing/editing a tasks title
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-item-title",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}/title",
+		Description: "edit the title of a task",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoItemTitleInput) (*models.UpdateTodoItemTitleOutput, error) {
+		item, err := todoItemHandler.UpdateTodoItemTitle(ctx, input.ID, input.Body.Title)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.UpdateTodoItemTitleOutput{Body: item}, nil
+	})
 }

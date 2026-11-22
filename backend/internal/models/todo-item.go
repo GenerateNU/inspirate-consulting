@@ -268,3 +268,16 @@ type UpdateTodoAssignmentParams struct {
 	AddStudentIDs    []uuid.UUID
 	RemoveStudentIDs []uuid.UUID
 }
+
+type UpdateTodoItemTitleBody struct {
+	Title string `json:"title" minLength:"1" maxLength:"200" doc:"New title of the task"`
+}
+
+type UpdateTodoItemTitleInput struct {
+	ID   string `path:"id" format:"uuid" doc:"ID of the todo item to update"`
+	Body UpdateTodoItemTitleBody
+}
+
+type UpdateTodoItemTitleOutput struct {
+	Body *TodoItem
+}
