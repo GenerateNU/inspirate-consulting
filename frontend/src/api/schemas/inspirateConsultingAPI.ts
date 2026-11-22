@@ -450,6 +450,22 @@ export const ListCounselorStudentsResponse = /*#__PURE__*/ zod.array(ListCounsel
 
 
 /**
+ * Get a counselor's profile
+ */
+export const GetCounselorParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the counselor'))
+})
+
+export const GetCounselorResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "custom_link": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
+
+
+/**
  * Creates an essay group for a student
  */
 export const createEssayGroupBodyNameMax = 100;

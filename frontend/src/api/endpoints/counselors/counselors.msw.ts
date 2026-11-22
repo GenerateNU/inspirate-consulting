@@ -24,12 +24,13 @@ import type {
 import {
   getAssignCounselorResponseMock,
   getFetchCounselorsResponseMock,
+  getGetCounselorResponseMock,
   getListCounselorPendingReviewsResponseMock,
   getListCounselorStudentsResponseMock,
   getUpdateCounselorResponseMock
 } from './counselors.faker';
 
-export { getUpdateCounselorResponseMock, getFetchCounselorsResponseMock, getListCounselorPendingReviewsResponseMock, getListCounselorStudentsResponseMock, getAssignCounselorResponseMock } from './counselors.faker';
+export { getUpdateCounselorResponseMock, getFetchCounselorsResponseMock, getListCounselorPendingReviewsResponseMock, getListCounselorStudentsResponseMock, getGetCounselorResponseMock, getAssignCounselorResponseMock } from './counselors.faker';
 
 
 export const getUpdateCounselorMockHandler = (overrideResponse?: Counselor | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Counselor> | Counselor), options?: RequestHandlerOptions) => {
@@ -80,6 +81,18 @@ export const getListCounselorStudentsMockHandler = (overrideResponse?: Counselor
   }, options)
 }
 
+export const getGetCounselorMockHandler = (overrideResponse?: Counselor | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Counselor> | Counselor), options?: RequestHandlerOptions) => {
+  return http.get('*/counselors/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetCounselorResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getAssignCounselorMockHandler = (overrideResponse?: Student | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<Student> | Student), options?: RequestHandlerOptions) => {
   return http.patch('*/students/assign', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
 
@@ -96,5 +109,6 @@ export const getCounselorsMock = () => [
   getFetchCounselorsMockHandler(),
   getListCounselorPendingReviewsMockHandler(),
   getListCounselorStudentsMockHandler(),
+  getGetCounselorMockHandler(),
   getAssignCounselorMockHandler()
 ]

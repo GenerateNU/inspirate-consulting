@@ -528,6 +528,117 @@ export function useListCounselorStudents<TData = Awaited<ReturnType<typeof listC
 
 
 
+export const getGetCounselorUrl = (id: string,) => {
+
+
+
+
+  return `/api/counselors/${id}`
+}
+
+/**
+ * Get a counselor's profile
+ */
+export const getCounselor = async (id: string, options?: RequestInit): Promise<Counselor> => {
+
+  const res = await fetch(getGetCounselorUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: Counselor, status?: number} = new globalThis.Error();
+    const data : Counselor = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: Counselor = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getGetCounselorQueryKey = (id: string,) => {
+    return [
+    `/api/counselors/${id}`
+    ] as const;
+    }
+
+
+export const getGetCounselorQueryOptions = <TData = Awaited<ReturnType<typeof getCounselor>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCounselor>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCounselorQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCounselor>>> = ({ signal }) => getCounselor(id, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCounselor>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCounselorQueryResult = NonNullable<Awaited<ReturnType<typeof getCounselor>>>
+export type GetCounselorQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
+
+
+export function useGetCounselor<TData = Awaited<ReturnType<typeof getCounselor>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCounselor>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCounselor>>,
+          TError,
+          Awaited<ReturnType<typeof getCounselor>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCounselor<TData = Awaited<ReturnType<typeof getCounselor>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCounselor>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCounselor>>,
+          TError,
+          Awaited<ReturnType<typeof getCounselor>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCounselor<TData = Awaited<ReturnType<typeof getCounselor>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCounselor>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetCounselor<TData = Awaited<ReturnType<typeof getCounselor>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCounselor>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCounselorQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const getAssignCounselorUrl = () => {
 
 
