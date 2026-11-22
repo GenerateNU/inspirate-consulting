@@ -962,6 +962,7 @@ export const listMediaQueryOffsetMin = 0;
 
 
 export const ListMediaQueryParams = /*#__PURE__*/ zod.object({
+  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return media whose title or description is similar to this text (pg_trgm similarity), best match first')),
   "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(listMediaQueryLimitMax)), listMediaQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of media to return')),
   "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(listMediaQueryOffsetMin)), listMediaQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of media to skip before returning results'))
 })
@@ -970,10 +971,11 @@ export const ListMediaResponseItem = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "description": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
-  "length_in_mins": /*#__PURE__*/ zod.int(),
-  "s3_key": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "s3_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "title": /*#__PURE__*/ zod.string()
+  "title": /*#__PURE__*/ zod.string(),
+  "youtube_video_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('11-character YouTube video id; embed as https://www.youtube.com/embed/{id}'))
 })
 export const ListMediaResponse = /*#__PURE__*/ zod.array(ListMediaResponseItem)
 
@@ -981,27 +983,32 @@ export const ListMediaResponse = /*#__PURE__*/ zod.array(ListMediaResponseItem)
 /**
  * Create a media/video
  */
+
+
+
 export const CreateMediaBody = /*#__PURE__*/ zod.object({
   "description": /*#__PURE__*/ zod.string(),
-  "length_in_mins": /*#__PURE__*/ zod.int(),
-  "s3_key": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.int()),
+  "s3_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))).check(/*#__PURE__*/ zod.describe('S3 key of an uploaded video; provide exactly one of s3_key or youtube_url')),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "title": /*#__PURE__*/ zod.string()
+  "title": /*#__PURE__*/ zod.string(),
+  "youtube_url": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('youtube.com or youtu.be video link; only the parsed video id is stored. Provide exactly one of s3_key or youtube_url'))
 })
 
 export const CreateMediaResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "description": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
-  "length_in_mins": /*#__PURE__*/ zod.int(),
-  "s3_key": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "s3_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "title": /*#__PURE__*/ zod.string()
+  "title": /*#__PURE__*/ zod.string(),
+  "youtube_video_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('11-character YouTube video id; embed as https://www.youtube.com/embed/{id}'))
 })
 
 
 /**
- * Allow students to fetch only videos they have access to
+ * Allow students to fetch only videos they have access to, with their progress and due date
  */
 export const getMediaAccessQueryLimitDefault = 20;
 export const getMediaAccessQueryLimitMax = 100;
@@ -1012,18 +1019,22 @@ export const getMediaAccessQueryOffsetMin = 0;
 
 
 export const GetMediaAccessQueryParams = /*#__PURE__*/ zod.object({
+  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return media whose title or description is similar to this text (pg_trgm similarity), best match first')),
   "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(getMediaAccessQueryLimitMax)), getMediaAccessQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of media to return')),
   "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(getMediaAccessQueryOffsetMin)), getMediaAccessQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of media to skip before returning results'))
 })
 
 export const GetMediaAccessResponseItem = /*#__PURE__*/ zod.object({
-  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "description": /*#__PURE__*/ zod.string(),
+  "due_date": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('Deadline of the student\'s todo that assigned this media (the most recent one, if assigned more than once)')),
   "id": /*#__PURE__*/ zod.string(),
-  "length_in_mins": /*#__PURE__*/ zod.int(),
-  "s3_key": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "s3_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "title": /*#__PURE__*/ zod.string()
+  "started_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "title": /*#__PURE__*/ zod.string(),
+  "youtube_video_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('11-character YouTube video id; embed as https://www.youtube.com/embed/{id}'))
 })
 export const GetMediaAccessResponse = /*#__PURE__*/ zod.array(GetMediaAccessResponseItem)
 
@@ -1038,8 +1049,10 @@ export const CreateMediaAccessBody = /*#__PURE__*/ zod.object({
 
 export const CreateMediaAccessResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the student first marked the media complete')),
   "id": /*#__PURE__*/ zod.string(),
   "media_id": /*#__PURE__*/ zod.string(),
+  "started_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the student first opened the media')),
   "student_id": /*#__PURE__*/ zod.string()
 })
 
@@ -1065,7 +1078,7 @@ export const DeleteMediaResponse = /*#__PURE__*/ zod.void()
 
 
 /**
- * Get a media/video
+ * Get a media/video. Students can only fetch media they have access to; counselors can fetch any.
  */
 export const GetMediaParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string()
@@ -1075,32 +1088,62 @@ export const GetMediaResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "description": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
-  "length_in_mins": /*#__PURE__*/ zod.int(),
-  "s3_key": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "s3_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "title": /*#__PURE__*/ zod.string()
+  "title": /*#__PURE__*/ zod.string(),
+  "youtube_video_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('11-character YouTube video id; embed as https://www.youtube.com/embed/{id}'))
 })
 
 
 /**
- * Retitle a video
+ * Update a video's title, description, and/or source (s3_key or youtube_url)
  */
 export const UpdateMediaParams = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string()
 })
 
+
+
+
+
 export const UpdateMediaBody = /*#__PURE__*/ zod.object({
-  "title": /*#__PURE__*/ zod.string()
+  "description": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()),
+  "s3_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))).check(/*#__PURE__*/ zod.describe('S3 key of an uploaded video; replaces the video source (clears youtube_video_id). Mutually exclusive with youtube_url')),
+  "title": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.minLength(1))),
+  "youtube_url": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('youtube.com or youtu.be video link; replaces the video source (clears s3_key). Mutually exclusive with s3_key'))
 })
 
 export const UpdateMediaResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "description": /*#__PURE__*/ zod.string(),
   "id": /*#__PURE__*/ zod.string(),
-  "length_in_mins": /*#__PURE__*/ zod.int(),
-  "s3_key": /*#__PURE__*/ zod.string(),
+  "length_in_mins": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.int()),
+  "s3_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
   "school_year": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
-  "title": /*#__PURE__*/ zod.string()
+  "title": /*#__PURE__*/ zod.string(),
+  "youtube_video_id": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('11-character YouTube video id; embed as https://www.youtube.com/embed/{id}'))
+})
+
+
+/**
+ * Mark media as started (student opened it) or completed (student marked it done). Idempotent
+ */
+export const RecordMediaProgressParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string()
+})
+
+export const RecordMediaProgressBody = /*#__PURE__*/ zod.object({
+  "status": /*#__PURE__*/ zod.enum(['started', 'completed']).check(/*#__PURE__*/ zod.describe('started when the student opens the media; completed when they mark it done. Repeating a status keeps the original timestamp'))
+})
+
+export const RecordMediaProgressResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "completed_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the student first marked the media complete')),
+  "id": /*#__PURE__*/ zod.string(),
+  "media_id": /*#__PURE__*/ zod.string(),
+  "started_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the student first opened the media')),
+  "student_id": /*#__PURE__*/ zod.string()
 })
 
 
@@ -2175,7 +2218,7 @@ export const UploadVideoResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * Get a video by its S3 key.
+ * Get a video by its S3 key. Students can only fetch keys of media they have access to.
  */
 export const GetVideoQueryParams = /*#__PURE__*/ zod.object({
   "s3_key": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('The S3 key/path of the video to fetch'))

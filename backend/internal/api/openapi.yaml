@@ -1,5 +1,60 @@
 components:
   schemas:
+    AccessibleMedia:
+      additionalProperties: false
+      properties:
+        completed_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        description:
+          type: string
+        due_date:
+          description: Deadline of the student's todo that assigned this media (the most recent one, if assigned more than once)
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        length_in_mins:
+          format: int64
+          type:
+            - integer
+            - "null"
+        s3_key:
+          type:
+            - string
+            - "null"
+        school_year:
+          type:
+            - string
+            - "null"
+        started_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        title:
+          type: string
+        youtube_video_id:
+          description: 11-character YouTube video id; embed as https://www.youtube.com/embed/{id}
+          type:
+            - string
+            - "null"
+      required:
+        - started_at
+        - completed_at
+        - due_date
+        - id
+        - title
+        - description
+        - length_in_mins
+        - school_year
+        - s3_key
+        - youtube_video_id
+      type: object
     Activity:
       additionalProperties: false
       properties:
@@ -646,6 +701,8 @@ components:
           format: int64
           type: integer
         s3_key:
+          description: S3 key of an uploaded video; provide exactly one of s3_key or youtube_url
+          minLength: 1
           type: string
         school_year:
           type:
@@ -653,12 +710,13 @@ components:
             - "null"
         title:
           type: string
+        youtube_url:
+          description: youtube.com or youtu.be video link; only the parsed video id is stored. Provide exactly one of s3_key or youtube_url
+          type: string
       required:
         - title
         - description
-        - length_in_mins
         - school_year
-        - s3_key
       type: object
     CreatePersonalCollegeApplicationRequestBody:
       additionalProperties: false
@@ -1628,15 +1686,24 @@ components:
           type: string
         length_in_mins:
           format: int64
-          type: integer
+          type:
+            - integer
+            - "null"
         s3_key:
-          type: string
+          type:
+            - string
+            - "null"
         school_year:
           type:
             - string
             - "null"
         title:
           type: string
+        youtube_video_id:
+          description: 11-character YouTube video id; embed as https://www.youtube.com/embed/{id}
+          type:
+            - string
+            - "null"
       required:
         - id
         - title
@@ -1644,6 +1711,7 @@ components:
         - length_in_mins
         - school_year
         - s3_key
+        - youtube_video_id
       type: object
     MediaAccess:
       additionalProperties: false
@@ -1655,16 +1723,30 @@ components:
           format: uri
           readOnly: true
           type: string
+        completed_at:
+          description: When the student first marked the media complete
+          format: date-time
+          type:
+            - string
+            - "null"
         id:
           type: string
         media_id:
           type: string
+        started_at:
+          description: When the student first opened the media
+          format: date-time
+          type:
+            - string
+            - "null"
         student_id:
           type: string
       required:
         - id
         - student_id
         - media_id
+        - started_at
+        - completed_at
       type: object
     NotificationPreferences:
       additionalProperties: false
@@ -1969,6 +2051,25 @@ components:
             - "null"
       required:
         - message_id
+      type: object
+    RecordMediaProgressInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/RecordMediaProgressInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        status:
+          description: started when the student opens the media; completed when they mark it done. Repeating a status keeps the original timestamp
+          enum:
+            - started
+            - completed
+          type: string
+      required:
+        - status
       type: object
     RefundEssayReviewResponseBody:
       additionalProperties: false
@@ -2521,10 +2622,18 @@ components:
           format: uri
           readOnly: true
           type: string
-        title:
+        description:
           type: string
-      required:
-        - title
+        s3_key:
+          description: S3 key of an uploaded video; replaces the video source (clears youtube_video_id). Mutually exclusive with youtube_url
+          minLength: 1
+          type: string
+        title:
+          minLength: 1
+          type: string
+        youtube_url:
+          description: youtube.com or youtu.be video link; replaces the video source (clears s3_key). Mutually exclusive with s3_key
+          type: string
       type: object
     UpdateNotificationPreferencesRequestBody:
       additionalProperties: false
@@ -4223,6 +4332,13 @@ paths:
       description: Fetch all videos, through counselor view
       operationId: list-media
       parameters:
+        - description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+          explode: false
+          in: query
+          name: q
+          schema:
+            description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+            type: string
         - description: Maximum number of media to return
           explode: false
           in: query
@@ -4289,9 +4405,16 @@ paths:
         - Media
   /media-access:
     get:
-      description: Allow students to fetch only videos they have access to
+      description: Allow students to fetch only videos they have access to, with their progress and due date
       operationId: get-media-access
       parameters:
+        - description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+          explode: false
+          in: query
+          name: q
+          schema:
+            description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+            type: string
         - description: Maximum number of media to return
           explode: false
           in: query
@@ -4319,7 +4442,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/Media"
+                  $ref: "#/components/schemas/AccessibleMedia"
                 type:
                   - array
                   - "null"
@@ -4399,7 +4522,7 @@ paths:
       tags:
         - Media
     get:
-      description: Get a media/video
+      description: Get a media/video. Students can only fetch media they have access to; counselors can fetch any.
       operationId: get-media
       parameters:
         - in: path
@@ -4423,7 +4546,7 @@ paths:
       tags:
         - Media
     patch:
-      description: Retitle a video
+      description: Update a video's title, description, and/or source (s3_key or youtube_url)
       operationId: update-media
       parameters:
         - in: path
@@ -4452,6 +4575,37 @@ paths:
           description: Error
       tags:
         - Media
+  /media/{id}/progress:
+    post:
+      description: Mark media as started (student opened it) or completed (student marked it done). Idempotent
+      operationId: record-media-progress
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordMediaProgressInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAccess"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Media Access
   /messages:
     post:
       description: Send a message from the current user to another user.
@@ -5771,7 +5925,7 @@ paths:
         - Videos
   /videos/lookup:
     get:
-      description: Get a video by its S3 key.
+      description: Get a video by its S3 key. Students can only fetch keys of media they have access to.
       operationId: get-video
       parameters:
         - description: The S3 key/path of the video to fetch

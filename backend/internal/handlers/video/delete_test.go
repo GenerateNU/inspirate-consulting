@@ -24,7 +24,7 @@ func TestHandler_DeleteVideo(t *testing.T) {
 		mockRepo := mocks.NewVideoRepository(t)
 		mockRepo.On("DeleteVideo", mock.Anything, s3Key).Return(nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		err := handler.DeleteVideo(ctx, s3Key)
 
 		assert.NoError(t, err)
@@ -37,7 +37,7 @@ func TestHandler_DeleteVideo(t *testing.T) {
 		mockRepo := mocks.NewVideoRepository(t)
 		mockRepo.On("DeleteVideo", mock.Anything, s3Key).Return(notFound)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		err := handler.DeleteVideo(ctx, s3Key)
 
 		assert.Error(t, err)
@@ -51,7 +51,7 @@ func TestHandler_DeleteVideo(t *testing.T) {
 		mockRepo.On("DeleteVideo", mock.Anything, s3Key).
 			Return(errors.New("s3client: failed to delete object"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		err := handler.DeleteVideo(ctx, s3Key)
 
 		assert.Error(t, err)

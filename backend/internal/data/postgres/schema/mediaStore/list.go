@@ -10,13 +10,13 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *MediaRepository) ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error) {
+func (r *MediaRepository) ListAllMedia(ctx context.Context, query string, threshold float64, limit int, offset int) ([]models.Media, error) {
 	listQuery, err := schema.ReadSQLBaseScript("list_media.sql", SqlMediaFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.Query(ctx, listQuery, limit, offset)
+	rows, err := r.db.Query(ctx, listQuery, limit, offset, query, threshold)
 
 	if err != nil {
 		return nil, err

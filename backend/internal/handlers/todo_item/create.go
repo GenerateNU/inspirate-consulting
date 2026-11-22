@@ -41,6 +41,14 @@ func (h *Handler) CreateTodoItem(ctx context.Context, input *models.CreateTodoIt
 		return nil, err
 	}
 
+	// A todo that links media grants the student access to it, so only counselors may link media.
+	// A student linking media would either grant themselves a video or duplicate a video they were already assigned.
+	if input.MediaID != nil {
+		if _, err := auth.GetStudentID(ctx); err == nil {
+			return nil, errs.Forbidden("only counselors can assign videos")
+		}
+	}
+
 	createdTodoItem, err := h.TodoItemRepository.CreateTodoItem(ctx, studentID.String(), userID.String(), *input)
 	if err != nil {
 		return nil, err

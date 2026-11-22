@@ -10,12 +10,14 @@ import {
 } from '@faker-js/faker';
 
 import type {
-  Media,
+  AccessibleMedia,
   MediaAccess
 } from '../../models';
 
 
-export const getGetMediaAccessResponseMock = (): Media[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), description: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.string.alpha({length: {min: 10, max: 20}}), length_in_mins: faker.number.int(), s3_key: faker.string.alpha({length: {min: 10, max: 20}}), school_year: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), title: faker.string.alpha({length: {min: 10, max: 20}})})))
+export const getGetMediaAccessResponseMock = (): AccessibleMedia[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), description: faker.string.alpha({length: {min: 10, max: 20}}), due_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), id: faker.string.alpha({length: {min: 10, max: 20}}), length_in_mins: faker.helpers.arrayElement([faker.number.int(), null]), s3_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), school_year: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), started_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), title: faker.string.alpha({length: {min: 10, max: 20}}), youtube_video_id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])})))
 
-export const getCreateMediaAccessResponseMock = (overrideResponse: Partial<Extract<MediaAccess, object>> = {}): MediaAccess => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), id: faker.string.alpha({length: {min: 10, max: 20}}), media_id: faker.string.alpha({length: {min: 10, max: 20}}), student_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+export const getCreateMediaAccessResponseMock = (overrideResponse: Partial<Extract<MediaAccess, object>> = {}): MediaAccess => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), id: faker.string.alpha({length: {min: 10, max: 20}}), media_id: faker.string.alpha({length: {min: 10, max: 20}}), started_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), student_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+
+export const getRecordMediaProgressResponseMock = (overrideResponse: Partial<Extract<MediaAccess, object>> = {}): MediaAccess => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), completed_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), id: faker.string.alpha({length: {min: 10, max: 20}}), media_id: faker.string.alpha({length: {min: 10, max: 20}}), started_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), student_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

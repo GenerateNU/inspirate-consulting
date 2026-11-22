@@ -9,7 +9,17 @@
 export interface MediaAccess {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /**
+     * When the student first marked the media complete
+     * @nullable
+     */
+  completed_at: string | null;
   id: string;
   media_id: string;
+  /**
+     * When the student first opened the media
+     * @nullable
+     */
+  started_at: string | null;
   student_id: string;
 }

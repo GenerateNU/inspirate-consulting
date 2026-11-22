@@ -14,6 +14,7 @@ import (
 	"inspirate-consulting/internal/models"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -21,11 +22,18 @@ import (
 
 // creates a Fiber app in test mode with a mocked video repository.
 func setupTestAppWithVideo(mockVideo data.VideoRepository) (*fiber.App, error) {
+	return setupTestAppWithVideoAndAccess(mockVideo, nil)
+}
+
+// creates a Fiber app in test mode with mocked video and media access repositories,
+// for routes that check whether a student may see a video.
+func setupTestAppWithVideoAndAccess(mockVideo data.VideoRepository, mockMediaAccess data.MediaAccessRepository) (*fiber.App, error) {
 	cfg := config.Config{
 		TestMode: true,
 	}
 	repo := &data.Repository{
-		Video: mockVideo,
+		Video:       mockVideo,
+		MediaAccess: mockMediaAccess,
 	}
 	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
@@ -120,36 +128,64 @@ func TestRoute_UploadVideo(t *testing.T) {
 func TestRoute_GetVideo(t *testing.T) {
 	t.Parallel()
 
-	t.Run("success", func(t *testing.T) {
+	s3Key := "videos/uuid-common-app-tips.mp4"
+	lookupPath := "/videos/lookup?s3_key=" + s3Key
+	studentID := uuid.New()
+	studentHeaders := map[string]string{"X-Student-ID": studentID.String()}
+	counselorHeaders := map[string]string{"X-Counselor-ID": uuid.NewString()}
+	video := &models.Video{
+		S3Key:       s3Key,
+		DownloadURL: "https://bucket.s3.amazonaws.com/videos/uuid-common-app-tips.mp4?X-Amz-...",
+	}
+
+	t.Run("counselor can fetch any key", func(t *testing.T) {
+		t.Parallel()
+
+		// No access expectations: a counselor request must not hit the access check
+		mockRepo := mocks.NewVideoRepository(t)
+		mockAccess := mocks.NewMediaAccessRepository(t)
+		mockRepo.On("GetVideo", mock.Anything, s3Key).Return(video, nil)
+
+		app, err := setupTestAppWithVideoAndAccess(mockRepo, mockAccess)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodGet, lookupPath, nil, counselorHeaders)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var output models.Video
+		require.NoError(t, json.Unmarshal(respBody, &output))
+		assert.Equal(t, s3Key, output.S3Key)
+	})
+
+	t.Run("student can fetch a key of media they have access to", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewVideoRepository(t)
-		mockRepo.On("GetVideo", mock.Anything, "videos/uuid-common-app-tips.mp4").Return(&models.Video{
-			S3Key:       "videos/uuid-common-app-tips.mp4",
-			DownloadURL: "https://bucket.s3.amazonaws.com/videos/uuid-common-app-tips.mp4?X-Amz-...",
-		}, nil)
+		mockAccess := mocks.NewMediaAccessRepository(t)
+		mockAccess.On("HasS3KeyAccess", mock.Anything, studentID.String(), s3Key).Return(true, nil)
+		mockRepo.On("GetVideo", mock.Anything, s3Key).Return(video, nil)
 
-		app, err := setupTestAppWithVideo(mockRepo)
+		app, err := setupTestAppWithVideoAndAccess(mockRepo, mockAccess)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodGet, "/videos/lookup?s3_key=videos/uuid-common-app-tips.mp4", nil)
-		require.NoError(t, err)
-
-		resp, err := app.Test(req)
-		require.NoError(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
-
+		resp, _ := doRequest(t, app, http.MethodGet, lookupPath, nil, studentHeaders)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
 
-		respBody, err := io.ReadAll(resp.Body)
+	t.Run("student without access gets 404 and no download url", func(t *testing.T) {
+		t.Parallel()
+
+		// No GetVideo expectation: a presigned URL must never be generated for this student
+		mockRepo := mocks.NewVideoRepository(t)
+		mockAccess := mocks.NewMediaAccessRepository(t)
+		mockAccess.On("HasS3KeyAccess", mock.Anything, studentID.String(), s3Key).Return(false, nil)
+
+		app, err := setupTestAppWithVideoAndAccess(mockRepo, mockAccess)
 		require.NoError(t, err)
 
-		var output models.Video
-		err = json.Unmarshal(respBody, &output)
-		require.NoError(t, err)
-		assert.Equal(t, "videos/uuid-common-app-tips.mp4", output.S3Key)
+		resp, respBody := doRequest(t, app, http.MethodGet, lookupPath, nil, studentHeaders)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+		assert.NotContains(t, string(respBody), "X-Amz")
 	})
 }
 

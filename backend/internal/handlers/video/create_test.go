@@ -34,7 +34,7 @@ func TestHandler_UploadVideo(t *testing.T) {
 		mockRepo := mocks.NewVideoRepository(t)
 		mockRepo.On("PresignUpload", mock.Anything, input).Return(expected, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UploadVideo(ctx, input)
 
 		assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestHandler_UploadVideo(t *testing.T) {
 		mockRepo.On("PresignUpload", mock.Anything, input).
 			Return(nil, errors.New("s3client: failed to presign upload URL"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.UploadVideo(ctx, input)
 
 		assert.Error(t, err)

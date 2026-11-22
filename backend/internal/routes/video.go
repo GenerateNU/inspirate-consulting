@@ -15,7 +15,7 @@ import (
 // SetUpVideoRoutes registers the video endpoints:
 // upload, get, and list.
 func SetUpVideoRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	videoHandler := video.NewHandler(repository.Video)
+	videoHandler := video.NewHandler(repository.Video, repository.MediaAccess)
 
 	// Register POST /videos handler.
 	huma.Register(api, huma.Operation{
@@ -39,7 +39,7 @@ func SetUpVideoRoutes(api huma.API, repository *data.Repository, verifyRole auth
 		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/videos/lookup",
-		Description: "Get a video by its S3 key.",
+		Description: "Get a video by its S3 key. Students can only fetch keys of media they have access to.",
 		Tags:        []string{"Videos"},
 	}, func(ctx context.Context, input *models.GetVideoInput) (*models.GetVideoOutput, error) {
 		video, err := videoHandler.GetVideo(ctx, input.S3Key)
@@ -52,7 +52,7 @@ func SetUpVideoRoutes(api huma.API, repository *data.Repository, verifyRole auth
 	// Register GET /videos handler for listing all videos in the S3 bucket.
 	huma.Register(api, huma.Operation{
 		OperationID: "list-videos",
-		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/videos",
 		Description: "List all videos in the S3 bucket.",
