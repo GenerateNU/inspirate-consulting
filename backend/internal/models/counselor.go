@@ -70,3 +70,11 @@ type UpdateCounselorInput struct {
 type UpdateCounselorOutput struct {
 	Body *Counselor
 }
+
+type GetCounselorInput struct {
+	ID uuid.UUID `path:"id" doc:"ID of the counselor"`
+}
+
+type GetCounselorOutput struct {
+	Body *Counselor
+}
