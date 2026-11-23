@@ -95,7 +95,7 @@ func TestListStudents_Counts(t *testing.T) {
 	ctx := context.Background()
 
 	counselorID := createTestCounselor(t, db)
-	studentID := createTestStudent(t, db, counselorID, "Alice", "junior")
+	studentID := createTestStudent(t, db, counselorID, "Alice", 2018)
 
 	var counselorUserID, studentUserID uuid.UUID
 	if err := db.QueryRow(ctx,
@@ -178,7 +178,7 @@ func TestListStudents_NoActivity(t *testing.T) {
 	ctx := context.Background()
 
 	counselorID := createTestCounselor(t, db)
-	createTestStudent(t, db, counselorID, "Alice", "junior")
+	createTestStudent(t, db, counselorID, "Alice", 2018)
 
 	students, err := repo.ListStudents(ctx, counselorID)
 	if err != nil {
