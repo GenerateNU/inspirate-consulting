@@ -38,7 +38,7 @@ export const HealthCheckResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
+ * List a student's college applications, ranked first. Students get their own; counselors must pass student_id and can view any student. Each application includes cycle_offered and essay_progress.
  */
 export const ListPersonalCollegeApplicationsQueryParams = /*#__PURE__*/ zod.object({
   "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose college list to return; required for counselors, defaults to the authenticated student'))

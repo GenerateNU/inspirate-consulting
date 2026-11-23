@@ -49,6 +49,14 @@ func ParseOptionalStudentID(raw string) (*uuid.UUID, error) {
 }
 
 func (a *Authorizer) ResolveStudentID(ctx context.Context, requested *uuid.UUID) (uuid.UUID, error) {
+	return resolveStudentID(ctx, requested, a.CanAccessStudent)
+}
+
+func (a *Authorizer) ResolveViewableStudentID(ctx context.Context, requested *uuid.UUID) (uuid.UUID, error) {
+	return resolveStudentID(ctx, requested, a.CanViewStudent)
+}
+
+func resolveStudentID(ctx context.Context, requested *uuid.UUID, check func(context.Context, uuid.UUID) error) (uuid.UUID, error) {
 	if requested == nil {
 		id, err := GetStudentID(ctx)
 		if err != nil {
@@ -56,10 +64,41 @@ func (a *Authorizer) ResolveStudentID(ctx context.Context, requested *uuid.UUID)
 		}
 		return id, nil
 	}
-	if err := a.CanAccessStudent(ctx, *requested); err != nil {
+	if err := check(ctx, *requested); err != nil {
 		return uuid.Nil, err
 	}
 	return *requested, nil
+}
+
+func (a *Authorizer) CanViewStudent(ctx context.Context, targetStudentID uuid.UUID) error {
+	if a == nil {
+		return nil
+	}
+
+	switch models.Role(GetRole(ctx)) {
+	case models.StudentRole:
+		return checkOwnStudent(ctx, targetStudentID)
+
+	case models.CounselorRole:
+		if _, err := GetCounselorID(ctx); err != nil {
+			return errs.Unauthorized()
+		}
+		return nil
+
+	default:
+		return errs.Forbidden("insufficient role")
+	}
+}
+
+func checkOwnStudent(ctx context.Context, targetStudentID uuid.UUID) error {
+	callerStudentID, err := GetStudentID(ctx)
+	if err != nil {
+		return errs.Unauthorized()
+	}
+	if callerStudentID != targetStudentID {
+		return errs.Forbidden("you can only access your own data")
+	}
+	return nil
 }
 
 func (a *Authorizer) CanAccessStudent(ctx context.Context, targetStudentID uuid.UUID) error {
@@ -70,14 +109,7 @@ func (a *Authorizer) CanAccessStudent(ctx context.Context, targetStudentID uuid.
 
 	switch models.Role(role) {
 	case models.StudentRole:
-		callerStudentID, err := GetStudentID(ctx)
-		if err != nil {
-			return errs.Unauthorized()
-		}
-		if callerStudentID != targetStudentID {
-			return errs.Forbidden("you can only access your own data")
-		}
-		return nil
+		return checkOwnStudent(ctx, targetStudentID)
 
 	case models.CounselorRole:
 		counselorID, err := GetCounselorID(ctx)

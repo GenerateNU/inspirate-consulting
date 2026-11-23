@@ -39,7 +39,7 @@ func (h *Handler) listTodoItemPage(ctx context.Context, query models.TodoItemQue
 	if err != nil {
 		return nil, err
 	}
-	studentID, err := h.Authorizer.ResolveStudentID(ctx, requested)
+	studentID, err := h.Authorizer.ResolveViewableStudentID(ctx, requested)
 	if err != nil {
 		return nil, err
 	}

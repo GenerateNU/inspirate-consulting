@@ -2977,7 +2977,7 @@ paths:
         - Health
   /applications:
     get:
-      description: List a student's college applications, ranked first. Students get their own; counselors must pass student_id for one of their students. Each application includes cycle_offered and essay_progress.
+      description: List a student's college applications, ranked first. Students get their own; counselors must pass student_id and can view any student. Each application includes cycle_offered and essay_progress.
       operationId: list-personal-college-applications
       parameters:
         - description: Student whose college list to return; required for counselors, defaults to the authenticated student
