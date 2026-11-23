@@ -619,3 +619,89 @@ func TestRoute_UpdateTodoAssignment(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	})
 }
+
+// Route tests for PATCH /todo-items/{id}/title.
+func TestRoute_UpdateTodoItemTitle(t *testing.T) {
+	t.Parallel()
+
+	itemID := uuid.NewString()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).Return(stubStudentID, nil)
+		mockRepo.On("UpdateTodoItemTitle", mock.Anything, itemID, "Request official transcripts").
+			Return(&models.TodoItem{ID: itemID, Title: "Request official transcripts"}, nil)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, respBody := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/title", map[string]any{
+			"title": "Request official transcripts",
+		})
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var updated models.TodoItem
+		require.NoError(t, json.Unmarshal(respBody, &updated))
+		assert.Equal(t, itemID, updated.ID)
+		assert.Equal(t, "Request official transcripts", updated.Title)
+	})
+
+	t.Run("empty title is rejected", func(t *testing.T) {
+		t.Parallel()
+
+		// Huma validation fails before the handler runs, so nothing is called
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/title", map[string]any{
+			"title": "",
+		})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("missing title is rejected", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/title", map[string]any{})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("invalid id is rejected", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/not-a-uuid/title", map[string]any{
+			"title": "Anything",
+		})
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).
+			Return(uuid.Nil, errs.NotFound("todo item", "id", itemID))
+
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodPatch, "/todo-items/"+itemID+"/title", map[string]any{
+			"title": "Anything",
+		})
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+}

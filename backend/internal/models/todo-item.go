@@ -268,3 +268,42 @@ type UpdateTodoAssignmentParams struct {
 	AddStudentIDs    []uuid.UUID
 	RemoveStudentIDs []uuid.UUID
 }
+
+type UpdateTodoItemTitleBody struct {
+	Title string `json:"title" minLength:"1" maxLength:"200" doc:"New title of the task"`
+}
+
+type UpdateTodoItemTitleInput struct {
+	ID   string `path:"id" format:"uuid" doc:"ID of the todo item to update"`
+	Body UpdateTodoItemTitleBody
+}
+
+type UpdateTodoItemTitleOutput struct {
+	Body *TodoItem
+}
+
+type UpdateTodoItemLinkBody struct {
+	LinkType          *TodoLinkType `json:"link_type" nullable:"true" enum:"college,essay,extracurricular,module" doc:"What the task links to, or null to remove its link"`
+	EssayID           *string       `json:"essay_id,omitempty" required:"false" format:"uuid" doc:"Essay to link, when link_type is essay"`
+	MediaID           *string       `json:"media_id,omitempty" required:"false" format:"uuid" doc:"Video to link, when link_type is module"`
+	GlobalCollegeID   *int64        `json:"global_college_id,omitempty" required:"false" doc:"College to link, when link_type is college"`
+	ExtracurricularID *int64        `json:"extracurricular_id,omitempty" required:"false" doc:"Extracurricular to link, when link_type is extracurricular"`
+}
+
+type UpdateTodoItemLinkInput struct {
+	ID   string `path:"id" format:"uuid" doc:"ID of the todo item to update"`
+	Body UpdateTodoItemLinkBody
+}
+
+type UpdateTodoItemLinkOutput struct {
+	Body *TodoItem
+}
+
+// Passed from the handler to the store; not part of the API.
+type TodoItemLink struct {
+	LinkType          *TodoLinkType
+	EssayID           *string
+	MediaID           *string
+	GlobalCollegeID   *int64
+	ExtracurricularID *int64
+}

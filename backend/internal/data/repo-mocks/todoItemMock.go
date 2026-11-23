@@ -286,6 +286,66 @@ func (_m *TodoItemRepository) UpdateTodoItemDescription(ctx context.Context, id 
 	return r0, r1
 }
 
+// UpdateTodoItemLink provides a mock function with given fields: ctx, id, link
+func (_m *TodoItemRepository) UpdateTodoItemLink(ctx context.Context, id string, link models.TodoItemLink) (*models.TodoItem, error) {
+	ret := _m.Called(ctx, id, link)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateTodoItemLink")
+	}
+
+	var r0 *models.TodoItem
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, models.TodoItemLink) (*models.TodoItem, error)); ok {
+		return rf(ctx, id, link)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, models.TodoItemLink) *models.TodoItem); ok {
+		r0 = rf(ctx, id, link)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.TodoItem)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, models.TodoItemLink) error); ok {
+		r1 = rf(ctx, id, link)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateTodoItemTitle provides a mock function with given fields: ctx, id, title
+func (_m *TodoItemRepository) UpdateTodoItemTitle(ctx context.Context, id string, title string) (*models.TodoItem, error) {
+	ret := _m.Called(ctx, id, title)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateTodoItemTitle")
+	}
+
+	var r0 *models.TodoItem
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*models.TodoItem, error)); ok {
+		return rf(ctx, id, title)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *models.TodoItem); ok {
+		r0 = rf(ctx, id, title)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.TodoItem)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, id, title)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTodoItemRepository creates a new instance of TodoItemRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTodoItemRepository(t interface {

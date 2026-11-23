@@ -36,7 +36,9 @@ import type {
   UpdateTodoAssignmentBody,
   UpdateTodoItemCompletedAtInputBody,
   UpdateTodoItemDeadlineInputBody,
-  UpdateTodoItemDescriptionInputBody
+  UpdateTodoItemDescriptionInputBody,
+  UpdateTodoItemLinkBody,
+  UpdateTodoItemTitleBody
 } from '../../models';
 
 
@@ -996,4 +998,202 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateTodoItemDescriptionMutationOptions(options), queryClient);
+    }
+    export const getUpdateTodoItemLinkUrl = (id: string,) => {
+
+
+
+
+  return `/api/todo-items/${id}/link`
+}
+
+/**
+ * Change what a todo item links to: an essay, college, extracurricular, or module, or nothing
+ */
+export const updateTodoItemLink = async (id: string,
+    updateTodoItemLinkBody: NonReadonly<UpdateTodoItemLinkBody>, options?: RequestInit): Promise<TodoItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateTodoItemLinkUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateTodoItemLinkBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: TodoItem, status?: number} = new globalThis.Error();
+    const data : TodoItem = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItem = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateTodoItemLinkMutationKey = () => ['updateTodoItemLink'] as const;
+
+export const getUpdateTodoItemLinkMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemLink>>, TError,UpdateTodoItemLinkMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemLink>>, TError,UpdateTodoItemLinkMutationVariables, TContext> => {
+
+const mutationKey = getUpdateTodoItemLinkMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTodoItemLink>>, UpdateTodoItemLinkMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTodoItemLink(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTodoItemLinkMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemLink>>>
+    export type UpdateTodoItemLinkMutationBody = NonReadonly<UpdateTodoItemLinkBody>
+    export type UpdateTodoItemLinkMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateTodoItemLinkMutationVariables = {id: string;data: NonReadonly<UpdateTodoItemLinkBody>}
+
+    export const useUpdateTodoItemLink = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemLink>>, TError,UpdateTodoItemLinkMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTodoItemLink>>,
+        TError,
+        UpdateTodoItemLinkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateTodoItemLinkMutationOptions(options), queryClient);
+    }
+    export const getUpdateTodoItemTitleUrl = (id: string,) => {
+
+
+
+
+  return `/api/todo-items/${id}/title`
+}
+
+/**
+ * edit the title of a task
+ */
+export const updateTodoItemTitle = async (id: string,
+    updateTodoItemTitleBody: NonReadonly<UpdateTodoItemTitleBody>, options?: RequestInit): Promise<TodoItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getUpdateTodoItemTitleUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateTodoItemTitleBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: TodoItem, status?: number} = new globalThis.Error();
+    const data : TodoItem = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItem = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getUpdateTodoItemTitleMutationKey = () => ['updateTodoItemTitle'] as const;
+
+export const getUpdateTodoItemTitleMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemTitle>>, TError,UpdateTodoItemTitleMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemTitle>>, TError,UpdateTodoItemTitleMutationVariables, TContext> => {
+
+const mutationKey = getUpdateTodoItemTitleMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTodoItemTitle>>, UpdateTodoItemTitleMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTodoItemTitle(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTodoItemTitleMutationResult = NonNullable<Awaited<ReturnType<typeof updateTodoItemTitle>>>
+    export type UpdateTodoItemTitleMutationBody = NonReadonly<UpdateTodoItemTitleBody>
+    export type UpdateTodoItemTitleMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type UpdateTodoItemTitleMutationVariables = {id: string;data: NonReadonly<UpdateTodoItemTitleBody>}
+
+    export const useUpdateTodoItemTitle = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTodoItemTitle>>, TError,UpdateTodoItemTitleMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateTodoItemTitle>>,
+        TError,
+        UpdateTodoItemTitleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateTodoItemTitleMutationOptions(options), queryClient);
     }

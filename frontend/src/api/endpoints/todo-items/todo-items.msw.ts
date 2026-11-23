@@ -27,10 +27,12 @@ import {
   getUpdateTodoAssignmentResponseMock,
   getUpdateTodoItemCompletedResponseMock,
   getUpdateTodoItemDeadlineResponseMock,
-  getUpdateTodoItemDescriptionResponseMock
+  getUpdateTodoItemDescriptionResponseMock,
+  getUpdateTodoItemLinkResponseMock,
+  getUpdateTodoItemTitleResponseMock
 } from './todo-items.faker';
 
-export { getUpdateTodoAssignmentResponseMock, getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getBulkCreateTodoItemsResponseMock, getSearchTodoItemsResponseMock, getUpdateTodoItemCompletedResponseMock, getUpdateTodoItemDeadlineResponseMock, getUpdateTodoItemDescriptionResponseMock } from './todo-items.faker';
+export { getUpdateTodoAssignmentResponseMock, getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getBulkCreateTodoItemsResponseMock, getSearchTodoItemsResponseMock, getUpdateTodoItemCompletedResponseMock, getUpdateTodoItemDeadlineResponseMock, getUpdateTodoItemDescriptionResponseMock, getUpdateTodoItemLinkResponseMock, getUpdateTodoItemTitleResponseMock } from './todo-items.faker';
 
 
 export const getUpdateTodoAssignmentMockHandler = (overrideResponse?: TodoItem[] | null | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem[] | null> | TodoItem[] | null), options?: RequestHandlerOptions) => {
@@ -138,6 +140,30 @@ export const getUpdateTodoItemDescriptionMockHandler = (overrideResponse?: TodoI
       })
   }, options)
 }
+
+export const getUpdateTodoItemLinkMockHandler = (overrideResponse?: TodoItem | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem> | TodoItem), options?: RequestHandlerOptions) => {
+  return http.patch('*/todo-items/:id/link', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateTodoItemLinkResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUpdateTodoItemTitleMockHandler = (overrideResponse?: TodoItem | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem> | TodoItem), options?: RequestHandlerOptions) => {
+  return http.patch('*/todo-items/:id/title', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateTodoItemTitleResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getTodoItemsMock = () => [
   getUpdateTodoAssignmentMockHandler(),
   getGetTodoItemsMockHandler(),
@@ -147,5 +173,7 @@ export const getTodoItemsMock = () => [
   getDeleteTodoItemMockHandler(),
   getUpdateTodoItemCompletedMockHandler(),
   getUpdateTodoItemDeadlineMockHandler(),
-  getUpdateTodoItemDescriptionMockHandler()
+  getUpdateTodoItemDescriptionMockHandler(),
+  getUpdateTodoItemLinkMockHandler(),
+  getUpdateTodoItemTitleMockHandler()
 ]
