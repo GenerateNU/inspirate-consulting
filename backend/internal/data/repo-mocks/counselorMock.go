@@ -19,6 +19,36 @@ type CounselorRepository struct {
 	mock.Mock
 }
 
+// GetCounselor provides a mock function with given fields: ctx, id
+func (_m *CounselorRepository) GetCounselor(ctx context.Context, id uuid.UUID) (*models.Counselor, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetCounselor")
+	}
+
+	var r0 *models.Counselor
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) (*models.Counselor, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) *models.Counselor); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Counselor)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListCounselors provides a mock function with given fields: ctx, name, after, limit, threshold
 func (_m *CounselorRepository) ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error) {
 	ret := _m.Called(ctx, name, after, limit, threshold)

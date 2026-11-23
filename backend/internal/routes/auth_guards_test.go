@@ -93,6 +93,7 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/counselors/{id}", anyRole, nil},
 
 	// llm
 	{http.MethodPost, "/llm/ask", guarded, []string{roleCounselor}},

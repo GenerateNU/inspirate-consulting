@@ -41,8 +41,10 @@ type Student struct {
 }
 
 type Counselor struct {
-	ID     uuid.UUID `json:"id"`
-	UserID uuid.UUID `json:"user_id"`
+	ID         uuid.UUID  `json:"id"`
+	UserID     uuid.UUID  `json:"user_id"`
+	CustomLink *string    `json:"custom_link"`
+	ExpiresAt  *time.Time `json:"expires_at"`
 }
 
 type CreateUserInput struct {

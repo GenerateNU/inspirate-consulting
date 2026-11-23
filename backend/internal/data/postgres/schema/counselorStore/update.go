@@ -12,8 +12,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-// updates a counselor's profile fields
-// STUB: input has no fields yet, so this only bumps updated_at
+// updates a counselor's profile fields; expires_at is stored on the counselor's user row
 func (r *CounselorRepository) UpdateCounselor(ctx context.Context, id uuid.UUID, input models.UpdateCounselorBody) (*models.Counselor, error) {
 	counselor := &models.Counselor{}
 
@@ -27,7 +26,9 @@ func (r *CounselorRepository) UpdateCounselor(ctx context.Context, id uuid.UUID,
 		ctx,
 		query,
 		id,
-	).Scan(&counselor.ID, &counselor.UserID)
+		input.CustomLink.Set, input.CustomLink.Ptr(),
+		input.ExpiresAt.Set, input.ExpiresAt.Ptr(),
+	).Scan(&counselor.ID, &counselor.UserID, &counselor.CustomLink, &counselor.ExpiresAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errs.NotFound("counselor", "id", id.String())

@@ -363,14 +363,17 @@ export const UpdateGlobalCollegeResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * Update the authenticated counselor's profile. The counselor has no editable fields yet.
+ * Update the authenticated counselor's custom link and account expiration. Omit a field to keep it, send null to clear it.
  */
 export const UpdateCounselorBody = /*#__PURE__*/ zod.object({
-
+  "custom_link": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('Counselor\'s custom link; send null to clear')),
+  "expires_at": /*#__PURE__*/ zod.nullish(/*#__PURE__*/ zod.iso.datetime({"offset":true})).check(/*#__PURE__*/ zod.describe('When the counselor\'s account expires; send null to remove expiration'))
 })
 
 export const UpdateCounselorResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "custom_link": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "id": /*#__PURE__*/ zod.string(),
   "user_id": /*#__PURE__*/ zod.string()
 })
@@ -444,6 +447,22 @@ export const ListCounselorStudentsResponseItem = /*#__PURE__*/ zod.object({
   "unread_message_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Number of messages from the student that the counselor hasn\'t read'))
 })
 export const ListCounselorStudentsResponse = /*#__PURE__*/ zod.array(ListCounselorStudentsResponseItem)
+
+
+/**
+ * Get a counselor's profile
+ */
+export const GetCounselorParams = /*#__PURE__*/ zod.object({
+  "id": /*#__PURE__*/ zod.string().check(/*#__PURE__*/ zod.describe('ID of the counselor'))
+})
+
+export const GetCounselorResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "custom_link": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "expires_at": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
+  "id": /*#__PURE__*/ zod.string(),
+  "user_id": /*#__PURE__*/ zod.string()
+})
 
 
 /**

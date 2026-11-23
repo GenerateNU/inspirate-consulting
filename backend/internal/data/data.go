@@ -123,6 +123,7 @@ type CounselorRepository interface {
 	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
 	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
 	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
+	GetCounselor(ctx context.Context, id uuid.UUID) (*models.Counselor, error)
 	UpdateCounselor(ctx context.Context, id uuid.UUID, input models.UpdateCounselorBody) (*models.Counselor, error)
 	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error)
 }

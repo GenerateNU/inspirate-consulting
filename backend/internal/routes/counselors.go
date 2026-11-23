@@ -13,7 +13,7 @@ import (
 )
 
 // SetUpCounselorRoutes registers the counselor endpoints:
-// list pending reviews, list students, update counselor, and fetch all counselors
+// list pending reviews, list students, update counselor, fetch all counselors, and get a counselor
 func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
 	counselorHandler := counselor.NewHandler(repository.Counselor)
 
@@ -54,7 +54,7 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/counselors",
-		Description: "Update the authenticated counselor's profile. The counselor has no editable fields yet.",
+		Description: "Update the authenticated counselor's custom link and account expiration. Omit a field to keep it, send null to clear it.",
 		Tags:        []string{"Counselors"},
 	}, func(ctx context.Context, input *models.UpdateCounselorInput) (*models.UpdateCounselorOutput, error) {
 		updatedCounselor, err := counselorHandler.UpdateCounselor(ctx, input.Body)
@@ -77,5 +77,20 @@ func SetUpCounselorRoutes(api huma.API, repository *data.Repository, verifyRole 
 			return nil, err
 		}
 		return &models.FetchCounselorsOutput{Body: page}, nil
+	})
+
+	// Registered after the static /counselors/* routes so they aren't matched as an ID
+	huma.Register(api, huma.Operation{
+		OperationID: "get-counselor",
+		Method:      http.MethodGet,
+		Path:        "/counselors/{id}",
+		Description: "Get a counselor's profile",
+		Tags:        []string{"Counselors"},
+	}, func(ctx context.Context, input *models.GetCounselorInput) (*models.GetCounselorOutput, error) {
+		fetchedCounselor, err := counselorHandler.GetCounselor(ctx, input.ID)
+		if err != nil {
+			return nil, err
+		}
+		return &models.GetCounselorOutput{Body: fetchedCounselor}, nil
 	})
 }

@@ -333,6 +333,15 @@ components:
           format: uri
           readOnly: true
           type: string
+        custom_link:
+          type:
+            - string
+            - "null"
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
         id:
           type: string
         user_id:
@@ -340,6 +349,8 @@ components:
       required:
         - id
         - user_id
+        - custom_link
+        - expires_at
       type: object
     CounselorListItem:
       additionalProperties: false
@@ -2349,6 +2360,18 @@ components:
           format: uri
           readOnly: true
           type: string
+        custom_link:
+          description: Counselor's custom link; send null to clear
+          format: uri
+          type:
+            - string
+            - "null"
+        expires_at:
+          description: When the counselor's account expires; send null to remove expiration
+          format: date-time
+          type:
+            - string
+            - "null"
       type: object
     UpdateEssayGroupBody:
       additionalProperties: false
@@ -3427,7 +3450,7 @@ paths:
         - Global Colleges
   /counselors:
     patch:
-      description: Update the authenticated counselor's profile. The counselor has no editable fields yet.
+      description: Update the authenticated counselor's custom link and account expiration. Omit a field to keep it, send null to clear it.
       operationId: update-counselor
       requestBody:
         content:
@@ -3575,6 +3598,33 @@ paths:
                 type:
                   - array
                   - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Counselors
+  /counselors/{id}:
+    get:
+      description: Get a counselor's profile
+      operationId: get-counselor
+      parameters:
+        - description: ID of the counselor
+          in: path
+          name: id
+          required: true
+          schema:
+            description: ID of the counselor
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Counselor"
           description: OK
         default:
           content:
