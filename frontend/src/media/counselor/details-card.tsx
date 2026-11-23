@@ -5,11 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import {
-  fieldClassName,
-  labelClassName,
-  panelClassName,
-} from "./media-styles";
+import { fieldClassName, labelClassName, panelClassName } from "./media-styles";
 import type { MediaEditForm } from "./hooks/use-media-edit-form";
 import { countWords, descriptionWordLimit } from "./utils/word-count";
 

@@ -4,12 +4,7 @@ import { Video } from "lucide-react";
 import { errorMessage } from "../../api/client";
 import { useGetVideo } from "../../api/endpoints";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -81,7 +76,7 @@ function VideoPreview({ form }: VideoPreviewProps) {
       onError={() => {
         if (retriedRef.current) return;
         retriedRef.current = true;
-        s3Video.refetch();
+        void s3Video.refetch();
       }}
       onLoadedMetadata={() => {
         retriedRef.current = false;

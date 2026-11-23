@@ -8,10 +8,7 @@ export default function AddMedia() {
   const navigate = useNavigate();
   return (
     <MediaPageFrame>
-      <MediaEditor
-        media={null}
-        onSaved={() => navigate(-1)}
-      />
+      <MediaEditor media={null} onSaved={() => navigate(-1)} />
     </MediaPageFrame>
   );
 }

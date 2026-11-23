@@ -82,7 +82,9 @@ export function useMediaEditForm(
         title: title.trim(),
         description: description.trim(),
         school_year: null,
-        length_in_mins: file ? await getVideoDurationMins(file.file) : undefined,
+        length_in_mins: file
+          ? await getVideoDurationMins(file.file)
+          : undefined,
         s3_key: s3Key,
         youtube_url: s3Key ? undefined : link,
       });

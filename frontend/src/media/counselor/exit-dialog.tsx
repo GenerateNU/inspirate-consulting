@@ -15,7 +15,7 @@ interface ExitDialogProps {
   onExit: () => void;
 }
 
-// "Exit without saving?" popup. 
+// "Exit without saving?" popup.
 // The hi-fi uses the compact layout (no X, small buttons on the right)
 export default function ExitDialog({
   open,
