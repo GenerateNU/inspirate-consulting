@@ -1,18 +1,26 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { errorMessage } from "../api/client";
 import {
+  getGetStudentQueryKey,
+  useGetStudent,
   useListCounselorStudents,
   useSetStudentReviewBalance,
 } from "../api/endpoints";
 import {
   ListCounselorStudentsSortBy as SortBy,
   ListCounselorStudentsSortOrder as SortOrder,
+  type CounselorStudent,
 } from "../api/models";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecentActivity from "./recent-activity";
 import StudentCard from "./student-card";
@@ -44,11 +52,17 @@ function EssaysToReview({ count }: { count: number }) {
 }
 
 // Set how many essay reviews a student can request
-function ReviewBalanceForm() {
+function ReviewBalanceForm({ students }: { students: CounselorStudent[] }) {
+  const queryClient = useQueryClient();
   const [studentId, setStudentId] = useState("");
-  const [balance, setBalance] = useState("0");
+  const [balance, setBalance] = useState("");
   const [result, setResult] = useState("");
   const assignBalance = useSetStudentReviewBalance();
+
+  // the students list doesn't include balances, so look up the picked student
+  const { data: picked } = useGetStudent(studentId, {
+    query: { enabled: studentId !== "" },
+  });
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,8 +70,13 @@ function ReviewBalanceForm() {
     assignBalance.mutate(
       { id: studentId, data: { review_balance: Number(balance) } },
       {
-        onSuccess: (student) =>
-          setResult(`Balance is now ${student.review_balance}`),
+        onSuccess: (student) => {
+          setResult(`Balance is now ${student.review_balance}`);
+          setBalance("");
+          void queryClient.invalidateQueries({
+            queryKey: getGetStudentQueryKey(studentId),
+          });
+        },
       },
     );
   };
@@ -65,19 +84,38 @@ function ReviewBalanceForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-lg border border-cream bg-white p-6 shadow-card"
+      className="flex flex-col gap-3 rounded-lg border border-cream bg-white p-6 shadow-card [&_[data-slot=native-select-wrapper]]:w-full"
     >
       <p className="font-host text-sm text-charcoal">Assign review balance</p>
-      <Input
-        aria-label="Student ID"
-        placeholder="Student ID"
+      <NativeSelect
+        aria-label="Student"
         value={studentId}
-        onChange={(e) => setStudentId(e.target.value)}
+        onChange={(e) => {
+          setStudentId(e.target.value);
+          setResult("");
+        }}
         required
-        className="h-8 border-greyish-brown font-host text-xs md:text-xs"
-      />
+        size="sm"
+        className="border-greyish-brown font-host text-xs"
+      >
+        <NativeSelectOption value="">Select a student</NativeSelectOption>
+        {students.map((student) => (
+          <NativeSelectOption
+            key={student.student_id}
+            value={student.student_id}
+          >
+            {student.name}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
+      {picked && (
+        <p className="font-host text-xs text-warm-grey-dark">
+          Current balance: {picked.review_balance}
+        </p>
+      )}
       <Input
-        aria-label="Amount"
+        aria-label="New balance"
+        placeholder="New balance"
         type="number"
         min="0"
         value={balance}
@@ -179,7 +217,7 @@ export default function Counselor() {
         <aside className="flex w-71.25 shrink-0 flex-col gap-8 max-lg:w-full">
           <EssaysToReview count={essaysToReview} />
           <RecentActivity />
-          <ReviewBalanceForm />
+          <ReviewBalanceForm students={studentsData ?? []} />
         </aside>
       </div>
     </div>

@@ -64,6 +64,7 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
             </li>
             <li>High School: {student.organization ?? "Not set"}</li>
             <li>Major of Interest: {student.student_interest ?? "Not set"}</li>
+            <li>Review Balance: {student.review_balance}</li>
           </ul>
 
           {/* PLACEHOLDER: progress status needs this student's tasks */}
