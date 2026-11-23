@@ -128,8 +128,8 @@ func TestListAllMedia_NoMedia(t *testing.T) {
 	}
 }
 
-// test the search query matches title or description by trigram similarity, case-insensitively,
-// and leaves out media that isn't similar enough
+// test the search query matches a word in the title or description, case-insensitively, even in a
+// long description, and leaves out media that doesn't match
 func TestListAllMedia_Search(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
@@ -149,7 +149,7 @@ func TestListAllMedia_Search(t *testing.T) {
 	}
 	byDescription, err := repo.CreateMedia(ctx, &models.CreateMediaRequestBody{
 		Title:       "Money Matters",
-		Description: "All about fafsa forms",
+		Description: "Filling out the fafsa step by step, with screenshots of every page of the form",
 		S3Key:       ptr("media/money.mp4"),
 	}, nil)
 	if err != nil {
@@ -163,7 +163,7 @@ func TestListAllMedia_Search(t *testing.T) {
 		t.Fatalf("setup CreateMedia failed: %v", err)
 	}
 
-	results, err := repo.ListAllMedia(ctx, "FaFsA", 0.2, 10, 0)
+	results, err := repo.ListAllMedia(ctx, "FaFsA", 0.4, 10, 0)
 	if err != nil {
 		t.Fatalf("ListAllMedia failed: %v", err)
 	}
@@ -177,8 +177,9 @@ func TestListAllMedia_Search(t *testing.T) {
 	}
 }
 
-// test search results are ordered by similarity, not alphabetically
-func TestListAllMedia_SearchRanksBestMatchFirst(t *testing.T) {
+// test a misspelled query still matches, and an exact word match ranks above a close one even when
+// it sorts later alphabetically
+func TestListAllMedia_SearchTypoAndRanking(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
@@ -187,9 +188,9 @@ func TestListAllMedia_SearchRanksBestMatchFirst(t *testing.T) {
 	repo := NewMediaRepository(testutils.SetupTestDB(t))
 	ctx := context.Background()
 
-	// "A FAFSA Overview" sorts first alphabetically, but "FAFSA" is the closer match
-	partial, err := repo.CreateMedia(ctx, &models.CreateMediaRequestBody{
-		Title:       "A FAFSA Overview",
+	// "A Fafsy Overview" sorts first alphabetically, but "FAFSA Guide" contains the exact word
+	closeMatch, err := repo.CreateMedia(ctx, &models.CreateMediaRequestBody{
+		Title:       "A Fafsy Overview",
 		Description: "test",
 		S3Key:       ptr("media/overview.mp4"),
 	}, nil)
@@ -197,7 +198,7 @@ func TestListAllMedia_SearchRanksBestMatchFirst(t *testing.T) {
 		t.Fatalf("setup CreateMedia failed: %v", err)
 	}
 	exact, err := repo.CreateMedia(ctx, &models.CreateMediaRequestBody{
-		Title:       "FAFSA",
+		Title:       "FAFSA Guide",
 		Description: "test",
 		S3Key:       ptr("media/exact.mp4"),
 	}, nil)
@@ -205,7 +206,7 @@ func TestListAllMedia_SearchRanksBestMatchFirst(t *testing.T) {
 		t.Fatalf("setup CreateMedia failed: %v", err)
 	}
 
-	results, err := repo.ListAllMedia(ctx, "fafsa", 0.2, 10, 0)
+	results, err := repo.ListAllMedia(ctx, "fafsa", 0.4, 10, 0)
 	if err != nil {
 		t.Fatalf("ListAllMedia failed: %v", err)
 	}
@@ -213,7 +214,7 @@ func TestListAllMedia_SearchRanksBestMatchFirst(t *testing.T) {
 	if len(results) != 2 {
 		t.Fatalf("expected 2 matching media, got %d", len(results))
 	}
-	if results[0].ID != exact.ID || results[1].ID != partial.ID {
-		t.Errorf("expected %q before %q, got %q then %q", exact.Title, partial.Title, results[0].Title, results[1].Title)
+	if results[0].ID != exact.ID || results[1].ID != closeMatch.ID {
+		t.Errorf("expected %q before %q, got %q then %q", exact.Title, closeMatch.Title, results[0].Title, results[1].Title)
 	}
 }

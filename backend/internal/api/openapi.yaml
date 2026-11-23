@@ -4332,12 +4332,12 @@ paths:
       description: Fetch all videos, through counselor view
       operationId: list-media
       parameters:
-        - description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+        - description: Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first
           explode: false
           in: query
           name: q
           schema:
-            description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+            description: Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first
             type: string
         - description: Maximum number of media to return
           explode: false
@@ -4408,12 +4408,12 @@ paths:
       description: Allow students to fetch only videos they have access to, with their progress and due date
       operationId: get-media-access
       parameters:
-        - description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+        - description: Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first
           explode: false
           in: query
           name: q
           schema:
-            description: Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+            description: Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first
             type: string
         - description: Maximum number of media to return
           explode: false

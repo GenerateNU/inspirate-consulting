@@ -97,7 +97,7 @@ type GetMediaOutput struct {
 }
 
 type ListAllMediaInput struct {
-	Query  string `query:"q" required:"false" doc:"Only return media whose title or description is similar to this text (pg_trgm similarity), best match first"`
+	Query  string `query:"q" required:"false" doc:"Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first"`
 	Limit  int    `query:"limit" default:"20" minimum:"1" maximum:"100" doc:"Maximum number of media to return"`
 	Offset int    `query:"offset" default:"0" minimum:"0" doc:"Number of media to skip before returning results"`
 }
@@ -123,7 +123,7 @@ type RevokeMediaAccessInput struct {
 }
 
 type ListAccessibleMediaInput struct {
-	Query  string `query:"q" required:"false" doc:"Only return media whose title or description is similar to this text (pg_trgm similarity), best match first"`
+	Query  string `query:"q" required:"false" doc:"Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first"`
 	Limit  int    `query:"limit" default:"20" minimum:"1" maximum:"100" doc:"Maximum number of media to return"`
 	Offset int    `query:"offset" default:"0" minimum:"0" doc:"Number of media to skip before returning results"`
 }

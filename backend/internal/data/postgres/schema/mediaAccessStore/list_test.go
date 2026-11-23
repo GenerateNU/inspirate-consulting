@@ -221,7 +221,7 @@ func TestListAccessibleMedia_Search(t *testing.T) {
 		}
 	}
 
-	results, err := repo.ListAccessibleMedia(ctx, studentID, "fafsa", 0.2, 10, 0)
+	results, err := repo.ListAccessibleMedia(ctx, studentID, "fafsa", 0.4, 10, 0)
 	if err != nil {
 		t.Fatalf("ListAccessibleMedia failed: %v", err)
 	}

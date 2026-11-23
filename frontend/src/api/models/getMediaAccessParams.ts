@@ -8,7 +8,7 @@
 
 export type GetMediaAccessParams = {
 /**
- * Only return media whose title or description is similar to this text (pg_trgm similarity), best match first
+ * Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first
  */
 q?: string;
 /**

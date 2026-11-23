@@ -962,7 +962,7 @@ export const listMediaQueryOffsetMin = 0;
 
 
 export const ListMediaQueryParams = /*#__PURE__*/ zod.object({
-  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return media whose title or description is similar to this text (pg_trgm similarity), best match first')),
+  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first')),
   "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(listMediaQueryLimitMax)), listMediaQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of media to return')),
   "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(listMediaQueryOffsetMin)), listMediaQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of media to skip before returning results'))
 })
@@ -1019,7 +1019,7 @@ export const getMediaAccessQueryOffsetMin = 0;
 
 
 export const GetMediaAccessQueryParams = /*#__PURE__*/ zod.object({
-  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return media whose title or description is similar to this text (pg_trgm similarity), best match first')),
+  "q": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first')),
   "limit": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(1)).check(/*#__PURE__*/ zod.lte(getMediaAccessQueryLimitMax)), getMediaAccessQueryLimitDefault).check(/*#__PURE__*/ zod.describe('Maximum number of media to return')),
   "offset": /*#__PURE__*/ zod._default(/*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.gte(getMediaAccessQueryOffsetMin)), getMediaAccessQueryOffsetDefault).check(/*#__PURE__*/ zod.describe('Number of media to skip before returning results'))
 })
