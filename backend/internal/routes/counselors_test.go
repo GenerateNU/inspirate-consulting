@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"inspirate-consulting/internal/config"
 	"inspirate-consulting/internal/data"
@@ -441,21 +442,30 @@ func TestRoute_UpdateCounselor(t *testing.T) {
 	t.Run("success updates the logged-in counselor", func(t *testing.T) {
 		t.Parallel()
 
+		link := "https://example.com/counselor"
+		expected := models.UpdateCounselorBody{
+			CustomLink: models.NewNullable(link),
+			ExpiresAt:  models.Null[time.Time](),
+		}
+
 		mockRepo := mocks.NewCounselorRepository(t)
 		// the counselor id comes from the session
-		mockRepo.On("UpdateCounselor", mock.Anything, counselorID, models.UpdateCounselorBody{}).
-			Return(&models.Counselor{ID: counselorID, UserID: uuid.New()}, nil)
+		mockRepo.On("UpdateCounselor", mock.Anything, counselorID, expected).
+			Return(&models.Counselor{ID: counselorID, UserID: uuid.New(), CustomLink: &link}, nil)
 
 		app, err := setupTestAppWithCounselor(mockRepo)
 		require.NoError(t, err)
 
-		resp, body := doJSON(t, app, http.MethodPatch, "/counselors", map[string]any{}, asCounselor)
+		resp, body := doJSON(t, app, http.MethodPatch, "/counselors",
+			map[string]any{"custom_link": link, "expires_at": nil}, asCounselor)
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var output models.Counselor
 		require.NoError(t, json.Unmarshal(body, &output))
 		assert.Equal(t, counselorID, output.ID)
+		assert.Equal(t, &link, output.CustomLink)
+		assert.Nil(t, output.ExpiresAt)
 	})
 
 	t.Run("caller without a counselor profile is unauthorized", func(t *testing.T) {
