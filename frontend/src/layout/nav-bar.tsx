@@ -112,10 +112,15 @@ export default function NavBar() {
   const collapsed = state === "collapsed" && !isMobile;
   const { role } = useAuthContext();
 
-  // My List is student-only; counselors manage the shared college list instead
+  // My List is student-only; counselors manage the shared college list instead,
+  // and their task dashboard is the counselor dashboard
+  const counselorPaths: Record<string, string> = {
+    Colleges: "/counselor-college-list",
+    "Task Dashboard": "/counselor",
+  };
   const links = mainLinks.map((item) =>
-    item.label === "Colleges" && role === "counselor"
-      ? { ...item, to: "/counselor-college-list" }
+    role === "counselor" && counselorPaths[item.label]
+      ? { ...item, to: counselorPaths[item.label] }
       : item,
   );
 
