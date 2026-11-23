@@ -21,10 +21,10 @@ func TestBulkCreateTodoItems_DedupesAndScopesToCounselor(t *testing.T) {
 	ctx := context.Background()
 
 	counselorA, counselorAUserID := createTestCounselor(t, db)
-	studentA1 := createTestStudentWithCounselor(t, db, counselorA, "junior")
-	studentA2 := createTestStudentWithCounselor(t, db, counselorA, "junior")
+	studentA1 := createTestStudentWithCounselor(t, db, counselorA, 2018)
+	studentA2 := createTestStudentWithCounselor(t, db, counselorA, 2018)
 	counselorB, _ := createTestCounselor(t, db)
-	studentB := createTestStudentWithCounselor(t, db, counselorB, "junior")
+	studentB := createTestStudentWithCounselor(t, db, counselorB, 2018)
 
 	assignmentID, items, err := repo.BulkCreateTodoItems(ctx, models.BulkCreateTodoItemsParams{
 		CounselorID: counselorA,
@@ -33,7 +33,7 @@ func TestBulkCreateTodoItems_DedupesAndScopesToCounselor(t *testing.T) {
 		// studentA1 is picked individually AND by year: should get one task.
 		// studentB belongs to counselor B: should get none.
 		StudentIDs: []uuid.UUID{studentA1, studentB},
-		Years:      []string{"junior"},
+		Years:      []int{2018},
 	})
 	require.NoError(t, err)
 

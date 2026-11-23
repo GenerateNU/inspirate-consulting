@@ -8,6 +8,8 @@
 import type { CounselorStudentLatestActivityAction } from './counselorStudentLatestActivityAction';
 
 export interface CounselorStudent {
+  /** Year the student graduates high school */
+  graduation_year: number;
   /** True when the student has an essay review that is still open */
   has_pending_review: boolean;
   /** True when the student has an incomplete to-do item past its deadline */
@@ -32,6 +34,4 @@ export interface CounselorStudent {
   student_id: string;
   /** Number of messages from the student that the counselor hasn't read */
   unread_message_count: number;
-  /** School year of the student */
-  year: string;
 }

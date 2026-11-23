@@ -11,5 +11,5 @@ export type ListCounselorStudentsSortBy = typeof ListCounselorStudentsSortBy[key
 
 export const ListCounselorStudentsSortBy = {
   name: 'name',
-  year: 'year',
+  graduation_year: 'graduation_year',
 } as const;

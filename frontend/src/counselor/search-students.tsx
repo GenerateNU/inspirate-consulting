@@ -17,7 +17,7 @@ export default function SearchStudents() {
   const counselorID = auth?.counselorID as string;
   const [Input, setInput] = useState("");
 
-  const [grade, setGrade] = useState<Grade | "">("");
+  const [grade, setGrade] = useState<Grade>("");
   const params: FetchStudentsParams = { name: Input };
   const {
     students: loadedStudents,
@@ -32,7 +32,7 @@ export default function SearchStudents() {
   let students: StudentListItem[] = loadedStudents;
   // only narrow by grade when one is picked; "All Grades" ("") keeps every result
   if (grade !== "") {
-    students = students.filter((student) => student.year === grade);
+    students = students.filter((student) => student.graduation_year === grade);
   }
 
   return (

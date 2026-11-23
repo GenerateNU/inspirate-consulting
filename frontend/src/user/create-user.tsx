@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { errorMessage } from "../api/client";
 import { useCreateUser } from "../api/endpoints";
-import {
-  CreateUserInputBodyRole,
-  CreateUserInputBodyYear,
-} from "../api/models";
+import { CreateUserInputBodyRole } from "../api/models";
 import { useAuthContext } from "../contexts/use-auth-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +17,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import { graduationYearOptions } from "@/lib/graduation-year";
 
 export default function CreateUser() {
   const { counselorID } = useAuthContext();
@@ -29,8 +27,8 @@ export default function CreateUser() {
   const [role, setRole] = useState<CreateUserInputBodyRole>(
     CreateUserInputBodyRole.student,
   );
-  const [year, setYear] = useState<CreateUserInputBodyYear>(
-    CreateUserInputBodyYear.freshman,
+  const [graduationYear, setGraduationYear] = useState(
+    graduationYearOptions()[3].value,
   );
   const [gpa, setGpa] = useState("");
   const [status, setStatus] = useState("");
@@ -50,7 +48,7 @@ export default function CreateUser() {
           role,
           ...(isStudent
             ? {
-                year,
+                graduation_year: graduationYear,
                 gpa: Number(gpa),
                 counselor_id: counselorID ?? undefined,
               }
@@ -115,31 +113,18 @@ export default function CreateUser() {
             {isStudent && (
               <>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="year">Graduation Year / Cohort</Label>
+                  <Label htmlFor="graduation-year">Graduation Year</Label>
                   <NativeSelect
-                    id="year"
+                    id="graduation-year"
                     className="w-full"
-                    value={year}
-                    onChange={(e) =>
-                      setYear(e.target.value as CreateUserInputBodyYear)
-                    }
+                    value={graduationYear}
+                    onChange={(e) => setGraduationYear(Number(e.target.value))}
                   >
-                    <NativeSelectOption
-                      value={CreateUserInputBodyYear.freshman}
-                    >
-                      Freshman
-                    </NativeSelectOption>
-                    <NativeSelectOption
-                      value={CreateUserInputBodyYear.sophomore}
-                    >
-                      Sophomore
-                    </NativeSelectOption>
-                    <NativeSelectOption value={CreateUserInputBodyYear.junior}>
-                      Junior
-                    </NativeSelectOption>
-                    <NativeSelectOption value={CreateUserInputBodyYear.senior}>
-                      Senior
-                    </NativeSelectOption>
+                    {graduationYearOptions().map(({ value, label }) => (
+                      <NativeSelectOption key={value} value={value}>
+                        {label}
+                      </NativeSelectOption>
+                    ))}
                   </NativeSelect>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -148,6 +133,8 @@ export default function CreateUser() {
                     id="gpa"
                     type="number"
                     min={0}
+                    max={5}
+                    step="0.01"
                     value={gpa}
                     onChange={(e) => setGpa(e.target.value)}
                     required

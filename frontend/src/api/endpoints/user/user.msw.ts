@@ -18,7 +18,8 @@ import type {
   CurrentUser,
   Pfp,
   PresignUploadResponse,
-  User
+  User,
+  UserProfile
 } from '../../models';
 
 import {
@@ -103,7 +104,7 @@ export const getPresignPfpUploadMockHandler = (overrideResponse?: PresignUploadR
   }, options)
 }
 
-export const getFetchUserMockHandler = (overrideResponse?: User | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<User> | User), options?: RequestHandlerOptions) => {
+export const getFetchUserMockHandler = (overrideResponse?: UserProfile | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<UserProfile> | UserProfile), options?: RequestHandlerOptions) => {
   return http.get('*/user/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 

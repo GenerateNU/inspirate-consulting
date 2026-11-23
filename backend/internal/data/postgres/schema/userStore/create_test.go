@@ -161,8 +161,8 @@ func TestCreateUser_Student(t *testing.T) {
 
 	counselorID := createTestCounselor(t, repo, db)
 
-	year := models.Junior
-	gpa := 4
+	year := 2028
+	gpa := 3.85
 	organization := "Debate Club"
 	interest := "Computer Science"
 
@@ -170,7 +170,7 @@ func TestCreateUser_Student(t *testing.T) {
 	input.Body.Name = "New Student"
 	input.Body.Email = "newstudent@gmail.com"
 	input.Body.Role = models.StudentRole
-	input.Body.Year = &year
+	input.Body.GraduationYear = &year
 	input.Body.GPA = &gpa
 	input.Body.Organization = &organization
 	input.Body.Interest = &interest
@@ -183,18 +183,18 @@ func TestCreateUser_Student(t *testing.T) {
 
 	var student models.Student
 	err = db.QueryRow(ctx,
-		`SELECT year, gpa, organization, student_interest, review_balance, counselor_id FROM public.student WHERE user_id = $1`,
+		`SELECT graduation_year, gpa, organization, student_interest, review_balance, counselor_id FROM public.student WHERE user_id = $1`,
 		output.Body.User.ID,
-	).Scan(&student.Year, &student.GPA, &student.Organization, &student.Interest, &student.ReviewBalance, &student.CounselorID)
+	).Scan(&student.GraduationYear, &student.GPA, &student.Organization, &student.Interest, &student.ReviewBalance, &student.CounselorID)
 	if err != nil {
 		t.Fatalf("student lookup failed: %v", err)
 	}
 
-	if student.Year != year {
-		t.Errorf("expected year %q, got %q", year, student.Year)
+	if student.GraduationYear != year {
+		t.Errorf("expected graduation year %d, got %d", year, student.GraduationYear)
 	}
 	if student.GPA != gpa {
-		t.Errorf("expected gpa %d, got %d", gpa, student.GPA)
+		t.Errorf("expected gpa %v, got %v", gpa, student.GPA)
 	}
 	if student.Organization == nil || *student.Organization != organization {
 		t.Errorf("expected organization %q, got %v", organization, student.Organization)
@@ -217,14 +217,14 @@ func TestCreateUser_StudentFailureRollsBackUser(t *testing.T) {
 	}
 	t.Parallel()
 
-	year := models.Senior
-	gpa := 3
+	year := 2027
+	gpa := 3.5
 
 	input := models.CreateUserInput{}
 	input.Body.Name = "Orphan Student"
 	input.Body.Email = "orphan@gmail.com"
 	input.Body.Role = models.StudentRole
-	input.Body.Year = &year
+	input.Body.GraduationYear = &year
 	input.Body.GPA = &gpa
 
 	db := testutils.SetupTestDB(t)

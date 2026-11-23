@@ -53,9 +53,9 @@ func createTestStudent(t *testing.T, db *pgxpool.Pool, student models.Student) m
 	t.Helper()
 
 	if err := db.QueryRow(context.Background(),
-		`INSERT INTO public.student (user_id, year, organization, gpa, review_balance, counselor_id, student_interest)
+		`INSERT INTO public.student (user_id, graduation_year, organization, gpa, review_balance, counselor_id, student_interest)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-		student.UserID, student.Year, student.Organization, student.GPA, student.ReviewBalance, student.CounselorID, student.Interest,
+		student.UserID, student.GraduationYear, student.Organization, student.GPA, student.ReviewBalance, student.CounselorID, student.Interest,
 	).Scan(&student.ID); err != nil {
 		t.Fatalf("setup createTestStudent failed: %v", err)
 	}
@@ -84,8 +84,8 @@ func createAssignedTestStudent(t *testing.T, db *pgxpool.Pool, name string, coun
 
 	userID := createTestUser(t, db, name)
 	if _, err := db.Exec(context.Background(),
-		`INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
-		 VALUES ($1, 'junior', 4, 0, $2)`,
+		`INSERT INTO public.student (user_id, graduation_year, gpa, review_balance, counselor_id)
+		 VALUES ($1, 2028, 4, 0, $2)`,
 		userID, counselorID); err != nil {
 		t.Fatalf("failed to create test student: %v", err)
 	}

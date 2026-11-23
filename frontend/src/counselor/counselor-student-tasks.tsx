@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser } from "../api/endpoints";
-import { gradeByYear } from "../lib/constants";
+import { graduationYearLabel } from "../lib/graduation-year";
 
 //validate URL before anything is fetched
 export default function CounselorStudentTasks() {
@@ -51,7 +51,9 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
 
           <p className="mt-2 text-sm font-semibold">Student Info</p>
           <ul className="text-xs">
-            <li>Grade: {gradeByYear[student.year] ?? student.year}</li>
+            <li>
+              Graduation Year: {graduationYearLabel(student.graduation_year)}
+            </li>
             <li>High School: {student.organization ?? "Not set"}</li>
             <li>Major of Interest: {student.student_interest ?? "Not set"}</li>
           </ul>

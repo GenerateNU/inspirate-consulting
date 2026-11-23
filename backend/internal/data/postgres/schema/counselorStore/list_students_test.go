@@ -25,9 +25,9 @@ func TestListStudents(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	otherCounselorID := createTestCounselor(t, db)
 
-	alice := createTestStudent(t, db, counselorID, "Alice", "junior")
-	carol := createTestStudent(t, db, counselorID, "Carol", "freshman")
-	bob := createTestStudent(t, db, otherCounselorID, "Bob", "senior")
+	alice := createTestStudent(t, db, counselorID, "Alice", 2028)
+	carol := createTestStudent(t, db, counselorID, "Carol", 2030)
+	bob := createTestStudent(t, db, otherCounselorID, "Bob", 2027)
 
 	results, err := repo.ListStudents(ctx, counselorID)
 	if err != nil {
@@ -56,8 +56,8 @@ func TestListStudents(t *testing.T) {
 	if got.Name != "Alice" {
 		t.Errorf("expected Name %q, got %q", "Alice", got.Name)
 	}
-	if got.Year != models.Junior {
-		t.Errorf("expected Year %q, got %q", models.Junior, got.Year)
+	if got.GraduationYear != 2028 {
+		t.Errorf("expected GraduationYear %d, got %d", 2028, got.GraduationYear)
 	}
 }
 
@@ -95,7 +95,7 @@ func TestListStudents_Counts(t *testing.T) {
 	ctx := context.Background()
 
 	counselorID := createTestCounselor(t, db)
-	studentID := createTestStudent(t, db, counselorID, "Alice", "junior")
+	studentID := createTestStudent(t, db, counselorID, "Alice", 2018)
 
 	var counselorUserID, studentUserID uuid.UUID
 	if err := db.QueryRow(ctx,
@@ -178,7 +178,7 @@ func TestListStudents_NoActivity(t *testing.T) {
 	ctx := context.Background()
 
 	counselorID := createTestCounselor(t, db)
-	createTestStudent(t, db, counselorID, "Alice", "junior")
+	createTestStudent(t, db, counselorID, "Alice", 2018)
 
 	students, err := repo.ListStudents(ctx, counselorID)
 	if err != nil {

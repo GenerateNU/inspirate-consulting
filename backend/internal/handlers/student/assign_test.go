@@ -26,7 +26,7 @@ func assignInput(userID uuid.UUID, counselorID *uuid.UUID) *models.AssignCounsel
 func expectStudentLookup(mockRepo *mocks.StudentRepository, ctx context.Context, userID, studentID uuid.UUID, current *uuid.UUID) {
 	mockRepo.On("GetStudentIDByUserID", ctx, userID).Return(studentID, nil)
 	mockRepo.On("GetStudent", ctx, studentID).
-		Return(&models.Student{ID: studentID, UserID: userID, Year: models.Junior, CounselorID: current}, nil)
+		Return(&models.Student{ID: studentID, UserID: userID, GraduationYear: 2028, CounselorID: current}, nil)
 }
 
 // denyingAuthorizer is a real Authorizer with no database. With no role in the
@@ -55,7 +55,7 @@ func TestHandler_AssignCounselor(t *testing.T) {
 		t.Parallel()
 
 		studentUserID, studentID, counselorID := uuid.New(), uuid.New(), uuid.New()
-		updated := &models.Student{ID: studentID, UserID: studentUserID, Year: models.Junior, CounselorID: &counselorID}
+		updated := &models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028, CounselorID: &counselorID}
 
 		mockRepo := mocks.NewStudentRepository(t)
 		expectStudentLookup(mockRepo, ctx, studentUserID, studentID, nil)
@@ -74,7 +74,7 @@ func TestHandler_AssignCounselor(t *testing.T) {
 
 		studentUserID, studentID := uuid.New(), uuid.New()
 		currentID, newID := uuid.New(), uuid.New()
-		updated := &models.Student{ID: studentID, UserID: studentUserID, Year: models.Junior, CounselorID: &newID}
+		updated := &models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028, CounselorID: &newID}
 
 		mockRepo := mocks.NewStudentRepository(t)
 		expectStudentLookup(mockRepo, ctx, studentUserID, studentID, &currentID)
@@ -110,7 +110,7 @@ func TestHandler_AssignCounselor(t *testing.T) {
 		t.Parallel()
 
 		studentUserID, studentID, currentID := uuid.New(), uuid.New(), uuid.New()
-		updated := &models.Student{ID: studentID, UserID: studentUserID, Year: models.Junior}
+		updated := &models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028}
 
 		mockRepo := mocks.NewStudentRepository(t)
 		expectStudentLookup(mockRepo, ctx, studentUserID, studentID, &currentID)

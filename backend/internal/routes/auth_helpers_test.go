@@ -215,7 +215,7 @@ func seedIdentities(t *testing.T, db *pgxpool.Pool) {
 	require.NoError(t, err)
 
 	_, err = db.Exec(ctx,
-		`INSERT INTO student (user_id, year, gpa, review_balance, counselor_id) VALUES ($1, 'senior', 4, 0, $2)`,
+		`INSERT INTO student (user_id, graduation_year, gpa, review_balance, counselor_id) VALUES ($1, 2027, 4, 0, $2)`,
 		insertUser(roleStudent), counselorID)
 	require.NoError(t, err)
 

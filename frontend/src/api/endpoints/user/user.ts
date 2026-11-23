@@ -34,7 +34,8 @@ import type {
   PresignUploadResponse,
   UpdatePfpRequestBody,
   UpdateUserBody,
-  User
+  User,
+  UserProfile
 } from '../../models';
 
 
@@ -681,7 +682,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 /**
  * fetch a user (student/counselor)
  */
-export const fetchUser = async (id: string, options?: RequestInit): Promise<User> => {
+export const fetchUser = async (id: string, options?: RequestInit): Promise<UserProfile> => {
 
   const res = await fetch(getFetchUserUrl(id),
   {
@@ -696,13 +697,13 @@ export const fetchUser = async (id: string, options?: RequestInit): Promise<User
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   if (!res.ok) {
 
-    const err: globalThis.Error & {info?: User, status?: number} = new globalThis.Error();
-    const data : User = body ? JSON.parse(body) : {}
+    const err: globalThis.Error & {info?: UserProfile, status?: number} = new globalThis.Error();
+    const data : UserProfile = body ? JSON.parse(body) : {}
     err.info = data;
     err.status = res.status;
     throw err;
   }
-  const data: User = body ? JSON.parse(body) : {}
+  const data: UserProfile = body ? JSON.parse(body) : {}
   return data
 }
 

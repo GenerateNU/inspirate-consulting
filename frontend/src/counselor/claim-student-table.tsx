@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { gradeForGraduationYear } from "@/lib/graduation-year";
 import type { StudentListItem } from "../api/models";
 import { useAssignCounselor, getFetchStudentsQueryKey } from "../api/endpoints";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
 
 // how each student year is shown in the Grade Cohort column
-const GRADE_LABELS: Record<string, string> = {
-  freshman: "9th",
-  sophomore: "10th",
-  junior: "11th",
-  senior: "12th",
+const gradeLabel = (graduationYear: number) => {
+  const grade = gradeForGraduationYear(graduationYear);
+  return grade === null ? `Class of ${graduationYear}` : `${grade}th`;
 };
 
 export function ClaimStudentTable({
@@ -76,7 +75,7 @@ export function ClaimStudentTable({
         </p>
 
         <p className="col-span-2 font-inter text-sm leading-5 text-[#171c20]">
-          {GRADE_LABELS[student.year] ?? student.year}
+          {gradeLabel(student.graduation_year)}
         </p>
 
         {/* target pathway column: not set up yet */}

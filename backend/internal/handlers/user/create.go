@@ -12,8 +12,8 @@ import (
 
 func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput, supabase supabase.SupabaseInterface) (*models.CreateUserOutput, error) {
 	// checked before signup so a bad request doesn't create a user signup in supabase without a user row in postgres
-	if input.Body.Role == models.StudentRole && (input.Body.Year == nil || input.Body.GPA == nil || input.Body.CounselorID == nil) {
-		return nil, errs.BadRequest("year, gpa, and counselor_id are required for students")
+	if input.Body.Role == models.StudentRole && (input.Body.GraduationYear == nil || input.Body.GPA == nil || input.Body.CounselorID == nil) {
+		return nil, errs.BadRequest("graduation_year, gpa, and counselor_id are required for students")
 	}
 
 	tempPassword, err := passwordgen.GenerateTempPassword()

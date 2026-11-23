@@ -27,13 +27,13 @@ func TestGetStudent(t *testing.T) {
 	interest := "Computer Science"
 
 	created := createTestStudent(t, db, models.Student{
-		UserID:        createTestUser(t, db, "Findable Student"),
-		Year:          models.Junior,
-		Organization:  &organization,
-		GPA:           4,
-		ReviewBalance: 3,
-		CounselorID:   &counselorID,
-		Interest:      &interest,
+		UserID:         createTestUser(t, db, "Findable Student"),
+		GraduationYear: 2028,
+		Organization:   &organization,
+		GPA:            3.85,
+		ReviewBalance:  3,
+		CounselorID:    &counselorID,
+		Interest:       &interest,
 	})
 
 	fetched, err := repo.GetStudent(ctx, created.ID)
@@ -47,11 +47,11 @@ func TestGetStudent(t *testing.T) {
 	if fetched.UserID != created.UserID {
 		t.Errorf("expected UserID %s, got %s", created.UserID, fetched.UserID)
 	}
-	if fetched.Year != created.Year {
-		t.Errorf("expected Year %q, got %q", created.Year, fetched.Year)
+	if fetched.GraduationYear != created.GraduationYear {
+		t.Errorf("expected GraduationYear %d, got %d", created.GraduationYear, fetched.GraduationYear)
 	}
 	if fetched.GPA != created.GPA {
-		t.Errorf("expected GPA %d, got %d", created.GPA, fetched.GPA)
+		t.Errorf("expected GPA %v, got %v", created.GPA, fetched.GPA)
 	}
 	if fetched.ReviewBalance != created.ReviewBalance {
 		t.Errorf("expected ReviewBalance %d, got %d", created.ReviewBalance, fetched.ReviewBalance)
@@ -79,11 +79,11 @@ func TestGetStudent_NullableFields(t *testing.T) {
 
 	counselorID := createTestCounselor(t, db)
 	created := createTestStudent(t, db, models.Student{
-		UserID:        createTestUser(t, db, "Sparse Student"),
-		Year:          models.Freshman,
-		GPA:           3,
-		ReviewBalance: 0,
-		CounselorID:   &counselorID,
+		UserID:         createTestUser(t, db, "Sparse Student"),
+		GraduationYear: 2030,
+		GPA:            3,
+		ReviewBalance:  0,
+		CounselorID:    &counselorID,
 	})
 
 	fetched, err := repo.GetStudent(ctx, created.ID)
@@ -114,18 +114,18 @@ func TestGetStudent_ReturnsRequestedStudent(t *testing.T) {
 
 	counselorID := createTestCounselor(t, db)
 	target := createTestStudent(t, db, models.Student{
-		UserID:        createTestUser(t, db, "Target Student"),
-		Year:          models.Senior,
-		GPA:           4,
-		ReviewBalance: 5,
-		CounselorID:   &counselorID,
+		UserID:         createTestUser(t, db, "Target Student"),
+		GraduationYear: 2027,
+		GPA:            4,
+		ReviewBalance:  5,
+		CounselorID:    &counselorID,
 	})
 	other := createTestStudent(t, db, models.Student{
-		UserID:        createTestUser(t, db, "Other Student"),
-		Year:          models.Sophomore,
-		GPA:           2,
-		ReviewBalance: 1,
-		CounselorID:   &counselorID,
+		UserID:         createTestUser(t, db, "Other Student"),
+		GraduationYear: 2029,
+		GPA:            2,
+		ReviewBalance:  1,
+		CounselorID:    &counselorID,
 	})
 
 	fetched, err := repo.GetStudent(ctx, target.ID)
@@ -139,8 +139,8 @@ func TestGetStudent_ReturnsRequestedStudent(t *testing.T) {
 	if fetched.UserID != target.UserID {
 		t.Errorf("expected UserID %s, got %s", target.UserID, fetched.UserID)
 	}
-	if fetched.Year != target.Year {
-		t.Errorf("expected Year %q, got %q", target.Year, fetched.Year)
+	if fetched.GraduationYear != target.GraduationYear {
+		t.Errorf("expected GraduationYear %d, got %d", target.GraduationYear, fetched.GraduationYear)
 	}
 	if fetched.ReviewBalance != target.ReviewBalance {
 		t.Errorf("expected ReviewBalance %d, got %d", target.ReviewBalance, fetched.ReviewBalance)

@@ -39,7 +39,7 @@ func createTestCounselor(t *testing.T, db *pgxpool.Pool) (uuid.UUID, uuid.UUID) 
 }
 
 // createTestStudentWithCounselor inserts a user and a student assigned to a counselor.
-func createTestStudentWithCounselor(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, year string) uuid.UUID {
+func createTestStudentWithCounselor(t *testing.T, db *pgxpool.Pool, counselorID uuid.UUID, graduationYear int) uuid.UUID {
 	t.Helper()
 	var studentID uuid.UUID
 	err := db.QueryRow(context.Background(),
@@ -48,10 +48,10 @@ func createTestStudentWithCounselor(t *testing.T, db *pgxpool.Pool, counselorID 
 			VALUES ('Test Student', gen_random_uuid()::text || '@test.com')
 			RETURNING id
 		)
-		INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
+		INSERT INTO public.student (user_id, graduation_year, gpa, review_balance, counselor_id)
 		SELECT id, $1, 4, 0, $2 FROM new_user
 		RETURNING id`,
-		year, counselorID,
+		graduationYear, counselorID,
 	).Scan(&studentID)
 	if err != nil {
 		t.Fatalf("failed to create test student: %v", err)

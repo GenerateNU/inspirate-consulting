@@ -363,6 +363,12 @@ components:
     CounselorStudent:
       additionalProperties: false
       properties:
+        graduation_year:
+          description: Year the student graduates high school
+          examples:
+            - 2027
+          format: int64
+          type: integer
         has_pending_review:
           description: True when the student has an essay review that is still open
           type: boolean
@@ -407,17 +413,12 @@ components:
           description: Number of messages from the student that the counselor hasn't read
           format: int64
           type: integer
-        year:
-          description: School year of the student
-          examples:
-            - junior
-          type: string
       required:
         - is_falling_behind
         - has_pending_review
         - student_id
         - name
-        - year
+        - graduation_year
         - pending_review_count
         - open_task_count
         - unread_message_count
@@ -776,7 +777,15 @@ components:
           type: string
         gpa:
           description: gpa of the student; required when role is student
+          format: double
+          maximum: 5
+          minimum: 0
+          type: number
+        graduation_year:
+          description: year the student graduates high school; required when role is student
           format: int64
+          maximum: 2100
+          minimum: 2000
           type: integer
         name:
           description: Name of the user
@@ -794,14 +803,6 @@ components:
           type: string
         student_interest:
           description: interest of the student
-          type: string
-        year:
-          description: year of the student; required when role is student
-          enum:
-            - freshman
-            - sophomore
-            - junior
-            - senior
           type: string
       required:
         - name
@@ -2125,6 +2126,9 @@ components:
             - string
             - "null"
         gpa:
+          format: double
+          type: number
+        graduation_year:
           format: int64
           type: integer
         high_school:
@@ -2158,12 +2162,10 @@ components:
             - "null"
         user_id:
           type: string
-        year:
-          type: string
       required:
         - id
         - user_id
-        - year
+        - graduation_year
         - student_interest
         - organization
         - gpa
@@ -2181,6 +2183,9 @@ components:
         counselor_id:
           type: string
         gpa:
+          format: double
+          type: number
+        graduation_year:
           format: int64
           type: integer
         id:
@@ -2200,14 +2205,12 @@ components:
           type: integer
         user_id:
           type: string
-        year:
-          type: string
       required:
         - id
         - user_id
         - name
         - pfp_key
-        - year
+        - graduation_year
         - organization
         - gpa
         - review_balance
@@ -2656,7 +2659,15 @@ components:
           type: string
         gpa:
           description: GPA of the student
+          format: double
+          maximum: 5
+          minimum: 0
+          type: number
+        graduation_year:
+          description: Year the student graduates high school
           format: int64
+          maximum: 2100
+          minimum: 2000
           type: integer
         high_school:
           description: High school the student attends
@@ -2675,14 +2686,6 @@ components:
           type: string
         student_interest:
           description: Interest of the student
-          type: string
-        year:
-          description: School year of the student
-          enum:
-            - freshman
-            - sophomore
-            - junior
-            - senior
           type: string
       type: object
     UpdateTodoAssignmentBody:
@@ -2889,6 +2892,53 @@ components:
         supabase_id:
           type: string
       required:
+        - id
+        - name
+        - email
+        - supabase_id
+        - pfp_key
+        - reset_time
+        - expires_at
+      type: object
+    UserProfile:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UserProfile.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        pfp_url:
+          description: Presigned, time-limited URL for the user's profile picture, null when they have none
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        supabase_id:
+          type: string
+      required:
+        - pfp_url
         - id
         - name
         - email
@@ -3478,18 +3528,14 @@ paths:
       description: List the authenticated counselor's students, flagged for falling behind and pending essay reviews.
       operationId: list-counselor-students
       parameters:
-        - description: Only return students in this school year
+        - description: Only return students graduating in this year
           explode: false
           in: query
-          name: year
+          name: graduation_year
           schema:
-            description: Only return students in this school year
-            enum:
-              - freshman
-              - sophomore
-              - junior
-              - senior
-            type: string
+            description: Only return students graduating in this year
+            format: int64
+            type: integer
         - description: Only return students with an open essay review
           explode: false
           in: query
@@ -3506,7 +3552,7 @@ paths:
             description: Field to sort by
             enum:
               - name
-              - year
+              - graduation_year
             type: string
         - description: Sort direction
           explode: false
@@ -5547,7 +5593,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/UserProfile"
           description: OK
         default:
           content:
