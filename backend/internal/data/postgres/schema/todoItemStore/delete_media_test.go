@@ -24,6 +24,7 @@ func TestDeleteTodoItem_RevokesMediaAccess(t *testing.T) {
 	created, err := repo.CreateTodoItem(ctx, studentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch the video",
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	})
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
@@ -58,6 +59,7 @@ func TestDeleteTodoItem_OnlyRevokesThatStudent(t *testing.T) {
 	todo, err := repo.CreateTodoItem(ctx, studentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch the video",
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	})
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
@@ -65,6 +67,7 @@ func TestDeleteTodoItem_OnlyRevokesThatStudent(t *testing.T) {
 	if _, err := repo.CreateTodoItem(ctx, otherStudentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch the video",
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	}); err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}
@@ -97,6 +100,7 @@ func TestDeleteTodoItem_NoMediaLeavesAccess(t *testing.T) {
 	if _, err := repo.CreateTodoItem(ctx, studentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch the video",
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	}); err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}

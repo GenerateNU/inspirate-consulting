@@ -22,14 +22,15 @@ func TestHandler_CreateTodoItem_LinkedMedia(t *testing.T) {
 	studentID := uuid.New()
 	userID := uuid.New()
 	mediaID := uuid.NewString()
+	module := models.TodoLinkModule
 	studentCtx := auth.WithUserID(auth.WithStudentID(context.Background(), studentID), userID)
 	counselorCtx := auth.WithUserID(auth.WithCounselorID(context.Background(), uuid.New()), userID)
 
 	t.Run("counselor can assign a video", func(t *testing.T) {
 		t.Parallel()
 
-		input := &models.CreateTodoItemRequestBody{StudentID: studentID.String(), TodoDescription: "Watch the FAFSA video", MediaID: &mediaID}
-		created := &models.TodoItem{ID: uuid.NewString(), StudentID: studentID.String(), MediaID: &mediaID}
+		input := &models.CreateTodoItemRequestBody{StudentID: studentID.String(), TodoDescription: "Watch the FAFSA video", MediaID: &mediaID, LinkType: &module}
+		created := &models.TodoItem{ID: uuid.NewString(), StudentID: studentID.String(), MediaID: &mediaID, LinkType: &module}
 
 		mockRepo := mocks.NewTodoItemRepository(t)
 		mockRepo.On("CreateTodoItem", mock.Anything, studentID.String(), userID.String(), *input).Return(created, nil)
@@ -44,7 +45,7 @@ func TestHandler_CreateTodoItem_LinkedMedia(t *testing.T) {
 	t.Run("student cannot link a video", func(t *testing.T) {
 		t.Parallel()
 
-		input := &models.CreateTodoItemRequestBody{TodoDescription: "Watch a video", MediaID: &mediaID}
+		input := &models.CreateTodoItemRequestBody{TodoDescription: "Watch a video", MediaID: &mediaID, LinkType: &module}
 
 		// No CreateTodoItem expectation: the todo (and the grant) must never be written
 		mockRepo := mocks.NewTodoItemRepository(t)

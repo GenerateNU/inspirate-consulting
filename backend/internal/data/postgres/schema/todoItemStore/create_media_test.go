@@ -13,6 +13,9 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
+// moduleLink is the link_type a media todo must have (todo_link_type_matches check).
+var moduleLink = models.TodoLinkModule
+
 // insertTestMedia adds a media row directly so todos have a valid media_id to link.
 func insertTestMedia(t *testing.T, db *pgxpool.Pool) string {
 	t.Helper()
@@ -57,6 +60,7 @@ func TestCreateTodoItem_GrantsMediaAccess(t *testing.T) {
 		TodoDescription: "Watch the video",
 		Deadline:        &deadline,
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	})
 	if err != nil {
 		t.Fatalf("CreateTodoItem failed: %v", err)
@@ -89,6 +93,7 @@ func TestCreateTodoItem_ExistingMediaAccessConflicts(t *testing.T) {
 	if _, err := repo.CreateTodoItem(ctx, studentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch the video",
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	}); err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}
@@ -96,6 +101,7 @@ func TestCreateTodoItem_ExistingMediaAccessConflicts(t *testing.T) {
 	_, err := repo.CreateTodoItem(ctx, studentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch the video again",
 		MediaID:         &mediaID,
+		LinkType:        &moduleLink,
 	})
 	var httpErr errs.HTTPError
 	if !errors.As(err, &httpErr) || httpErr.Code != http.StatusConflict {
@@ -157,6 +163,7 @@ func TestCreateTodoItem_InvalidMediaWritesNothing(t *testing.T) {
 	if _, err := repo.CreateTodoItem(ctx, studentID, uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Watch a video that doesn't exist",
 		MediaID:         &missingMediaID,
+		LinkType:        &moduleLink,
 	}); err == nil {
 		t.Fatal("expected an error for nonexistent media, got nil")
 	}
