@@ -24,9 +24,10 @@ import Counselor from "./counselor/counselor";
 import CounselorStudents from "./counselor/counselor-students";
 import PendingReviews from "./counselor/pending-reviews";
 import Layout from "./layout/layout";
-import UploadMedia from "./media/upload-media";
 import StudentMediaList from "./media/student-media-list";
-import CounselorMediaList from "./media/counselor-media-list";
+import CounselorMediaList from "./media/counselor/media-list";
+import CounselorMediaDetails from "./media/counselor/media-details";
+import CounselorAddMedia from "./media/counselor/add-media";
 import UpdateNotificationPreferences from "./notifications/update-notification-preferences";
 import CreateUser from "./user/create-user";
 import LogOut from "./logout/logout";
@@ -115,7 +116,11 @@ createRoot(document.getElementById("root")!).render(
                 element={<CounselorStudents />}
               />
               <Route path="/pending-reviews" element={<PendingReviews />} />
-              <Route path="/upload-media" element={<UploadMedia />} />
+              {/* old upload page; Create Module replaced it */}
+              <Route
+                path="/upload-media"
+                element={<Navigate to="/counselor-media-list/new" replace />}
+              />
               <Route
                 path="/student-media-list"
                 element={<StudentMediaList />}
@@ -123,6 +128,14 @@ createRoot(document.getElementById("root")!).render(
               <Route
                 path="/counselor-media-list"
                 element={<CounselorMediaList />}
+              />
+              <Route
+                path="/counselor-media-list/new"
+                element={<CounselorAddMedia />}
+              />
+              <Route
+                path="/counselor-media-list/:id"
+                element={<CounselorMediaDetails />}
               />
               <Route
                 path="/update-notification-preferences"
