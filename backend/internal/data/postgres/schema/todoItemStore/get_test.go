@@ -31,13 +31,16 @@ func TestListTodoItems(t *testing.T) {
 	}{
 		{studentID, models.CreateTodoItemRequestBody{
 			TodoDescription: "Request a letter of recommendation",
+			Title:           "Test task",
 			Deadline:        &deadline,
 		}},
 		{studentID, models.CreateTodoItemRequestBody{
 			TodoDescription: "Schedule a campus tour",
+			Title:           "Test task",
 		}},
 		{otherStudentID, models.CreateTodoItemRequestBody{
 			TodoDescription: "Belongs to a different student",
+			Title:           "Test task",
 		}},
 	}
 

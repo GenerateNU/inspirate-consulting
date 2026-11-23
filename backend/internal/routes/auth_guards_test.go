@@ -118,6 +118,8 @@ var routeTable = []routeAccess{
 	{http.MethodPatch, "/todo-items/{id}/deadline", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}/description", guarded, []string{roleCounselor}},
+	{http.MethodPost, "/todo-items/bulk", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/todo-assignments/{assignment_id}", guarded, []string{roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
@@ -336,6 +338,8 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"DELETE /media-access/{id}",
 		"DELETE /media/{id}",
 		"POST /llm/ask",
+		"POST /todo-items/bulk",
+		"PATCH /todo-assignments/{assignment_id}",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",

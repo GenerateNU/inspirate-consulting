@@ -23,6 +23,7 @@ func TestDeleteTodoItem(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Submit the FAFSA",
+		Title:           "Test task",
 	}
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
 	if err != nil {
@@ -58,12 +59,14 @@ func TestDeleteTodoItem_LeavesOthers(t *testing.T) {
 
 	toDelete, err := repo.CreateTodoItem(ctx, studentID, userID, models.CreateTodoItemRequestBody{
 		TodoDescription: "Delete me",
+		Title:           "Test task",
 	})
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
 	}
 	toKeep, err := repo.CreateTodoItem(ctx, studentID, userID, models.CreateTodoItemRequestBody{
 		TodoDescription: "Keep me",
+		Title:           "Test task",
 	})
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
@@ -121,6 +124,7 @@ func TestDeleteTodoItem_AlreadyDeleted(t *testing.T) {
 
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), models.CreateTodoItemRequestBody{
 		TodoDescription: "Delete me twice",
+		Title:           "Test task",
 	})
 	if err != nil {
 		t.Fatalf("setup CreateTodoItem failed: %v", err)
