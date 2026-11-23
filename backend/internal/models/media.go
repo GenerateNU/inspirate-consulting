@@ -11,7 +11,6 @@ const (
 	Senior    Year = "senior"
 )
 
-
 // Exactly one of S3Key / YoutubeVideoID is set (enforced by the media_single_source constraint).
 // Field order must match the SELECT column order, since list queries use pgx.RowToStructByPos.
 type Media struct {
