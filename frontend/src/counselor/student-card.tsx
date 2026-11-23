@@ -96,7 +96,7 @@ export default function StudentCard({
             tone="grey"
             className="mt-1 self-start border-none bg-cream/60 py-0.5 text-[10px]"
           >
-            {plural(student.open_task_count, "open task", "open tasks")}
+            {plural(student.open_task_count, "task assigned", "tasks assigned")}
           </Tag>
         </div>
       </Link>

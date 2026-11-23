@@ -132,7 +132,7 @@ export default function TaskForm({
 
   return (
     <div className="flex min-h-full w-full flex-col items-center bg-off-white px-12 py-10 max-lg:px-6">
-      <div className="flex w-full max-w-[656px] flex-col gap-6">
+      <div className="flex w-full max-w-164 flex-col gap-6">
         <div className="relative flex items-center">
           <button
             type="button"
@@ -175,7 +175,7 @@ export default function TaskForm({
                 aria-invalid={overLimit}
                 aria-describedby="task-description-count"
                 onChange={(e) => set({ description: e.target.value })}
-                className={cn(fieldInputClassName, "min-h-[136px]")}
+                className={cn(fieldInputClassName, "min-h-34")}
               />
               <p
                 id="task-description-count"
@@ -185,7 +185,7 @@ export default function TaskForm({
               </p>
             </div>
 
-            <label className="flex w-[250px] max-w-full flex-col gap-3">
+            <label className="flex w-62.5 max-w-full flex-col gap-3">
               <span className={fieldLabelClassName}>Due date</span>
               <Input
                 type="date"

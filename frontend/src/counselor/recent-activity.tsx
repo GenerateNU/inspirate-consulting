@@ -84,7 +84,7 @@ export default function RecentActivity() {
       <h2 className="font-jakarta text-xl leading-[normal] font-semibold text-charcoal">
         Recent Activity
       </h2>
-      <div className="max-h-[480px] overflow-y-auto rounded-lg border border-cream bg-white px-4 py-2 shadow-card">
+      <div className="max-h-120 overflow-y-auto rounded-lg border border-cream bg-white px-4 py-2 shadow-card">
         {activitiesLoading &&
           Array.from({ length: 4 }, (_, i) => (
             <div key={i} className="flex items-center gap-3 py-3">

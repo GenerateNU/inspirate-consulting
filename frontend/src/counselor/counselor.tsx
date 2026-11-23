@@ -167,7 +167,7 @@ export default function Counselor() {
             {isLoading &&
               Array.from({ length: 4 }, (_, i) => (
                 <li key={i}>
-                  <Skeleton className="h-[98px] w-full rounded-lg bg-cream/60" />
+                  <Skeleton className="h-24.5 w-full rounded-lg bg-cream/60" />
                 </li>
               ))}
             {students.map((student) => (
@@ -176,7 +176,7 @@ export default function Counselor() {
           </ul>
         </section>
 
-        <aside className="flex w-[285px] shrink-0 flex-col gap-8 max-lg:w-full">
+        <aside className="flex w-71.25 shrink-0 flex-col gap-8 max-lg:w-full">
           <EssaysToReview count={essaysToReview} />
           <RecentActivity />
           <ReviewBalanceForm />
