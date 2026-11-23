@@ -176,3 +176,53 @@
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: var(--color-mint);
 }
+
+.save-check {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.save-check.save-check-drawn {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 280ms cubic-bezier(0.65, 0, 0.35, 1);
+  animation: save-check-pop 360ms 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes save-check-pop {
+  45% {
+    transform: scale(1.2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .save-check.save-check-drawn {
+    transition: none;
+    animation: none;
+  }
+}
+
+.save-error-shake {
+  transform-origin: center;
+  animation: save-error-shake 560ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes save-error-shake {
+  15% {
+    transform: rotate(-18deg) scale(1.1);
+  }
+  30% {
+    transform: rotate(14deg) scale(1.1);
+  }
+  45% {
+    transform: rotate(-10deg) scale(1.05);
+  }
+  60% {
+    transform: rotate(6deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .save-error-shake {
+    animation: none;
+  }
+}

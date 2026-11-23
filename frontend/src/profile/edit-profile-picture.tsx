@@ -5,14 +5,12 @@ import { ArrowLeft } from "lucide-react";
 import { errorMessage } from "../api/client";
 import {
   getGetCurrentUserQueryKey,
-  presignPfpUpload,
-  updatePfp,
   useDeletePfp,
   useGetCurrentUser,
 } from "../api/endpoints";
 import UserAvatar from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
-import { compressPfp, pfpAccept, presignPfpBody } from "./pfp-file";
+import { compressPfp, pfpAccept, uploadPfp } from "./pfp-file";
 
 export default function EditProfilePicture() {
   const queryClient = useQueryClient();
@@ -42,22 +40,9 @@ export default function EditProfilePicture() {
   };
 
   const save = useMutation({
-    mutationFn: async (file: File) => {
-      // 1. get a presigned upload URL signed for this file's type and size
-      const { s3_key, upload_url } = await presignPfpUpload(
-        presignPfpBody(file),
-      );
-
-      // 2. PUT the image to S3
-      const uploadResponse = await fetch(upload_url, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type },
-      });
-      if (!uploadResponse.ok) throw new Error("Upload to S3 failed.");
-
-      // 3. save the uploaded key as the profile picture
-      return updatePfp({ s3_key });
+    mutationFn: (file: File) => {
+      if (!currentUser) throw new Error("Not signed in.");
+      return uploadPfp(file, currentUser.id);
     },
     onSuccess: () => {
       setStatus("Profile picture saved.");
@@ -118,6 +103,8 @@ export default function EditProfilePicture() {
       <div className="flex items-center gap-6">
         <UserAvatar
           name={currentUser?.name ?? ""}
+          userId={previewURL ? undefined : currentUser?.id}
+          pfpKey={currentUser?.pfp_key}
           src={previewURL ?? currentUser?.pfp_url}
           className="size-32"
           fallbackClassName="bg-mist text-3xl text-neutral-600"
