@@ -2900,6 +2900,53 @@ components:
         - reset_time
         - expires_at
       type: object
+    UserProfile:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/UserProfile.json
+          format: uri
+          readOnly: true
+          type: string
+        email:
+          type: string
+        expires_at:
+          format: date-time
+          type:
+            - string
+            - "null"
+        id:
+          type: string
+        name:
+          type: string
+        pfp_key:
+          type:
+            - string
+            - "null"
+        pfp_url:
+          description: Presigned, time-limited URL for the user's profile picture, null when they have none
+          type:
+            - string
+            - "null"
+        reset_time:
+          format: date-time
+          type:
+            - string
+            - "null"
+        supabase_id:
+          type: string
+      required:
+        - pfp_url
+        - id
+        - name
+        - email
+        - supabase_id
+        - pfp_key
+        - reset_time
+        - expires_at
+      type: object
     Video:
       additionalProperties: false
       properties:
@@ -5546,7 +5593,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/UserProfile"
           description: OK
         default:
           content:

@@ -163,12 +163,21 @@ type AssignCounselorOutput struct {
 	Body Student
 }
 
-type CurrentUser struct {
+// A user as shown on their profile, with a link to their picture
+type UserProfile struct {
 	User
+	PfpURL *string `json:"pfp_url" doc:"Presigned, time-limited URL for the user's profile picture, null when they have none"`
+}
+
+type FetchUserProfileOutput struct {
+	Body *UserProfile
+}
+
+type CurrentUser struct {
+	UserProfile
 	Role        Role       `json:"role" enum:"student,counselor" doc:"Role of the logged-in user"`
 	StudentID   *uuid.UUID `json:"student_id" doc:"Student profile ID, null unless the user is a student"`
 	CounselorID *uuid.UUID `json:"counselor_id" doc:"Counselor profile ID, null unless the user is a counselor"`
-	PfpURL      *string    `json:"pfp_url" doc:"Presigned, time-limited URL for the user's profile picture, null when they have none"`
 }
 
 type GetCurrentUserOutput struct {

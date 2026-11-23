@@ -139,13 +139,12 @@ func TestRoute_FetchUser(t *testing.T) {
 	test_uuid := uuid.MustParse("7bebfe6e-36ca-4343-a46c-d9430a951ba7")
 	//test_uuid_two := uuid.MustParse("ba0ccc36-6c60-4ad3-90ad-0fed4378f3df")
 	s1 := uuid.New()
-	key := ""
 
+	// No picture, so the route needs no picture storage to presign with.
 	userTest := models.User{
 		ID:         test_uuid,
 		Name:       "Aleng123",
 		SupabaseID: s1,
-		PfpKey:     &key,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -169,10 +168,11 @@ func TestRoute_FetchUser(t *testing.T) {
 		respBody, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
-		var output models.FetchUserOutput
+		var output models.FetchUserProfileOutput
 		err = json.Unmarshal(respBody, &output.Body)
 		require.NoError(t, err)
 		assert.Equal(t, test_uuid, output.Body.ID)
+		assert.Nil(t, output.Body.PfpURL)
 	})
 
 	t.Run("not found returns 404", func(t *testing.T) {

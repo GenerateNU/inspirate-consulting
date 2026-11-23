@@ -2085,6 +2085,7 @@ export const FetchUserResponse = /*#__PURE__*/ zod.object({
   "id": /*#__PURE__*/ zod.string(),
   "name": /*#__PURE__*/ zod.string(),
   "pfp_key": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()),
+  "pfp_url": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Presigned, time-limited URL for the user\'s profile picture, null when they have none')),
   "reset_time": /*#__PURE__*/ zod.nullable(/*#__PURE__*/ zod.iso.datetime({"offset":true})),
   "supabase_id": /*#__PURE__*/ zod.string()
 })

@@ -147,4 +147,5 @@ export * from './updateTodoItemLinkBodyLinkType';
 export * from './updateTodoItemTitleBody';
 export * from './updateUserBody';
 export * from './user';
+export * from './userProfile';
 export * from './video';

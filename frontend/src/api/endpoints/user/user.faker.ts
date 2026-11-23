@@ -14,7 +14,8 @@ import type {
   CurrentUser,
   Pfp,
   PresignUploadResponse,
-  User
+  User,
+  UserProfile
 } from '../../models';
 
 
@@ -28,5 +29,5 @@ export const getUpdatePfpResponseMock = (overrideResponse: Partial<Extract<Pfp, 
 
 export const getPresignPfpUploadResponseMock = (overrideResponse: Partial<Extract<PresignUploadResponse, object>> = {}): PresignUploadResponse => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), s3_key: faker.string.alpha({length: {min: 10, max: 20}}), upload_url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
-export const getFetchUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), email: faker.string.alpha({length: {min: 10, max: 20}}), expires_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reset_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+export const getFetchUserResponseMock = (overrideResponse: Partial<Extract<UserProfile, object>> = {}): UserProfile => ({$schema: faker.helpers.arrayElement([faker.internet.url(), undefined]), email: faker.string.alpha({length: {min: 10, max: 20}}), expires_at: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), pfp_key: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), pfp_url: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reset_time: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), supabase_id: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 

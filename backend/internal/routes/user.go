@@ -50,7 +50,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Path:        "/user/{id}",
 		Description: "fetch a user (student/counselor)",
 		Tags:        []string{"User"},
-	}, func(ctx context.Context, input *models.FetchUserInput) (*models.FetchUserOutput, error) {
+	}, func(ctx context.Context, input *models.FetchUserInput) (*models.FetchUserProfileOutput, error) {
 		userOutput, err := userHandler.FetchUser(ctx, input)
 		if err != nil {
 			return nil, err
