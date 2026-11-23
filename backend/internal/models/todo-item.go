@@ -230,7 +230,7 @@ type BulkCreateTodoItemsParams struct {
 	CollegeID   *int64
 	MediaID     *string
 	StudentIDs  []uuid.UUID
-	Years       []string
+	Years       []int
 	All         bool
 }
 

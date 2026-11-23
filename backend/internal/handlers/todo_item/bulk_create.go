@@ -50,7 +50,7 @@ func (h *Handler) BulkCreateTodoItems(ctx context.Context, input *models.BulkCre
 		CollegeID:   body.CollegeID,
 		MediaID:     body.MediaID,
 		StudentIDs:  body.StudentIDs,
-		Years:       graduationYearsToStudentYears(body.GraduationYears, time.Now()),
+		Years:       body.GraduationYears,
 		All:         body.All,
 	})
 	if err != nil {

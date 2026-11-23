@@ -22,8 +22,8 @@ func TestUpdateTodoAssignment_RemoveKeepsCompleted(t *testing.T) {
 	ctx := context.Background()
 
 	counselorID, counselorUserID := createTestCounselor(t, db)
-	done := createTestStudentWithCounselor(t, db, counselorID, "junior")
-	notDone := createTestStudentWithCounselor(t, db, counselorID, "junior")
+	done := createTestStudentWithCounselor(t, db, counselorID, 2018)
+	notDone := createTestStudentWithCounselor(t, db, counselorID, 2018)
 
 	assignmentID, items, err := repo.BulkCreateTodoItems(ctx, models.BulkCreateTodoItemsParams{
 		CounselorID: counselorID,

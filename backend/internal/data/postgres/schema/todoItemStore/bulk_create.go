@@ -40,7 +40,7 @@ func (r *TodoItemRepository) BulkCreateTodoItems(ctx context.Context, p models.B
 	}
 	years := p.Years
 	if years == nil {
-		years = []string{}
+		years = []int{}
 	}
 
 	// Resolve to only this counselor's students, deduplicated
