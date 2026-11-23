@@ -1,13 +1,10 @@
 import { useId, useRef, useState } from "react";
 import { Video } from "lucide-react";
 
-import { errorMessage } from "../../api/client";
-import { useGetVideo } from "../../api/endpoints";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { videoAccept } from "../../video/video-file";
 import {
@@ -16,73 +13,29 @@ import {
   panelClassName,
   primaryButtonClassName,
   secondaryButtonClassName,
-} from "./media-styles";
+  videoFrameClassName,
+} from "../shared/media-styles";
+import CardIconHeader from "../shared/card-icon-header";
+import SavedVideoPlayer from "../shared/saved-video-player";
 import type { MediaEditForm } from "./hooks/use-media-edit-form";
 
 interface VideoPreviewProps {
   form: MediaEditForm;
 }
 
-// plays the picked file, the saved YouTube video, or the saved S3 video
+// plays the newly picked file before it's uploaded, otherwise the saved video
 function VideoPreview({ form }: VideoPreviewProps) {
-  const s3Video = useGetVideo(
-    { s3_key: form.savedS3Key ?? undefined },
-    {
-      query: {
-        enabled: !!form.savedS3Key,
-        // each fetch signs a new URL, and a new src restarts the player, so keep
-        // the URL until shortly before it expires (the backend signs it for 1 hour)
-        staleTime: 50 * 60 * 1000,
-        refetchOnWindowFocus: false,
-      },
-    },
-  );
-  // only re-sign once per load, so a file that's really broken doesn't refetch forever
-  const retriedRef = useRef(false);
-
-  const frameClassName = "aspect-video w-full rounded-lg bg-greyish-brown";
-
   if (form.filePreviewUrl) {
     return (
-      <video src={form.filePreviewUrl} controls className={frameClassName} />
-    );
-  }
-  if (form.savedYoutubeId) {
-    return (
-      <iframe
-        src={`https://www.youtube.com/embed/${form.savedYoutubeId}`}
-        title="YouTube video"
-        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className={frameClassName}
+      <video
+        src={form.filePreviewUrl}
+        controls
+        className={videoFrameClassName}
       />
     );
   }
-  if (s3Video.error) {
-    return (
-      <p className="font-host text-sm text-danger">
-        Couldn&apos;t load the video: {errorMessage(s3Video.error)}
-      </p>
-    );
-  }
-  if (!s3Video.data) {
-    return <Skeleton className={frameClassName} aria-label="Loading video" />;
-  }
   return (
-    <video
-      src={s3Video.data.download_url}
-      controls
-      // S3 rejects an expired URL, so fetch a freshly signed one and try again
-      onError={() => {
-        if (retriedRef.current) return;
-        retriedRef.current = true;
-        void s3Video.refetch();
-      }}
-      onLoadedMetadata={() => {
-        retriedRef.current = false;
-      }}
-      className={frameClassName}
-    />
+    <SavedVideoPlayer s3Key={form.savedS3Key} youtubeId={form.savedYoutubeId} />
   );
 }
 
@@ -100,14 +53,7 @@ export default function VideoCard({ form }: VideoCardProps) {
 
   return (
     <Card className={panelClassName}>
-      <CardHeader className="flex items-center gap-4 px-5">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-lightest-yellow">
-          <Video className="size-5 text-charcoal" strokeWidth={1.75} />
-        </div>
-        <CardTitle className="font-jakarta text-lg font-medium text-charcoal">
-          Video
-        </CardTitle>
-      </CardHeader>
+      <CardIconHeader icon={Video} title="Video" />
 
       <CardContent className="flex flex-col gap-6 px-5">
         <input

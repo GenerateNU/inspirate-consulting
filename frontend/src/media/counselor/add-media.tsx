@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 import MediaEditor from "./media-editor";
-import MediaPageFrame from "./media-page-frame";
+import MediaPageFrame from "../shared/media-page-frame";
 
 // "Create Module": the same form as editing a module, starting empty
 export default function AddMedia() {

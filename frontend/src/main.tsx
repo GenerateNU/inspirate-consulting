@@ -24,7 +24,8 @@ import Counselor from "./counselor/counselor";
 import CounselorStudents from "./counselor/counselor-students";
 import PendingReviews from "./counselor/pending-reviews";
 import Layout from "./layout/layout";
-import StudentMediaList from "./media/student-media-list";
+import StudentMediaList from "./media/student/media-list";
+import StudentMediaDetails from "./media/student/media-details";
 import CounselorMediaList from "./media/counselor/media-list";
 import CounselorMediaDetails from "./media/counselor/media-details";
 import CounselorAddMedia from "./media/counselor/add-media";
@@ -124,6 +125,10 @@ createRoot(document.getElementById("root")!).render(
               <Route
                 path="/student-media-list"
                 element={<StudentMediaList />}
+              />
+              <Route
+                path="/student-media-list/:id"
+                element={<StudentMediaDetails />}
               />
               <Route
                 path="/counselor-media-list"

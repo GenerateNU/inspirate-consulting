@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 interface MediaHeaderProps {
   title: string;
   onBack: () => void;
-  // the page's button on the right, e.g. Publish or Save
+  // shown right after the title, e.g. the student's status badge
+  badge?: ReactNode;
+  // the page's button on the right, e.g. Publish, Save, or Mark as Complete
   action?: ReactNode;
 }
 
@@ -14,6 +16,7 @@ interface MediaHeaderProps {
 export default function MediaHeader({
   title,
   onBack,
+  badge,
   action,
 }: MediaHeaderProps) {
   return (
@@ -35,6 +38,7 @@ export default function MediaHeader({
         <h1 className="min-w-0 truncate font-jakarta text-2xl leading-[normal] font-bold text-charcoal">
           {title}
         </h1>
+        {badge}
       </div>
       {action}
     </div>

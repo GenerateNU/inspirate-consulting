@@ -8,3 +8,5 @@ export const fieldClassName =
 export const panelClassName =
   "gap-6 rounded-lg border-cream bg-white py-5 shadow-card";
 export const labelClassName = "font-host text-xs font-normal text-charcoal";
+export const videoFrameClassName =
+  "aspect-video w-full rounded-lg bg-greyish-brown";
