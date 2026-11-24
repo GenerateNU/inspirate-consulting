@@ -25,18 +25,23 @@ import (
 var stubStudentID = uuid.MustParse("00000000-0000-0000-0000-000000000002")
 
 // setupEssayTestApp creates a Fiber app in test mode with a mocked essay repository.
-func setupEssayTestApp(mockEssay data.EssayRepository) (*fiber.App, error) {
-	return setupEssayTestAppWithGroups(mockEssay, nil)
+func setupEssayTestApp(mockEssay data.EssayRepository, mockActivity ...data.ActivityRepository) (*fiber.App, error) {
+	return setupEssayTestAppWithGroups(mockEssay, nil, mockActivity...)
 }
 
-// setupEssayTestAppWithGroups creates a Fiber app in test mode with mocked essay and essay group repositories.
-func setupEssayTestAppWithGroups(mockEssay data.EssayRepository, mockEssayGroup data.EssayGroupRepository) (*fiber.App, error) {
+// setupEssayTestAppWithGroups creates a Fiber app in test mode with mocked
+// essay and essay group repositories. Tests that don't reach the
+// activity-logging call can omit mockActivity.
+func setupEssayTestAppWithGroups(mockEssay data.EssayRepository, mockEssayGroup data.EssayGroupRepository, mockActivity ...data.ActivityRepository) (*fiber.App, error) {
 	cfg := config.Config{
 		TestMode: true,
 	}
 	repo := &data.Repository{
 		Essay:      mockEssay,
 		EssayGroup: mockEssayGroup,
+	}
+	if len(mockActivity) > 0 {
+		repo.Activity = mockActivity[0]
 	}
 	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
@@ -208,7 +213,10 @@ func TestRoute_UpdateEssayStatus(t *testing.T) {
 			Status: models.Submitted,
 		}, nil)
 
-		app, err := setupEssayTestApp(mockRepo)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		app, err := setupEssayTestApp(mockRepo, mockActivityRepo)
 		require.NoError(t, err)
 
 		// Send valid JSON payload

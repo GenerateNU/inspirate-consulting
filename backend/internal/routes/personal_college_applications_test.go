@@ -29,6 +29,7 @@ func intPtr(i int) *int { return &i }
 func setupTestAppWithPersonalCollegeApplication(
 	mockPersonalRepo data.PersonalCollegeApplicationRepository,
 	mockGlobalCollegeRepo data.GlobalCollegeRepository,
+	mockActivityRepo data.ActivityRepository,
 ) (*fiber.App, error) {
 	cfg := config.Config{
 		TestMode: true,
@@ -36,6 +37,7 @@ func setupTestAppWithPersonalCollegeApplication(
 	repo := &data.Repository{
 		PersonalCollegeApplication: mockPersonalRepo,
 		GlobalCollege:              mockGlobalCollegeRepo,
+		Activity:                   mockActivityRepo,
 	}
 	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
@@ -67,7 +69,10 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 			return in.GlobalCollegeID == 1 && in.ApplicationType == "ED" && in.Category == "reach"
 		})).Return(expectedApplication, nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, mock.Anything).Return(nil)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo, mockActivityRepo)
 		require.NoError(t, err)
 
 		payload := map[string]any{
@@ -113,7 +118,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// CreatePersonalCollegeApplication will not be called.
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		payload := map[string]any{
@@ -145,7 +150,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		payload := map[string]any{
@@ -175,7 +180,7 @@ func TestRoute_CreatePersonalCollegeApplication(t *testing.T) {
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// Huma will reject the request before reaching the handler
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		payload := map[string]any{
@@ -215,7 +220,7 @@ func TestRoute_ListPersonalCollegeApplications(t *testing.T) {
 				{ID: 2, GlobalCollegeID: 2, ApplicationType: "EA", Category: "target"},
 			}, nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		req, err := http.NewRequest(http.MethodGet, "/applications", nil)
@@ -245,7 +250,7 @@ func TestRoute_ListPersonalCollegeApplications(t *testing.T) {
 		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return([]models.PersonalCollegeApplication{}, nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPersonalRepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		req, err := http.NewRequest(http.MethodGet, "/applications", nil)
@@ -286,7 +291,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo.On("UpdatePersonalCollegeApplication", mock.Anything, studentID, int64(42), mock.Anything).
 			Return(&models.PersonalCollegeApplication{ID: 42, GlobalCollegeID: 1, ApplicationType: "RD", Category: "safety"}, nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		payload := map[string]any{"global_college_id": 1, "application_type": "RD", "category": "safety", "application_status": "not_started"}
@@ -311,7 +316,7 @@ func TestRoute_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, mockGlobalCollegeRepo, nil)
 		require.NoError(t, err)
 
 		payload := map[string]any{"global_college_id": 1, "application_type": "BOGUS", "category": "safety", "application_status": "not_started"}
@@ -343,7 +348,7 @@ func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, int64(42), intPtr(1)).
 			Return([]models.PersonalCollegeApplication{{ID: 42, Rank: intPtr(1)}}, nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil, nil)
 		require.NoError(t, err)
 
 		bodyBytes, err := json.Marshal(map[string]any{"rank": 1})
@@ -374,7 +379,7 @@ func TestRoute_UpdatePersonalCollegeApplicationRank(t *testing.T) {
 		mockPCARepo.On("UpdateApplicationRank", mock.Anything, studentID, int64(42), (*int)(nil)).
 			Return([]models.PersonalCollegeApplication{{ID: 42, Rank: nil}}, nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil, nil)
 		require.NoError(t, err)
 
 		bodyBytes, err := json.Marshal(map[string]any{"rank": nil})
@@ -402,9 +407,12 @@ func TestRoute_DeletePersonalCollegeApplication(t *testing.T) {
 		t.Parallel()
 
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
-		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, studentID, int64(42)).Return(nil)
+		mockPCARepo.On("DeletePersonalCollegeApplication", mock.Anything, studentID, int64(42)).Return(int64(7), nil)
 
-		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, mock.Anything).Return(nil)
+
+		app, err := setupTestAppWithPersonalCollegeApplication(mockPCARepo, nil, mockActivityRepo)
 		require.NoError(t, err)
 
 		req, err := http.NewRequest(http.MethodDelete, "/applications/42", nil)

@@ -45,7 +45,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		groupRepo.On("GetEssayGroupStudentID", mock.Anything, groupID).Return(studentID, nil)
 		essayRepo.On("UpdateEssayGroup", mock.Anything, essayID, &groupID).Return(updatedEssay, nil)
 
-		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo)
+		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(studentRoleCtx(studentID), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},
@@ -72,7 +72,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		essayRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(studentID, nil)
 		essayRepo.On("UpdateEssayGroup", mock.Anything, essayID, (*uuid.UUID)(nil)).Return(updatedEssay, nil)
 
-		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo)
+		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(studentRoleCtx(studentID), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: nil},
@@ -90,7 +90,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		groupRepo := mocks.NewEssayGroupRepository(t)
 		essayRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(uuid.New(), nil)
 
-		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo)
+		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(studentRoleCtx(studentID), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},
@@ -109,7 +109,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		essayRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(studentID, nil)
 		groupRepo.On("GetEssayGroupStudentID", mock.Anything, groupID).Return(uuid.New(), nil)
 
-		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo)
+		handler := NewHandler(essayRepo, realAuthorizer(), groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(studentRoleCtx(studentID), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},
@@ -128,7 +128,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		essayRepo.On("GetEssayStudentID", mock.Anything, essayID).
 			Return(uuid.Nil, errs.NotFound("essay", "id", essayID.String()))
 
-		handler := NewHandler(essayRepo, nil, groupRepo)
+		handler := NewHandler(essayRepo, nil, groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(context.Background(), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},
@@ -147,7 +147,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		groupRepo.On("GetEssayGroupStudentID", mock.Anything, groupID).
 			Return(uuid.Nil, errs.NotFound("group", "id", groupID.String()))
 
-		handler := NewHandler(essayRepo, nil, groupRepo)
+		handler := NewHandler(essayRepo, nil, groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(context.Background(), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},
@@ -168,7 +168,7 @@ func TestHandler_UpdateEssayGroup(t *testing.T) {
 		essayRepo.On("UpdateEssayGroup", mock.Anything, essayID, &groupID).
 			Return((*models.Essays)(nil), errors.New("database error"))
 
-		handler := NewHandler(essayRepo, nil, groupRepo)
+		handler := NewHandler(essayRepo, nil, groupRepo, nil)
 		res, err := handler.UpdateEssayGroup(context.Background(), &models.UpdateEssayGroupInput{
 			EssayID: essayID,
 			Body:    models.UpdateEssayGroupBody{EssayGroupID: &groupID},

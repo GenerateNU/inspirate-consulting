@@ -49,7 +49,7 @@ func TestHandler_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		mockPCARepo.On("UpdatePersonalCollegeApplication", mock.Anything, studentID, applicationID, input).Return(expected, nil)
 
-		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplication(ctx, applicationID, input)
 
 		assert.NoError(t, err)
@@ -77,7 +77,7 @@ func TestHandler_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// UpdatePersonalCollegeApplication should NOT be called : validation should fail first.
 
-		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplication(ctx, applicationID, input)
 
 		assert.Error(t, err)
@@ -99,7 +99,7 @@ func TestHandler_UpdatePersonalCollegeApplication(t *testing.T) {
 
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 
-		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplication(ctx, applicationID, input)
 
 		assert.Error(t, err)
@@ -127,7 +127,7 @@ func TestHandler_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo.On("UpdatePersonalCollegeApplication", mock.Anything, studentID, applicationID, input).
 			Return(nil, errors.New("personal college application not found"))
 
-		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplication(ctx, applicationID, input)
 
 		assert.Error(t, err)
@@ -154,7 +154,7 @@ func TestHandler_UpdatePersonalCollegeApplication(t *testing.T) {
 		mockPCARepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// UpdatePersonalCollegeApplication is not called without a student id
 
-		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPCARepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.UpdatePersonalCollegeApplication(context.Background(), applicationID, input)
 
 		assert.ErrorIs(t, err, auth.ErrNoStudentID)

@@ -46,7 +46,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(detail, nil)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).GetExtracurricular(studentRoleCtx(ownerID), id)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).GetExtracurricular(studentRoleCtx(ownerID), id)
 
 		require.NoError(t, err)
 		assert.Equal(t, detail, res)
@@ -60,7 +60,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(detail, nil)
 
-		res, err := NewHandler(mockRepo, nil).GetExtracurricular(context.Background(), id)
+		res, err := NewHandler(mockRepo, nil, nil).GetExtracurricular(context.Background(), id)
 
 		require.NoError(t, err)
 		assert.Equal(t, detail, res)
@@ -72,7 +72,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(detail, nil)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).GetExtracurricular(studentRoleCtx(uuid.New()), id)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).GetExtracurricular(studentRoleCtx(uuid.New()), id)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -86,7 +86,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(detail, nil)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).GetExtracurricular(context.Background(), id)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).GetExtracurricular(context.Background(), id)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -101,7 +101,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(nil, notFound)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).GetExtracurricular(studentRoleCtx(ownerID), id)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).GetExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.Nil(t, res)
 		assert.Equal(t, notFound, err)
@@ -114,7 +114,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(bad, nil)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).GetExtracurricular(studentRoleCtx(ownerID), id)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).GetExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.Nil(t, res)
 		assert.Error(t, err)
@@ -126,7 +126,7 @@ func TestHandler_GetExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(nil, errors.New("database error"))
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).GetExtracurricular(studentRoleCtx(ownerID), id)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).GetExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")

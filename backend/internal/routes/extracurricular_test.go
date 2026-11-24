@@ -20,10 +20,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// setupExtracurricularTestApp creates a Fiber app in test mode with a mocked extracurricular repository.
-func setupExtracurricularTestApp(mockRepo data.ExtracurricularRepository) (*fiber.App, error) {
+// setupExtracurricularTestApp creates a Fiber app in test mode with a mocked
+// extracurricular repository. Tests that don't reach the activity-logging
+// call can omit mockActivityRepo.
+func setupExtracurricularTestApp(mockRepo data.ExtracurricularRepository, mockActivityRepo ...data.ActivityRepository) (*fiber.App, error) {
 	cfg := config.Config{TestMode: true}
 	repo := &data.Repository{Extracurricular: mockRepo}
+	if len(mockActivityRepo) > 0 {
+		repo.Activity = mockActivityRepo[0]
+	}
 	app, _, err := SetupApp(cfg, repo, nil, nil)
 	return app, err
 }
@@ -99,7 +104,10 @@ func TestRoute_CreateExtracurricular(t *testing.T) {
 			ApplicationDescription: extracurricularPtr("Led the team to a state title."),
 		}}, nil)
 
-		app, err := setupExtracurricularTestApp(mockRepo)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		app, err := setupExtracurricularTestApp(mockRepo, mockActivityRepo)
 		require.NoError(t, err)
 
 		resp, body := doRequest(t, app, http.MethodPost, "/extracurriculars", validCreatePayload(), headers)
@@ -127,7 +135,10 @@ func TestRoute_CreateExtracurricular(t *testing.T) {
 				b.Goals == nil && b.ReadyForApplication == nil && b.ApplicationDescription == nil
 		})).Return(&models.CreateExtracurricularOutput{Body: models.Extracurricular{ID: 2, Name: "Chess"}}, nil)
 
-		app, err := setupExtracurricularTestApp(mockRepo)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		app, err := setupExtracurricularTestApp(mockRepo, mockActivityRepo)
 		require.NoError(t, err)
 
 		resp, body := doRequest(t, app, http.MethodPost, "/extracurriculars", minimalCreatePayload())
@@ -153,7 +164,10 @@ func TestRoute_CreateExtracurricular(t *testing.T) {
 			mockRepo.On("CreateExtracurricular", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 				Return(&models.CreateExtracurricularOutput{}, nil)
 
-			app, err := setupExtracurricularTestApp(mockRepo)
+			mockActivityRepo := mocks.NewActivityRepository(t)
+			mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+			app, err := setupExtracurricularTestApp(mockRepo, mockActivityRepo)
 			require.NoError(t, err)
 
 			payload := minimalCreatePayload()
@@ -633,7 +647,10 @@ func TestRoute_DeleteExtracurricular(t *testing.T) {
 		}, nil)
 		mockRepo.On("DeleteExtracurricular", mock.Anything, int64(5), ownerID).Return(nil)
 
-		app, err := setupExtracurricularTestApp(mockRepo)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		app, err := setupExtracurricularTestApp(mockRepo, mockActivityRepo)
 		require.NoError(t, err)
 
 		resp, body := doRequest(t, app, http.MethodDelete, "/extracurriculars/5", nil, map[string]string{"X-Student-ID": ownerID})

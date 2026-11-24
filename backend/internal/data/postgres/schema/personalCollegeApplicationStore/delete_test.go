@@ -29,9 +29,12 @@ func TestDeletePersonalCollegeApplication(t *testing.T) {
 		t.Fatalf("setup CreatePersonalCollegeApplication failed: %v", err)
 	}
 
-	err = repo.DeletePersonalCollegeApplication(ctx, studentID, created.ID)
+	deletedCollegeID, err := repo.DeletePersonalCollegeApplication(ctx, studentID, created.ID)
 	if err != nil {
 		t.Fatalf("DeletePersonalCollegeApplication failed: %v", err)
+	}
+	if deletedCollegeID != collegeID {
+		t.Errorf("expected returned college id %d, got %d", collegeID, deletedCollegeID)
 	}
 
 	results, err := repo.ListPersonalCollegeApplicationsByStudentID(ctx, studentID)
@@ -52,7 +55,7 @@ func TestDeletePersonalCollegeApplication_NotFound(t *testing.T) {
 	repo := NewPersonalCollegeApplicationRepository(db)
 	ctx := context.Background()
 
-	err := repo.DeletePersonalCollegeApplication(ctx, uuid.MustParse("00000000-0000-0000-0000-000000000012"), 999999)
+	_, err := repo.DeletePersonalCollegeApplication(ctx, uuid.MustParse("00000000-0000-0000-0000-000000000012"), 999999)
 	if err == nil {
 		t.Fatal("expected an error deleting a nonexistent application, got nil")
 	}
@@ -79,7 +82,7 @@ func TestDeletePersonalCollegeApplication_WrongStudentFails(t *testing.T) {
 	}
 
 	// Attempting to delete another student's application should fail
-	err = repo.DeletePersonalCollegeApplication(ctx, otherStudentID, created.ID)
+	_, err = repo.DeletePersonalCollegeApplication(ctx, otherStudentID, created.ID)
 	if err == nil {
 		t.Fatal("expected an error deleting another student's application, got nil")
 	}

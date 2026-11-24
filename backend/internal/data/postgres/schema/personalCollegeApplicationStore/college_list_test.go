@@ -226,7 +226,7 @@ func TestDeletePersonalCollegeApplication_RemovesCollegeEssays(t *testing.T) {
 		t.Fatalf("failed to add review transaction: %v", err)
 	}
 
-	if err := repo.DeletePersonalCollegeApplication(ctx, studentID, app.ID); err != nil {
+	if _, err := repo.DeletePersonalCollegeApplication(ctx, studentID, app.ID); err != nil {
 		t.Fatalf("DeletePersonalCollegeApplication failed: %v", err)
 	}
 
@@ -265,7 +265,7 @@ func TestDeletePersonalCollegeApplication_KeepsEssaysWhenCollegeStillListed(t *t
 	}
 	essay := addTestEssay(t, db, studentID, &collegeID, "Draft")
 
-	if err := repo.DeletePersonalCollegeApplication(ctx, studentID, first.ID); err != nil {
+	if _, err := repo.DeletePersonalCollegeApplication(ctx, studentID, first.ID); err != nil {
 		t.Fatalf("DeletePersonalCollegeApplication failed: %v", err)
 	}
 	if ok, _ := essayExists(t, db, essay); !ok {
@@ -300,7 +300,7 @@ func TestDeletePersonalCollegeApplication_ClosesRankGap(t *testing.T) {
 		ids[i] = app.ID
 	}
 
-	if err := repo.DeletePersonalCollegeApplication(ctx, studentID, ids[0]); err != nil {
+	if _, err := repo.DeletePersonalCollegeApplication(ctx, studentID, ids[0]); err != nil {
 		t.Fatalf("DeletePersonalCollegeApplication failed: %v", err)
 	}
 

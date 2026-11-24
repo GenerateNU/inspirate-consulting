@@ -51,7 +51,51 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, studentID, input).
 			Return(expectedApplication, nil)
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, models.CreateActivityBody{
+			Action:          models.ActionAddedSchool,
+			GlobalCollegeID: &expectedApplication.GlobalCollegeID,
+		}).Return(nil)
+
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, mockActivityRepo)
+		res, err := handler.CreatePersonalCollegeApplication(ctx, input)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectedApplication, res)
+	})
+
+	t.Run("activity logging error is swallowed", func(t *testing.T) {
+		t.Parallel()
+
+		input := models.CreatePersonalCollegeApplicationRequestBody{
+			GlobalCollegeID: 1,
+			ApplicationType: "ED",
+			Category:        "reach",
+		}
+		college := &models.GlobalCollege{
+			ID:         1,
+			SchoolName: "Northeastern University",
+			Cycles:     []models.CollegeApplicationCycle{{Cycle: "ED", Deadline: &edDeadline}},
+		}
+		expectedApplication := &models.PersonalCollegeApplication{
+			ID:              1,
+			GlobalCollegeID: 1,
+			ApplicationType: "ED",
+			Category:        "reach",
+		}
+
+		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
+		mockGlobalCollegeRepo.On("GetGlobalCollege", mock.Anything, int64(1)).Return(college, nil)
+
+		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
+		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, studentID, input).
+			Return(expectedApplication, nil)
+
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, mock.Anything).
+			Return(errors.New("activity write failed"))
+
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, mockActivityRepo)
 		res, err := handler.CreatePersonalCollegeApplication(ctx, input)
 
 		assert.NoError(t, err)
@@ -79,7 +123,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// CreatePersonalCollegeApplication is not called if the requested deadline is invalid
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.CreatePersonalCollegeApplication(ctx, input)
 
 		assert.Error(t, err)
@@ -101,7 +145,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.CreatePersonalCollegeApplication(ctx, input)
 
 		assert.Error(t, err)
@@ -123,7 +167,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.CreatePersonalCollegeApplication(ctx, input)
 
 		assert.Error(t, err)
@@ -148,7 +192,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		mockPersonalRepo.On("CreatePersonalCollegeApplication", mock.Anything, studentID, input).
 			Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.CreatePersonalCollegeApplication(ctx, input)
 
 		assert.Error(t, err)
@@ -172,7 +216,7 @@ func TestHandler_CreatePersonalCollegeApplication(t *testing.T) {
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// CreatePersonalCollegeApplication is not called without a student id
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.CreatePersonalCollegeApplication(context.Background(), input)
 
 		assert.ErrorIs(t, err, auth.ErrNoStudentID)

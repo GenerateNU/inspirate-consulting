@@ -52,7 +52,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(expected, nil)
 
-		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+		res, err := NewHandler(mockRepo, nil, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, res)
@@ -72,7 +72,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 			return in.Body.ReadyForApplication != nil && !*in.Body.ReadyForApplication
 		})).Return(&models.Extracurricular{ID: id}, nil)
 
-		_, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+		_, err := NewHandler(mockRepo, nil, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
 		require.NoError(t, err)
 	})
 
@@ -84,7 +84,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(&models.Extracurricular{ID: id}, nil)
 
-		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+		res, err := NewHandler(mockRepo, nil, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, id, res.ID)
@@ -98,7 +98,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(&models.Extracurricular{ID: id}, nil)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).UpdateExtracurricular(studentRoleCtx(studentID), id, input)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).UpdateExtracurricular(studentRoleCtx(studentID), id, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, id, res.ID)
@@ -111,7 +111,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).UpdateExtracurricular(studentRoleCtx(uuid.New()), id, input)
+		res, err := NewHandler(mockRepo, realAuthorizer(), nil).UpdateExtracurricular(studentRoleCtx(uuid.New()), id, input)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -127,7 +127,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(uuid.Nil, pgx.ErrNoRows)
 		input := &models.UpdateExtracurricularInput{ID: id, Body: models.UpdateExtracurricularRequest{Goals: models.NewNullable("x")}}
 
-		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+		res, err := NewHandler(mockRepo, nil, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
 
 		assert.Nil(t, res)
 		assert.ErrorIs(t, err, pgx.ErrNoRows)
@@ -142,7 +142,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(nil, pgx.ErrNoRows)
 
-		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+		res, err := NewHandler(mockRepo, nil, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
 
 		assert.Nil(t, res)
 		assert.ErrorIs(t, err, pgx.ErrNoRows)
@@ -156,7 +156,7 @@ func TestHandler_UpdateExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricularStudentID", mock.Anything, id).Return(studentID, nil)
 		mockRepo.On("UpdateExtracurricular", mock.Anything, id, *input).Return(nil, errors.New("database error"))
 
-		res, err := NewHandler(mockRepo, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
+		res, err := NewHandler(mockRepo, nil, nil).UpdateExtracurricular(studentCtx(studentID, userID), id, input)
 
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")
