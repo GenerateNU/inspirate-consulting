@@ -57,7 +57,7 @@ export default function TaskDrawer({ task, onClose }: TaskDrawerProps) {
               </p>
             </SheetHeader>
 
-            <SheetDescription className="px-4 pt-3 font-host text-xs leading-[1.5] whitespace-pre-line text-warm-grey-dark">
+            <SheetDescription className="px-4 pt-3 font-host text-xs leading-normal whitespace-pre-line text-warm-grey-dark">
               {task.todo_description || "No description."}
             </SheetDescription>
 

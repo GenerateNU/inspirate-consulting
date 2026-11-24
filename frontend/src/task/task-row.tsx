@@ -47,7 +47,7 @@ export default function TaskRow({
             <div
               aria-hidden="true"
               className={cn(
-                "absolute top-[-1px] bottom-[-1px] left-[-1px] w-1",
+                "absolute -top-px -bottom-px -left-px w-1",
                 style?.accentClassName ?? UNLINKED_ACCENT_CLASS_NAME,
               )}
             />
