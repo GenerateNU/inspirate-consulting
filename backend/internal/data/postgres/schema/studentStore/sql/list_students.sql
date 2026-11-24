@@ -1,4 +1,4 @@
-SELECT s.id, s.user_id, u.name, u.pfp_key, s.year, s.organization, s.gpa, s.review_balance, s.counselor_id
+SELECT s.id, s.user_id, u.name, u.pfp_key, s.graduation_year, s.organization, s.gpa, s.review_balance, s.counselor_id
 FROM public.student AS s
 JOIN public.users AS u
 ON s.user_id = u.id

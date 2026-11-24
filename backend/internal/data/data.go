@@ -5,6 +5,7 @@ import (
 	"time"
 
 	dbinterface "inspirate-consulting/internal/data/db-interface"
+	activityRepository "inspirate-consulting/internal/data/postgres/schema/activityStore"
 	chatMessageRepository "inspirate-consulting/internal/data/postgres/schema/chatMessageStore"
 	counselorRepository "inspirate-consulting/internal/data/postgres/schema/counselorStore"
 	essayGroupRepository "inspirate-consulting/internal/data/postgres/schema/essayGroupsStore"
@@ -21,6 +22,7 @@ import (
 	studentRepository "inspirate-consulting/internal/data/postgres/schema/studentStore"
 	todoItemRepository "inspirate-consulting/internal/data/postgres/schema/todoItemStore"
 	userRepository "inspirate-consulting/internal/data/postgres/schema/userStore"
+	vectorRepository "inspirate-consulting/internal/data/postgres/schema/vectorStore"
 	"inspirate-consulting/internal/models"
 	"inspirate-consulting/internal/pagination"
 
@@ -29,6 +31,11 @@ import (
 )
 
 // For each schema, their interfaces are to be defined here
+type ActivityRepository interface {
+	CreateActivity(ctx context.Context, studentID uuid.UUID, body models.CreateActivityBody) error
+	GetActivitiesForCounselor(ctx context.Context, counselorID uuid.UUID, studentID *uuid.UUID) ([]models.Activity, error)
+}
+
 type GreetingRepository interface {
 	CreateGreeting(ctx context.Context, greeting models.CreateGreetingInput) (*models.CreateGreetingOutput, error)
 }
@@ -54,7 +61,7 @@ type ExtracurricularRepository interface {
 type EssayRepository interface {
 	UpdateStatus(ctx context.Context, essayID uuid.UUID, status models.Status) (*models.Essays, error)
 	UpdateEssayGroup(ctx context.Context, essayID uuid.UUID, essayGroupID *uuid.UUID) (*models.Essays, error)
-	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error)
+	GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID, input models.GetEssaysFromStudentFilter) ([]models.Essays, error)
 	GetEssaysByGroup(ctx context.Context, essayGroupID uuid.UUID) ([]models.Essays, error)
 	CreateEssay(ctx context.Context, studentID uuid.UUID, essay models.CreateEssayBody) error
 	GetEssay(ctx context.Context, essayID uuid.UUID) (*models.Essays, error)
@@ -77,6 +84,11 @@ type TodoItemRepository interface {
 	DeleteTodoItem(ctx context.Context, id string) error
 	UpdateTodoItemDescription(ctx context.Context, id string, newDescription string) (*models.TodoItem, error)
 	UpdateTodoItemDeadline(ctx context.Context, id string, newDeadline *time.Time) (*models.TodoItem, error)
+	GetTodoItemStudentID(ctx context.Context, todoItemID string) (uuid.UUID, error)
+	BulkCreateTodoItems(ctx context.Context, p models.BulkCreateTodoItemsParams) (uuid.UUID, []models.TodoItem, error)
+	UpdateTodoAssignment(ctx context.Context, p models.UpdateTodoAssignmentParams) ([]models.TodoItem, error)
+	UpdateTodoItemTitle(ctx context.Context, id string, title string) (*models.TodoItem, error)
+	UpdateTodoItemLink(ctx context.Context, id string, link models.TodoItemLink) (*models.TodoItem, error)
 }
 
 // To represent the Notification Log schema
@@ -111,6 +123,7 @@ type CounselorRepository interface {
 	ListPendingReviews(ctx context.Context, counselorID uuid.UUID) ([]models.PendingReview, error)
 	ListStudents(ctx context.Context, counselorID uuid.UUID) ([]models.CounselorStudentRow, error)
 	ListFallingBehindStudentIDs(ctx context.Context, counselorID uuid.UUID) ([]uuid.UUID, error)
+	GetCounselor(ctx context.Context, id uuid.UUID) (*models.Counselor, error)
 	UpdateCounselor(ctx context.Context, id uuid.UUID, input models.UpdateCounselorBody) (*models.Counselor, error)
 	ListCounselors(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.CounselorListItem, error)
 }
@@ -123,16 +136,28 @@ type UserRepository interface {
 	FetchSessionUserBySupabaseID(ctx context.Context, supabaseID uuid.UUID) (*models.SessionUser, error)
 	UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error
 	UpdateUser(ctx context.Context, id uuid.UUID, input models.UpdateUserBody) (*models.User, error)
+	// sets pfp_key (nil clears it) and returns the updated user and the key it replaced
+	SetPfpKey(ctx context.Context, id uuid.UUID, pfpKey *string) (*models.User, *string, error)
 }
 
 // To represent the methods for interacting with AWS S3 for presigned URLs for uploading and viewing videos
 // Get and List generate fresh presigned URLs to avoid expiration issues
 type VideoRepository interface {
 	// generates a unique S3 key and a presigned PUT URL for a new video upload.
-	PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error)
+	PresignUpload(ctx context.Context, input models.PresignUploadRequestBody) (*models.PresignUploadResponse, error)
 	GetVideo(ctx context.Context, s3Key string) (*models.Video, error)
 	ListVideos(ctx context.Context) ([]models.Video, error)
 	DeleteVideo(ctx context.Context, s3Key string) error
+}
+
+// To represent the methods for interacting with AWS S3 for profile pictures
+// Upload, verify, and delete are scoped to one user's own pfps/{userID}/ keys
+type PfpRepository interface {
+	// generates a unique key under the user's prefix and a presigned PUT URL for it.
+	PresignUpload(ctx context.Context, userID uuid.UUID, input models.PresignPfpUploadRequestBody) (*models.PresignUploadResponse, error)
+	VerifyUpload(ctx context.Context, userID uuid.UUID, s3Key string) error
+	GetDownloadURL(ctx context.Context, s3Key string) (string, error)
+	DeletePfp(ctx context.Context, userID uuid.UUID, s3Key string) error
 }
 
 type MediaRepository interface {
@@ -188,13 +213,29 @@ type StudentRepository interface {
 	GetStudent(ctx context.Context, id uuid.UUID) (*models.Student, error)
 	UpdateStudent(ctx context.Context, id uuid.UUID, input models.UpdateStudentBody) (*models.Student, error)
 	ListStudents(ctx context.Context, name *string, after *pagination.NameIDKey, limit int, threshold float64) ([]models.StudentListItem, error)
-	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID uuid.UUID) (*models.Student, error)
+	AssignCounselor(ctx context.Context, studentUserID uuid.UUID, counselorID *uuid.UUID) (*models.Student, error)
+	GetStudentIDByUserID(ctx context.Context, userID uuid.UUID) (uuid.UUID, error)
+}
+
+// To represent similarity search over vector_table (vectors are written by the embed-vectors edge function)
+type VectorRepository interface {
+	SearchChatMessages(ctx context.Context, queryEmbedding []float32, userID uuid.UUID, limit int) ([]models.ChatMessageSearchResult, error)
+	SearchTodoItems(ctx context.Context, queryEmbedding []float32, studentIDs []uuid.UUID, limit int) ([]models.TodoItemSearchResult, error)
+}
+
+// Cloudflare client
+type EmbeddingClient interface {
+	// embed stored content for comparison against search prompts
+	Embed(ctx context.Context, text string) ([]float32, error)
+	// embed search prompts for comparison against stored content
+	EmbedQuery(ctx context.Context, query string) ([]float32, error)
 }
 
 type Repository struct {
 	db *pgxpool.Pool
 
 	// For each interface, add a field here
+	Activity                   ActivityRepository
 	Greeting                   GreetingRepository
 	Extracurricular            ExtracurricularRepository
 	Essay                      EssayRepository
@@ -208,10 +249,14 @@ type Repository struct {
 	MediaAccess                MediaAccessRepository
 	User                       UserRepository
 	Video                      VideoRepository
+	Pfp                        PfpRepository
 	EssayReview                EssayReviewRepository
 	NotificationPreferences    NotificationPreferencesRepository
 	NotificationLog            NotificationLogRepository
 	Student                    StudentRepository
+	Vector                     VectorRepository
+	// set in InitApp only when Cloudflare is configured; nil disables similarity search
+	Embedding EmbeddingClient
 }
 
 // Close closes the database connection pool
@@ -229,6 +274,7 @@ func (r *Repository) GetDB() *pgxpool.Pool {
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db:                         db,
+		Activity:                   activityRepository.NewActivityRepository(db),
 		Greeting:                   greetingRepository.NewGreetingRepository(db),
 		Extracurricular:            extracurricularRepository.NewExtracurricularRepository(db),
 		Essay:                      essayRepository.NewEssayRepository(db),
@@ -245,5 +291,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 		NotificationLog:            notificationLogRepository.NewNotificationLogRepository(db),
 		Counselor:                  counselorRepository.NewCounselorRepository(db),
 		Student:                    studentRepository.NewStudentRepository(db),
+		Vector:                     vectorRepository.NewVectorRepository(db),
 	}
 }

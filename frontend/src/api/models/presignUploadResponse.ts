@@ -11,6 +11,6 @@ export interface PresignUploadResponse {
   readonly $schema?: string;
   /** The S3 key/path to store elsewhere, e.g. in a media table */
   s3_key: string;
-  /** A presigned URL the client PUTs the raw video bytes to */
+  /** A presigned URL the client PUTs the raw file bytes to */
   upload_url: string;
 }

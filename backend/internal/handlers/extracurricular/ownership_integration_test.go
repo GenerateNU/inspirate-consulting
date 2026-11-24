@@ -48,7 +48,7 @@ func setupOwnershipFixture(t *testing.T) ownershipFixture {
 	insertStudent := func(counselorID uuid.UUID) uuid.UUID {
 		var id uuid.UUID
 		require.NoError(t, db.QueryRow(ctx,
-			`INSERT INTO student (user_id, year, gpa, review_balance, counselor_id) VALUES ($1, 'senior', 4, 0, $2) RETURNING id`,
+			`INSERT INTO student (user_id, graduation_year, gpa, review_balance, counselor_id) VALUES ($1, 2027, 4, 0, $2) RETURNING id`,
 			insertUser(), counselorID).Scan(&id))
 		return id
 	}

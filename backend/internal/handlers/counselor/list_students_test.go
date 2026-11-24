@@ -23,16 +23,16 @@ var (
 )
 
 // roster for testing
-// Alice (junior): pending review
-// Bob (senior): falling behind
-// Carol (freshman): neither
-// Dave (sophomore): pending review and falling behind
+// Alice (2028): pending review
+// Bob (2027): falling behind
+// Carol (2030): neither
+// Dave (2029): pending review and falling behind
 func testRoster() []models.CounselorStudentRow {
 	return []models.CounselorStudentRow{
-		{StudentID: daveID, Name: "Dave", Year: models.Sophomore},
-		{StudentID: aliceID, Name: "Alice", Year: models.Junior},
-		{StudentID: carolID, Name: "Carol", Year: models.Freshman},
-		{StudentID: bobID, Name: "Bob", Year: models.Senior},
+		{StudentID: daveID, Name: "Dave", GraduationYear: 2029},
+		{StudentID: aliceID, Name: "Alice", GraduationYear: 2028},
+		{StudentID: carolID, Name: "Carol", GraduationYear: 2030},
+		{StudentID: bobID, Name: "Bob", GraduationYear: 2027},
 	}
 }
 
@@ -95,18 +95,18 @@ func TestHandler_ListStudents(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, []models.CounselorStudent{
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: aliceID, Name: "Alice", Year: models.Junior}, IsFallingBehind: false, HasPendingReview: true},
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: bobID, Name: "Bob", Year: models.Senior}, IsFallingBehind: true, HasPendingReview: false},
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: carolID, Name: "Carol", Year: models.Freshman}, IsFallingBehind: false, HasPendingReview: false},
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: daveID, Name: "Dave", Year: models.Sophomore}, IsFallingBehind: true, HasPendingReview: true},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: aliceID, Name: "Alice", GraduationYear: 2028}, IsFallingBehind: false, HasPendingReview: true},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: bobID, Name: "Bob", GraduationYear: 2027}, IsFallingBehind: true, HasPendingReview: false},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: carolID, Name: "Carol", GraduationYear: 2030}, IsFallingBehind: false, HasPendingReview: false},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: daveID, Name: "Dave", GraduationYear: 2029}, IsFallingBehind: true, HasPendingReview: true},
 		}, res)
 	})
 
-	t.Run("filters by year", func(t *testing.T) {
+	t.Run("filters by graduation year", func(t *testing.T) {
 		t.Parallel()
 
 		handler := NewHandler(newTestRepo(t, ctx))
-		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{Year: models.Junior, SortBy: "name", SortOrder: "asc"})
+		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{GraduationYear: 2028, SortBy: "name", SortOrder: "asc"})
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{"Alice"}, names(res))
@@ -126,7 +126,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		t.Parallel()
 
 		handler := NewHandler(newTestRepo(t, ctx))
-		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{Year: models.Sophomore, HasPendingReview: true, SortBy: "name", SortOrder: "asc"})
+		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{GraduationYear: 2029, HasPendingReview: true, SortBy: "name", SortOrder: "asc"})
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{"Dave"}, names(res))
@@ -136,7 +136,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		t.Parallel()
 
 		handler := NewHandler(newTestRepo(t, ctx))
-		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{Year: models.Senior, HasPendingReview: true, SortBy: "name", SortOrder: "asc"})
+		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{GraduationYear: 2027, HasPendingReview: true, SortBy: "name", SortOrder: "asc"})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, res)
@@ -153,34 +153,34 @@ func TestHandler_ListStudents(t *testing.T) {
 		assert.Equal(t, []string{"Dave", "Carol", "Bob", "Alice"}, names(res))
 	})
 
-	t.Run("sorts by year from freshman to senior, not alphabetically", func(t *testing.T) {
+	t.Run("sorts by graduation year, earliest first", func(t *testing.T) {
 		t.Parallel()
 
 		handler := NewHandler(newTestRepo(t, ctx))
-		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{SortBy: "year", SortOrder: "asc"})
-
-		assert.NoError(t, err)
-		assert.Equal(t, []string{"Carol", "Dave", "Alice", "Bob"}, names(res))
-	})
-
-	t.Run("sorts by year desc", func(t *testing.T) {
-		t.Parallel()
-
-		handler := NewHandler(newTestRepo(t, ctx))
-		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{SortBy: "year", SortOrder: "desc"})
+		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{SortBy: "graduation_year", SortOrder: "asc"})
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{"Bob", "Alice", "Dave", "Carol"}, names(res))
 	})
 
-	t.Run("year ties fall back to name, then student id", func(t *testing.T) {
+	t.Run("sorts by graduation year desc", func(t *testing.T) {
+		t.Parallel()
+
+		handler := NewHandler(newTestRepo(t, ctx))
+		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{SortBy: "graduation_year", SortOrder: "desc"})
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{"Carol", "Dave", "Alice", "Bob"}, names(res))
+	})
+
+	t.Run("graduation year ties fall back to name, then student id", func(t *testing.T) {
 		t.Parallel()
 
 		sameNameID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
 		roster := []models.CounselorStudentRow{
-			{StudentID: bobID, Name: "Zoe", Year: models.Junior},
-			{StudentID: aliceID, Name: "Amy", Year: models.Junior},
-			{StudentID: sameNameID, Name: "Zoe", Year: models.Junior},
+			{StudentID: bobID, Name: "Zoe", GraduationYear: 2028},
+			{StudentID: aliceID, Name: "Amy", GraduationYear: 2028},
+			{StudentID: sameNameID, Name: "Zoe", GraduationYear: 2028},
 		}
 
 		mockRepo := mocks.NewCounselorRepository(t)
@@ -189,7 +189,7 @@ func TestHandler_ListStudents(t *testing.T) {
 		mockRepo.On("ListFallingBehindStudentIDs", ctx, counselorID).Return([]uuid.UUID{}, nil)
 
 		handler := NewHandler(mockRepo)
-		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{SortBy: "year", SortOrder: "asc"})
+		res, err := handler.ListStudents(ctx, models.ListCounselorStudentsInput{SortBy: "graduation_year", SortOrder: "asc"})
 
 		assert.NoError(t, err)
 		assert.Equal(t, []uuid.UUID{aliceID, sameNameID, bobID}, []uuid.UUID{res[0].StudentID, res[1].StudentID, res[2].StudentID})

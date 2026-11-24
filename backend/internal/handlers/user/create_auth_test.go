@@ -26,10 +26,10 @@ func createInput(name, email string, role models.Role) *models.CreateUserInput {
 	in.Body.Email = email
 	in.Body.Role = role
 	if role == models.StudentRole {
-		year := models.Senior
-		gpa := 4
+		year := 2027
+		gpa := 3.85
 		counselorID := uuid.New()
-		in.Body.Year = &year
+		in.Body.GraduationYear = &year
 		in.Body.GPA = &gpa
 		in.Body.CounselorID = &counselorID
 	}
@@ -58,7 +58,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 			repo.On("CreateUser", mock.Anything, *in, supabaseID).
 				Return(&models.CreateUserOutput{Body: &models.CreateUserBody{User: &models.User{Name: "New User"}}}, nil).Once()
 
-			out, err := NewHandler(repo, testSQSClient()).CreateUser(ctx, in, sb)
+			out, err := NewHandler(repo, testSQSClient(), nil).CreateUser(ctx, in, sb)
 			require.NoError(t, err)
 
 			assert.Equal(t, "New User", out.Body.User.Name)
@@ -71,7 +71,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 	}
 
 	missingFields := map[string]func(in *models.CreateUserInput){
-		"year":         func(in *models.CreateUserInput) { in.Body.Year = nil },
+		"year":         func(in *models.CreateUserInput) { in.Body.GraduationYear = nil },
 		"gpa":          func(in *models.CreateUserInput) { in.Body.GPA = nil },
 		"counselor_id": func(in *models.CreateUserInput) { in.Body.CounselorID = nil },
 	}
@@ -90,9 +90,9 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 			in := createInput("X", "x@example.com", models.StudentRole)
 			clear(in)
 
-			out, err := NewHandler(repo, nil).CreateUser(ctx, in, sb)
+			out, err := NewHandler(repo, nil, nil).CreateUser(ctx, in, sb)
 			assert.Nil(t, out)
-			assert.Equal(t, errs.BadRequest("year, gpa, and counselor_id are required for students"), err)
+			assert.Equal(t, errs.BadRequest("graduation_year, gpa, and counselor_id are required for students"), err)
 			assert.False(t, signedUp, "no Supabase account should be created for an invalid request")
 		})
 	}
@@ -106,7 +106,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 		}
 		repo := mocks.NewUserRepository(t) // CreateUser must not be called
 
-		out, err := NewHandler(repo, testSQSClient()).CreateUser(ctx, createInput("X", "x@example.com", models.StudentRole), sb)
+		out, err := NewHandler(repo, testSQSClient(), nil).CreateUser(ctx, createInput("X", "x@example.com", models.StudentRole), sb)
 		assert.Nil(t, out)
 		assert.EqualError(t, err, "email already registered")
 	})
@@ -116,7 +116,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 		repo := mocks.NewUserRepository(t)
 		repo.On("CreateUser", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("db down"))
 
-		out, err := NewHandler(repo, testSQSClient()).CreateUser(ctx, createInput("X", "x@example.com", models.StudentRole), &supabase.MockSupabase{})
+		out, err := NewHandler(repo, testSQSClient(), nil).CreateUser(ctx, createInput("X", "x@example.com", models.StudentRole), &supabase.MockSupabase{})
 		assert.Nil(t, out)
 		assert.EqualError(t, err, "db down")
 	})

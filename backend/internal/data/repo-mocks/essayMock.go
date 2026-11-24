@@ -143,9 +143,9 @@ func (_m *EssayRepository) GetEssaysByGroup(ctx context.Context, essayGroupID uu
 	return r0, r1
 }
 
-// GetEssaysFromStudent provides a mock function with given fields: ctx, studentID
-func (_m *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID) ([]models.Essays, error) {
-	ret := _m.Called(ctx, studentID)
+// GetEssaysFromStudent provides a mock function with given fields: ctx, studentID, input
+func (_m *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID uuid.UUID, input models.GetEssaysFromStudentFilter) ([]models.Essays, error) {
+	ret := _m.Called(ctx, studentID, input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetEssaysFromStudent")
@@ -153,19 +153,19 @@ func (_m *EssayRepository) GetEssaysFromStudent(ctx context.Context, studentID u
 
 	var r0 []models.Essays
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) ([]models.Essays, error)); ok {
-		return rf(ctx, studentID)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.GetEssaysFromStudentFilter) ([]models.Essays, error)); ok {
+		return rf(ctx, studentID, input)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) []models.Essays); ok {
-		r0 = rf(ctx, studentID)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, models.GetEssaysFromStudentFilter) []models.Essays); ok {
+		r0 = rf(ctx, studentID, input)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.Essays)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
-		r1 = rf(ctx, studentID)
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, models.GetEssaysFromStudentFilter) error); ok {
+		r1 = rf(ctx, studentID, input)
 	} else {
 		r1 = ret.Error(1)
 	}

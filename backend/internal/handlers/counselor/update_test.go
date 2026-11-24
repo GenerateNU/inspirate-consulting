@@ -3,6 +3,7 @@ package counselor
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +17,10 @@ import (
 func TestHandler_UpdateCounselor(t *testing.T) {
 	t.Parallel()
 
-	input := models.UpdateCounselorBody{}
+	input := models.UpdateCounselorBody{
+		CustomLink: models.NewNullable("https://example.com/counselor"),
+		ExpiresAt:  models.Null[time.Time](),
+	}
 
 	t.Run("updates the logged-in counselor", func(t *testing.T) {
 		t.Parallel()

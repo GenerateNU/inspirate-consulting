@@ -93,9 +93,9 @@ func (_m *VideoRepository) ListVideos(ctx context.Context) ([]models.Video, erro
 	return r0, r1
 }
 
-// PresignUpload provides a mock function with given fields: ctx, originalFilename
-func (_m *VideoRepository) PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error) {
-	ret := _m.Called(ctx, originalFilename)
+// PresignUpload provides a mock function with given fields: ctx, input
+func (_m *VideoRepository) PresignUpload(ctx context.Context, input models.PresignUploadRequestBody) (*models.PresignUploadResponse, error) {
+	ret := _m.Called(ctx, input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PresignUpload")
@@ -103,19 +103,19 @@ func (_m *VideoRepository) PresignUpload(ctx context.Context, originalFilename s
 
 	var r0 *models.PresignUploadResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*models.PresignUploadResponse, error)); ok {
-		return rf(ctx, originalFilename)
+	if rf, ok := ret.Get(0).(func(context.Context, models.PresignUploadRequestBody) (*models.PresignUploadResponse, error)); ok {
+		return rf(ctx, input)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *models.PresignUploadResponse); ok {
-		r0 = rf(ctx, originalFilename)
+	if rf, ok := ret.Get(0).(func(context.Context, models.PresignUploadRequestBody) *models.PresignUploadResponse); ok {
+		r0 = rf(ctx, input)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.PresignUploadResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, originalFilename)
+	if rf, ok := ret.Get(1).(func(context.Context, models.PresignUploadRequestBody) error); ok {
+		r1 = rf(ctx, input)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -24,6 +24,7 @@ func TestUpdateTodoItemCompletedAt(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Submit the FAFSA",
+		Title:           "Test task",
 		Deadline:        &deadline,
 	}
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
@@ -93,6 +94,7 @@ func TestUpdateTodoItemCompletedAt_Clear(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Completed by mistake",
+		Title:           "Test task",
 	}
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
 	if err != nil {
@@ -145,6 +147,7 @@ func TestUpdateTodoItemDescription(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Submit the FAFSA",
+		Title:           "Test task",
 		Deadline:        &deadline,
 	}
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
@@ -229,6 +232,7 @@ func TestUpdateTodoItemDeadline(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Submit the FAFSA",
+		Title:           "Test task",
 		Deadline:        &deadline,
 	}
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)
@@ -300,6 +304,7 @@ func TestUpdateTodoItemDeadline_Clear(t *testing.T) {
 
 	input := models.CreateTodoItemRequestBody{
 		TodoDescription: "Deadline set by mistake",
+		Title:           "Test task",
 		Deadline:        &deadline,
 	}
 	created, err := repo.CreateTodoItem(ctx, uuid.NewString(), uuid.NewString(), input)

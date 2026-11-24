@@ -8,9 +8,11 @@ import (
 	"inspirate-consulting/internal/data"
 	"inspirate-consulting/internal/data/aws"
 	"inspirate-consulting/internal/data/aws/sqsclient"
+	"inspirate-consulting/internal/data/cloudflare/embeddingclient"
 	"inspirate-consulting/internal/data/postgres"
 	"inspirate-consulting/internal/errs"
 	"inspirate-consulting/internal/models"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -41,6 +43,15 @@ func InitApp(config config.Config) (*App, error) {
 
 	// Assign the AWS repositories to the main repository
 	repo.Video = awsRepo.Video
+	repo.Pfp = awsRepo.Pfp
+
+	// Similarity search is optional: without Cloudflare credentials, repo.Embedding stays nil
+	embeddingClient, err := embeddingclient.NewEmbeddingClient(config.Cloudflare.AccountID, config.Cloudflare.APIToken)
+	if err != nil {
+		slog.Warn("similarity search disabled: Cloudflare credentials not set")
+	} else {
+		repo.Embedding = embeddingClient
+	}
 
 	app, humaAPI, err := SetupApp(config, repo, sqsClient, accountSQSClient)
 	if err != nil {
@@ -158,6 +169,7 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetUpPersonalCollegeApplicationRoutes(api, repo, verifyRole, authorizer)
 	SetupUserRoutes(api, repo, &config, verifyRole, accountSQSClient)
 	SetUpVideoRoutes(api, repo, verifyRole)
+	SetUpPfpRoutes(api, repo, verifyRole)
 	SetUpMediaRoutes(api, repo, verifyRole)
 	SetUpMediaAccessRoutes(api, repo, verifyRole, authorizer)
 	SetUpEssayReviewRoutes(api, repo, verifyRole, authorizer)
@@ -169,6 +181,8 @@ func setupProtectedHumaRoutes(api huma.API, repo *data.Repository, sqsClient *sq
 	SetupLogoutRoutes(api, repo, &config)
 	SetupResetPasswordRoutes(api, repo, &config, verifyRole, accountSQSClient)
 	SetUpCounselorRoutes(api, repo, verifyRole)
-	SetUpLLMRoutes(api, &config, verifyRole)
+	SetUpLLMRoutes(api, repo, &config, verifyRole)
+	SetUpActivityRoutes(api, repo, verifyRole)
+
 	return nil
 }

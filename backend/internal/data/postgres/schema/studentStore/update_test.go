@@ -22,15 +22,15 @@ func TestUpdateStudent(t *testing.T) {
 
 	counselorID := createTestCounselor(t, db)
 	created := createTestStudent(t, db, models.Student{
-		UserID:        createTestUser(t, db, "Updatable Student"),
-		Year:          models.Freshman,
-		GPA:           3,
-		ReviewBalance: 2,
-		CounselorID:   &counselorID,
+		UserID:         createTestUser(t, db, "Updatable Student"),
+		GraduationYear: 2030,
+		GPA:            3,
+		ReviewBalance:  2,
+		CounselorID:    &counselorID,
 	})
 
-	year := models.Sophomore
-	gpa := 4
+	year := 2029
+	gpa := 3.85
 	organization := "Robotics"
 	interest := "Engineering"
 	highSchool := "Brookline High School"
@@ -40,7 +40,7 @@ func TestUpdateStudent(t *testing.T) {
 	geoPrefs := "Northeast"
 
 	updated, err := repo.UpdateStudent(ctx, created.ID, models.UpdateStudentBody{
-		Year:                  &year,
+		GraduationYear:        &year,
 		GPA:                   &gpa,
 		Organization:          &organization,
 		Interest:              &interest,
@@ -54,11 +54,11 @@ func TestUpdateStudent(t *testing.T) {
 		t.Fatalf("UpdateStudent failed: %v", err)
 	}
 
-	if updated.Year != year {
-		t.Errorf("expected Year %q, got %q", year, updated.Year)
+	if updated.GraduationYear != year {
+		t.Errorf("expected GraduationYear %d, got %d", year, updated.GraduationYear)
 	}
 	if updated.GPA != gpa {
-		t.Errorf("expected GPA %d, got %d", gpa, updated.GPA)
+		t.Errorf("expected GPA %v, got %v", gpa, updated.GPA)
 	}
 	if updated.Organization == nil || *updated.Organization != organization {
 		t.Errorf("expected Organization %q, got %v", organization, updated.Organization)
@@ -103,25 +103,25 @@ func TestUpdateStudent_Partial(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	organization := "Debate Club"
 	created := createTestStudent(t, db, models.Student{
-		UserID:        createTestUser(t, db, "Partly Updated Student"),
-		Year:          models.Junior,
-		Organization:  &organization,
-		GPA:           3,
-		ReviewBalance: 0,
-		CounselorID:   &counselorID,
+		UserID:         createTestUser(t, db, "Partly Updated Student"),
+		GraduationYear: 2028,
+		Organization:   &organization,
+		GPA:            3,
+		ReviewBalance:  0,
+		CounselorID:    &counselorID,
 	})
 
-	gpa := 4
+	gpa := 3.85
 	updated, err := repo.UpdateStudent(ctx, created.ID, models.UpdateStudentBody{GPA: &gpa})
 	if err != nil {
 		t.Fatalf("UpdateStudent failed: %v", err)
 	}
 
 	if updated.GPA != gpa {
-		t.Errorf("expected GPA %d, got %d", gpa, updated.GPA)
+		t.Errorf("expected GPA %v, got %v", gpa, updated.GPA)
 	}
-	if updated.Year != created.Year {
-		t.Errorf("expected Year %q to be unchanged, got %q", created.Year, updated.Year)
+	if updated.GraduationYear != created.GraduationYear {
+		t.Errorf("expected Year %q to be unchanged, got %q", created.GraduationYear, updated.GraduationYear)
 	}
 	if updated.Organization == nil || *updated.Organization != organization {
 		t.Errorf("expected Organization %q to be unchanged, got %v", organization, updated.Organization)
@@ -137,7 +137,7 @@ func TestUpdateStudent_NotFound(t *testing.T) {
 	repo, _ := setupTestRepo(t)
 	ctx := context.Background()
 
-	gpa := 4
+	gpa := 3.85
 	_, err := repo.UpdateStudent(ctx, uuid.New(), models.UpdateStudentBody{GPA: &gpa})
 	if err == nil {
 		t.Fatal("expected error updating non-existent student, got nil")

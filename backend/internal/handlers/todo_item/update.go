@@ -8,11 +8,21 @@ import (
 )
 
 func (h *Handler) UpdateTodoItemCompletedAt(ctx context.Context, id string, completed bool) (*models.TodoItem, error) {
+	studentID, err := h.TodoItemRepository.GetTodoItemStudentID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := h.Authorizer.CanAccessStudent(ctx, studentID); err != nil {
+		return nil, err
+	}
+
 	var completedAt *time.Time
 	if completed {
 		now := time.Now()
 		completedAt = &now
 	}
+
 	updatedItem, err := h.TodoItemRepository.UpdateTodoItemCompletedAt(ctx, id, completedAt)
 	if err != nil {
 		return nil, err

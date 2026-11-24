@@ -7,8 +7,7 @@ import (
 )
 
 func (r *VideoRepository) ListVideos(ctx context.Context) ([]models.Video, error) {
-	// get the object keys from the S3 bucket
-	keys, err := r.s3.ListObjectKeys(ctx)
+	keys, err := r.s3.ListObjectKeys(ctx, videoPrefix)
 	if err != nil {
 		return nil, err
 	}

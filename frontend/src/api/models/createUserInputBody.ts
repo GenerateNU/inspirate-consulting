@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { CreateUserInputBodyRole } from './createUserInputBodyRole';
-import type { CreateUserInputBodyYear } from './createUserInputBodyYear';
 
 export interface CreateUserInputBody {
   /** A URL to the JSON Schema for this object. */
@@ -17,8 +16,18 @@ export interface CreateUserInputBody {
   email: string;
   /** when the account expires; omit for no expiration */
   expires_at?: string;
-  /** gpa of the student; required when role is student */
+  /**
+     * gpa of the student; required when role is student
+     * @minimum 0
+     * @maximum 5
+     */
   gpa?: number;
+  /**
+     * year the student graduates high school; required when role is student
+     * @minimum 2000
+     * @maximum 2100
+     */
+  graduation_year?: number;
   /**
      * Name of the user
      * @minLength 1
@@ -27,15 +36,8 @@ export interface CreateUserInputBody {
   name: string;
   /** organization of the student */
   organization?: string;
-  /**
-     * pfp key of user
-     * @nullable
-     */
-  pfp_key: string | null;
   /** the type of user the counselor would like to create */
   role: CreateUserInputBodyRole;
   /** interest of the student */
   student_interest?: string;
-  /** year of the student; required when role is student */
-  year?: CreateUserInputBodyYear;
 }

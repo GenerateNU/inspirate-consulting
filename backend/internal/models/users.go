@@ -6,16 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// enum type for year of student
-type Year string
-
-const (
-	Freshman  Year = "freshman"
-	Sophomore Year = "sophomore"
-	Junior    Year = "junior"
-	Senior    Year = "senior"
-)
-
 // type of role a counselor can create when making a user
 type Role string
 
@@ -37,10 +27,10 @@ type User struct {
 type Student struct {
 	ID                    uuid.UUID  `json:"id"`
 	UserID                uuid.UUID  `json:"user_id"`
-	Year                  Year       `json:"year"`
+	GraduationYear        int        `json:"graduation_year"`
 	Interest              *string    `json:"student_interest"`
 	Organization          *string    `json:"organization"`
-	GPA                   int        `json:"gpa"`
+	GPA                   float64    `json:"gpa"`
 	ReviewBalance         int        `json:"review_balance"`
 	CounselorID           *uuid.UUID `json:"counselor_id"`
 	HighSchool            *string    `json:"high_school"`
@@ -51,23 +41,24 @@ type Student struct {
 }
 
 type Counselor struct {
-	ID     uuid.UUID `json:"id"`
-	UserID uuid.UUID `json:"user_id"`
+	ID         uuid.UUID  `json:"id"`
+	UserID     uuid.UUID  `json:"user_id"`
+	CustomLink *string    `json:"custom_link"`
+	ExpiresAt  *time.Time `json:"expires_at"`
 }
 
 type CreateUserInput struct {
 	Body struct {
 		Name      string     `json:"name" db:"name" doc:"Name of the user" minLength:"1" maxLength:"200"`
-		PfpKey    *string    `json:"pfp_key" db:"pfp_key" doc:"pfp key of user"`
 		Email     string     `json:"email" doc:"email of user for supabase signup"`
 		Role      Role       `json:"role" enum:"student,counselor" doc:"the type of user the counselor would like to create"`
 		ExpiresAt *time.Time `json:"expires_at,omitempty" required:"false" doc:"when the account expires; omit for no expiration"`
 		// student profile fields, only used when role is student
-		Year         *Year      `json:"year,omitempty" required:"false" enum:"freshman,sophomore,junior,senior" doc:"year of the student; required when role is student"`
-		GPA          *int       `json:"gpa,omitempty" required:"false" doc:"gpa of the student; required when role is student"`
-		Organization *string    `json:"organization,omitempty" required:"false" doc:"organization of the student"`
-		Interest     *string    `json:"student_interest,omitempty" required:"false" doc:"interest of the student"`
-		CounselorID  *uuid.UUID `json:"counselor_id,omitempty" required:"false" doc:"counselor the student is assigned to; required when role is student"`
+		GraduationYear *int       `json:"graduation_year,omitempty" required:"false" minimum:"2000" maximum:"2100" doc:"year the student graduates high school; required when role is student"`
+		GPA            *float64   `json:"gpa,omitempty" required:"false" minimum:"0" maximum:"5" doc:"gpa of the student; required when role is student"`
+		Organization   *string    `json:"organization,omitempty" required:"false" doc:"organization of the student"`
+		Interest       *string    `json:"student_interest,omitempty" required:"false" doc:"interest of the student"`
+		CounselorID    *uuid.UUID `json:"counselor_id,omitempty" required:"false" doc:"counselor the student is assigned to; required when role is student"`
 	}
 }
 
@@ -91,9 +82,9 @@ type FetchUserOutput struct {
 	Body *User `json:"body"`
 }
 
+// pfp_key is changed only through /user/pfp, which checks the key belongs to the user
 type UpdateUserBody struct {
-	Name   *string `json:"name,omitempty" required:"false" minLength:"1" maxLength:"200" doc:"Name of the user"`
-	PfpKey *string `json:"pfp_key,omitempty" required:"false" doc:"pfp key of user"`
+	Name *string `json:"name,omitempty" required:"false" minLength:"1" maxLength:"200" doc:"Name of the user"`
 }
 
 // user id is derived from session, users can only edit themselves
@@ -124,15 +115,15 @@ type FetchStudentsOutput struct {
 }
 
 type StudentListItem struct {
-	ID            uuid.UUID  `json:"id"`
-	UserID        uuid.UUID  `json:"user_id"`
-	Name          string     `json:"name"`
-	PfpKey        *string    `json:"pfp_key"`
-	Year          Year       `json:"year"`
-	Organization  *string    `json:"organization"`
-	GPA           int        `json:"gpa"`
-	ReviewBalance int        `json:"review_balance"`
-	CounselorID   *uuid.UUID `json:"counselor_id"`
+	ID             uuid.UUID  `json:"id"`
+	UserID         uuid.UUID  `json:"user_id"`
+	Name           string     `json:"name"`
+	PfpKey         *string    `json:"pfp_key"`
+	GraduationYear int        `json:"graduation_year"`
+	Organization   *string    `json:"organization"`
+	GPA            float64    `json:"gpa"`
+	ReviewBalance  int        `json:"review_balance"`
+	CounselorID    *uuid.UUID `json:"counselor_id"`
 }
 
 type FetchStudentsBody struct {
@@ -165,8 +156,8 @@ type FetchCounselorsBody struct {
 
 type AssignCounselorInput struct {
 	Body struct {
-		CounselorID uuid.UUID `json:"counselor_id" db:"counselor_id" doc:"id of the counselor to assign"`
-		UserID      uuid.UUID `json:"user_id" db:"user_id" doc:"user id of the student being assigned"`
+		CounselorID *uuid.UUID `json:"counselor_id" db:"counselor_id" nullable:"true" doc:"id of the counselor to assign"`
+		UserID      uuid.UUID  `json:"user_id" db:"user_id" doc:"user id of the student being assigned"`
 	}
 }
 
@@ -174,8 +165,18 @@ type AssignCounselorOutput struct {
 	Body Student
 }
 
-type CurrentUser struct {
+// A user as shown on their profile, with a link to their picture
+type UserProfile struct {
 	User
+	PfpURL *string `json:"pfp_url" doc:"Presigned, time-limited URL for the user's profile picture, null when they have none"`
+}
+
+type FetchUserProfileOutput struct {
+	Body *UserProfile
+}
+
+type CurrentUser struct {
+	UserProfile
 	Role        Role       `json:"role" enum:"student,counselor" doc:"Role of the logged-in user"`
 	StudentID   *uuid.UUID `json:"student_id" doc:"Student profile ID, null unless the user is a student"`
 	CounselorID *uuid.UUID `json:"counselor_id" doc:"Counselor profile ID, null unless the user is a counselor"`

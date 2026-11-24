@@ -77,8 +77,8 @@ func TestFetchSessionUserBySupabaseID_Student(t *testing.T) {
 	userID := createSessionTestUser(t, db, "Session Student", supabaseID)
 	var studentID uuid.UUID
 	if err := db.QueryRow(ctx,
-		`INSERT INTO public.student (user_id, year, gpa, review_balance, counselor_id)
-		 VALUES ($1, 'junior', 4, 0, $2) RETURNING id`, userID, counselorID).Scan(&studentID); err != nil {
+		`INSERT INTO public.student (user_id, graduation_year, gpa, review_balance, counselor_id)
+		 VALUES ($1, 2028, 4, 0, $2) RETURNING id`, userID, counselorID).Scan(&studentID); err != nil {
 		t.Fatalf("failed to create test student: %v", err)
 	}
 

@@ -25,20 +25,20 @@ func TestListFallingBehindStudentIDs(t *testing.T) {
 	past := time.Now().Add(-24 * time.Hour)
 	future := time.Now().Add(24 * time.Hour)
 
-	behind := createTestStudent(t, db, counselorID, "Behind", "junior")
+	behind := createTestStudent(t, db, counselorID, "Behind", 2028)
 	createTestTodoItem(t, db, behind, &past, nil)
 	createTestTodoItem(t, db, behind, &past, nil)
 
 	// overdue but completed, not yet due, and no deadline should not count
-	completed := createTestStudent(t, db, counselorID, "Completed", "junior")
+	completed := createTestStudent(t, db, counselorID, "Completed", 2028)
 	createTestTodoItem(t, db, completed, &past, &past)
-	notDue := createTestStudent(t, db, counselorID, "Not Due", "junior")
+	notDue := createTestStudent(t, db, counselorID, "Not Due", 2028)
 	createTestTodoItem(t, db, notDue, &future, nil)
-	noDeadline := createTestStudent(t, db, counselorID, "No Deadline", "junior")
+	noDeadline := createTestStudent(t, db, counselorID, "No Deadline", 2028)
 	createTestTodoItem(t, db, noDeadline, nil, nil)
 
 	// another counselor's student who is behind should not show up
-	otherStudent := createTestStudent(t, db, otherCounselorID, "Other", "senior")
+	otherStudent := createTestStudent(t, db, otherCounselorID, "Other", 2027)
 	createTestTodoItem(t, db, otherStudent, &past, nil)
 
 	results, err := repo.ListFallingBehindStudentIDs(ctx, counselorID)

@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { errorMessage } from "../api/client";
+import {
+  graduationYearLabel,
+  graduationYearOptions,
+} from "@/lib/graduation-year";
 import { useListCounselorStudents } from "../api/endpoints";
 import {
-  ListCounselorStudentsYear as Year,
   ListCounselorStudentsSortBy as SortBy,
   ListCounselorStudentsSortOrder as SortOrder,
   type CounselorStudent,
@@ -12,7 +15,7 @@ import {
 
 export default function CounselorStudents() {
   // Filters and sorting are sent as query params, so changing them refetches the list
-  const [year, setYear] = useState<Year | "">("");
+  const [graduationYear, setGraduationYear] = useState<number | "">("");
   const [pendingReviewOnly, setPendingReviewOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>(SortBy.name);
   const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.asc);
@@ -22,7 +25,7 @@ export default function CounselorStudents() {
     error,
     isLoading,
   } = useListCounselorStudents({
-    year: year || undefined,
+    graduation_year: graduationYear || undefined,
     has_pending_review: pendingReviewOnly || undefined,
     sort_by: sortBy,
     sort_order: sortOrder,
@@ -36,15 +39,19 @@ export default function CounselorStudents() {
 
       <div className="form-group">
         <label>
-          Year:{" "}
+          Graduation year:{" "}
           <select
-            value={year}
-            onChange={(e) => setYear(e.target.value as typeof year)}
+            value={graduationYear}
+            onChange={(e) =>
+              setGraduationYear(
+                e.target.value === "" ? "" : Number(e.target.value),
+              )
+            }
           >
             <option value="">All years</option>
-            {Object.values(Year).map((y) => (
-              <option key={y} value={y}>
-                {y}
+            {graduationYearOptions().map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
               </option>
             ))}
           </select>
@@ -68,7 +75,7 @@ export default function CounselorStudents() {
           >
             {Object.values(SortBy).map((field) => (
               <option key={field} value={field}>
-                {field}
+                {field.replace("_", " ")}
               </option>
             ))}
           </select>
@@ -98,12 +105,16 @@ export default function CounselorStudents() {
             >
               {student.name}
             </strong>{" "}
-            · {student.year}
+            · {graduationYearLabel(student.graduation_year)}
             {student.has_pending_review && " · Review requested"}
             {student.is_falling_behind && " · Falling behind"}
             {" · "}
             <Link to={`/counselor/students/${student.student_id}/essays`}>
               Essays
+            </Link>
+            {" · "}
+            <Link to={`/counselor/students/${student.student_id}/colleges`}>
+              Colleges
             </Link>
           </li>
         ))}

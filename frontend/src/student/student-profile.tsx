@@ -1,7 +1,7 @@
 // name, grade, highschool, major of interest, tasks completed
 import { useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser, useGetTodoItems } from "../api/endpoints";
-import { gradeByYear } from "../lib/constants";
+import { graduationYearLabel } from "../lib/graduation-year";
 
 export default function StudentProfile() {
   const { id = "" } = useParams();
@@ -52,7 +52,7 @@ export default function StudentProfile() {
       <h2>Student Profile</h2>
       <ul>
         <li>Name: {user?.name ?? "Unknown"}</li>
-        <li>Grade: {gradeByYear[student.year] ?? student.year}</li>
+        <li>Graduation Year: {graduationYearLabel(student.graduation_year)}</li>
         <li>High School: {student.organization ?? "Not set"}</li>
         <li>Major of Interest: {student.student_interest ?? "Not set"}</li>
         <li>

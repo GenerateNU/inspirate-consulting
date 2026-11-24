@@ -17,7 +17,7 @@ import (
 func studentRows(names ...string) []models.StudentListItem {
 	rows := make([]models.StudentListItem, len(names))
 	for i, name := range names {
-		rows[i] = models.StudentListItem{ID: uuid.New(), UserID: uuid.New(), Name: name, Year: models.Junior}
+		rows[i] = models.StudentListItem{ID: uuid.New(), UserID: uuid.New(), Name: name, GraduationYear: 2028}
 	}
 	return rows
 }

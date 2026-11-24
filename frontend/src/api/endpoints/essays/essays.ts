@@ -29,6 +29,7 @@ import type {
   ErrorModel,
   EssayBody,
   EssayListBody,
+  GetEssaysFromStudentParams,
   UpdateEssayGroupBody,
   UpdateStatusBody
 } from '../../models';
@@ -570,20 +571,29 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       > => {
       return useMutation(getUpdateEssayStatusMutationOptions(options), queryClient);
     }
-    export const getGetEssaysFromStudentUrl = (studentId: string,) => {
+    export const getGetEssaysFromStudentUrl = (studentId: string,
+    params?: GetEssaysFromStudentParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/students/${studentId}/essays`
+  return stringifiedParams.length > 0 ? `/api/students/${studentId}/essays?${stringifiedParams}` : `/api/students/${studentId}/essays`
 }
 
 /**
  * Shows all essays of a student
  */
-export const getEssaysFromStudent = async (studentId: string, options?: RequestInit): Promise<EssayListBody> => {
+export const getEssaysFromStudent = async (studentId: string,
+    params?: GetEssaysFromStudentParams, options?: RequestInit): Promise<EssayListBody> => {
 
-  const res = await fetch(getGetEssaysFromStudentUrl(studentId),
+  const res = await fetch(getGetEssaysFromStudentUrl(studentId,params),
   {
     ...options,
     method: 'GET'
@@ -610,23 +620,25 @@ export const getEssaysFromStudent = async (studentId: string, options?: RequestI
 
 
 
-export const getGetEssaysFromStudentQueryKey = (studentId: string,) => {
+export const getGetEssaysFromStudentQueryKey = (studentId: string,
+    params?: GetEssaysFromStudentParams,) => {
     return [
-    `/api/students/${studentId}/essays`
+    `/api/students/${studentId}/essays`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetEssaysFromStudentQueryOptions = <TData = Awaited<ReturnType<typeof getEssaysFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>>, fetch?: RequestInit}
+export const getGetEssaysFromStudentQueryOptions = <TData = Awaited<ReturnType<typeof getEssaysFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(studentId: string,
+    params?: GetEssaysFromStudentParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetEssaysFromStudentQueryKey(studentId);
+  const queryKey =  queryOptions?.queryKey ?? getGetEssaysFromStudentQueryKey(studentId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEssaysFromStudent>>> = ({ signal }) => getEssaysFromStudent(studentId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEssaysFromStudent>>> = ({ signal }) => getEssaysFromStudent(studentId,params, { signal, ...fetchOptions });
 
 
 
@@ -640,7 +652,8 @@ export type GetEssaysFromStudentQueryError = globalThis.Error & { info?: ErrorMo
 
 
 export function useGetEssaysFromStudent<TData = Awaited<ReturnType<typeof getEssaysFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
- studentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>> & Pick<
+ studentId: string,
+    params: undefined |  GetEssaysFromStudentParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEssaysFromStudent>>,
           TError,
@@ -650,7 +663,8 @@ export function useGetEssaysFromStudent<TData = Awaited<ReturnType<typeof getEss
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEssaysFromStudent<TData = Awaited<ReturnType<typeof getEssaysFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
- studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>> & Pick<
+ studentId: string,
+    params?: GetEssaysFromStudentParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEssaysFromStudent>>,
           TError,
@@ -660,16 +674,18 @@ export function useGetEssaysFromStudent<TData = Awaited<ReturnType<typeof getEss
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEssaysFromStudent<TData = Awaited<ReturnType<typeof getEssaysFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
- studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>>, fetch?: RequestInit}
+ studentId: string,
+    params?: GetEssaysFromStudentParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetEssaysFromStudent<TData = Awaited<ReturnType<typeof getEssaysFromStudent>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
- studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>>, fetch?: RequestInit}
+ studentId: string,
+    params?: GetEssaysFromStudentParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssaysFromStudent>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetEssaysFromStudentQueryOptions(studentId,options)
+  const queryOptions = getGetEssaysFromStudentQueryOptions(studentId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

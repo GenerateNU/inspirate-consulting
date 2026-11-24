@@ -5,15 +5,24 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
-import type { UpdateStudentBodyYear } from './updateStudentBodyYear';
 
 export interface UpdateStudentBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   /** Geographic preferences for colleges */
   geographic_preferences?: string;
-  /** GPA of the student */
+  /**
+     * GPA of the student
+     * @minimum 0
+     * @maximum 5
+     */
   gpa?: number;
+  /**
+     * Year the student graduates high school
+     * @minimum 2000
+     * @maximum 2100
+     */
+  graduation_year?: number;
   /** High school the student attends */
   high_school?: string;
   /** Intended major of the student */
@@ -26,6 +35,4 @@ export interface UpdateStudentBody {
   standardized_test_score?: string;
   /** Interest of the student */
   student_interest?: string;
-  /** School year of the student */
-  year?: UpdateStudentBodyYear;
 }

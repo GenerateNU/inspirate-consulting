@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./api/client";
 import "./index.css";
@@ -13,9 +13,10 @@ import EditExtracurricular from "./extracurricular/EditExtracurricular";
 import Essay from "./essays/essays";
 import CounselorCollegeList from "./college/counselor/college-list.tsx";
 import CounselorCollegeDetails from "./college/counselor/college-details.tsx";
-import StudentCollegeList from "./college/student/college-list.tsx";
-import StudentCollegeDetails from "./college/student/college-details.tsx";
+import CounselorAddCollege from "./college/counselor/add-college.tsx";
+import CounselorStudentCollegeList from "./college/counselor/student-college-list.tsx";
 import MyCollegeList from "./college/student/my-college-list";
+import SchoolDetails from "./college/student/school-details";
 import UploadVideo from "./video/upload-video";
 import VideoList from "./video/videos";
 import Student from "./student/student";
@@ -44,6 +45,7 @@ import StudentEssays from "./counselor/student-essays.tsx";
 import AssignTaskForm from "./task/assign-task-form.tsx";
 import CounselorStudentTasks from "./counselor/counselor-student-tasks.tsx";
 import ProfilePages from "./profile/profile-pages.tsx";
+import EditProfilePicture from "./profile/edit-profile-picture.tsx";
 import Chats from "./chat/chats.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -85,18 +87,23 @@ createRoot(document.getElementById("root")!).render(
                 element={<CounselorCollegeList />}
               />
               <Route
+                path="/counselor-college-list/new"
+                element={<CounselorAddCollege />}
+              />
+              <Route
                 path="/counselor-college-list/:id"
                 element={<CounselorCollegeDetails />}
               />
+              {/* old student college search page; Add School on My List replaced it */}
               <Route
-                path="/student-college-list"
-                element={<StudentCollegeList />}
-              />
-              <Route
-                path="/student-college-list/:id"
-                element={<StudentCollegeDetails />}
+                path="/student-college-list/*"
+                element={<Navigate to="/college-applications" replace />}
               />
               <Route path="/college-applications" element={<MyCollegeList />} />
+              <Route
+                path="/college-applications/:id"
+                element={<SchoolDetails />}
+              />
               <Route path="/upload-video" element={<UploadVideo />} />
               <Route path="/videos" element={<VideoList />} />
               <Route path="/student" element={<Student />} />
@@ -127,6 +134,10 @@ createRoot(document.getElementById("root")!).render(
                 path="/counselor/students/:studentId/essays"
                 element={<StudentEssays />}
               />
+              <Route
+                path="/counselor/students/:studentId/colleges"
+                element={<CounselorStudentCollegeList />}
+              />
               <Route path="/search" element={<SearchStudents />} />
               <Route path="/assign-task" element={<AssignTaskForm />} />
               <Route
@@ -134,6 +145,7 @@ createRoot(document.getElementById("root")!).render(
                 element={<CounselorStudentTasks />}
               />
               <Route path="/profile" element={<ProfilePages />} />
+              <Route path="/profile/picture" element={<EditProfilePicture />} />
               <Route path="/chats" element={<Chats />} />
               <Route path="/chats/:userId" element={<Chats />} />
             </Route>

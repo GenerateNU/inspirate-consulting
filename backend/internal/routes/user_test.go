@@ -70,13 +70,12 @@ func TestRoute_CreateUser(t *testing.T) {
 
 		// Send valid JSON payload
 		payload := map[string]any{
-			"email":        email,
-			"name":         name,
-			"pfp_key":      &key,
-			"role":         "student",
-			"year":         "senior",
-			"gpa":          4,
-			"counselor_id": counselorID,
+			"email":           email,
+			"name":            name,
+			"role":            "student",
+			"graduation_year": 2027,
+			"gpa":             4,
+			"counselor_id":    counselorID,
 		}
 		bodyBytes, err := json.Marshal(payload)
 		println(bodyBytes)
@@ -140,13 +139,12 @@ func TestRoute_FetchUser(t *testing.T) {
 	test_uuid := uuid.MustParse("7bebfe6e-36ca-4343-a46c-d9430a951ba7")
 	//test_uuid_two := uuid.MustParse("ba0ccc36-6c60-4ad3-90ad-0fed4378f3df")
 	s1 := uuid.New()
-	key := ""
 
+	// No picture, so the route needs no picture storage to presign with.
 	userTest := models.User{
 		ID:         test_uuid,
 		Name:       "Aleng123",
 		SupabaseID: s1,
-		PfpKey:     &key,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -170,10 +168,11 @@ func TestRoute_FetchUser(t *testing.T) {
 		respBody, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
-		var output models.FetchUserOutput
+		var output models.FetchUserProfileOutput
 		err = json.Unmarshal(respBody, &output.Body)
 		require.NoError(t, err)
 		assert.Equal(t, test_uuid, output.Body.ID)
+		assert.Nil(t, output.Body.PfpURL)
 	})
 
 	t.Run("not found returns 404", func(t *testing.T) {
@@ -273,12 +272,11 @@ func TestRoute_CreateUser_RoleFields(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, _ := doJSON(t, app, http.MethodPost, "/user", map[string]any{
-			"name":    "No Counselor",
-			"email":   "nocounselor@example.com",
-			"pfp_key": nil,
-			"role":    "student",
-			"year":    "junior",
-			"gpa":     3,
+			"name":            "No Counselor",
+			"email":           "nocounselor@example.com",
+			"role":            "student",
+			"graduation_year": 2028,
+			"gpa":             3,
 		})
 
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
@@ -298,10 +296,9 @@ func TestRoute_CreateUser_RoleFields(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, body := doJSON(t, app, http.MethodPost, "/user", map[string]any{
-			"name":    "New Counselor",
-			"email":   "newcounselor@example.com",
-			"role":    "counselor",
-			"pfp_key": nil,
+			"name":  "New Counselor",
+			"email": "newcounselor@example.com",
+			"role":  "counselor",
 		})
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -324,7 +321,7 @@ func TestRoute_UpdateUser(t *testing.T) {
 		mockRepo := mocks.NewUserRepository(t)
 		// the user id comes from the session; fields left out reach the handler as nil
 		mockRepo.On("UpdateUser", mock.Anything, userID, mock.MatchedBy(func(in models.UpdateUserBody) bool {
-			return in.Name != nil && *in.Name == "New Name" && in.PfpKey == nil
+			return in.Name != nil && *in.Name == "New Name"
 		})).Return(&models.User{ID: userID, Name: "New Name"}, nil)
 
 		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
@@ -340,20 +337,18 @@ func TestRoute_UpdateUser(t *testing.T) {
 		assert.Equal(t, "New Name", out.Name)
 	})
 
-	t.Run("pfp_key is passed through", func(t *testing.T) {
+	t.Run("pfp_key is rejected", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewUserRepository(t)
-		mockRepo.On("UpdateUser", mock.Anything, userID, mock.MatchedBy(func(in models.UpdateUserBody) bool {
-			return in.PfpKey != nil && *in.PfpKey == "new-key" && in.Name == nil
-		})).Return(&models.User{ID: userID}, nil)
+		// pfp_key can only change through /user/pfp, so the handler is never reached.
 
 		app, err := setupTestAppWithUser(mockRepo, &supabase.MockSupabase{})
 		require.NoError(t, err)
 
-		resp, _ := doJSON(t, app, http.MethodPatch, "/user", map[string]any{"pfp_key": "new-key"}, asUser)
+		resp, _ := doJSON(t, app, http.MethodPatch, "/user", map[string]any{"pfp_key": "pfps/someone-else/a.jpg"}, asUser)
 
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	})
 
 	t.Run("empty name is rejected by validation", func(t *testing.T) {

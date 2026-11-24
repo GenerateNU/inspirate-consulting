@@ -7,13 +7,12 @@
  */
 import type { ListCounselorStudentsSortBy } from './listCounselorStudentsSortBy';
 import type { ListCounselorStudentsSortOrder } from './listCounselorStudentsSortOrder';
-import type { ListCounselorStudentsYear } from './listCounselorStudentsYear';
 
 export type ListCounselorStudentsParams = {
 /**
- * Only return students in this school year
+ * Only return students graduating in this year
  */
-year?: ListCounselorStudentsYear;
+graduation_year?: number;
 /**
  * Only return students with an open essay review
  */

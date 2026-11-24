@@ -133,4 +133,76 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		}
 		return &models.UpdateTodoItemDescriptionOutput{Body: *updated}, err
 	})
+
+	//Register POST /todo-items/bulk handler for bulk creating todo items
+	huma.Register(api, huma.Operation{
+		OperationID: "bulk-create-todo-items",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPost,
+		Path:        "/todo-items/bulk",
+		Description: "Assign the same task to several of a counselors students at once",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.BulkCreateTodoItemsInput) (*models.BulkCreateTodoItemsOutput, error) {
+		result, err := todoItemHandler.BulkCreateTodoItems(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.BulkCreateTodoItemsOutput{Body: *result}, nil
+	})
+
+	//Register PATCH /todo-assignments/{assignment_id} handler for changing/editing tasks in an assignment
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-assignment",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-assignments/{assignment_id}",
+		Description: "edit tasks in an assignment, and add or remove students",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoAssignmentInput) (*models.UpdateTodoAssignmentOutput, error) {
+		items, err := todoItemHandler.UpdateTodoAssignment(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateTodoAssignmentOutput{Body: items}, nil
+	})
+
+	//Register PATCH /todo-items/{id}/title handler for changing/editing a tasks title
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-item-title",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}/title",
+		Description: "edit the title of a task",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoItemTitleInput) (*models.UpdateTodoItemTitleOutput, error) {
+		item, err := todoItemHandler.UpdateTodoItemTitle(ctx, input.ID, input.Body.Title)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.UpdateTodoItemTitleOutput{Body: item}, nil
+	})
+
+	//Register PATCH /todo-items{id}/link handler for changing/editing a item's link
+	huma.Register(api, huma.Operation{
+		OperationID: "update-todo-item-link",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Method:      http.MethodPatch,
+		Path:        "/todo-items/{id}/link",
+		Description: "Change what a todo item links to: an essay, college, extracurricular, or module, or nothing",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.UpdateTodoItemLinkInput) (*models.UpdateTodoItemLinkOutput, error) {
+		item, err := todoItemHandler.UpdateTodoItemLink(ctx, input.ID, models.TodoItemLink{
+			LinkType:          input.Body.LinkType,
+			EssayID:           input.Body.EssayID,
+			MediaID:           input.Body.MediaID,
+			GlobalCollegeID:   input.Body.GlobalCollegeID,
+			ExtracurricularID: input.Body.ExtracurricularID,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return &models.UpdateTodoItemLinkOutput{Body: item}, nil
+	})
 }

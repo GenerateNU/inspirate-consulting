@@ -18,7 +18,7 @@ func (h *Handler) GetCurrentUser(ctx context.Context) (*models.GetCurrentUserOut
 		return nil, err
 	}
 
-	current := &models.CurrentUser{User: *user.Body}
+	current := &models.CurrentUser{UserProfile: h.withPfpURL(ctx, user.Body)}
 	// The identity middleware only sets the profile ID that matches the caller's role
 	if studentID, err := auth.GetStudentID(ctx); err == nil {
 		current.Role = models.StudentRole

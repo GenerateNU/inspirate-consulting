@@ -56,6 +56,11 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/user/me", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/user/{id}", guarded, []string{roleStudent, roleCounselor}},
 
+	// profile pictures
+	{http.MethodPut, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodPatch, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodDelete, "/user/pfp", guarded, []string{roleStudent, roleCounselor}},
+
 	// greeting
 	{http.MethodPost, "/greeting", guarded, []string{roleCounselor}},
 
@@ -80,11 +85,15 @@ var routeTable = []routeAccess{
 	{http.MethodGet, "/students/fetchall", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/students/assign", guarded, []string{roleCounselor}},
 
+	// activity
+	{http.MethodGet, "/activity", guarded, []string{roleCounselor}},
+
 	// counselors
 	{http.MethodGet, "/counselors/reviews", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/students", guarded, []string{roleCounselor}},
 	{http.MethodPatch, "/counselors", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/counselors/fetchall", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/counselors/{id}", anyRole, nil},
 
 	// llm
 	{http.MethodPost, "/llm/ask", guarded, []string{roleCounselor}},
@@ -110,6 +119,10 @@ var routeTable = []routeAccess{
 	{http.MethodPatch, "/todo-items/{id}/deadline", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}/description", guarded, []string{roleCounselor}},
+	{http.MethodPost, "/todo-items/bulk", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/todo-assignments/{assignment_id}", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/todo-items/{id}/title", guarded, []string{roleCounselor}},
+	{http.MethodPatch, "/todo-items/{id}/link", guarded, []string{roleCounselor}},
 
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
@@ -314,6 +327,7 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"POST /colleges",
 		"POST /videos",
 		"DELETE /videos",
+		"GET /activity",
 		"GET /counselors/reviews",
 		"GET /counselors/students",
 		"PUT /colleges/{id}",
@@ -327,6 +341,10 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"DELETE /media-access/{id}",
 		"DELETE /media/{id}",
 		"POST /llm/ask",
+		"POST /todo-items/bulk",
+		"PATCH /todo-assignments/{assignment_id}",
+		"PATCH /todo-items/{id}/title",
+		"PATCH /todo-items/{id}/link",
 	}, counselorOnly)
 	assert.ElementsMatch(t, []string{
 		"POST /essays",

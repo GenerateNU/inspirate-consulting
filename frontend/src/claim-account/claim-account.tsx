@@ -10,7 +10,8 @@ import {
   useUpdateStudent,
 } from "../api/endpoints";
 import { useAuthContext } from "../contexts/use-auth-context";
-import { CurrentUserRole, UpdateStudentBodyYear } from "../api/models";
+import { CurrentUserRole } from "../api/models";
+import { graduationYearOptions } from "@/lib/graduation-year";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -80,8 +81,8 @@ export default function ClaimAccount() {
     }
   };
 
-  const [year, setYear] = useState<UpdateStudentBodyYear>(
-    UpdateStudentBodyYear.freshman,
+  const [graduationYear, setGraduationYear] = useState(
+    graduationYearOptions()[3].value,
   );
   const [highSchool, setHighSchool] = useState("");
   const [gpa, setGpa] = useState("");
@@ -97,7 +98,7 @@ export default function ClaimAccount() {
       await updateStudent({
         id: studentID,
         data: {
-          year,
+          graduation_year: graduationYear,
           high_school: highSchool,
           gpa: Number(gpa),
           standardized_test_score: testScore || undefined,
@@ -171,27 +172,18 @@ export default function ClaimAccount() {
         <form onSubmit={handleProfileSubmit}>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="year">Graduation Year / Cohort</Label>
+              <Label htmlFor="graduation-year">Graduation Year</Label>
               <NativeSelect
-                id="year"
+                id="graduation-year"
                 className="w-full"
-                value={year}
-                onChange={(e) =>
-                  setYear(e.target.value as UpdateStudentBodyYear)
-                }
+                value={graduationYear}
+                onChange={(e) => setGraduationYear(Number(e.target.value))}
               >
-                <NativeSelectOption value={UpdateStudentBodyYear.freshman}>
-                  Freshman
-                </NativeSelectOption>
-                <NativeSelectOption value={UpdateStudentBodyYear.sophomore}>
-                  Sophomore
-                </NativeSelectOption>
-                <NativeSelectOption value={UpdateStudentBodyYear.junior}>
-                  Junior
-                </NativeSelectOption>
-                <NativeSelectOption value={UpdateStudentBodyYear.senior}>
-                  Senior
-                </NativeSelectOption>
+                {graduationYearOptions().map(({ value, label }) => (
+                  <NativeSelectOption key={value} value={value}>
+                    {label}
+                  </NativeSelectOption>
+                ))}
               </NativeSelect>
             </div>
             <div className="flex flex-col gap-2">
@@ -210,6 +202,8 @@ export default function ClaimAccount() {
                   id="gpa"
                   type="number"
                   min={0}
+                  max={5}
+                  step="0.01"
                   value={gpa}
                   onChange={(e) => setGpa(e.target.value)}
                   required

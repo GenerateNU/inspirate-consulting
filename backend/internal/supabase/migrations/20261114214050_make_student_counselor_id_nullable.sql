@@ -1,0 +1,1 @@
+alter table public.student alter column counselor_id drop not null;

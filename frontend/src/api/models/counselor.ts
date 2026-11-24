@@ -9,6 +9,10 @@
 export interface Counselor {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /** @nullable */
+  custom_link: string | null;
+  /** @nullable */
+  expires_at: string | null;
   id: string;
   user_id: string;
 }

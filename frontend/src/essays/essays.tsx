@@ -55,7 +55,7 @@ export default function Essay() {
   const [showEssayForm, setShowEssayForm] = useState(false);
   const [showGroupForm, setShowGroupForm] = useState(false);
 
-  const essaysQuery = useGetEssaysFromStudent(studentId, {
+  const essaysQuery = useGetEssaysFromStudent(studentId, undefined, {
     query: { enabled: !!studentId },
   });
   const groupsQuery = useGetEssayGroupsFromStudent(studentId, {
@@ -64,7 +64,7 @@ export default function Essay() {
   const studentQuery = useGetStudent(studentId, {
     query: { enabled: !!studentId },
   });
-  const applicationsQuery = useListPersonalCollegeApplications({
+  const applicationsQuery = useListPersonalCollegeApplications(undefined, {
     query: { enabled: !!studentId },
   });
   const requestReview = useRequestEssayReview();

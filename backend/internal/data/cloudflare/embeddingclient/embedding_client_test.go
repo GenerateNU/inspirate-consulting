@@ -253,3 +253,50 @@ func TestEmbed_CanceledContext(t *testing.T) {
 		t.Fatal("expected an error for a canceled context, got nil")
 	}
 }
+
+func TestEmbedQuery_SendsQueriesField(t *testing.T) {
+	expected := makeVector(Dimensions)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("failed to decode request body: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if body["queries"] != "essay deadlines" {
+			t.Errorf("expected queries %q, got %v", "essay deadlines", body["queries"])
+		}
+		if len(body) != 1 {
+			t.Errorf("expected only the queries field in the request, got %v", body)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(successBody(expected))
+	}))
+	defer server.Close()
+
+	got, err := newTestClient(server).EmbedQuery(context.Background(), "essay deadlines")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(got) != Dimensions {
+		t.Fatalf("expected %d dimensions, got %d", Dimensions, len(got))
+	}
+}
+
+func TestEmbedQuery_EmptyQuery(t *testing.T) {
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+	}))
+	defer server.Close()
+
+	_, err := newTestClient(server).EmbedQuery(context.Background(), "")
+	if err == nil {
+		t.Fatal("expected an error for an empty query, got nil")
+	}
+	if called {
+		t.Error("expected no request to be sent for an empty query")
+	}
+}

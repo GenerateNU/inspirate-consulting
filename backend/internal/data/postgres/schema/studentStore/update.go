@@ -25,7 +25,7 @@ func (r *StudentRepository) UpdateStudent(ctx context.Context, id uuid.UUID, inp
 		ctx,
 		query,
 		id,
-		input.Year,
+		input.GraduationYear,
 		input.Organization,
 		input.GPA,
 		input.Interest,
@@ -35,7 +35,7 @@ func (r *StudentRepository) UpdateStudent(ctx context.Context, id uuid.UUID, inp
 		input.IntendedMinor,
 		input.GeographicPreferences,
 	).Scan(
-		&Student.ID, &Student.UserID, &Student.Year, &Student.Organization, &Student.GPA,
+		&Student.ID, &Student.UserID, &Student.GraduationYear, &Student.Organization, &Student.GPA,
 		&Student.ReviewBalance, &Student.CounselorID, &Student.Interest,
 		&Student.HighSchool, &Student.StandardizedTestScore, &Student.IntendedMajor,
 		&Student.IntendedMinor, &Student.GeographicPreferences,

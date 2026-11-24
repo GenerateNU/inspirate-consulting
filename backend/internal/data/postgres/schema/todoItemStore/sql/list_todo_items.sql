@@ -1,5 +1,5 @@
 WITH filtered AS (
-    SELECT id, created_at, updated_at, student_id, user_id, todo_description, completed_at, deadline, essay_id, media_id, global_college_id,
+    SELECT id, created_at, updated_at, student_id, user_id, todo_description, completed_at, deadline, essay_id, media_id, global_college_id, title, extracurricular_id, link_type, assignment_id,
         -- Missing dates are replaced with $10 so the sort key is never null and can be compared against the cursor
         coalesce(
             CASE $8::text
@@ -22,13 +22,11 @@ WITH filtered AS (
       AND ($5::bigint IS NULL OR global_college_id = $5)
       AND (
         $6::text IS NULL
-        OR ($6 = 'essay' AND essay_id IS NOT NULL)
-        OR ($6 = 'media' AND media_id IS NOT NULL)
-        OR ($6 = 'college' AND global_college_id IS NOT NULL)
+        OR link_type::text = CASE $6 WHEN 'media' THEN 'module' ELSE $6 END
       )
       AND ($7::text IS NULL OR todo_description ILIKE '%' || $7 || '%')
 )
-SELECT id, created_at, updated_at, student_id, user_id, todo_description, completed_at, deadline, essay_id, media_id, global_college_id
+SELECT id, created_at, updated_at, student_id, user_id, todo_description, completed_at, deadline, essay_id, media_id, global_college_id, title, extracurricular_id, link_type, assignment_id
 FROM filtered
 WHERE $11::timestamptz IS NULL
    OR ($9::text = 'asc' AND (sort_key, id) > ($11, $12::uuid))

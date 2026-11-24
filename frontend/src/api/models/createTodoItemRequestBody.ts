@@ -5,6 +5,7 @@
  * API for the Inspirate Consulting application
  * OpenAPI spec version: 1.0.0
  */
+import type { CreateTodoItemRequestBodyLinkType } from './createTodoItemRequestBodyLinkType';
 
 export interface CreateTodoItemRequestBody {
   /** A URL to the JSON Schema for this object. */
@@ -13,11 +14,21 @@ export interface CreateTodoItemRequestBody {
   deadline?: string;
   /** Essay this task is for; at most one of essay_id, media_id, global_college_id */
   essay_id?: string;
+  /** Extracurricular this task is linked to */
+  extracurricular_id?: number;
   /** College this task is for; at most one of essay_id, media_id, global_college_id */
   global_college_id?: number;
+  /** What kind of item this task is linked to */
+  link_type?: CreateTodoItemRequestBodyLinkType;
   /** Media this task is for; at most one of essay_id, media_id, global_college_id */
   media_id?: string;
   /** Student the task is for; required for counselors, defaults to the authenticated student */
   student_id?: string;
+  /**
+     * Short title of the task
+     * @minLength 1
+     * @maxLength 200
+     */
+  title: string;
   todo_description: string;
 }

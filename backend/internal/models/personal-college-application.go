@@ -84,7 +84,7 @@ type CreatePersonalCollegeApplicationOutput struct {
 	Body PersonalCollegeApplication
 }
 
-// students list their own applications; counselors pass student_id (must be one of their students)
+// students list their own applications; counselors pass any student's student_id
 type ListPersonalCollegeApplicationsInput struct {
 	StudentID string `query:"student_id" required:"false" format:"uuid" doc:"Student whose college list to return; required for counselors, defaults to the authenticated student"`
 }

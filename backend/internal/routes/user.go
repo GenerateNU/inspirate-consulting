@@ -15,7 +15,7 @@ import (
 )
 
 func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.Config, verifyRole auth.RoleVerifier, accountSQSClient *sqsclient.SQSClient) {
-	userHandler := user.NewHandler(repository.User, accountSQSClient)
+	userHandler := user.NewHandler(repository.User, accountSQSClient, repository.Pfp)
 	huma.Register(api, huma.Operation{
 		OperationID: "create-user",
 		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
@@ -50,7 +50,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		Path:        "/user/{id}",
 		Description: "fetch a user (student/counselor)",
 		Tags:        []string{"User"},
-	}, func(ctx context.Context, input *models.FetchUserInput) (*models.FetchUserOutput, error) {
+	}, func(ctx context.Context, input *models.FetchUserInput) (*models.FetchUserProfileOutput, error) {
 		userOutput, err := userHandler.FetchUser(ctx, input)
 		if err != nil {
 			return nil, err
@@ -62,7 +62,7 @@ func SetupUserRoutes(api huma.API, repository *data.Repository, config *config.C
 		OperationID: "update-user",
 		Method:      http.MethodPatch,
 		Path:        "/user",
-		Description: "Update the authenticated user's name and pfp_key. Fields left out of the request are not changed.",
+		Description: "Update the authenticated user's name. Fields left out of the request are not changed. Use /user/pfp to change the profile picture.",
 		Tags:        []string{"User"},
 	}, func(ctx context.Context, input *models.UpdateUserInput) (*models.UpdateUserOutput, error) {
 		updatedUser, err := userHandler.UpdateUser(ctx, input.Body)

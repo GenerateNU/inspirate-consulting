@@ -32,8 +32,8 @@ func TestLockStudent(t *testing.T) {
 	if student.ReviewBalance != 7 {
 		t.Errorf("expected ReviewBalance 7, got %d", student.ReviewBalance)
 	}
-	if student.Year != models.Senior {
-		t.Errorf("expected Year %q, got %q", models.Senior, student.Year)
+	if student.GraduationYear != 2027 {
+		t.Errorf("expected GraduationYear %d, got %d", 2027, student.GraduationYear)
 	}
 	if student.Organization != nil {
 		t.Errorf("expected nil Organization, got %q", *student.Organization)

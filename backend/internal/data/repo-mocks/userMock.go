@@ -139,6 +139,45 @@ func (_m *UserRepository) FetchUserBySupabaseID(ctx context.Context, input model
 	return r0, r1
 }
 
+// SetPfpKey provides a mock function with given fields: ctx, id, pfpKey
+func (_m *UserRepository) SetPfpKey(ctx context.Context, id uuid.UUID, pfpKey *string) (*models.User, *string, error) {
+	ret := _m.Called(ctx, id, pfpKey)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetPfpKey")
+	}
+
+	var r0 *models.User
+	var r1 *string
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *string) (*models.User, *string, error)); ok {
+		return rf(ctx, id, pfpKey)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, *string) *models.User); ok {
+		r0 = rf(ctx, id, pfpKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, *string) *string); ok {
+		r1 = rf(ctx, id, pfpKey)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*string)
+		}
+	}
+
+	if rf, ok := ret.Get(2).(func(context.Context, uuid.UUID, *string) error); ok {
+		r2 = rf(ctx, id, pfpKey)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // UpdateResetTime provides a mock function with given fields: ctx, id, resetTime
 func (_m *UserRepository) UpdateResetTime(ctx context.Context, id uuid.UUID, resetTime *time.Time) error {
 	ret := _m.Called(ctx, id, resetTime)

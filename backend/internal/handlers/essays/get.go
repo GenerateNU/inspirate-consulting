@@ -11,7 +11,12 @@ func (h *Handler) GetEssaysFromStudent(ctx context.Context, input *models.GetEss
 		return nil, err
 	}
 
-	essays, err := h.EssayRepository.GetEssaysFromStudent(ctx, input.StudentID)
+	filter := models.GetEssaysFromStudentFilter{}
+	if input.CollegeID != 0 {
+		filter.CollegeID = &input.CollegeID
+	}
+
+	essays, err := h.EssayRepository.GetEssaysFromStudent(ctx, input.StudentID, filter)
 	if err != nil {
 		return nil, err
 	}

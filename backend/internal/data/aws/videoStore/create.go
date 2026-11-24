@@ -2,15 +2,22 @@ package videoRepository
 
 import (
 	"context"
+	"fmt"
 
-	"inspirate-consulting/internal/data/aws/s3client"
+	"github.com/google/uuid"
+
 	"inspirate-consulting/internal/models"
 )
 
-func (r *VideoRepository) PresignUpload(ctx context.Context, originalFilename string) (*models.PresignUploadResponse, error) {
-	key := s3client.GenerateObjectKey(originalFilename)
+// keeps the original filename in the key for readability
+func generateVideoKey(originalFilename string) string {
+	return fmt.Sprintf("%s%s-%s", videoPrefix, uuid.NewString(), originalFilename)
+}
 
-	uploadURL, err := r.s3.PresignUpload(ctx, key)
+func (r *VideoRepository) PresignUpload(ctx context.Context, input models.PresignUploadRequestBody) (*models.PresignUploadResponse, error) {
+	key := generateVideoKey(input.OriginalFilename)
+
+	uploadURL, err := r.s3.PresignUpload(ctx, key, input.ContentType, input.ContentLength)
 	if err != nil {
 		return nil, err
 	}

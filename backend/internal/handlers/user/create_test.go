@@ -45,7 +45,6 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 	input := models.CreateUserInput{}
 	input.Body.Name = "Aleng123"
 	input.Body.Email = "tt@gmail.com"
-	input.Body.PfpKey = &key
 	input.Body.Role = models.CounselorRole
 
 	t.Run("success", func(t *testing.T) {
@@ -58,7 +57,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 
 		fake := &fakeSQS{}
 		sqsClient := sqsclient.NewSQSClientWithAPI(fake, "test-account-queue-url")
-		handler := NewHandler(mockRepo, sqsClient)
+		handler := NewHandler(mockRepo, sqsClient, nil)
 		res, err := handler.CreateUser(ctx, &input, &supabase.MockSupabase{})
 
 		assert.NoError(t, err)
@@ -74,7 +73,7 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 			Return(nil, errors.New("user already exists"))
 
 		sqsClient := sqsclient.NewSQSClientWithAPI(&fakeSQS{}, "test-account-queue-url")
-		handler := NewHandler(mockRepo, sqsClient)
+		handler := NewHandler(mockRepo, sqsClient, nil)
 		res, err := handler.CreateUser(ctx, &input, &supabase.MockSupabase{})
 
 		assert.Error(t, err)

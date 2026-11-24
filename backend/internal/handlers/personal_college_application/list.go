@@ -7,13 +7,13 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-// lists a student's college list; students get their own, counselors pass one of their students' ids
+// lists a student's college list; students get their own, counselors pass any student's id
 func (h *Handler) ListPersonalCollegeApplicationsByStudentID(ctx context.Context, rawStudentID string) ([]models.PersonalCollegeApplication, error) {
 	requested, err := auth.ParseOptionalStudentID(rawStudentID)
 	if err != nil {
 		return nil, err
 	}
-	studentID, err := h.Authorizer.ResolveStudentID(ctx, requested)
+	studentID, err := h.Authorizer.ResolveViewableStudentID(ctx, requested)
 	if err != nil {
 		return nil, err
 	}
