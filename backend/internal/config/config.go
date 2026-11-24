@@ -11,6 +11,7 @@ type Config struct {
 	SQS         SQS
 	Gemini      Gemini
 	Cloudflare  Cloudflare
+	Features    Features
 	// TestMode=true will skip the auth middleware
 	TestMode bool
 }

@@ -19,7 +19,10 @@ func SetUpLLMRoutes(api huma.API, repository *data.Repository, cfg *config.Confi
 
 	huma.Register(api, huma.Operation{
 		OperationID: "ask-llm",
-		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
+		Middlewares: huma.Middlewares{
+			verifyRole(api, models.CounselorRole),
+			auth.RequireFeature(api, cfg.Features.Agent),
+		},
 		Method:      http.MethodPost,
 		Path:        "/llm/ask",
 		Description: "Ask the LLM a question. The model may search tasks or chats to answer it.",

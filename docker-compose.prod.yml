@@ -23,6 +23,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+        VITE_AGENT_ENABLED: ${AGENT_ENABLED:-false}
     ports:
       - "3000:80"
     restart: unless-stopped

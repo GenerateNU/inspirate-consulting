@@ -89,6 +89,21 @@ func VerifyRole(api huma.API, roles ...models.Role) func(ctx huma.Context, next 
 	}
 }
 
+// RequireFeature hides a route behind a feature flag: when it's off the route
+// answers 404 as if it didn't exist.
+func RequireFeature(api huma.API, enabled bool) func(ctx huma.Context, next func(huma.Context)) {
+	return func(ctx huma.Context, next func(huma.Context)) {
+		if enabled {
+			next(ctx)
+			return
+		}
+
+		if err := huma.WriteErr(api, ctx, http.StatusNotFound, "Not found"); err != nil {
+			slog.Error("Failed to write error", "err", err)
+		}
+	}
+}
+
 func AuthMiddleware(api huma.API, verifier *Verifier, sb supabase.SupabaseInterface) func(ctx huma.Context, next func(huma.Context)) {
 	skipPaths := map[string]bool{
 		"/api/v1/health": true,
