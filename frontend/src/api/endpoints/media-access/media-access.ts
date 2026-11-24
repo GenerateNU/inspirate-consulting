@@ -25,11 +25,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AccessibleMedia,
   ErrorModel,
   GetMediaAccessParams,
   GrantMediaAccessRequestBody,
-  Media,
-  MediaAccess
+  MediaAccess,
+  RecordMediaProgressInputBody
 } from '../../models';
 
 
@@ -94,9 +95,9 @@ export const getGetMediaAccessUrl = (params?: GetMediaAccessParams,) => {
 }
 
 /**
- * Allow students to fetch only videos they have access to
+ * Allow students to fetch only videos they have access to, with their progress and due date
  */
-export const getMediaAccess = async (params?: GetMediaAccessParams, options?: RequestInit): Promise<Media[] | null> => {
+export const getMediaAccess = async (params?: GetMediaAccessParams, options?: RequestInit): Promise<AccessibleMedia[] | null> => {
 
   const res = await fetch(getGetMediaAccessUrl(params),
   {
@@ -111,13 +112,13 @@ export const getMediaAccess = async (params?: GetMediaAccessParams, options?: Re
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   if (!res.ok) {
 
-    const err: globalThis.Error & {info?: Media[] | null, status?: number} = new globalThis.Error();
-    const data : Media[] | null = body ? JSON.parse(body) : {}
+    const err: globalThis.Error & {info?: AccessibleMedia[] | null, status?: number} = new globalThis.Error();
+    const data : AccessibleMedia[] | null = body ? JSON.parse(body) : {}
     err.info = data;
     err.status = res.status;
     throw err;
   }
-  const data: Media[] | null = body ? JSON.parse(body) : {}
+  const data: AccessibleMedia[] | null = body ? JSON.parse(body) : {}
   return data
 }
 
@@ -377,4 +378,103 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteMediaAccessMutationOptions(options), queryClient);
+    }
+    export const getRecordMediaProgressUrl = (id: string,) => {
+
+
+
+
+  return `/api/media/${id}/progress`
+}
+
+/**
+ * Mark media as started (student opened it) or completed (student marked it done). Idempotent
+ */
+export const recordMediaProgress = async (id: string,
+    recordMediaProgressInputBody: NonReadonly<RecordMediaProgressInputBody>, options?: RequestInit): Promise<MediaAccess> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getRecordMediaProgressUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(recordMediaProgressInputBody)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: MediaAccess, status?: number} = new globalThis.Error();
+    const data : MediaAccess = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: MediaAccess = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getRecordMediaProgressMutationKey = () => ['recordMediaProgress'] as const;
+
+export const getRecordMediaProgressMutationOptions = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordMediaProgress>>, TError,RecordMediaProgressMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof recordMediaProgress>>, TError,RecordMediaProgressMutationVariables, TContext> => {
+
+const mutationKey = getRecordMediaProgressMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordMediaProgress>>, RecordMediaProgressMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  recordMediaProgress(id,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordMediaProgressMutationResult = NonNullable<Awaited<ReturnType<typeof recordMediaProgress>>>
+    export type RecordMediaProgressMutationBody = NonReadonly<RecordMediaProgressInputBody>
+    export type RecordMediaProgressMutationError = globalThis.Error & { info?: ErrorModel; status?: number }
+    export type RecordMediaProgressMutationVariables = {id: string;data: NonReadonly<RecordMediaProgressInputBody>}
+
+    export const useRecordMediaProgress = <TError = globalThis.Error & { info?: ErrorModel; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordMediaProgress>>, TError,RecordMediaProgressMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof recordMediaProgress>>,
+        TError,
+        RecordMediaProgressMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordMediaProgressMutationOptions(options), queryClient);
     }

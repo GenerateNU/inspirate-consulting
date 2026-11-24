@@ -9,5 +9,14 @@
 export interface UpdateMediaInputBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
-  title: string;
+  description?: string;
+  /**
+     * S3 key of an uploaded video; replaces the video source (clears youtube_video_id). Mutually exclusive with youtube_url
+     * @minLength 1
+     */
+  s3_key?: string;
+  /** @minLength 1 */
+  title?: string;
+  /** youtube.com or youtu.be video link; replaces the video source (clears s3_key). Mutually exclusive with s3_key */
+  youtube_url?: string;
 }

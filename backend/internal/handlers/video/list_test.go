@@ -28,7 +28,7 @@ func TestHandler_ListVideos(t *testing.T) {
 		mockRepo := mocks.NewVideoRepository(t)
 		mockRepo.On("ListVideos", mock.Anything).Return(expected, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListVideos(ctx)
 
 		assert.NoError(t, err)
@@ -41,7 +41,7 @@ func TestHandler_ListVideos(t *testing.T) {
 		mockRepo := mocks.NewVideoRepository(t)
 		mockRepo.On("ListVideos", mock.Anything).Return([]models.Video{}, nil)
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListVideos(ctx)
 
 		assert.NoError(t, err)
@@ -54,7 +54,7 @@ func TestHandler_ListVideos(t *testing.T) {
 		mockRepo := mocks.NewVideoRepository(t)
 		mockRepo.On("ListVideos", mock.Anything).Return(nil, errors.New("s3client: failed to list objects"))
 
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		res, err := handler.ListVideos(ctx)
 
 		assert.Error(t, err)

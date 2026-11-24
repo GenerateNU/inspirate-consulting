@@ -27,7 +27,7 @@ func TestHandler_DeleteMedia(t *testing.T) {
 		mockRepo.On("DeleteMedia", mock.Anything, id).Return(nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		err := handler.DeleteMedia(ctx, id)
 
 		// Verify result
@@ -42,7 +42,7 @@ func TestHandler_DeleteMedia(t *testing.T) {
 		mockRepo.On("DeleteMedia", mock.Anything, id).Return(errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
+		handler := NewHandler(mockRepo, nil)
 		err := handler.DeleteMedia(ctx, id)
 
 		// Verify error propagation

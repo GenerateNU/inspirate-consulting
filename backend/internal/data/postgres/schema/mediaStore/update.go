@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *MediaRepository) UpdateMedia(ctx context.Context, id string, change string) (*models.Media, error) {
+func (r *MediaRepository) UpdateMedia(ctx context.Context, id string, fields models.UpdateMediaFields) (*models.Media, error) {
 	query, err := schema.ReadSQLBaseScript("update_media.sql", SqlMediaFiles)
 	if err != nil {
 		err := errs.InternalServerError("Failed to read base query: ", err.Error())
@@ -18,13 +18,14 @@ func (r *MediaRepository) UpdateMedia(ctx context.Context, id string, change str
 	}
 
 	updated := &models.Media{}
-	err = r.db.QueryRow(ctx, query, id, change).Scan(
+	err = r.db.QueryRow(ctx, query, id, fields.Title, fields.Description, fields.S3Key, fields.YoutubeVideoID).Scan(
 		&updated.ID,
 		&updated.Title,
 		&updated.Description,
 		&updated.LengthInMins,
 		&updated.SchoolYear,
 		&updated.S3Key,
+		&updated.YoutubeVideoID,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

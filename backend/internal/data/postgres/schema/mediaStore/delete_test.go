@@ -22,9 +22,9 @@ func TestDeleteMedia(t *testing.T) {
 	created, err := repo.CreateMedia(ctx, &models.CreateMediaRequestBody{
 		Title:        "Deletable Video",
 		Description:  "Should be removed",
-		LengthInMins: 5,
-		S3Key:        "media/deletable.mp4",
-	})
+		LengthInMins: ptr(5),
+		S3Key:        ptr("media/deletable.mp4"),
+	}, nil)
 	if err != nil {
 		t.Fatalf("setup CreateMedia failed: %v", err)
 	}
@@ -34,7 +34,7 @@ func TestDeleteMedia(t *testing.T) {
 	}
 
 	// The deleted media should no longer be listed.
-	results, err := repo.ListAllMedia(ctx, 10, 0)
+	results, err := repo.ListAllMedia(ctx, "", 0.2, 10, 0)
 	if err != nil {
 		t.Fatalf("ListAllMedia failed: %v", err)
 	}

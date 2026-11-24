@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './accessibleMedia';
 export * from './activity';
 export * from './activityAction';
 export * from './activityEssayStatus';
@@ -100,6 +101,8 @@ export * from './presignUploadRequestBodyContentType';
 export * from './presignUploadResponse';
 export * from './queueEmailNotificationRequestBody';
 export * from './queueEmailNotificationResponseBody';
+export * from './recordMediaProgressInputBody';
+export * from './recordMediaProgressInputBodyStatus';
 export * from './refundEssayReviewResponseBody';
 export * from './requestEssayReviewRequestBody';
 export * from './resetPasswordInputBody';
