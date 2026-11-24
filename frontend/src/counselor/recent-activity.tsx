@@ -11,7 +11,6 @@ import {
 } from "../api/models";
 import { useAuthContext } from "../contexts/use-auth-context";
 import { formatTime } from "../lib/format-relative-time";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserAvatar from "@/components/user-avatar";
 
@@ -81,26 +80,28 @@ export default function RecentActivity() {
   const items = activities ?? [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
-      </CardHeader>
-      <CardContent className="max-h-96 overflow-y-auto">
+    <section className="flex flex-col gap-4">
+      <h2 className="font-jakarta text-xl leading-[normal] font-semibold text-charcoal">
+        Recent Activity
+      </h2>
+      <div className="max-h-120 overflow-y-auto rounded-lg border border-cream bg-white px-4 py-2 shadow-card">
         {activitiesLoading &&
           Array.from({ length: 4 }, (_, i) => (
             <div key={i} className="flex items-center gap-3 py-3">
-              <Skeleton className="size-9 rounded-full bg-neutral-200" />
+              <Skeleton className="size-9 rounded-full bg-cream/60" />
               <div className="flex flex-1 flex-col gap-2">
-                <Skeleton className="h-4 w-3/4 bg-neutral-200" />
-                <Skeleton className="h-3 w-1/3 bg-neutral-200" />
+                <Skeleton className="h-4 w-3/4 bg-cream/60" />
+                <Skeleton className="h-3 w-1/3 bg-cream/60" />
               </div>
             </div>
           ))}
         {error && (
-          <p className="py-3 text-sm text-red-600">{errorMessage(error)}</p>
+          <p className="py-3 font-host text-sm text-danger">
+            {errorMessage(error)}
+          </p>
         )}
         {!activitiesLoading && !error && items.length === 0 && (
-          <p className="py-3 text-sm text-neutral-500">
+          <p className="py-3 font-host text-sm text-warm-grey-dark">
             No recent activity yet.
           </p>
         )}
@@ -110,14 +111,18 @@ export default function RecentActivity() {
           return (
             <div
               key={activity.id}
-              className="flex items-center gap-3 border-b border-neutral-100 py-3 last:border-0"
+              className="flex items-center gap-3 border-b border-cream py-3 last:border-0"
             >
-              <UserAvatar name={name} className="size-9" />
+              <UserAvatar
+                name={name}
+                className="size-9"
+                fallbackClassName="bg-blue font-host text-white"
+              />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">
+                <p className="truncate font-host text-xs text-charcoal">
                   {activityCopy(activity, name)}
                 </p>
-                <p className="text-xs text-neutral-400">
+                <p className="font-host text-[10px] text-warm-grey-dark">
                   {formatTime(new Date(activity.created_at))} ·{" "}
                   <Link to={activityLink(activity)} className="underline">
                     View
@@ -127,7 +132,7 @@ export default function RecentActivity() {
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

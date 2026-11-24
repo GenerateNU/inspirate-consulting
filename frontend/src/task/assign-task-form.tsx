@@ -1,78 +1,108 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import AssignToSelect, { type AssignToValue } from "./assign-to-select";
-import ConnectToSelect, { type ConnectToValue } from "./connect-to-select";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
+import {
+  getGetTodoItemsQueryKey,
+  getListCounselorStudentsQueryKey,
+  useBulkCreateTodoItems,
+  useCreateTodoItem,
+} from "../api/endpoints";
+import type {
+  BulkCreateTodoItemsBody,
+  CreateTodoItemRequestBody,
+} from "../api/models";
+import { isIndividual } from "./assign-to-section";
+import TaskForm, { type TaskFormValues } from "./task-form";
+import { DEFAULT_DUE_TIME } from "./todoShared";
+
+export const dueDateToDeadline = (dueDate: string) =>
+  dueDate
+    ? new Date(`${dueDate}T${DEFAULT_DUE_TIME}`).toISOString()
+    : undefined;
+
+// Create a task for one student, or a bulk task for classes and/or several students
 export default function AssignTaskForm() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   // If we came from a student's page, preselect that student
   const [searchParams] = useSearchParams();
   const preselectedStudentId = searchParams.get("studentId");
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [assignTo, setAssignTo] = useState<AssignToValue>({
-    mode: preselectedStudentId ? "individual" : "undefined",
-    grades: [],
-    studentIds: preselectedStudentId ? [preselectedStudentId] : [],
-  });
-  const [connectTo, setConnectTo] = useState<ConnectToValue>({
-    type: "",
-    itemIds: [],
-  });
+  const createOne = useCreateTodoItem();
+  const createBulk = useBulkCreateTodoItems();
+
+  const initialValues: TaskFormValues = {
+    title: "",
+    description: "",
+    dueDate: "",
+    assignTo: {
+      all: false,
+      graduationYears: [],
+      studentIds: preselectedStudentId ? [preselectedStudentId] : [],
+    },
+    connectTo: { type: null, itemId: "" },
+  };
+
+  const onSuccess = () => {
+    void queryClient.invalidateQueries({ queryKey: getGetTodoItemsQueryKey() });
+    void queryClient.invalidateQueries({
+      queryKey: getListCounselorStudentsQueryKey(),
+    });
+    void navigate(
+      preselectedStudentId
+        ? `/counselor/students/${preselectedStudentId}`
+        : "/counselor",
+    );
+  };
+
+  const handleSubmit = (values: TaskFormValues) => {
+    const { title, description, dueDate, assignTo, connectTo } = values;
+    const { type, itemId } = connectTo;
+    const deadline = dueDateToDeadline(dueDate);
+
+    if (isIndividual(assignTo)) {
+      const body: CreateTodoItemRequestBody = {
+        student_id: assignTo.studentIds[0],
+        title: title.trim(),
+        todo_description: description.trim(),
+        deadline,
+      };
+      if (type) body.link_type = type;
+      if (itemId && type === "essay") body.essay_id = itemId;
+      if (itemId && type === "college") body.global_college_id = Number(itemId);
+      if (itemId && type === "module") body.media_id = itemId;
+      createOne.mutate({ data: body }, { onSuccess });
+      return;
+    }
+
+    const body: BulkCreateTodoItemsBody = {
+      title: title.trim(),
+      description: description.trim(),
+      deadline,
+    };
+    if (assignTo.all) body.all = true;
+    else {
+      if (assignTo.graduationYears.length > 0)
+        body.graduation_years = assignTo.graduationYears;
+      if (assignTo.studentIds.length > 0)
+        body.student_ids = assignTo.studentIds;
+    }
+    // groups can only link to a college or a module
+    if (type === "college" || type === "module") body.link_type = type;
+    if (itemId && type === "college") body.college_id = Number(itemId);
+    if (itemId && type === "module") body.media_id = itemId;
+    createBulk.mutate({ data: body }, { onSuccess });
+  };
 
   return (
-    <div className="flex flex-col gap-4 p-10">
-      <h1 className="text-2xl font-semibold">Assign New Task</h1>
-
-      <input
-        type="text"
-        placeholder="Task Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border px-3 py-2"
-      />
-
-      <textarea
-        placeholder="Task Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="border px-3 py-2"
-      />
-
-      <div className="flex gap-6">
-        {/* Left: due date */}
-        <label className="flex w-64 flex-col text-sm">
-          Select Due Date
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="mt-1 border px-2 py-1"
-          />
-        </label>
-
-        {/* Right: assign to / connect to */}
-        <div className="flex flex-1 flex-col gap-4">
-          <AssignToSelect value={assignTo} onChange={setAssignTo} />
-          <ConnectToSelect value={connectTo} onChange={setConnectTo} />
-        </div>
-      </div>
-
-      {/* PLACEHOLDER: submitting needs a backend endpoint that assigns a task to the selected students */}
-      <div className="flex flex-col items-end gap-1">
-        <button
-          type="button"
-          disabled
-          className="cursor-not-allowed rounded bg-black px-6 py-2 text-white opacity-50"
-        >
-          Assign Task →
-        </button>
-        <p className="text-xs text-gray-500">
-          Assigning tasks isn&apos;t available yet. It needs a new backend
-          endpoint.
-        </p>
-      </div>
-    </div>
+    <TaskForm
+      heading="Create Task"
+      initialValues={initialValues}
+      submitLabel="Assign task"
+      pendingLabel="Assigning..."
+      isPending={createOne.isPending || createBulk.isPending}
+      error={createOne.error ?? createBulk.error}
+      onSubmit={handleSubmit}
+    />
   );
 }

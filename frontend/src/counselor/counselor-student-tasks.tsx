@@ -1,6 +1,14 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser } from "../api/endpoints";
+import { errorMessage } from "../api/client";
+import {
+  GetTodoItemsSortBy,
+  GetTodoItemsSortOrder,
+  GetTodoItemsStatus,
+} from "../api/models";
 import { graduationYearLabel } from "../lib/graduation-year";
+import { formatDeadline } from "../task/todoShared";
+import { useTodoPages } from "../task/useTodoList";
 
 //validate URL before anything is fetched
 export default function CounselorStudentTasks() {
@@ -56,6 +64,7 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
             </li>
             <li>High School: {student.organization ?? "Not set"}</li>
             <li>Major of Interest: {student.student_interest ?? "Not set"}</li>
+            <li>Review Balance: {student.review_balance}</li>
           </ul>
 
           {/* PLACEHOLDER: progress status needs this student's tasks */}
@@ -80,13 +89,75 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
             </Link>
           </div>
 
-          {/* PLACEHOLDER: needs an endpoint for a specific student's tasks */}
-          <div className="border p-6 text-sm text-gray-500">
-            This student&apos;s task list isn&apos;t available yet. It needs a
-            backend endpoint for listing a specific student&apos;s tasks.
-          </div>
+          <StudentTaskRows studentId={studentId} />
         </div>
       </div>
+    </div>
+  );
+}
+
+// This student's tasks, newest first, each with a link to edit it
+function StudentTaskRows({ studentId }: { studentId: string }) {
+  const { items, error, isLoading, hasMore, isLoadingMore, loadMore } =
+    useTodoPages(
+      {
+        student_id: studentId,
+        status: GetTodoItemsStatus.all,
+        sort_by: GetTodoItemsSortBy.created_at,
+        sort_order: GetTodoItemsSortOrder.desc,
+      },
+      "",
+    );
+
+  if (isLoading) return <p className="text-sm">Loading tasks...</p>;
+  if (error)
+    return (
+      <p className="text-sm text-danger">
+        Could not load tasks: {errorMessage(error)}
+      </p>
+    );
+  if (items.length === 0)
+    return <p className="text-sm text-gray-500">No tasks assigned yet.</p>;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-2">
+        {items.map((task) => (
+          <li
+            key={task.id}
+            className="flex items-center justify-between gap-4 rounded-lg bg-white px-4 py-3"
+          >
+            <div className="min-w-0">
+              <p
+                className={`truncate text-sm font-medium ${task.completed_at ? "text-gray-500 line-through" : ""}`}
+              >
+                {task.title}
+              </p>
+              {task.deadline && (
+                <p className="text-xs text-gray-500">
+                  Due {formatDeadline(task.deadline)}
+                </p>
+              )}
+            </div>
+            <Link
+              to={`/counselor/students/${studentId}/tasks/${task.id}/edit`}
+              className="shrink-0 text-sm underline"
+            >
+              Edit
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => void loadMore()}
+          disabled={isLoadingMore}
+          className="self-start px-4 py-1 text-sm"
+        >
+          {isLoadingMore ? "Loading..." : "Load more"}
+        </button>
+      )}
     </div>
   );
 }

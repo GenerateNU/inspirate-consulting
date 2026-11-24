@@ -2,13 +2,14 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 // pill colors from the hi-fi "Tags" component
-export type TagTone = "grey" | "green" | "yellow" | "blue";
+export type TagTone = "grey" | "green" | "yellow" | "blue" | "red";
 
 const toneClassName: Record<TagTone, string> = {
   grey: "border border-greyish-brown bg-white text-dark-greyish-brown",
   green: "bg-lightest-green text-dark-green",
   yellow: "bg-lightest-yellow text-dark-yellow",
   blue: "bg-lightest-blue text-dark-blue",
+  red: "border border-danger-stroke bg-danger/10 text-danger",
 };
 
 export const tagClassName =
