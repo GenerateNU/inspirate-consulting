@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserAvatar from "@/components/user-avatar";
-import { formatListTime, isUUID } from "./chat-utils";
+import { AssistantAvatar } from "./assistant-conversation";
+import { ASSISTANT_CHAT_ID, formatListTime, isUUID } from "./chat-utils";
 
 interface ChatListProps {
   chats: ChatSummary[];
   currentUserId: string | null;
+  showAssistant: boolean;
   isLoading: boolean;
   error: string | null;
 }
@@ -19,6 +21,7 @@ interface ChatListProps {
 export default function ChatList({
   chats,
   currentUserId,
+  showAssistant,
   isLoading,
   error,
 }: ChatListProps) {
@@ -30,6 +33,11 @@ export default function ChatList({
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto">
+        {showAssistant && (
+          <li>
+            <AssistantListItem />
+          </li>
+        )}
         {isLoading &&
           Array.from({ length: 4 }, (_, i) => (
             <li
@@ -110,6 +118,28 @@ function ChatListItem({
             <Badge className="bg-forest text-white">{chat.unread_count}</Badge>
           )}
         </div>
+      </div>
+    </NavLink>
+  );
+}
+
+function AssistantListItem() {
+  return (
+    <NavLink
+      to={`/chats/${ASSISTANT_CHAT_ID}`}
+      className={({ isActive }) =>
+        cn(
+          "flex items-center gap-3 px-5 py-3 transition-colors hover:bg-neutral-100",
+          isActive && "bg-neutral-100",
+        )
+      }
+    >
+      <AssistantAvatar className="size-10" />
+      <div className="min-w-0 flex-1">
+        <span className="truncate">Assistant</span>
+        <p className="truncate text-sm text-neutral-500">
+          Search your students' tasks and messages
+        </p>
       </div>
     </NavLink>
   );
