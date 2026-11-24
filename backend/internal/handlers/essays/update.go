@@ -2,6 +2,7 @@ package essays
 
 import (
 	"context"
+	"log/slog"
 
 	"inspirate-consulting/internal/models"
 )
@@ -20,6 +21,14 @@ func (h *Handler) UpdateStatus(ctx context.Context, input *models.UpdateStatusIn
 	updatedEssay, err := h.EssayRepository.UpdateStatus(ctx, input.EssayID, input.Body.Status)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := h.ActivityRepository.CreateActivity(ctx, studentID, models.CreateActivityBody{
+		Action:      models.ActionEssayStatusChanged,
+		EssayID:     &updatedEssay.ID,
+		EssayStatus: &updatedEssay.Status,
+	}); err != nil {
+		slog.Error("failed to log essay_status_changed activity", "student_id", studentID, "essay_id", updatedEssay.ID, "error", err)
 	}
 
 	return &models.UpdateStatusOutput{

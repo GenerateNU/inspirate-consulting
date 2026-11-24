@@ -2,6 +2,7 @@ package personalcollegeapplication
 
 import (
 	"context"
+	"log/slog"
 
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/models"
@@ -27,6 +28,13 @@ func (h *Handler) CreatePersonalCollegeApplication(ctx context.Context, input mo
 	createdPersonalCollegeApplication, err := h.PersonalCollegeApplicationRepository.CreatePersonalCollegeApplication(ctx, studentID, input)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := h.ActivityRepository.CreateActivity(ctx, studentID, models.CreateActivityBody{
+		Action:          models.ActionAddedSchool,
+		GlobalCollegeID: &createdPersonalCollegeApplication.GlobalCollegeID,
+	}); err != nil {
+		slog.Error("failed to log added_school activity", "student_id", studentID, "global_college_id", createdPersonalCollegeApplication.GlobalCollegeID, "error", err)
 	}
 
 	return createdPersonalCollegeApplication, nil

@@ -18,27 +18,27 @@ import (
 //   - closes the gap in the student's ranking
 //
 // essays are left alone if the student still has another application to the same college.
-func (r *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error {
+func (r *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) (int64, error) {
 	deleteQuery, err := schema.ReadSQLBaseScript("delete_personal_college_application.sql", SqlPersonalCollegeApplicationFiles)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	archiveEssaysQuery, err := schema.ReadSQLBaseScript("archive_college_essays_with_reviews.sql", SqlPersonalCollegeApplicationFiles)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	deleteEssaysQuery, err := schema.ReadSQLBaseScript("delete_college_essays.sql", SqlPersonalCollegeApplicationFiles)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	closeRankGapQuery, err := schema.ReadSQLBaseScript("close_personal_college_application_rank_gap.sql", SqlPersonalCollegeApplicationFiles)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
@@ -46,23 +46,23 @@ func (r *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(
 	var rank *int
 	if err := tx.QueryRow(ctx, deleteQuery, applicationID, studentID).Scan(&collegeID, &rank); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return errs.NotFound("personal college application", "id", applicationID)
+			return 0, errs.NotFound("personal college application", "id", applicationID)
 		}
-		return err
+		return 0, err
 	}
 
 	if _, err := tx.Exec(ctx, archiveEssaysQuery, studentID, collegeID); err != nil {
-		return err
+		return 0, err
 	}
 	if _, err := tx.Exec(ctx, deleteEssaysQuery, studentID, collegeID); err != nil {
-		return err
+		return 0, err
 	}
 
 	if rank != nil {
 		if _, err := tx.Exec(ctx, closeRankGapQuery, studentID, *rank); err != nil {
-			return err
+			return 0, err
 		}
 	}
 
-	return tx.Commit(ctx)
+	return collegeID, tx.Commit(ctx)
 }
