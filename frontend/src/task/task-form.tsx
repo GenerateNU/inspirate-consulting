@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { errorMessage } from "../api/client";
 import { useListCounselorStudents } from "../api/endpoints";
 import arrowLeftIcon from "@/assets/college/arrow-left.svg";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
   fieldLabelClassName,
   hintClassName,
 } from "./task-form-styles";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export const DESCRIPTION_WORD_LIMIT = 250;
 const TITLE_MAX_LENGTH = 200;
@@ -205,10 +205,12 @@ export default function TaskForm({
             subtitle="Choose a whole class, specific students, or both."
           >
             {studentsQuery.error ? (
-              <p className="font-host text-xs text-danger">
-                Couldn&apos;t load your students:{" "}
-                {errorMessage(studentsQuery.error)}
-              </p>
+              <ErrorMessage
+                variant="banner"
+                title="Couldn't load your students"
+                error={studentsQuery.error}
+                onRetry={studentsQuery.refetch}
+              />
             ) : (
               <AssignToSection
                 value={assignTo}
@@ -254,11 +256,7 @@ export default function TaskForm({
               {missing.length > 0 && (
                 <p className={hintClassName}>Add {missing.join(" and ")}.</p>
               )}
-              {error != null && (
-                <p role="alert" className="font-host text-xs text-danger">
-                  {errorMessage(error)}
-                </p>
-              )}
+              <ErrorMessage error={error} size="xs" />
             </div>
           </Section>
         </form>

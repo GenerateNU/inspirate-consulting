@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 
-import { errorMessage } from "../api/client";
 import { useGetActivities, useListCounselorStudents } from "../api/endpoints";
 import {
   ActivityAction,
@@ -13,6 +12,7 @@ import { useAuthContext } from "../contexts/use-auth-context";
 import { formatTime } from "../lib/format-relative-time";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserAvatar from "@/components/user-avatar";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 function activityCopy(activity: Activity, name: string): string {
   switch (activity.action) {
@@ -58,12 +58,16 @@ export default function RecentActivity() {
     data: activities,
     error: activitiesError,
     isLoading: activitiesLoading,
+    refetch: refetchActivities,
   } = useGetActivities(undefined, { query: { enabled: isCounselor } });
 
-  const { data: studentsData, error: studentsError } = useListCounselorStudents(
-    undefined,
-    { query: { enabled: isCounselor } },
-  );
+  const {
+    data: studentsData,
+    error: studentsError,
+    refetch: refetchStudents,
+  } = useListCounselorStudents(undefined, {
+    query: { enabled: isCounselor },
+  });
 
   // Only counselors can see this panel - and the backend 403s anyone else,
   // so skip fetching and rendering entirely otherwise.
@@ -95,11 +99,16 @@ export default function RecentActivity() {
               </div>
             </div>
           ))}
-        {error && (
-          <p className="py-3 font-host text-sm text-danger">
-            {errorMessage(error)}
-          </p>
-        )}
+        <ErrorMessage
+          variant="banner"
+          error={error}
+          title="Couldn't load recent activity"
+          onRetry={() => {
+            void refetchActivities();
+            void refetchStudents();
+          }}
+          className="my-3"
+        />
         {!activitiesLoading && !error && items.length === 0 && (
           <p className="py-3 font-host text-sm text-warm-grey-dark">
             No recent activity yet.

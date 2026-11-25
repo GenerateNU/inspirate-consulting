@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
-import { errorMessage } from "../api/client";
 import {
   useGetNotificationPreferences,
   useUpdateNotificationPreferences,
 } from "../api/endpoints";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function UpdateNotificationPreferences() {
-  const { data: prefs, error, isLoading } = useGetNotificationPreferences();
+  const {
+    data: prefs,
+    error,
+    isLoading,
+    refetch,
+  } = useGetNotificationPreferences();
   const update = useUpdateNotificationPreferences();
 
   const [emailEnabled, setEmailEnabled] = useState(true);
@@ -58,7 +63,13 @@ export default function UpdateNotificationPreferences() {
     return (
       <div className="form-container">
         <h2>Notification Preferences</h2>
-        <p>Something went wrong.</p>
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load your preferences"
+          error={error}
+          message={error ? undefined : "No preferences found."}
+          onRetry={refetch}
+        />
       </div>
     );
   }
@@ -127,7 +138,7 @@ export default function UpdateNotificationPreferences() {
         </button>
       </form>
       {status && <p>{status}</p>}
-      {update.error && <p>Error: {errorMessage(update.error)}</p>}
+      <ErrorMessage error={update.error} prefix="Couldn't save preferences" />
     </div>
   );
 }

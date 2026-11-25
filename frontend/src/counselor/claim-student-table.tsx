@@ -4,6 +4,7 @@ import type { StudentListItem } from "../api/models";
 import { useAssignCounselor, getFetchStudentsQueryKey } from "../api/endpoints";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // how each student year is shown in the Grade Cohort column
 const gradeLabel = (graduationYear: number) => {
@@ -28,7 +29,7 @@ export function ClaimStudentTable({
   isLoadingMore: boolean;
   onLoadMore: () => void;
 }) {
-  const { mutate: assignCounselor } = useAssignCounselor();
+  const { mutate: assignCounselor, error: claimError } = useAssignCounselor();
   const queryClient = useQueryClient();
   // students claimed on this page, so the row updates right away instead of after a refetch
   const [claimedIDs, setClaimedIDs] = useState<Set<string>>(new Set());
@@ -126,12 +127,20 @@ export function ClaimStudentTable({
         <span className="col-span-3" />
         <span className="col-span-2 text-right">Assignment Status</span>
       </div>
+      <ErrorMessage
+        error={claimError}
+        prefix="Couldn't claim student"
+        className="px-4 pt-3"
+      />
       {hasSearch && studentRows}
-      {hasSearch && error ? (
-        <p className="p-4 font-inter text-sm text-[#45464c]">
-          Could not load students.
-        </p>
-      ) : null}
+      {hasSearch && (
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load students"
+          error={error}
+          className="m-4 w-auto"
+        />
+      )}
       {hasSearch && isLoadingMore ? (
         <p className="p-4 font-inter text-sm text-[#45464c]">
           Loading more students…

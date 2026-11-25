@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import type { TodoItem } from "../api/models";
-import { errorMessage } from "../api/client";
 import PageLinks, { type PageLink } from "@/components/page-links";
 import { Skeleton } from "@/components/ui/skeleton";
 import TaskDrawer from "./task-drawer";
@@ -10,6 +9,7 @@ import TaskRow from "./task-row";
 import TaskStatCard from "./task-stat-card";
 import { useTaskGroups, type TaskGroup } from "./use-task-groups";
 import { useStudentTasks, useToggleTaskCompleted } from "./use-student-tasks";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // Temporary links to this page's sub-pages (see the Figma sitemap).
 const pageLinks: PageLink[] = [
@@ -179,12 +179,10 @@ export default function StudentTaskList() {
 
         <TaskStatCards />
 
-        {toggleCompleted.error && (
-          <p role="alert" className="font-host text-sm text-danger">
-            Couldn&apos;t update that task:{" "}
-            {errorMessage(toggleCompleted.error)}
-          </p>
-        )}
+        <ErrorMessage
+          error={toggleCompleted.error}
+          prefix="Couldn't update that task"
+        />
 
         <div className="flex max-w-228 flex-col gap-8">
           {tasksQuery.isLoading &&
@@ -195,11 +193,12 @@ export default function StudentTaskList() {
               </div>
             ))}
 
-          {tasksQuery.error && (
-            <p className="font-host text-sm text-danger">
-              Couldn&apos;t load your tasks: {errorMessage(tasksQuery.error)}
-            </p>
-          )}
+          <ErrorMessage
+            variant="banner"
+            title="Couldn't load your tasks"
+            error={tasksQuery.error}
+            onRetry={tasksQuery.refetch}
+          />
 
           {!tasksQuery.isLoading &&
             !tasksQuery.error &&

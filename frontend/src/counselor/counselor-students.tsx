@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { errorMessage } from "../api/client";
 import {
   graduationYearLabel,
   graduationYearOptions,
@@ -12,6 +11,7 @@ import {
   ListCounselorStudentsSortOrder as SortOrder,
   type CounselorStudent,
 } from "../api/models";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function CounselorStudents() {
   // Filters and sorting are sent as query params, so changing them refetches the list
@@ -24,6 +24,7 @@ export default function CounselorStudents() {
     data: studentsData,
     error,
     isLoading,
+    refetch,
   } = useListCounselorStudents({
     graduation_year: graduationYear || undefined,
     has_pending_review: pendingReviewOnly || undefined,
@@ -91,7 +92,12 @@ export default function CounselorStudents() {
       </div>
 
       {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {errorMessage(error)}</p>}
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load your students"
+        error={error}
+        onRetry={refetch}
+      />
       {!isLoading && !error && students.length === 0 && (
         <p>No students match these filters.</p>
       )}

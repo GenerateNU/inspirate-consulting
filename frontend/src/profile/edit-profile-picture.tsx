@@ -11,6 +11,7 @@ import {
 import UserAvatar from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { compressPfp, pfpAccept, uploadPfp } from "./pfp-file";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function EditProfilePicture() {
   const queryClient = useQueryClient();
@@ -87,7 +88,6 @@ export default function EditProfilePicture() {
   };
 
   const isBusy = save.isPending || remove.isPending;
-  const error = selectError || (save.error ?? remove.error);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6 md:p-10">
@@ -147,11 +147,11 @@ export default function EditProfilePicture() {
       </form>
 
       {status && <p>{status}</p>}
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          Error: {typeof error === "string" ? error : errorMessage(error)}
-        </p>
-      )}
+      <ErrorMessage
+        message={selectError}
+        error={save.error ?? remove.error}
+        prefix={selectError ? undefined : "Couldn't update picture"}
+      />
     </div>
   );
 }

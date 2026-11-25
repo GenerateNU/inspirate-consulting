@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { errorMessage } from "../api/client";
 import {
   getGetExtracurricularQueryKey,
   getListExtracurricularsQueryKey,
@@ -21,26 +20,36 @@ import {
   toUpdateRequestBody,
   type ActivityFormValues,
 } from "./ExtracurricularShared";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function EditExtracurricular() {
   const { id } = useParams();
   const numericId = Number(id);
-  const { data, isLoading, error } = useGetExtracurricular(numericId, {
+  const { data, isLoading, error, refetch } = useGetExtracurricular(numericId, {
     query: { enabled: Number.isInteger(numericId) },
   });
 
   if (isLoading) return <p className={activityPageClass}>Loading...</p>;
   if (error || !data) {
+    const loadFailed = !!error && error.status !== 404;
     return (
       <div className={activityPageClass}>
-        <p>
-          {error && error.status !== 404
-            ? `Error: ${errorMessage(error)}`
-            : "This extracurricular doesn't exist or was removed."}
-        </p>
-        <Link to="/extracurriculars" className="underline">
-          Back to extracurriculars
-        </Link>
+        <ErrorMessage
+          variant="banner"
+          title={loadFailed ? "Couldn't load this extracurricular" : undefined}
+          error={error}
+          message={
+            loadFailed
+              ? undefined
+              : "This extracurricular doesn't exist or was removed."
+          }
+          onRetry={loadFailed ? refetch : undefined}
+          action={
+            <Link to="/extracurriculars" className="underline">
+              Back to extracurriculars
+            </Link>
+          }
+        />
       </div>
     );
   }

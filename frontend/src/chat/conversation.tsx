@@ -17,7 +17,6 @@ import {
   useMarkChatRead,
 } from "../api/endpoints";
 import type { ChatMessage } from "../api/models";
-import { errorMessage } from "../api/client";
 import { cn } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,6 +29,7 @@ import {
   formatTime,
   type MessageGroup,
 } from "./chat-utils";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const PAGE_SIZE = 30;
 
@@ -159,11 +159,12 @@ export default function Conversation({
           <div ref={topSentinelRef} />
           {isFetchingNextPage && <MessagesSkeleton rows={2} />}
           {messagesQuery.isLoading && <MessagesSkeleton rows={5} />}
-          {messagesQuery.error && (
-            <p className="text-center text-sm text-red-600">
-              {errorMessage(messagesQuery.error)}
-            </p>
-          )}
+          <ErrorMessage
+            variant="banner"
+            title="Couldn't load messages"
+            error={messagesQuery.error}
+            onRetry={messagesQuery.refetch}
+          />
           {messagesQuery.isSuccess && messages.length === 0 && (
             <p className="text-center text-sm text-neutral-500">
               No messages yet. Say hello!
@@ -351,11 +352,11 @@ function Composer({
           <Navigation className="size-8 rotate-45 fill-current" />
         </Button>
       </div>
-      {createMessage.error && (
-        <p className="mt-2 text-sm text-red-600">
-          {errorMessage(createMessage.error)}
-        </p>
-      )}
+      <ErrorMessage
+        error={createMessage.error}
+        prefix="Couldn't send"
+        className="mt-2"
+      />
     </form>
   );
 }

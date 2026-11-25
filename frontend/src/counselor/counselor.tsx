@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { errorMessage } from "../api/client";
 import {
   getGetStudentQueryKey,
   useGetStudent,
@@ -24,6 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import RecentActivity from "./recent-activity";
 import StudentCard from "./student-card";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const sectionHeadingClassName =
   "font-jakarta text-xl leading-[normal] font-semibold text-charcoal";
@@ -132,11 +132,11 @@ function ReviewBalanceForm({ students }: { students: CounselorStudent[] }) {
         Assign balance
       </Button>
       {result && <p className="font-host text-xs text-dark-green">{result}</p>}
-      {assignBalance.error && (
-        <p className="font-host text-xs text-danger">
-          {errorMessage(assignBalance.error)}
-        </p>
-      )}
+      <ErrorMessage
+        error={assignBalance.error}
+        prefix="Couldn't assign balance"
+        size="xs"
+      />
     </form>
   );
 }
@@ -148,6 +148,7 @@ export default function Counselor() {
     data: studentsData,
     error,
     isLoading,
+    refetch,
   } = useListCounselorStudents({
     sort_by: SortBy.name,
     sort_order: SortOrder.asc,
@@ -186,11 +187,12 @@ export default function Counselor() {
             </Button>
           </div>
 
-          {error && (
-            <p className="font-host text-sm text-danger">
-              {errorMessage(error)}
-            </p>
-          )}
+          <ErrorMessage
+            variant="banner"
+            error={error}
+            title="Couldn't load your students"
+            onRetry={refetch}
+          />
 
           {!isLoading && !error && students.length === 0 && (
             <p className="font-host text-sm text-warm-grey-dark">

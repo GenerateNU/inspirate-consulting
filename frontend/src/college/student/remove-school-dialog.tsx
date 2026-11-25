@@ -1,10 +1,10 @@
-import { errorMessage } from "../../api/client";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 interface RemoveSchoolDialogProps {
   // the school being removed, or null when the dialog is closed
@@ -45,17 +45,11 @@ export default function RemoveSchoolDialog({
           <DialogDescription className="font-host text-sm leading-5 text-[#575c57]">
             {description}
           </DialogDescription>
-          {blockedMessage ? (
-            <p role="alert" className="font-host text-sm text-danger">
-              {blockedMessage}
-            </p>
-          ) : (
-            error != null && (
-              <p role="alert" className="font-host text-sm text-danger">
-                Error: {errorMessage(error)}
-              </p>
-            )
-          )}
+          <ErrorMessage
+            error={error}
+            message={blockedMessage}
+            prefix={blockedMessage ? undefined : "Couldn't remove"}
+          />
         </div>
         <div className="flex items-center justify-end gap-2">
           <button

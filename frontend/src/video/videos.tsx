@@ -1,5 +1,6 @@
 import { useListVideos } from "../api/endpoints";
 import PageLinks, { type PageLink } from "@/components/page-links";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // Temporary links to this page's sub-pages (see the Figma sitemap).
 const pageLinks: PageLink[] = [
@@ -29,8 +30,13 @@ export default function VideoList() {
       <>
         <PageLinks links={pageLinks} />
         <div className="form-container">
-          <h2>Videos </h2>
-          <p>Something went wrong. </p>
+          <h2>Videos</h2>
+          <ErrorMessage
+            variant="banner"
+            title="Couldn't load videos"
+            error={error}
+            onRetry={refetch}
+          />
         </div>
       </>
     );

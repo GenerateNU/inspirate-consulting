@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { errorMessage } from "../api/client";
 import { useCreateTodoItem } from "../api/endpoints";
 import type { CreateTodoItemRequestBody } from "../api/models";
 import {
@@ -9,6 +8,7 @@ import {
   useTodoLinkOptions,
   type LinkType,
 } from "./todoShared";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function CreateTask() {
   const [title, setTitle] = useState("");
@@ -132,7 +132,7 @@ export default function CreateTask() {
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {errorMessage(error)}</p>}
+      <ErrorMessage error={error} prefix="Couldn't create task" />
     </div>
   );
 }

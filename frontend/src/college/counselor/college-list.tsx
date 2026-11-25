@@ -14,6 +14,7 @@ import Tag from "../utils/components/tag";
 import { cycleLabel } from "../utils/shared";
 import { editorCycleOrder } from "./cycles-editor";
 import { primaryButtonClassName } from "./college-details";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // counselor's "Colleges" page: every global college with the cycles it offers
 export default function CounselorCollegeList() {
@@ -51,9 +52,12 @@ export default function CounselorCollegeList() {
     body = <p className="font-host text-sm">Loading...</p>;
   } else if (collegesQuery.error) {
     body = (
-      <p className="font-host text-sm">
-        Error: {errorMessage(collegesQuery.error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load colleges"
+        error={collegesQuery.error}
+        onRetry={collegesQuery.refetch}
+      />
     );
   } else if (colleges.length === 0) {
     body = (

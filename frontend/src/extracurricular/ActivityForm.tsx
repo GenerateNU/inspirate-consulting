@@ -7,7 +7,6 @@ import {
   Palette,
   Paperclip,
 } from "lucide-react";
-import { errorMessage } from "../api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +27,7 @@ import {
   type ActivityFormValues,
 } from "./ExtracurricularShared";
 import { CategoryIcon, SectionCard, Toggle } from "./sections";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const FORM_ID = "ec-activity-form";
 
@@ -145,11 +145,11 @@ export default function ActivityForm({
         </p>
       )}
 
-      {(formError || error) && (
-        <p role="alert" className={edit.error}>
-          {formError ?? `Error: ${errorMessage(error)}`}
-        </p>
-      )}
+      <ErrorMessage
+        error={error}
+        message={formError}
+        prefix={formError ? undefined : "Couldn't save"}
+      />
 
       <div
         className={cn(

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 type Audience = "student" | "counselor";
 
@@ -21,18 +22,17 @@ const emailLabel: Record<"default" | Audience, string> = {
 export default function LogIn({ audience }: LogInProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState("");
+  const [error, setError] = useState<unknown>(null);
 
   const { login } = useAuthContext();
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLElement>) => {
     event.preventDefault();
-    setStatus("");
+    setError(null);
     try {
       await login(email, password);
     } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong");
+      setError(err);
     }
   };
 
@@ -65,14 +65,11 @@ export default function LogIn({ audience }: LogInProps) {
               />
             </div>
             <Button type="submit">Log In</Button>
-            {status && (
-              <p
-                role="alert"
-                className="rounded-md bg-destructive/10 p-4 text-destructive"
-              >
-                {status}
-              </p>
-            )}
+            <ErrorMessage
+              variant="banner"
+              title="Couldn't log in"
+              error={error}
+            />
             <Separator />
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account yet? Contact an administrator.
