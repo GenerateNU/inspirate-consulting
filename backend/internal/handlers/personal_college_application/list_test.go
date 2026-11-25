@@ -33,7 +33,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return(expectedApplications, nil)
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.ListPersonalCollegeApplicationsByStudentID(ctx, "")
 
 		assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return([]models.PersonalCollegeApplication{}, nil)
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.ListPersonalCollegeApplicationsByStudentID(ctx, "")
 
 		assert.NoError(t, err)
@@ -63,7 +63,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		mockPersonalRepo.On("ListPersonalCollegeApplicationsByStudentID", mock.Anything, studentID).
 			Return(nil, errors.New("database error"))
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.ListPersonalCollegeApplicationsByStudentID(ctx, "")
 
 		assert.Error(t, err)
@@ -78,7 +78,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 		// ListPersonalCollegeApplicationsByStudentID is not called without a student id
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.ListPersonalCollegeApplicationsByStudentID(context.Background(), "")
 
 		assert.EqualError(t, err, "http error: 400 student_id is required")
@@ -91,7 +91,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 		mockGlobalCollegeRepo := mocks.NewGlobalCollegeRepository(t)
 		mockPersonalRepo := mocks.NewPersonalCollegeApplicationRepository(t)
 
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.ListPersonalCollegeApplicationsByStudentID(ctx, "not-a-uuid")
 
 		assert.Error(t, err)
@@ -108,7 +108,7 @@ func TestHandler_ListPersonalCollegeApplicationsByStudentID(t *testing.T) {
 			Return([]models.PersonalCollegeApplication{}, nil)
 
 		// nil authorizer allows any student (access checks are covered by the auth package)
-		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil)
+		handler := NewHandler(mockPersonalRepo, mockGlobalCollegeRepo, nil, nil)
 		res, err := handler.ListPersonalCollegeApplicationsByStudentID(ctx, otherStudentID.String())
 
 		assert.NoError(t, err)

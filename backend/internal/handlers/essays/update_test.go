@@ -42,7 +42,39 @@ func TestHandler_UpdateStatus(t *testing.T) {
 		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(studentID, nil)
 		mockRepo.On("UpdateStatus", mock.Anything, essayID, models.Submitted).Return(updatedEssay, nil)
 
-		handler := NewHandler(mockRepo, realAuthorizer(), nil)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, models.CreateActivityBody{
+			Action:      models.ActionEssayStatusChanged,
+			EssayID:     &essayID,
+			EssayStatus: &updatedEssay.Status,
+		}).Return(nil)
+
+		handler := NewHandler(mockRepo, realAuthorizer(), nil, mockActivityRepo)
+		res, err := handler.UpdateStatus(studentRoleCtx(studentID), input)
+
+		assert.NoError(t, err)
+		assert.Equal(t, &models.UpdateStatusOutput{
+			Body: models.EssayBody{Essay: updatedEssay},
+		}, res)
+	})
+
+	t.Run("activity logging error is swallowed", func(t *testing.T) {
+		t.Parallel()
+
+		updatedEssay := &models.Essays{
+			ID:     essayID,
+			Status: models.Submitted,
+		}
+
+		mockRepo := mocks.NewEssayRepository(t)
+		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(studentID, nil)
+		mockRepo.On("UpdateStatus", mock.Anything, essayID, models.Submitted).Return(updatedEssay, nil)
+
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, mock.Anything).
+			Return(errors.New("activity write failed"))
+
+		handler := NewHandler(mockRepo, realAuthorizer(), nil, mockActivityRepo)
 		res, err := handler.UpdateStatus(studentRoleCtx(studentID), input)
 
 		assert.NoError(t, err)
@@ -57,7 +89,7 @@ func TestHandler_UpdateStatus(t *testing.T) {
 		mockRepo := mocks.NewEssayRepository(t)
 		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).Return(uuid.New(), nil)
 
-		handler := NewHandler(mockRepo, realAuthorizer(), nil)
+		handler := NewHandler(mockRepo, realAuthorizer(), nil, nil)
 		res, err := handler.UpdateStatus(studentRoleCtx(studentID), input)
 
 		assert.Nil(t, res)
@@ -74,7 +106,7 @@ func TestHandler_UpdateStatus(t *testing.T) {
 		mockRepo.On("GetEssayStudentID", mock.Anything, essayID).
 			Return(uuid.Nil, errs.NotFound("essay", "id", essayID.String()))
 
-		handler := NewHandler(mockRepo, nil, nil)
+		handler := NewHandler(mockRepo, nil, nil, nil)
 		res, err := handler.UpdateStatus(context.Background(), input)
 
 		assert.Nil(t, res)
@@ -92,7 +124,7 @@ func TestHandler_UpdateStatus(t *testing.T) {
 		mockRepo.On("UpdateStatus", mock.Anything, essayID, models.Submitted).
 			Return((*models.Essays)(nil), errors.New("database error"))
 
-		handler := NewHandler(mockRepo, nil, nil)
+		handler := NewHandler(mockRepo, nil, nil, nil)
 		res, err := handler.UpdateStatus(context.Background(), input)
 
 		assert.Nil(t, res)

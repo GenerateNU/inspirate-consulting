@@ -69,7 +69,7 @@ func setupOwnershipFixture(t *testing.T) ownershipFixture {
 	require.NoError(t, err)
 	f.extracurricularID = created.Body.ID
 
-	f.handler = NewHandler(repo, auth.NewAuthorizer(db))
+	f.handler = NewHandler(repo, auth.NewAuthorizer(db), nil)
 	return f
 }
 

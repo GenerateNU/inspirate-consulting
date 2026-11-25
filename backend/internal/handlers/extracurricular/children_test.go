@@ -86,7 +86,7 @@ func TestHandler_ExtracurricularChildren_Authorization(t *testing.T) {
 			mockRepo.On("GetExtracurricular", mock.Anything, parentID).Return(parent, nil)
 			op.expect(mockRepo, parentID)
 
-			require.NoError(t, op.run(NewHandler(mockRepo, realAuthorizer()), ownerID, parentID))
+			require.NoError(t, op.run(NewHandler(mockRepo, realAuthorizer(), nil), ownerID, parentID))
 		})
 
 		t.Run(op.name+": another student is forbidden", func(t *testing.T) {
@@ -95,7 +95,7 @@ func TestHandler_ExtracurricularChildren_Authorization(t *testing.T) {
 			mockRepo := mocks.NewExtracurricularRepository(t)
 			mockRepo.On("GetExtracurricular", mock.Anything, parentID).Return(parent, nil)
 
-			err := op.run(NewHandler(mockRepo, realAuthorizer()), uuid.New(), parentID)
+			err := op.run(NewHandler(mockRepo, realAuthorizer(), nil), uuid.New(), parentID)
 
 			var httpErr errs.HTTPError
 			require.ErrorAs(t, err, &httpErr)
@@ -110,7 +110,7 @@ func TestHandler_ExtracurricularChildren_Authorization(t *testing.T) {
 			mockRepo := mocks.NewExtracurricularRepository(t)
 			mockRepo.On("GetExtracurricular", mock.Anything, parentID).Return(nil, notFound)
 
-			err := op.run(NewHandler(mockRepo, realAuthorizer()), ownerID, parentID)
+			err := op.run(NewHandler(mockRepo, realAuthorizer(), nil), ownerID, parentID)
 
 			assert.Equal(t, notFound, err)
 			assert.Len(t, mockRepo.Calls, 1, "child repository method must not be called")
@@ -122,7 +122,7 @@ func TestHandler_ExtracurricularChildren_Authorization(t *testing.T) {
 			mockRepo := mocks.NewExtracurricularRepository(t)
 			mockRepo.On("GetExtracurricular", mock.Anything, parentID).Return(nil, errors.New("database error"))
 
-			assert.EqualError(t, op.run(NewHandler(mockRepo, realAuthorizer()), ownerID, parentID), "database error")
+			assert.EqualError(t, op.run(NewHandler(mockRepo, realAuthorizer(), nil), ownerID, parentID), "database error")
 		})
 	}
 }
@@ -142,7 +142,7 @@ func TestHandler_ExtracurricularChildren_ForwardsArguments(t *testing.T) {
 		mockRepo.On("GetExtracurricular", mock.Anything, int64(8)).Return(parent, nil)
 		mockRepo.On("UpdateExtracurricularNote", mock.Anything, int64(8), int64(5), models.ExtracurricularNoteRequest{Body: "new"}).Return(want, nil)
 
-		got, err := NewHandler(mockRepo, realAuthorizer()).UpdateExtracurricularNote(studentRoleCtx(ownerID), &models.UpdateExtracurricularNoteInput{
+		got, err := NewHandler(mockRepo, realAuthorizer(), nil).UpdateExtracurricularNote(studentRoleCtx(ownerID), &models.UpdateExtracurricularNoteInput{
 			ExtracurricularID: 8, NoteID: 5, Body: models.ExtracurricularNoteRequest{Body: "new"},
 		})
 		require.NoError(t, err)
@@ -158,7 +158,7 @@ func TestHandler_ExtracurricularChildren_ForwardsArguments(t *testing.T) {
 		mockRepo.On("GetExtracurricular", mock.Anything, int64(8)).Return(parent, nil)
 		mockRepo.On("UpdateExtracurricularAchievement", mock.Anything, int64(8), int64(6), body).Return(want, nil)
 
-		got, err := NewHandler(mockRepo, realAuthorizer()).UpdateExtracurricularAchievement(studentRoleCtx(ownerID), &models.UpdateExtracurricularAchievementInput{
+		got, err := NewHandler(mockRepo, realAuthorizer(), nil).UpdateExtracurricularAchievement(studentRoleCtx(ownerID), &models.UpdateExtracurricularAchievementInput{
 			ExtracurricularID: 8, AchievementID: 6, Body: body,
 		})
 		require.NoError(t, err)

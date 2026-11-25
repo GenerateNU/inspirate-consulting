@@ -64,7 +64,29 @@ func TestHandler_CreateExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("CreateExtracurricular", mock.Anything, studentID.String(), userID.String(), *input).Return(expected, nil)
 
-		res, err := NewHandler(mockRepo, nil).CreateExtracurricular(studentCtx(studentID, userID), input)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, models.CreateActivityBody{
+			Action:            models.ActionAddedExtracurricular,
+			ExtracurricularID: &expected.Body.ID,
+		}).Return(nil)
+
+		res, err := NewHandler(mockRepo, nil, mockActivityRepo).CreateExtracurricular(studentCtx(studentID, userID), input)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, res)
+	})
+
+	t.Run("activity logging error is swallowed", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("CreateExtracurricular", mock.Anything, studentID.String(), userID.String(), *input).Return(expected, nil)
+
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, studentID, mock.Anything).
+			Return(errors.New("activity write failed"))
+
+		res, err := NewHandler(mockRepo, nil, mockActivityRepo).CreateExtracurricular(studentCtx(studentID, userID), input)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, res)
@@ -84,7 +106,10 @@ func TestHandler_CreateExtracurricular(t *testing.T) {
 					*b.ApplicationDescription == "Led the team to a state title."
 			})).Return(expected, nil)
 
-		_, err := NewHandler(mockRepo, nil).CreateExtracurricular(studentCtx(studentID, userID), input)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		_, err := NewHandler(mockRepo, nil, mockActivityRepo).CreateExtracurricular(studentCtx(studentID, userID), input)
 		require.NoError(t, err)
 	})
 
@@ -105,7 +130,10 @@ func TestHandler_CreateExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("CreateExtracurricular", mock.Anything, studentID.String(), userID.String(), *minimal).Return(out, nil)
 
-		res, err := NewHandler(mockRepo, nil).CreateExtracurricular(studentCtx(studentID, userID), minimal)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		res, err := NewHandler(mockRepo, nil, mockActivityRepo).CreateExtracurricular(studentCtx(studentID, userID), minimal)
 
 		require.NoError(t, err)
 		assert.Nil(t, res.Body.Description)
@@ -119,7 +147,7 @@ func TestHandler_CreateExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		ctx := auth.WithUserID(context.Background(), userID)
 
-		res, err := NewHandler(mockRepo, nil).CreateExtracurricular(ctx, input)
+		res, err := NewHandler(mockRepo, nil, nil).CreateExtracurricular(ctx, input)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -134,7 +162,7 @@ func TestHandler_CreateExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		ctx := auth.WithStudentID(context.Background(), studentID)
 
-		res, err := NewHandler(mockRepo, nil).CreateExtracurricular(ctx, input)
+		res, err := NewHandler(mockRepo, nil, nil).CreateExtracurricular(ctx, input)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -150,7 +178,7 @@ func TestHandler_CreateExtracurricular(t *testing.T) {
 		mockRepo.On("CreateExtracurricular", mock.Anything, studentID.String(), userID.String(), *input).
 			Return(nil, errors.New("database error"))
 
-		res, err := NewHandler(mockRepo, nil).CreateExtracurricular(studentCtx(studentID, userID), input)
+		res, err := NewHandler(mockRepo, nil, nil).CreateExtracurricular(studentCtx(studentID, userID), input)
 
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")

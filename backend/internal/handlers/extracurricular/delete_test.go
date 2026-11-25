@@ -21,7 +21,7 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 	t.Parallel()
 
 	ownerID := uuid.New()
-	const id int64 = 21
+	id := int64(21)
 	existing := &models.ExtracurricularDetail{
 		Extracurricular: models.Extracurricular{ID: id, StudentID: ownerID.String(), Name: "Debate"},
 	}
@@ -33,7 +33,29 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(existing, nil)
 		mockRepo.On("DeleteExtracurricular", mock.Anything, id, ownerID.String()).Return(nil)
 
-		err := NewHandler(mockRepo, realAuthorizer()).DeleteExtracurricular(studentRoleCtx(ownerID), id)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, ownerID, models.CreateActivityBody{
+			Action:            models.ActionRemovedExtracurricular,
+			ExtracurricularID: &id,
+		}).Return(nil)
+
+		err := NewHandler(mockRepo, realAuthorizer(), mockActivityRepo).DeleteExtracurricular(studentRoleCtx(ownerID), id)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("activity logging error is swallowed", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(existing, nil)
+		mockRepo.On("DeleteExtracurricular", mock.Anything, id, ownerID.String()).Return(nil)
+
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, ownerID, mock.Anything).
+			Return(errors.New("activity write failed"))
+
+		err := NewHandler(mockRepo, realAuthorizer(), mockActivityRepo).DeleteExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.NoError(t, err)
 	})
@@ -45,7 +67,10 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(existing, nil)
 		mockRepo.On("DeleteExtracurricular", mock.Anything, id, ownerID.String()).Return(nil)
 
-		err := NewHandler(mockRepo, nil).DeleteExtracurricular(context.Background(), id)
+		mockActivityRepo := mocks.NewActivityRepository(t)
+		mockActivityRepo.On("CreateActivity", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		err := NewHandler(mockRepo, nil, mockActivityRepo).DeleteExtracurricular(context.Background(), id)
 
 		assert.NoError(t, err)
 	})
@@ -56,7 +81,7 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(existing, nil)
 
-		err := NewHandler(mockRepo, realAuthorizer()).DeleteExtracurricular(studentRoleCtx(uuid.New()), id)
+		err := NewHandler(mockRepo, realAuthorizer(), nil).DeleteExtracurricular(studentRoleCtx(uuid.New()), id)
 
 		var httpErr errs.HTTPError
 		require.ErrorAs(t, err, &httpErr)
@@ -71,7 +96,7 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(nil, notFound)
 
-		err := NewHandler(mockRepo, realAuthorizer()).DeleteExtracurricular(studentRoleCtx(ownerID), id)
+		err := NewHandler(mockRepo, realAuthorizer(), nil).DeleteExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.Equal(t, notFound, err)
 		mockRepo.AssertNotCalled(t, "DeleteExtracurricular", mock.Anything, mock.Anything, mock.Anything)
@@ -85,7 +110,7 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(existing, nil)
 		mockRepo.On("DeleteExtracurricular", mock.Anything, id, ownerID.String()).Return(notFound)
 
-		err := NewHandler(mockRepo, realAuthorizer()).DeleteExtracurricular(studentRoleCtx(ownerID), id)
+		err := NewHandler(mockRepo, realAuthorizer(), nil).DeleteExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.Equal(t, notFound, err)
 	})
@@ -96,7 +121,7 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(nil, errors.New("database error"))
 
-		err := NewHandler(mockRepo, realAuthorizer()).DeleteExtracurricular(studentRoleCtx(ownerID), id)
+		err := NewHandler(mockRepo, realAuthorizer(), nil).DeleteExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.EqualError(t, err, "database error")
 		mockRepo.AssertNotCalled(t, "DeleteExtracurricular", mock.Anything, mock.Anything, mock.Anything)
@@ -109,7 +134,7 @@ func TestHandler_DeleteExtracurricular(t *testing.T) {
 		mockRepo.On("GetExtracurricular", mock.Anything, id).Return(existing, nil)
 		mockRepo.On("DeleteExtracurricular", mock.Anything, id, ownerID.String()).Return(errors.New("database error"))
 
-		err := NewHandler(mockRepo, realAuthorizer()).DeleteExtracurricular(studentRoleCtx(ownerID), id)
+		err := NewHandler(mockRepo, realAuthorizer(), nil).DeleteExtracurricular(studentRoleCtx(ownerID), id)
 
 		assert.EqualError(t, err, "database error")
 	})

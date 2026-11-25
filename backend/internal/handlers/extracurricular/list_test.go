@@ -33,7 +33,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(rows, nil)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID))
+		res, err := NewHandler(mockRepo, nil, nil).ListExtracurriculars(studentCtx(studentID, userID))
 
 		require.NoError(t, err)
 		assert.Equal(t, rows, res)
@@ -45,7 +45,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return([]models.Extracurricular{}, nil)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID))
+		res, err := NewHandler(mockRepo, nil, nil).ListExtracurriculars(studentCtx(studentID, userID))
 
 		require.NoError(t, err)
 		assert.NotNil(t, res)
@@ -57,7 +57,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID))
+		res, err := NewHandler(mockRepo, nil, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID))
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -72,7 +72,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(nil, errors.New("database error"))
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID))
+		res, err := NewHandler(mockRepo, nil, nil).ListExtracurriculars(studentCtx(studentID, userID))
 
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")
