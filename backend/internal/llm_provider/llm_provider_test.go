@@ -65,12 +65,12 @@ func TestGemini_RoutesQueryToTool(t *testing.T) {
 
 			resp, err := createGeminiInteraction(context.Background(), cfg, tt.input)
 			require.NoError(t, err)
-			require.NotNil(t, resp.Interaction)
+			require.NotNil(t, resp.Content)
 
 			var got []string
-			for _, step := range resp.Interaction.Steps {
-				if step.FunctionCallStep != nil {
-					got = append(got, step.FunctionCallStep.Name)
+			for _, part := range resp.Content.Parts {
+				if part.FunctionCall != nil {
+					got = append(got, part.FunctionCall.Name)
 				}
 			}
 
