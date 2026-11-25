@@ -1,10 +1,10 @@
 import { Navigate, useParams } from "react-router-dom";
-import { errorMessage } from "@/api/client";
 import { useFetchStudents, useFetchUser, useGetStudent } from "@/api/endpoints";
 import { useAuthContext } from "@/contexts/use-auth-context";
 import { PageShell } from "@/profile/components/page-shell";
 import { ProfileSkeleton } from "@/profile/components/profile-skeleton";
 import { ProfileView } from "@/profile/components/profile-view";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function ViewProfile() {
   const { userId = "" } = useParams();
@@ -35,9 +35,17 @@ export default function ViewProfile() {
   if (loadError || !user.data) {
     return (
       <PageShell>
-        <p className="font-host text-sm text-danger">
-          Could not load this profile: {errorMessage(loadError)}
-        </p>
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load this profile"
+          error={loadError}
+          message={loadError ? undefined : "Something went wrong."}
+          onRetry={() =>
+            [user, studentLookup, student]
+              .filter((query) => query.error)
+              .forEach((query) => void query.refetch())
+          }
+        />
       </PageShell>
     );
   }

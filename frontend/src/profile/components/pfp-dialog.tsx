@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { compressPfp, pfpAccept, uploadPfp } from "@/profile/pfp-file";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const secondaryButton =
   "rounded-lg border border-greyish-brown bg-white px-4 py-2 font-host text-xs leading-[normal] text-charcoal outline-none hover:bg-black/5 focus-visible:ring-[3px] focus-visible:ring-dark-green/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -98,7 +99,6 @@ function ProfilePictureDialog({
   });
 
   const isBusy = save.isPending || remove.isPending;
-  const error = selectError || (save.error ?? remove.error);
 
   function close() {
     setImage(null);
@@ -207,11 +207,11 @@ function ProfilePictureDialog({
           }}
         />
 
-        {error && (
-          <p role="alert" className="font-host text-xs text-danger">
-            {typeof error === "string" ? error : errorMessage(error)}
-          </p>
-        )}
+        <ErrorMessage
+          message={selectError}
+          error={save.error ?? remove.error}
+          size="xs"
+        />
 
         <div className="flex items-center justify-between gap-2">
           {user.pfp_url ? (

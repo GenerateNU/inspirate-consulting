@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { errorMessage } from "../../api/client";
 import type { Media } from "../../api/models";
 import { Button } from "@/components/ui/button";
 import DetailsCard from "./details-card";
@@ -11,6 +10,7 @@ import MediaPageBody from "../shared/media-page-body";
 import { primaryButtonClassName } from "../shared/media-styles";
 import { useMediaEditForm } from "./hooks/use-media-edit-form";
 import VideoCard from "./video-card";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 interface MediaEditorProps {
   // null when creating a new module
@@ -49,11 +49,17 @@ export default function MediaEditor({ media, onSaved }: MediaEditorProps) {
       />
 
       <MediaPageBody>
-        {(form.validationError || form.error) && (
-          <p role="alert" className="font-host text-sm text-danger">
-            {form.validationError ?? `Error: ${errorMessage(form.error)}`}
-          </p>
-        )}
+        <ErrorMessage
+          message={form.validationError}
+          error={form.error}
+          prefix={
+            form.validationError
+              ? undefined
+              : media
+                ? "Couldn't save"
+                : "Couldn't publish"
+          }
+        />
         <DetailsCard form={form} />
         <VideoCard form={form} />
       </MediaPageBody>

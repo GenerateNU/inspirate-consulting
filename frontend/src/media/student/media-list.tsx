@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
-import { errorMessage } from "../../api/client";
 import { useGetMediaAccess } from "../../api/endpoints";
 import { useDebouncedSearch } from "../shared/hooks/use-debounced-search";
 import ModuleCard from "../shared/module-card";
@@ -12,6 +11,7 @@ import ProgressCard from "./progress-card";
 import StatusBadge from "./status-badge";
 import { formatDueDate } from "./utils/format-due-date";
 import { getModuleStatus } from "./utils/module-status";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // student's "Modules" page: the modules they've been assigned, with their progress
 export default function StudentMediaList() {
@@ -35,9 +35,12 @@ export default function StudentMediaList() {
     body = <ModuleListSkeleton />;
   } else if (shownModules.error) {
     body = (
-      <p className="font-host text-sm">
-        Error: {errorMessage(shownModules.error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load your modules"
+        error={shownModules.error}
+        onRetry={shownModules.refetch}
+      />
     );
   } else if (shown.length === 0) {
     body = (
