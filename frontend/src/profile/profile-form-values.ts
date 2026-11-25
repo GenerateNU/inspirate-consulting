@@ -1,7 +1,9 @@
 import type {
+  Counselor,
   CurrentUser,
   NotificationPreferences,
   Student,
+  UpdateCounselorBody,
   UpdateNotificationPreferencesRequestBody,
   UpdateStudentBody,
 } from "@/api/models";
@@ -14,6 +16,8 @@ export interface ProfileValues {
   intendedMajor: string;
   intendedMinor: string;
   region: string;
+  customLink: string;
+  expiresAt: string;
 }
 
 export interface NotificationValues {
@@ -28,6 +32,8 @@ export interface ProfileErrors {
   name?: string;
   gpa?: string;
   daysBeforeDue?: string;
+  customLink?: string;
+  expiresAt?: string;
 }
 
 export type SetProfileValue = (
@@ -38,9 +44,24 @@ export type SetNotificationValue = <K extends keyof NotificationValues>(
   key: K,
 ) => (value: NotificationValues[K]) => void;
 
+// <input type="date"> works in local YYYY-MM-DD, the API in ISO timestamps
+export function toDateInput(date: string | Date | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+export function tomorrowDateInput(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return toDateInput(d);
+}
+
 export const toProfileValues = (
   user: CurrentUser,
   student?: Student,
+  counselor?: Counselor,
 ): ProfileValues => ({
   name: user.name,
   highSchool: student?.high_school ?? "",
@@ -49,6 +70,8 @@ export const toProfileValues = (
   intendedMajor: student?.intended_major ?? "",
   intendedMinor: student?.intended_minor ?? "",
   region: student?.geographic_preferences ?? "",
+  customLink: counselor?.custom_link ?? "",
+  expiresAt: toDateInput(counselor?.expires_at),
 });
 
 export const toNotificationValues = (
@@ -78,10 +101,21 @@ const isNumberInRange = (text: string, min: number, max: number) => {
 const isWholeNumberInRange = (text: string, min: number, max: number) =>
   isNumberInRange(text, min, max) && Number.isInteger(Number(text));
 
+const isWebUrl = (text: string) => {
+  try {
+    const { protocol } = new URL(text);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 export function validateProfile(
+  initial: ProfileValues,
   values: ProfileValues,
   notify: NotificationValues,
   hasStudent: boolean,
+  hasCounselor: boolean,
 ): ProfileErrors {
   const errors: ProfileErrors = {};
   if (values.name.trim() === "") errors.name = "Enter your name.";
@@ -92,6 +126,18 @@ export function validateProfile(
     !isWholeNumberInRange(notify.daysBeforeDue, 0, 30)
   )
     errors.daysBeforeDue = "Enter a whole number of days from 0 to 30.";
+  if (hasCounselor) {
+    const link = values.customLink.trim();
+    if (link !== "" && !isWebUrl(link))
+      errors.customLink = "Enter a full link starting with https://.";
+    // a same-day or past date would lock the counselor out right away
+    if (
+      values.expiresAt !== initial.expiresAt &&
+      values.expiresAt !== "" &&
+      values.expiresAt < tomorrowDateInput()
+    )
+      errors.expiresAt = "Choose a date after today.";
+  }
   return errors;
 }
 
@@ -115,6 +161,21 @@ export function studentChanges(
       ([key, value]) => before[key as keyof UpdateStudentBody] !== value,
     ),
   );
+}
+
+// an emptied field is sent as null so the backend clears it
+export function counselorChanges(
+  initial: ProfileValues,
+  values: ProfileValues,
+): UpdateCounselorBody {
+  const changes: UpdateCounselorBody = {};
+  const link = values.customLink.trim();
+  if (link !== initial.customLink) changes.custom_link = link || null;
+  if (values.expiresAt !== initial.expiresAt)
+    changes.expires_at = values.expiresAt
+      ? new Date(`${values.expiresAt}T00:00:00`).toISOString()
+      : null;
+  return changes;
 }
 
 export const toNotificationBody = (

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
+  useUpdateCounselor,
   useUpdateNotificationPreferences,
   useUpdateStudent,
   useUpdateUser,
 } from "@/api/endpoints";
 import type {
+  UpdateCounselorBody,
   UpdateNotificationPreferencesRequestBody,
   UpdateStudentBody,
 } from "@/api/models";
@@ -13,6 +15,7 @@ import type { SaveState } from "@/profile/components/save-button";
 export interface ProfileUpdate {
   name?: string;
   student?: StudentUpdate;
+  counselor?: UpdateCounselorBody;
   notifications?: UpdateNotificationPreferencesRequestBody;
 }
 
@@ -26,13 +29,15 @@ export function useSaveProfile() {
   const [failedSaves, setFailedSaves] = useState(0);
   const updateUser = useUpdateUser();
   const updateStudent = useUpdateStudent();
+  const updateCounselor = useUpdateCounselor();
   const updateNotifications = useUpdateNotificationPreferences();
 
-  const send = ({ name, student, notifications }: ProfileUpdate) =>
+  const send = ({ name, student, counselor, notifications }: ProfileUpdate) =>
     Promise.all([
       name !== undefined && updateUser.mutateAsync({ data: { name } }),
       student &&
         updateStudent.mutateAsync({ id: student.id, data: student.changes }),
+      counselor && updateCounselor.mutateAsync({ data: counselor }),
       notifications && updateNotifications.mutateAsync({ data: notifications }),
     ]);
 
@@ -49,7 +54,10 @@ export function useSaveProfile() {
   };
 
   const error =
-    updateUser.error ?? updateStudent.error ?? updateNotifications.error;
+    updateUser.error ??
+    updateStudent.error ??
+    updateCounselor.error ??
+    updateNotifications.error;
 
   return { save, saveState, failedSaves, error };
 }

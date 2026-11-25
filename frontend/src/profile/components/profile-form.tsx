@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { CollegePreferenceFields } from "@/profile/components/college-preference-fields";
+import { CounselorFields } from "@/profile/components/counselor-fields";
 import { DiscardChangesDialog } from "@/profile/components/discard-changes-dialog";
 import { ErrorAlert } from "@/profile/components/error-alert";
 import { NotificationFields } from "@/profile/components/notification-fields";
@@ -22,7 +23,7 @@ export function ProfileForm({
 }: ProfileFormProps) {
   const form = useProfileForm(source);
   const leaveGuard = useLeaveGuard(form.isDirty);
-  const { user, student } = source;
+  const { user, student, counselor } = source;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -60,6 +61,13 @@ export function ProfileForm({
           {student && (
             <CollegePreferenceFields
               values={form.values}
+              setValue={form.setValue}
+            />
+          )}
+          {counselor && (
+            <CounselorFields
+              values={form.values}
+              errors={form.errors}
               setValue={form.setValue}
             />
           )}
