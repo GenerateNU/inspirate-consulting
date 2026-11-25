@@ -8,14 +8,16 @@ import (
 type Handler struct {
 	PersonalCollegeApplicationRepository storage.PersonalCollegeApplicationRepository
 	GlobalCollegeRepository              storage.GlobalCollegeRepository
+	ActivityRepository                   storage.ActivityRepository
 	Authorizer                           *auth.Authorizer
 }
 
 // Here is where we create the handler which has reference to the PersonalCollegeApplicationRepository
-func NewHandler(personalCollegeApplicationRepository storage.PersonalCollegeApplicationRepository, globalCollegeRepository storage.GlobalCollegeRepository, authorizer *auth.Authorizer) *Handler {
+func NewHandler(personalCollegeApplicationRepository storage.PersonalCollegeApplicationRepository, globalCollegeRepository storage.GlobalCollegeRepository, authorizer *auth.Authorizer, activityRepository storage.ActivityRepository) *Handler {
 	return &Handler{
 		PersonalCollegeApplicationRepository: personalCollegeApplicationRepository,
 		GlobalCollegeRepository:              globalCollegeRepository,
+		ActivityRepository:                   activityRepository,
 		Authorizer:                           authorizer,
 	}
 }

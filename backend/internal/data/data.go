@@ -115,7 +115,7 @@ type PersonalCollegeApplicationRepository interface {
 	ListPersonalCollegeApplicationsByStudentID(ctx context.Context, studentID uuid.UUID) ([]models.PersonalCollegeApplication, error)
 	UpdateApplicationRank(ctx context.Context, studentID uuid.UUID, applicationID int64, newRank *int) ([]models.PersonalCollegeApplication, error)
 	UpdatePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64, input models.UpdatePersonalCollegeApplicationRequestBody) (*models.PersonalCollegeApplication, error)
-	DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error
+	DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) (int64, error)
 }
 
 // To represent the Counselor's view of their students and pending essay reviews

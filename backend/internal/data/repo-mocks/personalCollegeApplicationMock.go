@@ -48,21 +48,31 @@ func (_m *PersonalCollegeApplicationRepository) CreatePersonalCollegeApplication
 }
 
 // DeletePersonalCollegeApplication provides a mock function with given fields: ctx, studentID, applicationID
-func (_m *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) error {
+func (_m *PersonalCollegeApplicationRepository) DeletePersonalCollegeApplication(ctx context.Context, studentID uuid.UUID, applicationID int64) (int64, error) {
 	ret := _m.Called(ctx, studentID, applicationID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeletePersonalCollegeApplication")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, int64) error); ok {
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, int64) (int64, error)); ok {
+		return rf(ctx, studentID, applicationID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, int64) int64); ok {
 		r0 = rf(ctx, studentID, applicationID)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(int64)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, int64) error); ok {
+		r1 = rf(ctx, studentID, applicationID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ListPersonalCollegeApplicationsByStudentID provides a mock function with given fields: ctx, studentID

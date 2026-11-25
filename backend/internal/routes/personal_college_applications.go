@@ -16,7 +16,7 @@ import (
 // create and list by student ID, delete, update rank, and update application details.
 // Any counselor can read a student's list (GET with student_id); every write is student-only.
 func SetUpPersonalCollegeApplicationRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
-	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege, authorizer)
+	personalCollegeApplicationHandler := personalcollegeapplication.NewHandler(repository.PersonalCollegeApplication, repository.GlobalCollege, authorizer, repository.Activity)
 
 	// Register POST /applications handler.
 	huma.Register(api, huma.Operation{

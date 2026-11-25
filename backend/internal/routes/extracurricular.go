@@ -13,7 +13,7 @@ import (
 )
 
 func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier, authorizer *auth.Authorizer) {
-	extracurricularHandler := extracurricular.NewHandler(repository.Extracurricular, authorizer)
+	extracurricularHandler := extracurricular.NewHandler(repository.Extracurricular, authorizer, repository.Activity)
 
 	//Register POST /extracurriculars handler
 	huma.Register(api, huma.Operation{

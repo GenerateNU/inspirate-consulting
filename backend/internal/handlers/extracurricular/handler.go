@@ -8,13 +8,15 @@ import (
 // Handler is the application layer for extracurricular operations.
 type Handler struct {
 	ExtracurricularRepository storage.ExtracurricularRepository
+	ActivityRepository        storage.ActivityRepository
 	Authorizer                *auth.Authorizer
 }
 
 // NewHandler constructs a new extracurricular handler with a repository dependency.
-func NewHandler(extracurricularRepository storage.ExtracurricularRepository, authorizer *auth.Authorizer) *Handler {
+func NewHandler(extracurricularRepository storage.ExtracurricularRepository, authorizer *auth.Authorizer, activityRepository storage.ActivityRepository) *Handler {
 	return &Handler{
 		ExtracurricularRepository: extracurricularRepository,
+		ActivityRepository:        activityRepository,
 		Authorizer:                authorizer,
 	}
 }

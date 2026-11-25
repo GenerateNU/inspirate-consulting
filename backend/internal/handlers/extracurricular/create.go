@@ -2,6 +2,7 @@ package extracurricular
 
 import (
 	"context"
+	"log/slog"
 
 	"inspirate-consulting/internal/auth"
 	"inspirate-consulting/internal/errs"
@@ -19,5 +20,17 @@ func (h *Handler) CreateExtracurricular(ctx context.Context, input *models.Creat
 		return nil, errs.Unauthorized()
 	}
 
-	return h.ExtracurricularRepository.CreateExtracurricular(ctx, studentID.String(), userID.String(), *input)
+	created, err := h.ExtracurricularRepository.CreateExtracurricular(ctx, studentID.String(), userID.String(), *input)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := h.ActivityRepository.CreateActivity(ctx, studentID, models.CreateActivityBody{
+		Action:            models.ActionAddedExtracurricular,
+		ExtracurricularID: &created.Body.ID,
+	}); err != nil {
+		slog.Error("failed to log added_extracurricular activity", "student_id", studentID, "extracurricular_id", created.Body.ID, "error", err)
+	}
+
+	return created, nil
 }
