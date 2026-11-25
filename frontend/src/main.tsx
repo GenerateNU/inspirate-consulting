@@ -45,8 +45,9 @@ import StudentEssays from "./counselor/student-essays.tsx";
 import AssignTaskForm from "./task/assign-task-form.tsx";
 import EditTaskForm from "./task/edit-task-form.tsx";
 import CounselorStudentTasks from "./counselor/counselor-student-tasks.tsx";
-import ProfilePages from "./profile/profile-pages.tsx";
+import EditProfile from "./profile/edit-profile.tsx";
 import EditProfilePicture from "./profile/edit-profile-picture.tsx";
+import ViewProfile from "./profile/view-profile.tsx";
 import Chats from "./chat/chats.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -145,12 +146,13 @@ createRoot(document.getElementById("root")!).render(
                 path="/counselor/students/:id"
                 element={<CounselorStudentTasks />}
               />
+              <Route path="/profile" element={<EditProfile />} />
               <Route
                 path="/counselor/students/:studentId/tasks/:taskId/edit"
                 element={<EditTaskForm />}
               />
-              <Route path="/profile" element={<ProfilePages />} />
               <Route path="/profile/picture" element={<EditProfilePicture />} />
+              <Route path="/profile/:userId" element={<ViewProfile />} />
               <Route path="/chats" element={<Chats />} />
               <Route path="/chats/:userId" element={<Chats />} />
             </Route>
