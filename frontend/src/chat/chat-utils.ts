@@ -2,6 +2,9 @@ import type { ChatMessage } from "../api/models";
 
 export const POLL_INTERVAL_MS = 5000;
 
+// Route id for the assistant conversation at /chats/assistant.
+export const ASSISTANT_CHAT_ID = "assistant";
+
 // Consecutive messages from one sender within this window share a bubble group.
 const GROUP_GAP_MS = 5 * 60 * 1000;
 // A gap this long (or a new day) starts a new section with a timestamp header.
