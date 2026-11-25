@@ -6,8 +6,9 @@ import type { Media } from "../../api/models";
 import { Button } from "@/components/ui/button";
 import DetailsCard from "./details-card";
 import ExitDialog from "./exit-dialog";
-import MediaHeader from "./media-header";
-import { primaryButtonClassName } from "./media-styles";
+import MediaHeader from "../shared/media-header";
+import MediaPageBody from "../shared/media-page-body";
+import { primaryButtonClassName } from "../shared/media-styles";
 import { useMediaEditForm } from "./hooks/use-media-edit-form";
 import VideoCard from "./video-card";
 
@@ -47,8 +48,7 @@ export default function MediaEditor({ media, onSaved }: MediaEditorProps) {
         }
       />
 
-      {/* 72px = back button + gap, so the cards line up under the module icon */}
-      <div className="flex w-full flex-col gap-4 pl-[72px] max-lg:pl-0">
+      <MediaPageBody>
         {(form.validationError || form.error) && (
           <p role="alert" className="font-host text-sm text-danger">
             {form.validationError ?? `Error: ${errorMessage(form.error)}`}
@@ -56,7 +56,7 @@ export default function MediaEditor({ media, onSaved }: MediaEditorProps) {
         )}
         <DetailsCard form={form} />
         <VideoCard form={form} />
-      </div>
+      </MediaPageBody>
 
       <ExitDialog
         open={confirmingExit}

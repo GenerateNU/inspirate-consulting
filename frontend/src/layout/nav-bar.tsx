@@ -44,7 +44,7 @@ const mainLinks: NavItemConfig[] = [
   { to: "/college-applications", label: "Colleges", icon: School },
   { to: "/essay", label: "Essays", icon: FileText },
   { to: "/extracurriculars", label: "Extracurriculars", icon: Palette },
-  { to: "/videos", label: "Modules", icon: SquarePlay },
+  { to: "/student-media-list", label: "Modules", icon: SquarePlay },
   { to: "/chats", label: "Chats", icon: MessageCircle },
 ];
 
