@@ -24,14 +24,14 @@ func TestHandler_ListAllMedia(t *testing.T) {
 		{
 			ID:           uuid.NewString(),
 			Title:        "Common App Essay Tips",
-			LengthInMins: 15,
-			S3Key:        "video-bucket/common-app-tips.mp4",
+			LengthInMins: ptr(15),
+			S3Key:        ptr("video-bucket/common-app-tips.mp4"),
 		},
 		{
 			ID:           uuid.NewString(),
 			Title:        "Navigating the FAFSA",
-			LengthInMins: 20,
-			S3Key:        "video-bucket/fafsa.mp4",
+			LengthInMins: ptr(20),
+			S3Key:        ptr("video-bucket/fafsa.mp4"),
 		},
 	}
 
@@ -40,11 +40,11 @@ func TestHandler_ListAllMedia(t *testing.T) {
 
 		// Set up mock repository expectation
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything, limit, offset).Return(expectedOutput, nil)
+		mockRepo.On("ListAllMedia", mock.Anything, "", searchThreshold, limit, offset).Return(expectedOutput, nil)
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx, limit, offset)
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.ListAllMedia(ctx, "", limit, offset)
 
 		// Verify result
 		assert.NoError(t, err)
@@ -57,14 +57,27 @@ func TestHandler_ListAllMedia(t *testing.T) {
 
 		// The mock only matches the exact pagination values, so a mismatch fails the test
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything, 1, 1).Return(expectedOutput[1:], nil)
+		mockRepo.On("ListAllMedia", mock.Anything, "", searchThreshold, 1, 1).Return(expectedOutput[1:], nil)
 
-		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx, 1, 1)
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.ListAllMedia(ctx, "", 1, 1)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedOutput[1:], res)
 		assert.Len(t, res, 1)
+	})
+
+	t.Run("passes search query through to repository", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewMediaRepository(t)
+		mockRepo.On("ListAllMedia", mock.Anything, "fafsa", searchThreshold, limit, offset).Return(expectedOutput[1:], nil)
+
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.ListAllMedia(ctx, "fafsa", limit, offset)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOutput[1:], res)
 	})
 
 	t.Run("no media", func(t *testing.T) {
@@ -72,10 +85,10 @@ func TestHandler_ListAllMedia(t *testing.T) {
 
 		// No media uploaded yet is an empty list, not an error
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything, limit, offset).Return([]models.Media{}, nil)
+		mockRepo.On("ListAllMedia", mock.Anything, "", searchThreshold, limit, offset).Return([]models.Media{}, nil)
 
-		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx, limit, offset)
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.ListAllMedia(ctx, "", limit, offset)
 
 		assert.NoError(t, err)
 		assert.Empty(t, res)
@@ -86,11 +99,11 @@ func TestHandler_ListAllMedia(t *testing.T) {
 
 		// Simulate database repository failure
 		mockRepo := mocks.NewMediaRepository(t)
-		mockRepo.On("ListAllMedia", mock.Anything, limit, offset).Return(nil, errors.New("database error"))
+		mockRepo.On("ListAllMedia", mock.Anything, "", searchThreshold, limit, offset).Return(nil, errors.New("database error"))
 
 		// Execute handler
-		handler := NewHandler(mockRepo)
-		res, err := handler.ListAllMedia(ctx, limit, offset)
+		handler := NewHandler(mockRepo, nil)
+		res, err := handler.ListAllMedia(ctx, "", limit, offset)
 
 		// Verify error propagation
 		assert.Error(t, err)

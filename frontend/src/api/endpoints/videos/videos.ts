@@ -395,7 +395,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 }
 
 /**
- * Get a video by its S3 key.
+ * Get a video by its S3 key. Students can only fetch keys of media they have access to.
  */
 export const getVideo = async (params?: GetVideoParams, options?: RequestInit): Promise<Video> => {
 

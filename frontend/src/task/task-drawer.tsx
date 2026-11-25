@@ -1,13 +1,24 @@
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import type { TodoItem } from "../api/models";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useTaskDestination } from "./use-task-destination";
 
 type TaskDrawerProps = {
   task: TodoItem | null;
   onClose: () => void;
-  onStart?: (task: TodoItem) => void;
 };
 
-function formatDueDateTime(deadline: string | null | undefined) {
+// e.g. "Due 10/13 at 11:59 PM EST"
+function formatDueDateTime(deadline: string | null) {
   if (!deadline) return "No due date";
   const due = new Date(deadline);
   const date = due.toLocaleDateString("en-US", {
@@ -22,70 +33,48 @@ function formatDueDateTime(deadline: string | null | undefined) {
   return `Due ${date} at ${time}`;
 }
 
-export default function TaskDrawer({
-  task,
-  onClose,
-  onStart,
-}: TaskDrawerProps) {
-  const isOpen = task !== null;
-
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
+// The hi-fi description drawer: the task's details, and Start to go to what it's linked to
+export default function TaskDrawer({ task, onClose }: TaskDrawerProps) {
+  const navigate = useNavigate();
+  const { name, path } = useTaskDestination(task);
 
   return (
-    <>
-      {/* Backdrop: click to close */}
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 bg-black/30 transition-opacity ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      />
-
-      {/* Drawer panel */}
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className={`fixed right-0 top-0 flex h-full w-96 flex-col bg-white p-8 shadow-xl transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
+    <Sheet open={task !== null} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-full gap-0 border-l-cream bg-white sm:max-w-80.5">
         {task && (
           <>
-            <div className="flex items-start justify-between">
-              <h2 className="text-2xl font-semibold">
-                {task.todo_description}
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className="text-2xl"
-              >
-                ×
-              </button>
-            </div>
+            <SheetHeader className="gap-1 px-4 pt-10 pb-0">
+              <SheetTitle className="font-host text-lg leading-[normal] font-normal text-charcoal">
+                {task.title}
+              </SheetTitle>
+              {name && (
+                <p className="font-host text-sm leading-[normal] text-charcoal">
+                  {name}
+                </p>
+              )}
+              <p className="mt-2 font-host text-xs text-warm-grey">
+                {formatDueDateTime(task.deadline)}
+              </p>
+            </SheetHeader>
 
-            <p className="mt-6 text-xs">{formatDueDateTime(task.deadline)}</p>
+            <SheetDescription className="px-4 pt-3 font-host text-xs leading-normal whitespace-pre-line text-warm-grey-dark">
+              {task.todo_description || "No description."}
+            </SheetDescription>
 
-            {/* mt-auto pushes the button to the bottom of the drawer */}
-            <button
-              type="button"
-              onClick={() => onStart?.(task)}
-              className="mt-auto flex items-center justify-end gap-2 rounded bg-black px-6 py-3 text-lg text-white"
-            >
-              Start →
-            </button>
+            {path && (
+              <SheetFooter className="items-center px-4 pb-8">
+                <Button
+                  type="button"
+                  onClick={() => void navigate(path)}
+                  className="h-8 w-19.5 rounded-md bg-dark-green font-host text-xs font-normal text-white hover:bg-forest"
+                >
+                  Start
+                </Button>
+              </SheetFooter>
+            )}
           </>
         )}
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

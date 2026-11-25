@@ -14,19 +14,20 @@ import type {
 } from 'msw';
 
 import type {
-  Media,
+  AccessibleMedia,
   MediaAccess
 } from '../../models';
 
 import {
   getCreateMediaAccessResponseMock,
-  getGetMediaAccessResponseMock
+  getGetMediaAccessResponseMock,
+  getRecordMediaProgressResponseMock
 } from './media-access.faker';
 
-export { getGetMediaAccessResponseMock, getCreateMediaAccessResponseMock } from './media-access.faker';
+export { getGetMediaAccessResponseMock, getCreateMediaAccessResponseMock, getRecordMediaProgressResponseMock } from './media-access.faker';
 
 
-export const getGetMediaAccessMockHandler = (overrideResponse?: Media[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Media[] | null> | Media[] | null), options?: RequestHandlerOptions) => {
+export const getGetMediaAccessMockHandler = (overrideResponse?: AccessibleMedia[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<AccessibleMedia[] | null> | AccessibleMedia[] | null), options?: RequestHandlerOptions) => {
   return http.get('*/media-access', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
@@ -59,8 +60,21 @@ export const getDeleteMediaAccessMockHandler = (overrideResponse?: void | ((info
       })
   }, options)
 }
+
+export const getRecordMediaProgressMockHandler = (overrideResponse?: MediaAccess | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<MediaAccess> | MediaAccess), options?: RequestHandlerOptions) => {
+  return http.post('*/media/:id/progress', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getRecordMediaProgressResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getMediaAccessMock = () => [
   getGetMediaAccessMockHandler(),
   getCreateMediaAccessMockHandler(),
-  getDeleteMediaAccessMockHandler()
+  getDeleteMediaAccessMockHandler(),
+  getRecordMediaProgressMockHandler()
 ]

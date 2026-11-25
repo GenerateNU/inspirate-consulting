@@ -11,9 +11,16 @@ export interface Media {
   readonly $schema?: string;
   description: string;
   id: string;
-  length_in_mins: number;
-  s3_key: string;
+  /** @nullable */
+  length_in_mins: number | null;
+  /** @nullable */
+  s3_key: string | null;
   /** @nullable */
   school_year: string | null;
   title: string;
+  /**
+     * 11-character YouTube video id; embed as https://www.youtube.com/embed/{id}
+     * @nullable
+     */
+  youtube_video_id: string | null;
 }

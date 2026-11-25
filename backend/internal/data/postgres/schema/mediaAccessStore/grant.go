@@ -14,7 +14,13 @@ func (r *MediaAccessRepository) GrantMediaAccess(ctx context.Context, body *mode
 		return nil, err
 	}
 
-	err = r.db.QueryRow(ctx, insertQuery, body.StudentID, body.MediaID).Scan(&createdAccess.ID, &createdAccess.StudentID, &createdAccess.MediaID)
+	err = r.db.QueryRow(ctx, insertQuery, body.StudentID, body.MediaID).Scan(
+		&createdAccess.ID,
+		&createdAccess.StudentID,
+		&createdAccess.MediaID,
+		&createdAccess.StartedAt,
+		&createdAccess.CompletedAt,
+	)
 
 	if err != nil {
 		return nil, err

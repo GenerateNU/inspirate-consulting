@@ -43,6 +43,7 @@ import StudentTaskList from "./task/student-task-list.tsx";
 import StudentProfile from "./student/student-profile.tsx";
 import StudentEssays from "./counselor/student-essays.tsx";
 import AssignTaskForm from "./task/assign-task-form.tsx";
+import EditTaskForm from "./task/edit-task-form.tsx";
 import CounselorStudentTasks from "./counselor/counselor-student-tasks.tsx";
 import EditProfile from "./profile/edit-profile.tsx";
 import EditProfilePicture from "./profile/edit-profile-picture.tsx";
@@ -146,6 +147,10 @@ createRoot(document.getElementById("root")!).render(
                 element={<CounselorStudentTasks />}
               />
               <Route path="/profile" element={<EditProfile />} />
+              <Route
+                path="/counselor/students/:studentId/tasks/:taskId/edit"
+                element={<EditTaskForm />}
+              />
               <Route path="/profile/picture" element={<EditProfilePicture />} />
               <Route path="/profile/:userId" element={<ViewProfile />} />
               <Route path="/chats" element={<Chats />} />

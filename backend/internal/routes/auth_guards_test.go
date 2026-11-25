@@ -127,18 +127,19 @@ var routeTable = []routeAccess{
 	// videos
 	{http.MethodPost, "/videos", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/videos/lookup", guarded, []string{roleStudent, roleCounselor}},
-	{http.MethodGet, "/videos", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodGet, "/videos", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/videos", guarded, []string{roleCounselor}},
 
 	// media
-	{http.MethodPost, "/media", anyRole, nil},
-	{http.MethodGet, "/media/{id}", anyRole, nil},
-	{http.MethodGet, "/media", anyRole, nil},
+	{http.MethodPost, "/media", guarded, []string{roleCounselor}},
+	{http.MethodGet, "/media/{id}", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodGet, "/media", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/media/{id}", guarded, []string{roleCounselor}},
-	{http.MethodPatch, "/media/{id}", anyRole, nil},
-	{http.MethodPost, "/media-access", anyRole, nil},
+	{http.MethodPatch, "/media/{id}", guarded, []string{roleCounselor}},
+	{http.MethodPost, "/media-access", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/media-access/{id}", guarded, []string{roleCounselor}},
 	{http.MethodGet, "/media-access", anyRole, nil},
+	{http.MethodPost, "/media/{id}/progress", guarded, []string{roleStudent}},
 
 	// extracurriculars
 	{http.MethodPost, "/extracurriculars", anyRole, nil},
@@ -340,6 +341,11 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"PATCH /todo-items/{id}/description",
 		"DELETE /media-access/{id}",
 		"DELETE /media/{id}",
+		"GET /media",
+		"POST /media",
+		"PATCH /media/{id}",
+		"POST /media-access",
+		"GET /videos",
 		"POST /llm/ask",
 		"POST /todo-items/bulk",
 		"PATCH /todo-assignments/{assignment_id}",
@@ -353,5 +359,6 @@ func TestGuards_CounselorOnlyAndStudentOnlyRoutes(t *testing.T) {
 		"DELETE /applications/{id}",
 		"PUT /applications/{id}",
 		"PUT /applications/{id}/rank",
+		"POST /media/{id}/progress",
 	}, studentOnly)
 }
