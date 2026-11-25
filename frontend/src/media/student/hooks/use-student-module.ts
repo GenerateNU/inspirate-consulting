@@ -50,6 +50,7 @@ export function useStudentModule(id: string) {
     module,
     isLoading: modulesQuery.isLoading,
     error: modulesQuery.error,
+    refetch: modulesQuery.refetch,
     markComplete,
     marking: progress.isPending,
     markError: progress.error,

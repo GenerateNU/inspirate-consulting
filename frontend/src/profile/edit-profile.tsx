@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { errorMessage } from "@/api/client";
 import {
   getGetCurrentUserQueryKey,
   getGetNotificationPreferencesQueryKey,
@@ -14,6 +13,7 @@ import { ProfileForm } from "@/profile/components/profile-form";
 import { ProfileSkeleton } from "@/profile/components/profile-skeleton";
 import { ProfileView } from "@/profile/components/profile-view";
 import type { ProfileSource } from "@/profile/use-profile-form";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 function useRefetchProfile(studentId?: string) {
   const queryClient = useQueryClient();
@@ -95,9 +95,17 @@ export default function EditProfile() {
   if (loadError || !currentUser.data || !notifications.data) {
     return (
       <PageShell>
-        <p className="font-host text-sm text-danger">
-          Could not load your profile: {errorMessage(loadError)}
-        </p>
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load your profile"
+          error={loadError}
+          message={loadError ? undefined : "Something went wrong."}
+          onRetry={() =>
+            [currentUser, student, notifications]
+              .filter((query) => query.error)
+              .forEach((query) => void query.refetch())
+          }
+        />
       </PageShell>
     );
   }

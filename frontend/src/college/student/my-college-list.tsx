@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
 
-import { errorMessage } from "../../api/client";
 import arrowsDownUpIcon from "@/assets/college/arrows-down-up.svg";
 import {
   DropdownMenu,
@@ -15,6 +14,7 @@ import ApplicationCard from "./application-card";
 import RemoveSchoolDialog from "./remove-school-dialog";
 import { sortOptions, type SortKey } from "../utils/sort-applications";
 import { useMyCollegeList } from "./use-my-college-list";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // page frame with the "My List" heading; actions sit to the right of it
 function MyListShell({
@@ -62,7 +62,12 @@ export default function MyCollegeList() {
   if (list.error) {
     return (
       <MyListShell>
-        <p className="font-host text-sm">Error: {errorMessage(list.error)}</p>
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load your list"
+          error={list.error}
+          onRetry={list.refetch}
+        />
       </MyListShell>
     );
   }

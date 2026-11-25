@@ -1,9 +1,9 @@
-import { errorMessage } from "../api/client";
 import {
   useListCounselorPendingReviews,
   useCompleteEssayReview,
 } from "../api/endpoints";
 import type { PendingReview } from "../api/models";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function PendingReviews() {
   const {
@@ -28,7 +28,12 @@ export default function PendingReviews() {
     return (
       <div className="form-container">
         <h2>Pending Reviews</h2>
-        <p>Error: {errorMessage(error)}</p>
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load pending reviews"
+          error={error}
+          onRetry={refetch}
+        />
       </div>
     );
   }
@@ -49,9 +54,10 @@ export default function PendingReviews() {
   return (
     <div className="form-container">
       <h2>Pending Reviews</h2>
-      {completeReview.error && (
-        <p role="alert">Error: {errorMessage(completeReview.error)}</p>
-      )}
+      <ErrorMessage
+        error={completeReview.error}
+        prefix="Couldn't complete review"
+      />
 
       {reviews.length === 0 && <p>No reviews waiting on you.</p>}
       <ul>

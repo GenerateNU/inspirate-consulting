@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { errorMessage } from "../api/client";
 import { useCreateUser } from "../api/endpoints";
 import { CreateUserInputBodyRole } from "../api/models";
 import { useAuthContext } from "../contexts/use-auth-context";
@@ -18,6 +17,7 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { graduationYearOptions } from "@/lib/graduation-year";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function CreateUser() {
   const { counselorID } = useAuthContext();
@@ -150,14 +150,7 @@ export default function CreateUser() {
             {status && (
               <p className="text-sm text-muted-foreground">{status}</p>
             )}
-            {error && (
-              <p
-                role="alert"
-                className="rounded-md bg-destructive/10 p-4 text-destructive"
-              >
-                {errorMessage(error)}
-              </p>
-            )}
+            <ErrorMessage variant="banner" error={error} />
           </CardFooter>
         </form>
       </Card>

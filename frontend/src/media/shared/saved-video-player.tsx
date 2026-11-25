@@ -1,9 +1,9 @@
 import { useRef } from "react";
 
-import { errorMessage } from "../../api/client";
 import { useGetVideo } from "../../api/endpoints";
 import { Skeleton } from "@/components/ui/skeleton";
 import { videoFrameClassName } from "./media-styles";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 interface SavedVideoPlayerProps {
   s3Key: string | null;
@@ -50,9 +50,12 @@ export default function SavedVideoPlayer({
   }
   if (s3Video.error) {
     return (
-      <p className="font-host text-sm text-danger">
-        Couldn&apos;t load the video: {errorMessage(s3Video.error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load the video"
+        error={s3Video.error}
+        onRetry={s3Video.refetch}
+      />
     );
   }
   if (!s3Video.data) {

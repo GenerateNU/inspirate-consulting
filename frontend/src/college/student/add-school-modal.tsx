@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 
-import { errorMessage } from "../../api/client";
 import {
   CreatePersonalCollegeApplicationRequestBodyApplicationType as ApplicationType,
   CreatePersonalCollegeApplicationRequestBodyCategory as Category,
@@ -27,6 +26,7 @@ import { cycleLabel } from "../utils/shared";
 import { useCollegeSearch } from "../utils/use-college-search";
 import { categoryOptions, interestOptions } from "./application-labels";
 import type { NewSchool } from "./use-my-college-list";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // what the student has picked on one search result
 interface Selection {
@@ -230,9 +230,13 @@ export default function AddSchoolModal({
     results = <p className="py-6 text-center font-host text-sm">Loading...</p>;
   } else if (search.error || (search.searching && search.searchError)) {
     results = (
-      <p className="py-6 text-center font-host text-sm">
-        Error: {errorMessage(search.error ?? search.searchError)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load schools"
+        error={search.error ?? search.searchError}
+        onRetry={search.refetch}
+        className="mx-5 w-auto"
+      />
     );
   } else if (search.colleges.length === 0) {
     results = (
@@ -296,11 +300,7 @@ export default function AddSchoolModal({
             />
           </label>
 
-          {error != null && (
-            <p role="alert" className="font-host text-sm text-danger">
-              Couldn&apos;t add every school: {errorMessage(error)}
-            </p>
-          )}
+          <ErrorMessage error={error} prefix="Couldn't add every school" />
 
           <div className="min-h-0 flex-1 overflow-y-auto rounded-lg bg-white py-5 shadow-card">
             {results}

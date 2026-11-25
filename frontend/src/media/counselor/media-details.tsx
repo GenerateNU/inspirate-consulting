@@ -1,19 +1,20 @@
 import type { ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { errorMessage, type ApiError } from "../../api/client";
+import type { ApiError } from "../../api/client";
 import { useGetMedia } from "../../api/endpoints";
 import { Skeleton } from "@/components/ui/skeleton";
 import MediaHeader from "../shared/media-header";
 import MediaPageBody from "../shared/media-page-body";
 import MediaPageFrame from "../shared/media-page-frame";
 import MediaEditor from "./media-editor";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // edit an existing module; Save returns to the list
 export default function CounselorMediaDetails() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { data: media, isLoading, error } = useGetMedia(id);
+  const { data: media, isLoading, error, refetch } = useGetMedia(id);
   const back = () => navigate(-1);
 
   let content: ReactNode;
@@ -32,11 +33,17 @@ export default function CounselorMediaDetails() {
       <>
         <MediaHeader title="Module" onBack={back} />
         <MediaPageBody>
-          <p className="font-host text-sm">
-            {(error as ApiError | null)?.status === 404
-              ? "Module not found."
-              : `Error: ${errorMessage(error)}`}
-          </p>
+          {(error as ApiError | null)?.status === 404 ? (
+            <p className="font-host text-sm">Module not found.</p>
+          ) : (
+            <ErrorMessage
+              variant="banner"
+              title="Couldn't load this module"
+              error={error}
+              message={error ? undefined : "Something went wrong."}
+              onRetry={refetch}
+            />
+          )}
         </MediaPageBody>
       </>
     );

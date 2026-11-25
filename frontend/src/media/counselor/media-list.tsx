@@ -15,6 +15,7 @@ import ModuleCard from "../shared/module-card";
 import ModuleListFrame from "../shared/module-list-frame";
 import ModuleListSkeleton from "../shared/module-list-skeleton";
 import ModuleSearch from "../shared/module-search";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // counselor's "Modules" page: the whole media library, searchable
 export default function CounselorMediaList() {
@@ -48,9 +49,12 @@ export default function CounselorMediaList() {
     body = <ModuleListSkeleton />;
   } else if (mediaQuery.error) {
     body = (
-      <p className="font-host text-sm">
-        Error: {errorMessage(mediaQuery.error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load modules"
+        error={mediaQuery.error}
+        onRetry={mediaQuery.refetch}
+      />
     );
   } else if (media.length === 0) {
     body = (

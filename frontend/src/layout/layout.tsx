@@ -1,10 +1,11 @@
-import { Outlet, useMatch } from "react-router-dom";
+import { Outlet, useLocation, useMatch } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ErrorBoundary } from "@/components/error-boundary";
 import NavBar from "./nav-bar";
 
 // SidebarProvider persists the open/collapsed state in this cookie.
@@ -14,6 +15,7 @@ const readSidebarCookie = () =>
 export default function Layout() {
   // Chat scrolls inside its own panes, so it needs the page pinned to the viewport.
   const fillViewport = useMatch("/chats/*") !== null;
+  const { pathname } = useLocation();
 
   return (
     <SidebarProvider defaultOpen={readSidebarCookie()}>
@@ -23,7 +25,10 @@ export default function Layout() {
           <SidebarTrigger />
         </header>
         <div className="flex min-h-0 flex-1 flex-col">
-          <Outlet />
+          {/* keyed by route so navigating away clears a crashed page */}
+          <ErrorBoundary key={pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </SidebarInset>
     </SidebarProvider>

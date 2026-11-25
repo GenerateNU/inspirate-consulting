@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { errorMessage } from "../api/client";
 import { useUpdateTodoItemCompleted } from "../api/endpoints";
 import {
   GetTodoItemsSortBy,
@@ -17,6 +16,7 @@ import {
   type LinkType,
 } from "./todoShared";
 import { useTaskFilterParams, useTodoPages } from "./useTodoList";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const SORT_LABELS: Record<GetTodoItemsSortBy, string> = {
   created_at: "Date created",
@@ -66,7 +66,7 @@ function TaskItem({
         <span> — completed {formatDate(task.completed_at)}</span>
       )}
       {linkLabel && <span> [{linkLabel}]</span>}
-      {error && <span> — Error: {errorMessage(error)}</span>}
+      <ErrorMessage error={error} prefix="Couldn't update" />
     </li>
   );
 }
@@ -168,7 +168,12 @@ export default function TaskList() {
       </div>
 
       {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {errorMessage(error)}</p>}
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load tasks"
+        error={error}
+        onRetry={refresh}
+      />
       {!isLoading && !error && items.length === 0 && (
         <p>{q.trim() ? "No tasks match your search." : "No tasks yet."}</p>
       )}

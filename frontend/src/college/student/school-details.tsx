@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { errorMessage } from "../../api/client";
 import {
   useGetEssaysFromStudent,
   useGetGlobalCollege,
@@ -32,6 +31,7 @@ import ChoiceChips from "../utils/components/choice-chips";
 import Tag, { type TagTone } from "../utils/components/tag";
 import { cycleDateLabel, cycleLabel, findCycle } from "../utils/shared";
 import { categoryOptions, interestOptions } from "./application-labels";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // the fields the student edits here; each change saves right away
 interface Plan {
@@ -269,11 +269,7 @@ function SchoolDetailsBody({ app }: { app: PersonalCollegeApplication }) {
           </div>
         </div>
 
-        {update.error && (
-          <p role="alert" className="font-host text-sm text-danger">
-            Couldn&apos;t save: {errorMessage(update.error)}
-          </p>
-        )}
+        <ErrorMessage error={update.error} prefix="Couldn't save" />
       </section>
 
       <section className="flex flex-col gap-4">
@@ -283,9 +279,12 @@ function SchoolDetailsBody({ app }: { app: PersonalCollegeApplication }) {
         {essaysQuery.isLoading ? (
           <p className="font-host text-sm">Loading...</p>
         ) : essaysQuery.error ? (
-          <p className="font-host text-sm">
-            Error: {errorMessage(essaysQuery.error)}
-          </p>
+          <ErrorMessage
+            variant="banner"
+            title="Couldn't load essay prompts"
+            error={essaysQuery.error}
+            onRetry={essaysQuery.refetch}
+          />
         ) : essays.length === 0 ? (
           <p className="font-host text-sm text-dark-greyish-brown">
             No essays for this school yet.
@@ -329,9 +328,12 @@ export default function SchoolDetails() {
     body = <p className="font-host text-sm">Loading...</p>;
   } else if (applicationsQuery.error) {
     body = (
-      <p className="font-host text-sm">
-        Error: {errorMessage(applicationsQuery.error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load this school"
+        error={applicationsQuery.error}
+        onRetry={applicationsQuery.refetch}
+      />
     );
   } else if (!app) {
     body = (

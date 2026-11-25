@@ -166,5 +166,4 @@ export const edit = {
   iconButton:
     "size-7 rounded-md text-charcoal [&_svg:not([class*='size-'])]:size-5",
   tag: "rounded-full bg-cream px-2 py-1 text-xs leading-none font-medium whitespace-nowrap text-[#5e5c56]",
-  error: "text-sm text-destructive",
 };

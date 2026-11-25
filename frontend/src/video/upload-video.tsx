@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { uploadVideo } from "../api/endpoints";
-import { errorMessage } from "../api/client";
 import { presignVideoBody, videoAccept } from "./video-file";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function UploadVideo() {
   const [file, setFile] = useState<File | null>(null);
@@ -54,7 +54,7 @@ export default function UploadVideo() {
         </button>
       </form>
       {status && <p>{status}</p>}
-      {error && <p>Error: {errorMessage(error)}</p>}
+      <ErrorMessage error={error} prefix="Couldn't upload" />
     </div>
   );
 }

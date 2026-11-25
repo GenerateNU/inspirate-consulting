@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useFetchUser, useListChats } from "../api/endpoints";
-import { errorMessage } from "../api/client";
 import { useAuthContext } from "../contexts/use-auth-context";
 import { cn } from "../lib/utils";
 import ChatList from "./chat-list";
@@ -35,7 +34,8 @@ export default function Chats() {
           chats={chats}
           currentUserId={currentUserId}
           isLoading={chatsQuery.isLoading}
-          error={chatsQuery.error ? errorMessage(chatsQuery.error) : null}
+          error={chatsQuery.error}
+          onRetry={chatsQuery.refetch}
         />
       </aside>
 

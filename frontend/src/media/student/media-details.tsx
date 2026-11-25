@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
 
-import { errorMessage } from "../../api/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -13,13 +12,21 @@ import DescriptionCard from "./description-card";
 import { useStudentModule } from "./hooks/use-student-module";
 import StatusBadge from "./status-badge";
 import { getModuleStatus } from "./utils/module-status";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // a student watching one assigned module
 export default function StudentMediaDetails() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { module, isLoading, error, markComplete, marking, markError } =
-    useStudentModule(id);
+  const {
+    module,
+    isLoading,
+    error,
+    refetch,
+    markComplete,
+    marking,
+    markError,
+  } = useStudentModule(id);
   const back = () => navigate(-1);
 
   if (isLoading) {
@@ -39,11 +46,18 @@ export default function StudentMediaDetails() {
       <MediaPageFrame>
         <MediaHeader title="Module" onBack={back} />
         <MediaPageBody>
-          <p className="font-host text-sm">
-            {error
-              ? `Error: ${errorMessage(error)}`
-              : "This module isn't assigned to you."}
-          </p>
+          {error ? (
+            <ErrorMessage
+              variant="banner"
+              title="Couldn't load this module"
+              error={error}
+              onRetry={refetch}
+            />
+          ) : (
+            <p className="font-host text-sm">
+              This module isn&apos;t assigned to you.
+            </p>
+          )}
         </MediaPageBody>
       </MediaPageFrame>
     );
@@ -80,11 +94,7 @@ export default function StudentMediaDetails() {
       />
 
       <MediaPageBody>
-        {markError && (
-          <p role="alert" className="font-host text-sm text-danger">
-            Error: {errorMessage(markError)}
-          </p>
-        )}
+        <ErrorMessage error={markError} prefix="Couldn't mark as complete" />
         <SavedVideoPlayer
           s3Key={module.s3_key}
           youtubeId={module.youtube_video_id}

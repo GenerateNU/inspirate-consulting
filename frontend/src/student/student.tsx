@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { errorMessage } from "../api/client";
 import {
   useRequestEssayReview,
   useGetEssayReviewStatus,
   useRefundEssayReview,
 } from "../api/endpoints";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function Student() {
   // Request a review
@@ -91,7 +91,10 @@ export default function Student() {
         <button type="submit">Request Review</button>
       </form>
       {requestResult && <p>{requestResult}</p>}
-      {requestReview.error && <p>Error: {errorMessage(requestReview.error)}</p>}
+      <ErrorMessage
+        error={requestReview.error}
+        prefix="Couldn't request review"
+      />
 
       <h2>Review Status for an Essay</h2>
       <form onSubmit={handleLookup}>
@@ -118,8 +121,8 @@ export default function Student() {
         </div>
       )}
       {lookupResult && <p>{lookupResult}</p>}
-      {lookupError && <p>Error: {errorMessage(lookupError)}</p>}
-      {refund.error && <p>Error: {errorMessage(refund.error)}</p>}
+      <ErrorMessage error={lookupError} prefix="Couldn't get status" />
+      <ErrorMessage error={refund.error} prefix="Couldn't refund" />
     </div>
   );
 }

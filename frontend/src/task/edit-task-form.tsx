@@ -1,7 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { errorMessage } from "../api/client";
 import {
   getGetTodoItemsQueryKey,
   getListCounselorStudentsQueryKey,
@@ -14,6 +13,7 @@ import {
 import type { TodoItem, UpdateTodoItemLinkBody } from "../api/models";
 import { dueDateToDeadline } from "./assign-task-form";
 import TaskForm, { type TaskFormValues } from "./task-form";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const PAGE_SIZE = 100;
 
@@ -123,15 +123,19 @@ export default function EditTaskForm() {
     return <p className="p-12 font-host text-sm">Loading task...</p>;
   if (taskQuery.error || !task) {
     return (
-      <div className="flex flex-col gap-2 p-12 font-host text-sm">
-        <p className="text-danger">
-          {taskQuery.error
-            ? `Couldn't load this task: ${errorMessage(taskQuery.error)}`
-            : "This task doesn't exist."}
-        </p>
-        <Link to={`/counselor/students/${studentId}`} className="underline">
-          Back to student
-        </Link>
+      <div className="p-12">
+        <ErrorMessage
+          variant="banner"
+          title={taskQuery.error ? "Couldn't load this task" : undefined}
+          error={taskQuery.error}
+          message={taskQuery.error ? undefined : "This task doesn't exist."}
+          onRetry={taskQuery.error ? taskQuery.refetch : undefined}
+          action={
+            <Link to={`/counselor/students/${studentId}`} className="underline">
+              Back to student
+            </Link>
+          }
+        />
       </div>
     );
   }

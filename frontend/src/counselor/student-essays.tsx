@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle, ExternalLink, IdCard } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
-import { errorMessage } from "../api/client";
 import {
   getGetEssayReviewStatusQueryKey,
   getListCounselorPendingReviewsQueryKey,
@@ -26,6 +25,7 @@ import {
   reviewStats,
   useReviewStatuses,
 } from "../essays/essay-sections";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function StudentEssays() {
   const { studentId = "" } = useParams();
@@ -116,14 +116,7 @@ export default function StudentEssays() {
           ]}
         />
 
-        {error && (
-          <p
-            role="alert"
-            className="rounded-md bg-destructive/10 p-4 text-destructive"
-          >
-            {errorMessage(error)}
-          </p>
-        )}
+        <ErrorMessage variant="banner" error={error} />
 
         {essaysQuery.isLoading || groupsQuery.isLoading ? (
           <p>Loading...</p>

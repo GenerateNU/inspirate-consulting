@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Pencil, Trophy } from "lucide-react";
-import { errorMessage } from "../../api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +8,7 @@ import { edit, longDateLabel, toDateInput } from "../ExtracurricularShared";
 import { byNewest, FormActions, runThen } from "./FormActions";
 import type { AchievementItem, AchievementStore } from "./itemSources";
 import { SectionCard } from "./SectionCard";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export function AchievementsSection({
   store,
@@ -97,9 +97,7 @@ export function AchievementsSection({
             required
           />
         </div>
-        {store.error && (
-          <p className={edit.error}>Error: {errorMessage(store.error)}</p>
-        )}
+        <ErrorMessage error={store.error} prefix="Couldn't save achievement" />
         <FormActions
           itemLabel="Achievement"
           isEditing={editingId !== null}

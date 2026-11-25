@@ -1,6 +1,5 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser } from "../api/endpoints";
-import { errorMessage } from "../api/client";
 import {
   GetTodoItemsSortBy,
   GetTodoItemsSortOrder,
@@ -9,6 +8,7 @@ import {
 import { graduationYearLabel } from "../lib/graduation-year";
 import { formatDeadline } from "../task/todoShared";
 import { useTodoPages } from "../task/useTodoList";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 //validate URL before anything is fetched
 export default function CounselorStudentTasks() {
@@ -17,13 +17,15 @@ export default function CounselorStudentTasks() {
   if (!id) {
     return (
       <div className="p-10">
-        <h1 className="text-2xl font-semibold">An error occurred</h1>
-        <p className="mt-2 text-sm">
-          No student was specified.{" "}
-          <Link to="/counselor-students" className="underline">
-            Back to students
-          </Link>
-        </p>
+        <ErrorMessage
+          variant="banner"
+          message="No student was specified."
+          action={
+            <Link to="/counselor-students" className="underline">
+              Back to students
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -42,7 +44,18 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
   const user = userQuery.data;
 
   if (studentQuery.isLoading || userQuery.isLoading) return <p>Loading...</p>;
-  if (studentQuery.error || !student) return <p>Could not load student.</p>;
+  if (studentQuery.error || !student)
+    return (
+      <div className="p-10">
+        <ErrorMessage
+          variant="banner"
+          title="Couldn't load this student"
+          error={studentQuery.error}
+          message={studentQuery.error ? undefined : "Student not found."}
+          onRetry={studentQuery.error ? studentQuery.refetch : undefined}
+        />
+      </div>
+    );
 
   const name = user?.name ?? "Student";
 
@@ -98,7 +111,7 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
 
 // This student's tasks, newest first, each with a link to edit it
 function StudentTaskRows({ studentId }: { studentId: string }) {
-  const { items, error, isLoading, hasMore, isLoadingMore, loadMore } =
+  const { items, error, isLoading, hasMore, isLoadingMore, loadMore, refresh } =
     useTodoPages(
       {
         student_id: studentId,
@@ -112,9 +125,12 @@ function StudentTaskRows({ studentId }: { studentId: string }) {
   if (isLoading) return <p className="text-sm">Loading tasks...</p>;
   if (error)
     return (
-      <p className="text-sm text-danger">
-        Could not load tasks: {errorMessage(error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load tasks"
+        error={error}
+        onRetry={refresh}
+      />
     );
   if (items.length === 0)
     return <p className="text-sm text-gray-500">No tasks assigned yet.</p>;

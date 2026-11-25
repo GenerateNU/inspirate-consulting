@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserAvatar from "@/components/user-avatar";
 import { formatListTime, isUUID } from "./chat-utils";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 interface ChatListProps {
   chats: ChatSummary[];
   currentUserId: string | null;
   isLoading: boolean;
-  error: string | null;
+  error: unknown;
+  onRetry: () => unknown;
 }
 
 export default function ChatList({
@@ -21,6 +23,7 @@ export default function ChatList({
   currentUserId,
   isLoading,
   error,
+  onRetry,
 }: ChatListProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -44,8 +47,17 @@ export default function ChatList({
               </div>
             </li>
           ))}
-        {error && <li className="p-5 text-sm text-red-600">{error}</li>}
-        {!isLoading && !error && chats.length === 0 && (
+        {error != null && (
+          <li className="p-5">
+            <ErrorMessage
+              variant="banner"
+              title="Couldn't load conversations"
+              error={error}
+              onRetry={onRetry}
+            />
+          </li>
+        )}
+        {!isLoading && error == null && chats.length === 0 && (
           <li className="p-5 text-sm text-neutral-500">
             No conversations yet.
           </li>
@@ -154,7 +166,7 @@ function NewChatForm({ currentUserId }: { currentUserId: string | null }) {
           Start
         </Button>
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      <ErrorMessage message={error} size="xs" />
     </form>
   );
 }
