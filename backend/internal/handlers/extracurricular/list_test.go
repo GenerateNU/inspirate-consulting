@@ -33,7 +33,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(rows, nil)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "")
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, rows, res)
@@ -45,7 +45,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return([]models.Extracurricular{}, nil)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "")
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), nil)
 
 		require.NoError(t, err)
 		assert.NotNil(t, res)
@@ -57,7 +57,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), "")
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), nil)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -74,25 +74,28 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, requested.String()).Return(rows, nil)
 
-		// nil Authorizer allows access, so this covers the student_id plumbing only
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), requested.String())
+		// no student in auth (a counselor); nil Authorizer allows access, so this
+		// covers the student_id plumbing only
+		raw := requested.String()
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), &raw)
 
 		require.NoError(t, err)
 		assert.Equal(t, rows, res)
 	})
 
-	t.Run("student requesting another student's list is forbidden", func(t *testing.T) {
+	t.Run("student always gets their own list, even when passing another student's id", func(t *testing.T) {
 		t.Parallel()
 
+		rows := []models.Extracurricular{{ID: 4, StudentID: studentID.String(), Name: "Choir"}}
 		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(rows, nil)
 
-		res, err := NewHandler(mockRepo, realAuthorizer()).ListExtracurriculars(studentRoleCtx(studentID), uuid.NewString())
+		other := uuid.NewString()
+		res, err := NewHandler(mockRepo, realAuthorizer()).ListExtracurriculars(studentRoleCtx(studentID), &other)
 
-		assert.Nil(t, res)
-		var httpErr errs.HTTPError
-		require.ErrorAs(t, err, &httpErr)
-		assert.Equal(t, 403, httpErr.Code)
-		mockRepo.AssertNotCalled(t, "ListExtracurriculars")
+		require.NoError(t, err)
+		assert.Equal(t, rows, res)
+		mockRepo.AssertNotCalled(t, "ListExtracurriculars", mock.Anything, other)
 	})
 
 	t.Run("malformed student id is a bad request", func(t *testing.T) {
@@ -100,7 +103,8 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "not-a-uuid")
+		raw := "not-a-uuid"
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), &raw)
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
@@ -115,7 +119,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(nil, errors.New("database error"))
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "")
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), nil)
 
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")

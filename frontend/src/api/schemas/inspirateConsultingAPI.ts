@@ -606,10 +606,10 @@ export const UpdateEssayStatusResponse = /*#__PURE__*/ zod.object({
 
 
 /**
- * List a student's extracurriculars. Students get their own; counselors must pass student_id for a student assigned to them.
+ * List a student's extracurriculars. Students always get their own; counselors must pass student_id for a student assigned to them.
  */
 export const ListExtracurricularsQueryParams = /*#__PURE__*/ zod.object({
-  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose extracurriculars to return; required for counselors (who must be assigned to the student), defaults to the authenticated student'))
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose extracurriculars to return; required for counselors (who must be assigned to the student), ignored for students, who always get their own'))
 })
 
 export const ListExtracurricularsResponseItem = /*#__PURE__*/ zod.object({

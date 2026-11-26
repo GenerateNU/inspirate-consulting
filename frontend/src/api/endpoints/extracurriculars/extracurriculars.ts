@@ -100,7 +100,7 @@ export const getListExtracurricularsUrl = (params?: ListExtracurricularsParams,)
 }
 
 /**
- * List a student's extracurriculars. Students get their own; counselors must pass student_id for a student assigned to them.
+ * List a student's extracurriculars. Students always get their own; counselors must pass student_id for a student assigned to them.
  */
 export const listExtracurriculars = async (params?: ListExtracurricularsParams, options?: RequestInit): Promise<Extracurricular[] | null> => {
 

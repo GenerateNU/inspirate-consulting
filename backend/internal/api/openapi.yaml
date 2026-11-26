@@ -3934,15 +3934,15 @@ paths:
         - Essays
   /extracurriculars:
     get:
-      description: List a student's extracurriculars. Students get their own; counselors must pass student_id for a student assigned to them.
+      description: List a student's extracurriculars. Students always get their own; counselors must pass student_id for a student assigned to them.
       operationId: list-extracurriculars
       parameters:
-        - description: Student whose extracurriculars to return; required for counselors (who must be assigned to the student), defaults to the authenticated student
+        - description: Student whose extracurriculars to return; required for counselors (who must be assigned to the student), ignored for students, who always get their own
           explode: false
           in: query
           name: student_id
           schema:
-            description: Student whose extracurriculars to return; required for counselors (who must be assigned to the student), defaults to the authenticated student
+            description: Student whose extracurriculars to return; required for counselors (who must be assigned to the student), ignored for students, who always get their own
             format: uuid
             type: string
       responses:

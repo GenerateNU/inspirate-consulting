@@ -8,7 +8,7 @@
 
 export type ListExtracurricularsParams = {
 /**
- * Student whose extracurriculars to return; required for counselors (who must be assigned to the student), defaults to the authenticated student
+ * Student whose extracurriculars to return; required for counselors (who must be assigned to the student), ignored for students, who always get their own
  */
 student_id?: string;
 };
