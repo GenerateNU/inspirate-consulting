@@ -1,10 +1,9 @@
 import { Panel } from "@/profile/components/panel";
 import { TextField } from "@/profile/components/text-field";
-import {
-  tomorrowDateInput,
-  type ProfileErrors,
-  type ProfileValues,
-  type SetProfileValue,
+import type {
+  ProfileErrors,
+  ProfileValues,
+  SetProfileValue,
 } from "@/profile/profile-form-values";
 
 interface CounselorFieldsProps {
@@ -32,10 +31,8 @@ export function CounselorFields({
       <TextField
         label="Account Expiration (blank for none)"
         type="date"
-        min={tomorrowDateInput()}
         value={values.expiresAt}
         onChange={setValue("expiresAt")}
-        error={errors.expiresAt}
       />
     </Panel>
   );

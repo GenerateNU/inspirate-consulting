@@ -7,6 +7,7 @@ import type {
 } from "@/api/models";
 import {
   counselorChanges,
+  expiresImmediately,
   sameNotificationValues,
   studentChanges,
   toNotificationBody,
@@ -57,13 +58,7 @@ export function useProfileForm({
       : toNotificationBody(notify, initialNotify),
   };
   const isDirty = Object.values(update).some((part) => part !== undefined);
-  const errors = validateProfile(
-    initial,
-    values,
-    notify,
-    !!student,
-    !!counselor,
-  );
+  const errors = validateProfile(values, notify, !!student, !!counselor);
   const hasErrors = Object.values(errors).some(Boolean);
 
   const save = async () => {
@@ -79,6 +74,7 @@ export function useProfileForm({
     errors,
     hasErrors,
     isDirty,
+    expiresImmediately: !!counselor && expiresImmediately(initial, values),
     save,
     saveState: saver.saveState,
     failedSaves: saver.failedSaves,

@@ -1,4 +1,5 @@
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { CollegePreferenceFields } from "@/profile/components/college-preference-fields";
 import { CounselorFields } from "@/profile/components/counselor-fields";
 import { DiscardChangesDialog } from "@/profile/components/discard-changes-dialog";
@@ -24,9 +25,19 @@ export function ProfileForm({
   const form = useProfileForm(source);
   const leaveGuard = useLeaveGuard(form.isDirty);
   const { user, student, counselor } = source;
+  const [confirmingExpiry, setConfirmingExpiry] = useState(false);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (form.expiresImmediately) {
+      setConfirmingExpiry(true);
+      return;
+    }
+    void form.save();
+  };
+
+  const handleConfirmExpiry = () => {
+    setConfirmingExpiry(false);
     void form.save();
   };
 
@@ -80,6 +91,14 @@ export function ProfileForm({
       </form>
 
       <DiscardChangesDialog {...leaveGuard.dialog} />
+      <ConfirmDialog
+        open={confirmingExpiry}
+        onOpenChange={setConfirmingExpiry}
+        title="Expire your account now?"
+        description="This expiration date is today or earlier, so your account will expire as soon as you save. You'll be signed out and won't be able to sign back in until the date is changed."
+        confirmLabel="Save and Expire"
+        onConfirm={handleConfirmExpiry}
+      />
     </PageShell>
   );
 }

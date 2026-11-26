@@ -33,7 +33,6 @@ export interface ProfileErrors {
   gpa?: string;
   daysBeforeDue?: string;
   customLink?: string;
-  expiresAt?: string;
 }
 
 export type SetProfileValue = (
@@ -111,7 +110,6 @@ const isWebUrl = (text: string) => {
 };
 
 export function validateProfile(
-  initial: ProfileValues,
   values: ProfileValues,
   notify: NotificationValues,
   hasStudent: boolean,
@@ -130,16 +128,18 @@ export function validateProfile(
     const link = values.customLink.trim();
     if (link !== "" && !isWebUrl(link))
       errors.customLink = "Enter a full link starting with https://.";
-    // a same-day or past date would lock the counselor out right away
-    if (
-      values.expiresAt !== initial.expiresAt &&
-      values.expiresAt !== "" &&
-      values.expiresAt < tomorrowDateInput()
-    )
-      errors.expiresAt = "Choose a date after today.";
   }
   return errors;
 }
+
+// a new expiration of today or earlier ends the account as soon as it's saved
+export const expiresImmediately = (
+  initial: ProfileValues,
+  values: ProfileValues,
+) =>
+  values.expiresAt !== initial.expiresAt &&
+  values.expiresAt !== "" &&
+  values.expiresAt < tomorrowDateInput();
 
 const toStudentBody = (values: ProfileValues): UpdateStudentBody => ({
   high_school: values.highSchool.trim(),
