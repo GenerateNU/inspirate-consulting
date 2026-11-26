@@ -106,10 +106,7 @@ func createTemplateDB(ctx context.Context) error {
 		return fmt.Errorf("migrations failed: %w", err)
 	}
 
-	if err := runSQLDir(pool, "internal/supabase/seed"); err != nil {
-		return fmt.Errorf("seeds failed: %w", err)
-	}
-
+	// Seed files are for local dev (supabase db reset) only; tests expect empty tables.
 	return nil
 }
 
