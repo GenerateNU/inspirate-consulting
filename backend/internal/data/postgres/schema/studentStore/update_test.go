@@ -121,7 +121,7 @@ func TestUpdateStudent_Partial(t *testing.T) {
 		t.Errorf("expected GPA %v, got %v", gpa, updated.GPA)
 	}
 	if updated.GraduationYear != created.GraduationYear {
-		t.Errorf("expected Year %q to be unchanged, got %q", created.GraduationYear, updated.GraduationYear)
+		t.Errorf("expected Year to be unchanged", created.GraduationYear, updated.GraduationYear)
 	}
 	if updated.Organization == nil || *updated.Organization != organization {
 		t.Errorf("expected Organization %q to be unchanged, got %v", organization, updated.Organization)
