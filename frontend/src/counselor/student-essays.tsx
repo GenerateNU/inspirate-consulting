@@ -1,7 +1,6 @@
-import { graduationYearLabel } from "@/lib/graduation-year";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle, ExternalLink, IdCard } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { CheckCircle, ExternalLink } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 import {
   getGetEssayReviewStatusQueryKey,
@@ -15,7 +14,6 @@ import type { Essays } from "../api/models";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import UserAvatar from "@/components/user-avatar";
 import {
   EssaySections,
   RequestedAt,
@@ -26,6 +24,7 @@ import {
   useReviewStatuses,
 } from "../essays/essay-sections";
 import { ErrorMessage } from "@/components/ui/error-message";
+import StudentPageHeader from "./student-page-header";
 
 export default function StudentEssays() {
   const { studentId = "" } = useParams();
@@ -72,40 +71,13 @@ export default function StudentEssays() {
   };
 
   return (
-    <div className="flex-1 bg-muted/40 px-4 py-8">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        <Button variant="outline" className="w-fit" asChild>
-          <Link to="/counselor-students">
-            <ArrowLeft className="size-4" aria-hidden />
-            Back to all students
-          </Link>
-        </Button>
-
-        <Card className="flex-row flex-wrap items-center justify-between gap-4 p-6 sm:p-8">
-          <div className="flex flex-wrap items-center gap-4">
-            <UserAvatar
-              name={student?.name ?? ""}
-              className="size-16 rounded-md"
-              fallbackClassName="rounded-md text-2xl font-semibold text-foreground"
-            />
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                {student?.name ?? "Student"}
-              </h1>
-              {student && (
-                <p className="text-sm text-muted-foreground">
-                  {graduationYearLabel(student.graduation_year)}
-                </p>
-              )}
-            </div>
-          </div>
-          <Button variant="secondary" asChild>
-            <Link to={`/students/${studentId}`}>
-              <IdCard className="size-4" aria-hidden />
-              View student profile
-            </Link>
-          </Button>
-        </Card>
+    // same layout as the counselor's view of a student's college list
+    <div className="flex min-h-full w-full flex-col gap-5 bg-off-white py-12 pr-20 pl-[58px] max-lg:px-6">
+      <StudentPageHeader
+        title={student ? `${student.name}’s Essays` : "Essays"}
+        backTo={`/counselor/students/${studentId}`}
+      />
+      <div className="flex w-full flex-col gap-6 pl-[57px] max-lg:pl-0">
 
         <StatGrid
           stats={[

@@ -33,6 +33,7 @@ import type {
   ExtracurricularDetail,
   ExtracurricularNote,
   ExtracurricularNoteRequest,
+  ListExtracurricularsParams,
   UpdateExtracurricularAchievementRequest,
   UpdateExtracurricularRequest
 } from '../../models';
@@ -83,20 +84,27 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getListExtracurricularsUrl = () => {
+export const getListExtracurricularsUrl = (params?: ListExtracurricularsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/extracurriculars`
+  return stringifiedParams.length > 0 ? `/api/extracurriculars?${stringifiedParams}` : `/api/extracurriculars`
 }
 
 /**
- * List extracurriculars for the authenticated student.
+ * List a student's extracurriculars. Students get their own; counselors must pass student_id for a student assigned to them.
  */
-export const listExtracurriculars = async ( options?: RequestInit): Promise<Extracurricular[] | null> => {
+export const listExtracurriculars = async (params?: ListExtracurricularsParams, options?: RequestInit): Promise<Extracurricular[] | null> => {
 
-  const res = await fetch(getListExtracurricularsUrl(),
+  const res = await fetch(getListExtracurricularsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -123,23 +131,23 @@ export const listExtracurriculars = async ( options?: RequestInit): Promise<Extr
 
 
 
-export const getListExtracurricularsQueryKey = () => {
+export const getListExtracurricularsQueryKey = (params?: ListExtracurricularsParams,) => {
     return [
-    `/api/extracurriculars`
+    `/api/extracurriculars`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListExtracurricularsQueryOptions = <TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
+export const getListExtracurricularsQueryOptions = <TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: ListExtracurricularsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListExtracurricularsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListExtracurricularsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExtracurriculars>>> = ({ signal }) => listExtracurriculars({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExtracurriculars>>> = ({ signal }) => listExtracurriculars(params, { signal, ...fetchOptions });
 
 
 
@@ -153,7 +161,7 @@ export type ListExtracurricularsQueryError = globalThis.Error & { info?: ErrorMo
 
 
 export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>> & Pick<
+ params: undefined |  ListExtracurricularsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listExtracurriculars>>,
           TError,
@@ -163,7 +171,7 @@ export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listEx
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>> & Pick<
+ params?: ListExtracurricularsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listExtracurriculars>>,
           TError,
@@ -173,16 +181,16 @@ export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listEx
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
+ params?: ListExtracurricularsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useListExtracurriculars<TData = Awaited<ReturnType<typeof listExtracurriculars>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
+ params?: ListExtracurricularsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExtracurriculars>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListExtracurricularsQueryOptions(options)
+  const queryOptions = getListExtracurricularsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

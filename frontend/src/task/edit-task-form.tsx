@@ -115,7 +115,8 @@ export default function EditTaskForm() {
       void queryClient.invalidateQueries({
         queryKey: getListCounselorStudentsQueryKey(),
       });
-      void navigate(`/counselor/students/${studentId}`);
+      // back to wherever the edit was opened from: the student's profile or full task list
+      void navigate(-1);
     },
   });
 

@@ -24,7 +24,10 @@ func (r *StudentRepository) GetStudent(ctx context.Context, id uuid.UUID) (*mode
 		ctx,
 		query,
 		id,
-	).Scan(&Student.ID, &Student.UserID, &Student.GraduationYear, &Student.Organization, &Student.GPA, &Student.ReviewBalance, &Student.CounselorID, &Student.Interest)
+	).Scan(&Student.ID, &Student.UserID, &Student.GraduationYear, &Student.Organization, &Student.GPA,
+		&Student.ReviewBalance, &Student.CounselorID, &Student.Interest,
+		&Student.HighSchool, &Student.StandardizedTestScore, &Student.IntendedMajor,
+		&Student.IntendedMinor, &Student.GeographicPreferences)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errs.NotFound("student", "id", id.String())

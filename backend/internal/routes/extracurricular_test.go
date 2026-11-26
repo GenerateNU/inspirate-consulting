@@ -283,7 +283,7 @@ func TestRoute_ListExtracurriculars(t *testing.T) {
 		assert.JSONEq(t, `[]`, string(body))
 	})
 
-	t.Run("counselor without student identity is unauthorized", func(t *testing.T) {
+	t.Run("counselor without student_id is a bad request", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
@@ -291,7 +291,21 @@ func TestRoute_ListExtracurriculars(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, _ := doRequest(t, app, http.MethodGet, "/extracurriculars", nil, map[string]string{"X-Counselor-ID": uuid.NewString()})
-		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	})
+
+	t.Run("student_id query is passed to the repository", func(t *testing.T) {
+		t.Parallel()
+
+		requested := uuid.NewString()
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("ListExtracurriculars", mock.Anything, requested).Return([]models.Extracurricular{}, nil)
+
+		app, err := setupExtracurricularTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, body := doRequest(t, app, http.MethodGet, "/extracurriculars?student_id="+requested, nil, map[string]string{"X-Counselor-ID": uuid.NewString()})
+		require.Equal(t, http.StatusOK, resp.StatusCode, string(body))
 	})
 
 	t.Run("repository error", func(t *testing.T) {

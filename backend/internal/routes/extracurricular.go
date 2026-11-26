@@ -29,10 +29,10 @@ func SetUpExtracurricularRoutes(api huma.API, repository *data.Repository, verif
 		OperationID: "list-extracurriculars",
 		Method:      http.MethodGet,
 		Path:        "/extracurriculars",
-		Description: "List extracurriculars for the authenticated student.",
+		Description: "List a student's extracurriculars. Students get their own; counselors must pass student_id for a student assigned to them.",
 		Tags:        []string{"Extracurriculars"},
-	}, func(ctx context.Context, _ *models.ListExtracurricularsInput) (*models.ListExtracurricularsOutput, error) {
-		list, err := extracurricularHandler.ListExtracurriculars(ctx)
+	}, func(ctx context.Context, input *models.ListExtracurricularsInput) (*models.ListExtracurricularsOutput, error) {
+		list, err := extracurricularHandler.ListExtracurriculars(ctx, input.StudentID)
 		if err != nil {
 			return nil, err
 		}

@@ -48,6 +48,9 @@ import StudentEssays from "./counselor/student-essays.tsx";
 import AssignTaskForm from "./task/assign-task-form.tsx";
 import EditTaskForm from "./task/edit-task-form.tsx";
 import CounselorStudentTasks from "./counselor/counselor-student-tasks.tsx";
+import CounselorStudentProfile from "./counselor/student-profile/student-profile-page.tsx";
+import CounselorExtracurriculars from "./extracurricular/CounselorExtracurriculars";
+import CounselorViewExtracurricular from "./extracurricular/CounselorViewExtracurricular";
 import EditProfile from "./profile/edit-profile.tsx";
 import EditProfilePicture from "./profile/edit-profile-picture.tsx";
 import ViewProfile from "./profile/view-profile.tsx";
@@ -170,7 +173,19 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/assign-task" element={<AssignTaskForm />} />
                 <Route
                   path="/counselor/students/:id"
+                  element={<CounselorStudentProfile />}
+                />
+                <Route
+                  path="/counselor/students/:id/tasks"
                   element={<CounselorStudentTasks />}
+                />
+                <Route
+                  path="/counselor/students/:studentId/extracurriculars"
+                  element={<CounselorExtracurriculars />}
+                />
+                <Route
+                  path="/counselor/students/:studentId/extracurriculars/:id"
+                  element={<CounselorViewExtracurricular />}
                 />
                 <Route path="/profile" element={<EditProfile />} />
                 <Route

@@ -113,8 +113,10 @@ export default function NavBar() {
   const { role } = useAuthContext();
 
   // My List is student-only; counselors manage the shared college list instead.
-  // Modules likewise goes to the counselor's media library
+  // Modules likewise goes to the counselor's media library, and Task Dashboard
+  // to the counselor dashboard (My Students), not a student's own tasks
   const counselorPaths: Record<string, string> = {
+    "Task Dashboard": "/counselor",
     Colleges: "/counselor-college-list",
     Modules: "/counselor-media-list",
   };

@@ -33,7 +33,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(rows, nil)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID))
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "")
 
 		require.NoError(t, err)
 		assert.Equal(t, rows, res)
@@ -45,24 +45,67 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return([]models.Extracurricular{}, nil)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID))
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "")
 
 		require.NoError(t, err)
 		assert.NotNil(t, res)
 		assert.Empty(t, res)
 	})
 
-	t.Run("missing student id is unauthorized", func(t *testing.T) {
+	t.Run("no student id in the request or the auth context is a bad request", func(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewExtracurricularRepository(t)
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID))
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), "")
 
 		assert.Nil(t, res)
 		var httpErr errs.HTTPError
 		require.ErrorAs(t, err, &httpErr)
-		assert.Equal(t, 401, httpErr.Code)
+		assert.Equal(t, 400, httpErr.Code)
+		mockRepo.AssertNotCalled(t, "ListExtracurriculars")
+	})
+
+	t.Run("requested student id is listed when the caller may access it", func(t *testing.T) {
+		t.Parallel()
+
+		requested := uuid.New()
+		rows := []models.Extracurricular{{ID: 3, StudentID: requested.String(), Name: "Robotics"}}
+		mockRepo := mocks.NewExtracurricularRepository(t)
+		mockRepo.On("ListExtracurriculars", mock.Anything, requested.String()).Return(rows, nil)
+
+		// nil Authorizer allows access, so this covers the student_id plumbing only
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(auth.WithUserID(context.Background(), userID), requested.String())
+
+		require.NoError(t, err)
+		assert.Equal(t, rows, res)
+	})
+
+	t.Run("student requesting another student's list is forbidden", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewExtracurricularRepository(t)
+
+		res, err := NewHandler(mockRepo, realAuthorizer()).ListExtracurriculars(studentRoleCtx(studentID), uuid.NewString())
+
+		assert.Nil(t, res)
+		var httpErr errs.HTTPError
+		require.ErrorAs(t, err, &httpErr)
+		assert.Equal(t, 403, httpErr.Code)
+		mockRepo.AssertNotCalled(t, "ListExtracurriculars")
+	})
+
+	t.Run("malformed student id is a bad request", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo := mocks.NewExtracurricularRepository(t)
+
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "not-a-uuid")
+
+		assert.Nil(t, res)
+		var httpErr errs.HTTPError
+		require.ErrorAs(t, err, &httpErr)
+		assert.Equal(t, 400, httpErr.Code)
 		mockRepo.AssertNotCalled(t, "ListExtracurriculars")
 	})
 
@@ -72,7 +115,7 @@ func TestHandler_ListExtracurriculars(t *testing.T) {
 		mockRepo := mocks.NewExtracurricularRepository(t)
 		mockRepo.On("ListExtracurriculars", mock.Anything, studentID.String()).Return(nil, errors.New("database error"))
 
-		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID))
+		res, err := NewHandler(mockRepo, nil).ListExtracurriculars(studentCtx(studentID, userID), "")
 
 		assert.Nil(t, res)
 		assert.EqualError(t, err, "database error")

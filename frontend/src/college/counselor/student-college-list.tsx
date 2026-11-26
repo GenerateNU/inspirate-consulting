@@ -1,11 +1,11 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import {
   useListCounselorStudents,
   useListGlobalColleges,
   useListPersonalCollegeApplications,
 } from "../../api/endpoints";
-import arrowLeftIcon from "@/assets/college/arrow-left.svg";
+import StudentPageHeader from "../../counselor/student-page-header";
 import ApplicationCard from "../student/application-card";
 import { sortApplications } from "../utils/sort-applications";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -13,7 +13,6 @@ import { ErrorMessage } from "@/components/ui/error-message";
 // "Anna's College List": a counselor's read-only view of one student's list
 export default function StudentCollegeList() {
   const { studentId = "" } = useParams();
-  const navigate = useNavigate();
 
   const applicationsQuery = useListPersonalCollegeApplications(
     { student_id: studentId },
@@ -71,20 +70,10 @@ export default function StudentCollegeList() {
 
   return (
     <div className="flex min-h-full w-full flex-col gap-5 bg-off-white py-12 pr-20 pl-[58px] max-lg:px-6">
-      <div className="flex w-full items-start gap-9">
-        <button
-          type="button"
-          data-slot="icon-button"
-          aria-label="Back"
-          onClick={() => navigate(-1)}
-          className="shrink-0 rounded-md hover:bg-black/5"
-        >
-          <img src={arrowLeftIcon} alt="" width={32} height={32} />
-        </button>
-        <h1 className="min-w-0 flex-1 truncate font-jakarta text-2xl leading-[normal] font-bold text-charcoal">
-          {student ? `${student.name}’s College List` : "College List"}
-        </h1>
-      </div>
+      <StudentPageHeader
+        title={student ? `${student.name}’s College List` : "College List"}
+        backTo={`/counselor/students/${studentId}`}
+      />
       <div className="flex w-full flex-col pl-[57px] max-lg:pl-0">{body}</div>
     </div>
   );
