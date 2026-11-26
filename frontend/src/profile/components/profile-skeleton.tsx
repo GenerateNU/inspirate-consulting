@@ -6,6 +6,7 @@ import { ReadOnlyFieldSkeleton } from "@/profile/components/read-only-field";
 
 interface ProfileSkeletonProps {
   academic?: boolean;
+  counselor?: boolean;
   own?: boolean;
 }
 
@@ -15,7 +16,11 @@ interface SkeletonPanel {
   avatar?: boolean;
 }
 
-const skeletonPanels = (academic: boolean, own: boolean): SkeletonPanel[] => [
+const skeletonPanels = (
+  academic: boolean,
+  counselor: boolean,
+  own: boolean,
+): SkeletonPanel[] => [
   { title: "Personal Information", fields: 2, avatar: true },
   ...(academic
     ? [
@@ -23,11 +28,13 @@ const skeletonPanels = (academic: boolean, own: boolean): SkeletonPanel[] => [
         { title: "College Preferences & Specializations", fields: 3 },
       ]
     : []),
+  ...(counselor ? [{ title: "Counselor Details", fields: 2 }] : []),
   ...(own ? [{ title: "Notifications", fields: 4 }] : []),
 ];
 
 export function ProfileSkeleton({
   academic = true,
+  counselor = false,
   own = true,
 }: ProfileSkeletonProps) {
   return (
@@ -40,7 +47,7 @@ export function ProfileSkeleton({
         aria-label={own ? "Loading your profile" : "Loading profile"}
         className="flex w-full flex-col gap-6 sm:pl-15"
       >
-        {skeletonPanels(academic, own).map((panel) => (
+        {skeletonPanels(academic, counselor, own).map((panel) => (
           <PanelSkeleton key={panel.title} {...panel} />
         ))}
       </div>

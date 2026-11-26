@@ -1,4 +1,5 @@
-import type { NotificationPreferences, Student } from "@/api/models";
+import type { Counselor, NotificationPreferences, Student } from "@/api/models";
+import { CounselorSummary } from "@/profile/components/counselor-summary";
 import { InviteUserCard } from "@/profile/components/invite-user-card";
 import { LogOutButton } from "@/profile/components/log-out-button";
 import { NotificationsSummary } from "@/profile/components/notifications-summary";
@@ -19,10 +20,16 @@ export interface OwnProfile {
 interface ProfileViewProps {
   user: ProfileUser;
   student?: Student;
+  counselor?: Counselor;
   own?: OwnProfile;
 }
 
-export function ProfileView({ user, student, own }: ProfileViewProps) {
+export function ProfileView({
+  user,
+  student,
+  counselor,
+  own,
+}: ProfileViewProps) {
   return (
     <PageShell>
       <PageHeader title={user.name}>
@@ -32,6 +39,7 @@ export function ProfileView({ user, student, own }: ProfileViewProps) {
       <div className="flex w-full flex-col gap-6 sm:pl-15">
         <PersonalInfoSummary user={user} own={!!own} />
         {student && <StudentSummary student={student} />}
+        {counselor && <CounselorSummary counselor={counselor} />}
         {own && <NotificationsSummary notifications={own.notifications} />}
         {own?.canInvite && <InviteUserCard />}
       </div>

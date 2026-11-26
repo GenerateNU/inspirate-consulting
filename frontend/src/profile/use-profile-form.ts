@@ -1,10 +1,13 @@
 import { useState } from "react";
 import type {
+  Counselor,
   CurrentUser,
   NotificationPreferences,
   Student,
 } from "@/api/models";
 import {
+  counselorChanges,
+  expiresImmediately,
   sameNotificationValues,
   studentChanges,
   toNotificationBody,
@@ -19,15 +22,17 @@ import { useSaveProfile, type ProfileUpdate } from "@/profile/use-save-profile";
 export interface ProfileSource {
   user: CurrentUser;
   student?: Student;
+  counselor?: Counselor;
   notifications: NotificationPreferences;
 }
 
 export function useProfileForm({
   user,
   student,
+  counselor,
   notifications,
 }: ProfileSource) {
-  const [initial] = useState(() => toProfileValues(user, student));
+  const [initial] = useState(() => toProfileValues(user, student, counselor));
   const [values, setValues] = useState(initial);
   const [initialNotify] = useState(() => toNotificationValues(notifications));
   const [notify, setNotify] = useState(initialNotify);
@@ -39,18 +44,21 @@ export function useProfileForm({
     setNotify((n) => ({ ...n, [key]: value }));
 
   const changes = student ? studentChanges(initial, values) : {};
+  const counselorUpdate = counselor ? counselorChanges(initial, values) : {};
   const update: ProfileUpdate = {
     name: values.name !== initial.name ? values.name.trim() : undefined,
     student:
       student && Object.keys(changes).length > 0
         ? { id: student.id, changes }
         : undefined,
+    counselor:
+      Object.keys(counselorUpdate).length > 0 ? counselorUpdate : undefined,
     notifications: sameNotificationValues(notify, initialNotify)
       ? undefined
       : toNotificationBody(notify, initialNotify),
   };
   const isDirty = Object.values(update).some((part) => part !== undefined);
-  const errors = validateProfile(values, notify, !!student);
+  const errors = validateProfile(values, notify, !!student, !!counselor);
   const hasErrors = Object.values(errors).some(Boolean);
 
   const save = async () => {
@@ -66,6 +74,7 @@ export function useProfileForm({
     errors,
     hasErrors,
     isDirty,
+    expiresImmediately: !!counselor && expiresImmediately(initial, values),
     save,
     saveState: saver.saveState,
     failedSaves: saver.failedSaves,

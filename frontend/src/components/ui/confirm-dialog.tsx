@@ -74,7 +74,7 @@ function ConfirmDialog({
               <XIcon className="size-6" aria-hidden="true" />
             </button>
           </AlertDialog.Cancel>
-          <div className="flex w-full flex-col gap-6 py-6">
+          <div className="flex w-full flex-col gap-6 pb-6">
             <div className="flex flex-col gap-4">
               <AlertDialog.Title className="font-jakarta text-xl font-medium text-[#1c261f]">
                 {title}
