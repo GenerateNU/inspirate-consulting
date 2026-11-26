@@ -119,11 +119,7 @@ export default function ThisWeeksTasks({ studentId }: ThisWeeksTasksProps) {
           </span>
         )}
         <div className="ml-auto flex gap-2">
-          <Button
-            asChild
-            variant="outline"
-            className={outlineButtonClassName}
-          >
+          <Button asChild variant="outline" className={outlineButtonClassName}>
             <Link to={`/counselor/students/${studentId}/tasks`}>
               View Full Dashboard
             </Link>

@@ -15,9 +15,7 @@ function Detail({ label, value }: DetailProps) {
       <dd
         className={cn(
           "truncate font-host text-xs",
-          value == null || value === ""
-            ? "text-warm-grey"
-            : "text-charcoal",
+          value == null || value === "" ? "text-warm-grey" : "text-charcoal",
         )}
       >
         {value == null || value === "" ? "Not set" : value}
@@ -31,7 +29,9 @@ interface StudentDetailsCardProps {
 }
 
 // "Student details": academic overview and college preferences
-export default function StudentDetailsCard({ student }: StudentDetailsCardProps) {
+export default function StudentDetailsCard({
+  student,
+}: StudentDetailsCardProps) {
   return (
     <Card className={cn(panelClassName, "gap-4")}>
       <h2 className={sectionTitleClassName}>Student details</h2>

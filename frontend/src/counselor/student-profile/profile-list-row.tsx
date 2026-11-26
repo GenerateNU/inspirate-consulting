@@ -44,12 +44,17 @@ export default function ProfileListRow({
     <li
       className={cn(
         "relative flex items-center gap-3 overflow-clip rounded-md border py-3 pr-4 pl-5",
-        muted ? "border-dashed border-blue bg-off-white" : "border-cream bg-white",
+        muted
+          ? "border-dashed border-blue bg-off-white"
+          : "border-cream bg-white",
       )}
     >
       <div
         aria-hidden="true"
-        className={cn("absolute -top-px -bottom-px -left-px w-1", accentClassName)}
+        className={cn(
+          "absolute -top-px -bottom-px -left-px w-1",
+          accentClassName,
+        )}
       />
       <span
         aria-hidden="true"

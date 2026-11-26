@@ -23,7 +23,8 @@ function essayStatus(
   review: EssayReviewStatus | undefined,
 ): { label: string; tone: TagTone } {
   if (isReviewOpen(review)) return { label: "Needs review", tone: "yellow" };
-  if (essay.status === "Submitted") return { label: "Completed", tone: "green" };
+  if (essay.status === "Submitted")
+    return { label: "Completed", tone: "green" };
   return { label: "Drafting", tone: "blue" };
 }
 

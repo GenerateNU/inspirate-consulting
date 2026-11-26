@@ -78,7 +78,6 @@ export default function StudentEssays() {
         backTo={`/counselor/students/${studentId}`}
       />
       <div className="flex w-full flex-col gap-6 pl-[57px] max-lg:pl-0">
-
         <StatGrid
           stats={[
             { label: "Total essays", value: stats.total },
