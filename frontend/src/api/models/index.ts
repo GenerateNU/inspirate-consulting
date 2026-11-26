@@ -82,6 +82,7 @@ export * from './listChatMessagesParams';
 export * from './listCounselorStudentsParams';
 export * from './listCounselorStudentsSortBy';
 export * from './listCounselorStudentsSortOrder';
+export * from './listExtracurricularsParams';
 export * from './listMediaParams';
 export * from './listPersonalCollegeApplicationsParams';
 export * from './loginInputBody';

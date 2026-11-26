@@ -9,6 +9,7 @@ import { graduationYearLabel } from "../lib/graduation-year";
 import { formatDeadline } from "../task/todoShared";
 import { useTodoPages } from "../task/useTodoList";
 import { ErrorMessage } from "@/components/ui/error-message";
+import StudentPageHeader from "./student-page-header";
 
 //validate URL before anything is fetched
 export default function CounselorStudentTasks() {
@@ -60,10 +61,14 @@ function CounselorStudentTasksContent({ studentId }: { studentId: string }) {
   const name = user?.name ?? "Student";
 
   return (
-    <div className="flex flex-col gap-6 p-10">
-      <h1 className="text-2xl font-semibold">{name}&apos;s Tasks</h1>
+    // same layout as the counselor's view of a student's college list
+    <div className="flex min-h-full w-full flex-col gap-5 bg-off-white py-12 pr-20 pl-[58px] max-lg:px-6">
+      <StudentPageHeader
+        title={`${name}’s Tasks`}
+        backTo={`/counselor/students/${studentId}`}
+      />
 
-      <div className="flex gap-8">
+      <div className="flex gap-8 pl-[57px] max-lg:pl-0">
         {/* Left: profile card */}
         <div className="flex w-56 flex-col items-center gap-2 bg-white p-4">
           {/* PLACEHOLDER: profile photo */}

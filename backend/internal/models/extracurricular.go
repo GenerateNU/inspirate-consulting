@@ -85,9 +85,10 @@ type CreateExtracurricularOutput struct {
 	Body Extracurricular
 }
 
-// ListExtracurricularsInput holds the request context for listing a student's extracurriculars.
-// The student is taken from the auth context, so there are no request parameters.
-type ListExtracurricularsInput struct{}
+// ListExtracurricularsInput holds the request parameters for listing a student's extracurriculars.
+type ListExtracurricularsInput struct {
+	StudentID string `query:"student_id" required:"false" format:"uuid" doc:"Student whose extracurriculars to return; required for counselors (who must be assigned to the student), ignored for students, who always get their own"`
+}
 
 // ListExtracurricularsOutput contains the extracurricular records returned for a student.
 type ListExtracurricularsOutput struct {

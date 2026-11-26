@@ -25,15 +25,25 @@ func TestGetStudent(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	organization := "Debate Club"
 	interest := "Computer Science"
+	highSchool := "Jericho High School"
+	testScore := "1500 SAT"
+	major := "Data Science"
+	minor := "Business Administration"
+	geography := "Northeast"
 
 	created := createTestStudent(t, db, models.Student{
-		UserID:         createTestUser(t, db, "Findable Student"),
-		GraduationYear: 2028,
-		Organization:   &organization,
-		GPA:            3.85,
-		ReviewBalance:  3,
-		CounselorID:    &counselorID,
-		Interest:       &interest,
+		UserID:                createTestUser(t, db, "Findable Student"),
+		GraduationYear:        2028,
+		Organization:          &organization,
+		GPA:                   3.85,
+		ReviewBalance:         3,
+		CounselorID:           &counselorID,
+		Interest:              &interest,
+		HighSchool:            &highSchool,
+		StandardizedTestScore: &testScore,
+		IntendedMajor:         &major,
+		IntendedMinor:         &minor,
+		GeographicPreferences: &geography,
 	})
 
 	fetched, err := repo.GetStudent(ctx, created.ID)
@@ -65,9 +75,24 @@ func TestGetStudent(t *testing.T) {
 	if fetched.CounselorID == nil || *fetched.CounselorID != counselorID {
 		t.Errorf("expected CounselorID %s, got %v", counselorID, fetched.CounselorID)
 	}
+	if fetched.HighSchool == nil || *fetched.HighSchool != highSchool {
+		t.Errorf("expected HighSchool %q, got %v", highSchool, fetched.HighSchool)
+	}
+	if fetched.StandardizedTestScore == nil || *fetched.StandardizedTestScore != testScore {
+		t.Errorf("expected StandardizedTestScore %q, got %v", testScore, fetched.StandardizedTestScore)
+	}
+	if fetched.IntendedMajor == nil || *fetched.IntendedMajor != major {
+		t.Errorf("expected IntendedMajor %q, got %v", major, fetched.IntendedMajor)
+	}
+	if fetched.IntendedMinor == nil || *fetched.IntendedMinor != minor {
+		t.Errorf("expected IntendedMinor %q, got %v", minor, fetched.IntendedMinor)
+	}
+	if fetched.GeographicPreferences == nil || *fetched.GeographicPreferences != geography {
+		t.Errorf("expected GeographicPreferences %q, got %v", geography, fetched.GeographicPreferences)
+	}
 }
 
-// organization and student_interest are nullable, so a student without them must scan back as nil
+// the optional text columns are nullable, so a student without them must scan back as nil
 func TestGetStudent_NullableFields(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
@@ -96,6 +121,21 @@ func TestGetStudent_NullableFields(t *testing.T) {
 	}
 	if fetched.Interest != nil {
 		t.Errorf("expected nil Interest, got %q", *fetched.Interest)
+	}
+	if fetched.HighSchool != nil {
+		t.Errorf("expected nil HighSchool, got %q", *fetched.HighSchool)
+	}
+	if fetched.StandardizedTestScore != nil {
+		t.Errorf("expected nil StandardizedTestScore, got %q", *fetched.StandardizedTestScore)
+	}
+	if fetched.IntendedMajor != nil {
+		t.Errorf("expected nil IntendedMajor, got %q", *fetched.IntendedMajor)
+	}
+	if fetched.IntendedMinor != nil {
+		t.Errorf("expected nil IntendedMinor, got %q", *fetched.IntendedMinor)
+	}
+	if fetched.GeographicPreferences != nil {
+		t.Errorf("expected nil GeographicPreferences, got %q", *fetched.GeographicPreferences)
 	}
 	if fetched.ReviewBalance != 0 {
 		t.Errorf("expected ReviewBalance 0, got %d", fetched.ReviewBalance)
