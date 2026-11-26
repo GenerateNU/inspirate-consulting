@@ -2,6 +2,9 @@ import type { ChatMessage } from "../api/models";
 
 export const POLL_INTERVAL_MS = 5000;
 
+// Feature flag for the assistant, set from AGENT_ENABLED at build time.
+export const AGENT_ENABLED = import.meta.env.VITE_AGENT_ENABLED === "true";
+
 // Route id for the assistant conversation at /chats/assistant.
 export const ASSISTANT_CHAT_ID = "assistant";
 

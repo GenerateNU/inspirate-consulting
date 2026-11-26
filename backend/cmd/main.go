@@ -76,6 +76,7 @@ func LoadConfig() (*config.Config, error) {
 		SQS         config.SQS
 		Gemini      config.Gemini
 		Cloudflare  config.Cloudflare
+		Features    config.Features
 	}
 
 	var cfg envConf
@@ -94,5 +95,6 @@ func LoadConfig() (*config.Config, error) {
 		Cloudflare:  cfg.Cloudflare,
 		TestMode:    testMode == "true",
 		Gemini:      cfg.Gemini,
+		Features:    cfg.Features,
 	}, nil
 }

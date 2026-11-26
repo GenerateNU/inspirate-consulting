@@ -7,11 +7,11 @@ import {
 import { Link } from "react-router-dom";
 import { ArrowLeft, Navigation, Sparkles } from "lucide-react";
 import { useAskLlm } from "../api/endpoints";
+import { errorMessage } from "../api/client";
 import { cn } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { ErrorMessage } from "@/components/ui/error-message";
 
 // Lives only in this component; the assistant conversation isn't saved.
 interface AssistantMessage {
@@ -86,7 +86,7 @@ export default function AssistantConversation() {
       <Composer
         onSend={ask}
         isPending={askLlm.isPending}
-        error={askLlm.error}
+        error={askLlm.error ? errorMessage(askLlm.error) : null}
       />
     </div>
   );
@@ -139,7 +139,7 @@ function Composer({
 }: {
   onSend: (question: string) => void;
   isPending: boolean;
-  error: unknown;
+  error: string | null;
 }) {
   const [text, setText] = useState("");
   const canSend = text.trim() !== "" && !isPending;
@@ -186,7 +186,7 @@ function Composer({
           <Navigation className="size-8 rotate-45 fill-current" />
         </Button>
       </div>
-      <ErrorMessage error={error} prefix="Couldn't ask" className="mt-2" />
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </form>
   );
 }

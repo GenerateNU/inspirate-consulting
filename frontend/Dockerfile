@@ -5,6 +5,8 @@ RUN bun install --frozen-lockfile
 COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_AGENT_ENABLED=false
+ENV VITE_AGENT_ENABLED=$VITE_AGENT_ENABLED
 RUN bun run build
 
 FROM nginx:alpine
