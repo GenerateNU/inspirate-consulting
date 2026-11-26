@@ -1,20 +1,23 @@
 import { Navigate, useParams } from "react-router-dom";
 import { useFetchUser, useListChats } from "../api/endpoints";
 import { CurrentUserRole } from "../api/models";
-import { errorMessage } from "../api/client";
 import { useAuthContext } from "../contexts/use-auth-context";
 import { cn } from "../lib/utils";
 import AssistantConversation from "./assistant-conversation";
 import ChatList from "./chat-list";
 import Conversation from "./conversation";
-import { ASSISTANT_CHAT_ID, POLL_INTERVAL_MS } from "./chat-utils";
+import {
+  AGENT_ENABLED,
+  ASSISTANT_CHAT_ID,
+  POLL_INTERVAL_MS,
+} from "./chat-utils";
 
 export default function Chats() {
   const { userId } = useParams();
   const { userID: currentUserId, role } = useAuthContext();
-  // The assistant is counselor-only.
-  const isCounselor = role === CurrentUserRole.counselor;
-  const isAssistant = isCounselor && userId === ASSISTANT_CHAT_ID;
+  // The assistant is counselor-only and behind the AGENT_ENABLED flag.
+  const showAssistant = AGENT_ENABLED && role === CurrentUserRole.counselor;
+  const isAssistant = userId === ASSISTANT_CHAT_ID;
 
   const chatsQuery = useListChats({
     query: { refetchInterval: POLL_INTERVAL_MS },
@@ -43,7 +46,7 @@ export default function Chats() {
         <ChatList
           chats={chats}
           currentUserId={currentUserId}
-          showAssistant={isCounselor}
+          showAssistant={showAssistant}
           isLoading={chatsQuery.isLoading}
           error={chatsQuery.error}
           onRetry={chatsQuery.refetch}
