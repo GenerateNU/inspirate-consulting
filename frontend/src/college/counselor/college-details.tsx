@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { errorMessage, type ApiError } from "../../api/client";
+import type { ApiError } from "../../api/client";
 import type { GlobalCollege } from "../../api/models";
 import arrowLeftIcon from "@/assets/college/arrow-left.svg";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { useCollegeFromRoute } from "../utils/use-college-from-route";
 import { cycleDateLabel, cycleLabel } from "../utils/shared";
 import CyclesEditor, { editorCycleOrder } from "./cycles-editor";
 import { useCollegeEditForm } from "./use-college-edit-form";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export const primaryButtonClassName =
   "rounded-lg bg-dark-green px-4 py-2 font-host text-xs leading-[normal] text-white hover:bg-dark-green/90 disabled:cursor-not-allowed disabled:opacity-50";
@@ -211,11 +212,11 @@ export function SchoolEditor({
             </button>
           </div>
         ) : (
-          (form.validationError || form.error) && (
-            <p role="alert" className="font-host text-sm text-danger">
-              {form.validationError ?? `Error: ${errorMessage(form.error)}`}
-            </p>
-          )
+          <ErrorMessage
+            error={form.error}
+            message={form.validationError}
+            prefix={form.validationError ? undefined : "Couldn't save"}
+          />
         )}
 
         <Panel
@@ -267,14 +268,18 @@ export default function CounselorCollegeDetails() {
       </>
     );
   } else if (error || !college) {
+    const notFound = !error || (error as ApiError).status === 404;
     content = (
       <>
         <Header title="School Details" />
-        <p className="pl-[67px] font-host text-sm">
-          {(error as ApiError | null)?.status === 404
-            ? "College not found."
-            : `Error: ${errorMessage(error)}`}
-        </p>
+        <ErrorMessage
+          variant="banner"
+          title={notFound ? undefined : "Couldn't load this college"}
+          error={error}
+          message={notFound ? "College not found." : undefined}
+          onRetry={notFound ? undefined : refetch}
+          className="ml-[67px] w-auto max-lg:ml-0"
+        />
       </>
     );
   } else if (editing) {

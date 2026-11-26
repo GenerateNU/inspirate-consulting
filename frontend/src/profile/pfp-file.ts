@@ -1,4 +1,6 @@
 import Compressor from "compressorjs";
+import { presignPfpUpload, updatePfp } from "../api/endpoints";
+import { seedPfpCache } from "@/lib/pfp-cache";
 import {
   PresignPfpUploadRequestBodyContentType,
   type PresignPfpUploadRequestBody,
@@ -40,4 +42,17 @@ export function presignPfpBody(file: File): PresignPfpUploadRequestBody {
     content_type: file.type as PresignPfpUploadRequestBodyContentType,
     content_length: file.size,
   };
+}
+
+export async function uploadPfp(file: File, userId: string) {
+  const { s3_key, upload_url } = await presignPfpUpload(presignPfpBody(file));
+  const uploadResponse = await fetch(upload_url, {
+    method: "PUT",
+    body: file,
+    headers: { "Content-Type": file.type },
+  });
+  if (!uploadResponse.ok) throw new Error("Upload to S3 failed.");
+  const pfp = await updatePfp({ s3_key });
+  await seedPfpCache(userId, pfp.s3_key, file);
+  return pfp;
 }

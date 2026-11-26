@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, FilePlus, FolderPlus, Send } from "lucide-react";
 
-import { errorMessage } from "../api/client";
 import {
   getGetEssayGroupsFromStudentQueryKey,
   getGetEssayReviewStatusQueryKey,
@@ -38,6 +37,7 @@ import {
   useReviewStatuses,
 } from "./essay-sections";
 import PageLinks, { type PageLink } from "@/components/page-links";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // Temporary links to this page's sub-pages (see the Figma sitemap).
 const pageLinks: PageLink[] = [
@@ -205,14 +205,7 @@ export default function Essay() {
             />
           </Card>
 
-          {error && (
-            <p
-              role="alert"
-              className="rounded-md bg-destructive/10 p-4 text-destructive"
-            >
-              {errorMessage(error)}
-            </p>
-          )}
+          <ErrorMessage variant="banner" error={error} />
 
           {essaysQuery.isLoading || groupsQuery.isLoading ? (
             <p>Loading...</p>
@@ -380,11 +373,11 @@ function NewEssayForm({
           ))}
         </NativeSelect>
       </div>
-      {create.error && (
-        <p role="alert" className="text-sm text-destructive sm:col-span-2">
-          {errorMessage(create.error)}
-        </p>
-      )}
+      <ErrorMessage
+        error={create.error}
+        prefix="Couldn't create"
+        className="sm:col-span-2"
+      />
       <div className="flex justify-end gap-2 sm:col-span-2">
         <Button variant="ghost" onClick={onDone}>
           Cancel
@@ -453,11 +446,11 @@ function NewGroupForm({
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
-      {create.error && (
-        <p role="alert" className="text-sm text-destructive sm:col-span-2">
-          {errorMessage(create.error)}
-        </p>
-      )}
+      <ErrorMessage
+        error={create.error}
+        prefix="Couldn't create"
+        className="sm:col-span-2"
+      />
       <div className="flex justify-end gap-2 sm:col-span-2">
         <Button variant="ghost" onClick={onDone}>
           Cancel

@@ -77,29 +77,115 @@ func (_m *MediaAccessRepository) GrantMediaAccess(ctx context.Context, body *mod
 	return r0, r1
 }
 
-// ListAccessibleMedia provides a mock function with given fields: ctx, studentID, limit, offset
-func (_m *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error) {
-	ret := _m.Called(ctx, studentID, limit, offset)
+// HasMediaAccess provides a mock function with given fields: ctx, studentID, mediaID
+func (_m *MediaAccessRepository) HasMediaAccess(ctx context.Context, studentID string, mediaID string) (bool, error) {
+	ret := _m.Called(ctx, studentID, mediaID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HasMediaAccess")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (bool, error)); ok {
+		return rf(ctx, studentID, mediaID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) bool); ok {
+		r0 = rf(ctx, studentID, mediaID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, studentID, mediaID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// HasS3KeyAccess provides a mock function with given fields: ctx, studentID, s3Key
+func (_m *MediaAccessRepository) HasS3KeyAccess(ctx context.Context, studentID string, s3Key string) (bool, error) {
+	ret := _m.Called(ctx, studentID, s3Key)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HasS3KeyAccess")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (bool, error)); ok {
+		return rf(ctx, studentID, s3Key)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) bool); ok {
+		r0 = rf(ctx, studentID, s3Key)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, studentID, s3Key)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListAccessibleMedia provides a mock function with given fields: ctx, studentID, query, threshold, limit, offset
+func (_m *MediaAccessRepository) ListAccessibleMedia(ctx context.Context, studentID string, query string, threshold float64, limit int, offset int) ([]models.AccessibleMedia, error) {
+	ret := _m.Called(ctx, studentID, query, threshold, limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListAccessibleMedia")
 	}
 
-	var r0 []models.Media
+	var r0 []models.AccessibleMedia
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) ([]models.Media, error)); ok {
-		return rf(ctx, studentID, limit, offset)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, float64, int, int) ([]models.AccessibleMedia, error)); ok {
+		return rf(ctx, studentID, query, threshold, limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) []models.Media); ok {
-		r0 = rf(ctx, studentID, limit, offset)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, float64, int, int) []models.AccessibleMedia); ok {
+		r0 = rf(ctx, studentID, query, threshold, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Media)
+			r0 = ret.Get(0).([]models.AccessibleMedia)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, int, int) error); ok {
-		r1 = rf(ctx, studentID, limit, offset)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, float64, int, int) error); ok {
+		r1 = rf(ctx, studentID, query, threshold, limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// RecordMediaProgress provides a mock function with given fields: ctx, studentID, mediaID, completed
+func (_m *MediaAccessRepository) RecordMediaProgress(ctx context.Context, studentID string, mediaID string, completed bool) (*models.MediaAccess, error) {
+	ret := _m.Called(ctx, studentID, mediaID, completed)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RecordMediaProgress")
+	}
+
+	var r0 *models.MediaAccess
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) (*models.MediaAccess, error)); ok {
+		return rf(ctx, studentID, mediaID, completed)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) *models.MediaAccess); ok {
+		r0 = rf(ctx, studentID, mediaID, completed)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.MediaAccess)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, bool) error); ok {
+		r1 = rf(ctx, studentID, mediaID, completed)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useAuthContext } from "../contexts/use-auth-context";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function AccountExpired() {
   const { logout } = useAuthContext();
-  const [status, setStatus] = useState("");
+  const [error, setError] = useState<unknown>(null);
 
   const handleLogout = async () => {
+    setError(null);
     try {
       await logout();
     } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong.");
+      setError(err);
     }
   };
 
@@ -30,7 +31,11 @@ export default function AccountExpired() {
         >
           Log out
         </button>
-        {status && <p className="mt-4 text-sm text-red-600">{status}</p>}
+        <ErrorMessage
+          error={error}
+          prefix="Couldn't log out"
+          className="mt-4"
+        />
       </div>
     </div>
   );

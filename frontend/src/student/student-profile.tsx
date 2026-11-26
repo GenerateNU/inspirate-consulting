@@ -2,6 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useGetStudent, useFetchUser, useGetTodoItems } from "../api/endpoints";
 import { graduationYearLabel } from "../lib/graduation-year";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function StudentProfile() {
   const { id = "" } = useParams();
@@ -27,20 +28,31 @@ export default function StudentProfile() {
     return <p>Loading...</p>;
   }
 
-  if (studentQuery.error) {
-    return <p>Could not load student: {studentQuery.error.message}</p>;
-  }
-
-  if (userQuery.error) {
-    return <p>Could not load user: {userQuery.error.message}</p>;
-  }
-
-  if (todosQuery.error) {
-    return <p>Could not load tasks: {todosQuery.error.message}</p>;
+  const failed = [
+    { query: studentQuery, title: "Couldn't load student" },
+    { query: userQuery, title: "Couldn't load user" },
+    { query: todosQuery, title: "Couldn't load tasks" },
+  ].find(({ query }) => query.error);
+  if (failed) {
+    return (
+      <ErrorMessage
+        variant="banner"
+        title={failed.title}
+        error={failed.query.error}
+        onRetry={failed.query.refetch}
+        className="m-8 w-auto"
+      />
+    );
   }
 
   if (!student) {
-    return <p>Student not found.</p>;
+    return (
+      <ErrorMessage
+        variant="banner"
+        message="Student not found."
+        className="m-8 w-auto"
+      />
+    );
   }
 
   const completedCount = todos.filter(

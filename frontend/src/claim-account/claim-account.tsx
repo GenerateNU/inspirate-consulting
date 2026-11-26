@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { errorMessage } from "../api/client";
 import {
   getGetCurrentUserQueryKey,
   useGetCurrentUser,
@@ -26,6 +25,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // Reached only via the auth-context redirect gate once a just-invited user
 // logs in with their temp password.
@@ -37,7 +37,7 @@ export default function ClaimAccount() {
 
   const [step, setStep] = useState<"password" | "profile">("password");
   const [newPassword, setNewPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [passwordError, setPasswordError] = useState<unknown>(null);
 
   const { mutateAsync: resetPassword, isPending: isResettingPassword } =
     useResetUserPassword();
@@ -54,7 +54,7 @@ export default function ClaimAccount() {
     event: React.SubmitEvent<HTMLElement>,
   ) => {
     event.preventDefault();
-    setPasswordError("");
+    setPasswordError(null);
     if (!currentUser?.email) return;
     try {
       await resetPassword({ data: { new_password: newPassword } });
@@ -76,8 +76,7 @@ export default function ClaimAccount() {
         void navigate("/counselor", { replace: true });
       }
     } catch (err) {
-      console.error(err);
-      setPasswordError("Something went wrong setting your password.");
+      setPasswordError(err);
     }
   };
 
@@ -144,14 +143,11 @@ export default function ClaimAccount() {
               <Button type="submit" disabled={isResettingPassword}>
                 {isResettingPassword ? "Saving..." : "Continue"}
               </Button>
-              {passwordError && (
-                <p
-                  role="alert"
-                  className="rounded-md bg-destructive/10 p-4 text-destructive"
-                >
-                  {passwordError}
-                </p>
-              )}
+              <ErrorMessage
+                variant="banner"
+                title="Couldn't set your password"
+                error={passwordError}
+              />
             </CardContent>
           </form>
         </Card>
@@ -260,14 +256,11 @@ export default function ClaimAccount() {
             <Button type="submit" disabled={isSavingProfile}>
               {isSavingProfile ? "Saving..." : "Proceed to Dashboard"}
             </Button>
-            {profileError && (
-              <p
-                role="alert"
-                className="rounded-md bg-destructive/10 p-4 text-destructive"
-              >
-                {errorMessage(profileError)}
-              </p>
-            )}
+            <ErrorMessage
+              variant="banner"
+              title="Couldn't save your profile"
+              error={profileError}
+            />
           </CardContent>
         </form>
       </Card>

@@ -26,6 +26,7 @@ func (r *MediaRepository) GetMedia(ctx context.Context, id string) (*models.Medi
 		&getMedia.LengthInMins,
 		&getMedia.SchoolYear,
 		&getMedia.S3Key,
+		&getMedia.YoutubeVideoID,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

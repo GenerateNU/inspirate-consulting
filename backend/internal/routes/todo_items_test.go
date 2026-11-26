@@ -413,6 +413,7 @@ func TestRoute_DeleteTodoItem(t *testing.T) {
 
 		// The path id must reach the repository unchanged
 		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).Return(uuid.New(), nil)
 		mockRepo.On("DeleteTodoItem", mock.Anything, itemID).Return(nil)
 
 		app, err := setupTodoItemTestApp(mockRepo)
@@ -426,9 +427,10 @@ func TestRoute_DeleteTodoItem(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
 		t.Parallel()
 
+		// A missing todo is reported by the owner lookup, before any delete
 		mockRepo := mocks.NewTodoItemRepository(t)
-		mockRepo.On("DeleteTodoItem", mock.Anything, itemID).
-			Return(errs.NotFound("todo item", "id", itemID))
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).
+			Return(uuid.Nil, errs.NotFound("todo items", "id", itemID))
 
 		app, err := setupTodoItemTestApp(mockRepo)
 		require.NoError(t, err)
@@ -441,6 +443,7 @@ func TestRoute_DeleteTodoItem(t *testing.T) {
 		t.Parallel()
 
 		mockRepo := mocks.NewTodoItemRepository(t)
+		mockRepo.On("GetTodoItemStudentID", mock.Anything, itemID).Return(uuid.New(), nil)
 		mockRepo.On("DeleteTodoItem", mock.Anything, itemID).
 			Return(errors.New("database error"))
 

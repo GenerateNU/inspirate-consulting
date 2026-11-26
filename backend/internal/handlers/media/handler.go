@@ -5,11 +5,13 @@ import (
 )
 
 type Handler struct {
-	MediaRepository storage.MediaRepository
+	MediaRepository       storage.MediaRepository
+	MediaAccessRepository storage.MediaAccessRepository
 }
 
-func NewHandler(mediaRepository storage.MediaRepository) *Handler {
+func NewHandler(mediaRepository storage.MediaRepository, mediaAccessRepository storage.MediaAccessRepository) *Handler {
 	return &Handler{
-		MediaRepository: mediaRepository,
+		MediaRepository:       mediaRepository,
+		MediaAccessRepository: mediaAccessRepository,
 	}
 }

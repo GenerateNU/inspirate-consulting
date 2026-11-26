@@ -123,6 +123,7 @@ export function useMyCollegeList() {
     isStudent,
     isLoading: isStudent && (isLoading || collegesLoading),
     error,
+    refetch,
 
     // what's on the list
     applications: sorted,

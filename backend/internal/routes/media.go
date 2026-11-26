@@ -13,11 +13,12 @@ import (
 )
 
 func SetUpMediaRoutes(api huma.API, repository *data.Repository, verifyRole auth.RoleVerifier) {
-	mediaHandler := media.NewHandler(repository.Media)
+	mediaHandler := media.NewHandler(repository.Media, repository.MediaAccess)
 
 	//Register POST /media handler
 	huma.Register(api, huma.Operation{
 		OperationID: "create-media",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/media",
 		Description: "Create a media/video",
@@ -34,9 +35,10 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository, verifyRole auth
 	//Register GET /media/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "get-media",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/media/{id}",
-		Description: "Get a media/video",
+		Description: "Get a media/video. Students can only fetch media they have access to; counselors can fetch any.",
 		Tags:        []string{"Media"},
 	}, func(ctx context.Context, input *models.GetMediaInput) (*models.GetMediaOutput, error) {
 		fetchedMedia, err := mediaHandler.GetMedia(ctx, input.ID)
@@ -49,17 +51,19 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository, verifyRole auth
 	//Register GET /media handler
 	huma.Register(api, huma.Operation{
 		OperationID: "list-media",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodGet,
 		Path:        "/media",
 		Description: "Fetch all videos, through counselor view",
 		Tags:        []string{"Media"},
 	}, func(ctx context.Context, input *models.ListAllMediaInput) (*models.ListAllMediaOutput, error) {
-		allMedia, err := mediaHandler.ListAllMedia(ctx, input.Limit, input.Offset)
+		allMedia, err := mediaHandler.ListAllMedia(ctx, input.Query, input.Limit, input.Offset)
 		if err != nil {
 			return nil, err
 		}
 		return &models.ListAllMediaOutput{Body: allMedia}, nil
 	})
+
 	//Register DELETE media/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "delete-media",
@@ -79,12 +83,13 @@ func SetUpMediaRoutes(api huma.API, repository *data.Repository, verifyRole auth
 	//Register UPDATE media/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-media",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPatch,
 		Path:        "/media/{id}",
-		Description: "Retitle a video",
+		Description: "Update a video's title, description, and/or source (s3_key or youtube_url)",
 		Tags:        []string{"Media"},
 	}, func(ctx context.Context, input *models.UpdateMediaInput) (*models.UpdateMediaOutput, error) {
-		updatedMedia, err := mediaHandler.UpdateMedia(ctx, input.ID, input.Body.Title)
+		updatedMedia, err := mediaHandler.UpdateMedia(ctx, input.ID, &input.Body)
 
 		if err != nil {
 			return nil, err

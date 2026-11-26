@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Palette, Plus, Trash2 } from "lucide-react";
-import { errorMessage } from "../api/client";
 import {
   getListExtracurricularsQueryKey,
   useDeleteExtracurricular,
@@ -11,19 +10,23 @@ import {
 import type { Extracurricular } from "../api/models";
 import { Button } from "@/components/ui/button";
 import { categoryLabel, dateRangeLabel } from "./ExtracurricularShared";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function Extracurriculars() {
   const queryClient = useQueryClient();
-  const { data, isLoading, error } = useListExtracurriculars();
-  const { mutate: deleteItem, isPending: isDeleting } =
-    useDeleteExtracurricular({
-      mutation: {
-        onSuccess: () =>
-          queryClient.invalidateQueries({
-            queryKey: getListExtracurricularsQueryKey(),
-          }),
-      },
-    });
+  const { data, isLoading, error, refetch } = useListExtracurriculars();
+  const {
+    mutate: deleteItem,
+    isPending: isDeleting,
+    error: deleteError,
+  } = useDeleteExtracurricular({
+    mutation: {
+      onSuccess: () =>
+        queryClient.invalidateQueries({
+          queryKey: getListExtracurricularsQueryKey(),
+        }),
+    },
+  });
   const list = data ?? [];
 
   const handleDelete = (item: Extracurricular) => {
@@ -49,7 +52,13 @@ export default function Extracurriculars() {
       </div>
 
       {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {errorMessage(error)}</p>}
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load your extracurriculars"
+        error={error}
+        onRetry={refetch}
+      />
+      <ErrorMessage error={deleteError} prefix="Couldn't delete" />
       {!isLoading && !error && list.length === 0 && (
         <p>
           No extracurriculars yet.{" "}

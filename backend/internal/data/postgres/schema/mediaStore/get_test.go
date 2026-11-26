@@ -22,9 +22,9 @@ func TestGetMedia(t *testing.T) {
 	created, err := repo.CreateMedia(ctx, &models.CreateMediaRequestBody{
 		Title:        "Findable Video",
 		Description:  "Should be retrievable by id",
-		LengthInMins: 20,
-		S3Key:        "media/findable.mp4",
-	})
+		LengthInMins: ptr(20),
+		S3Key:        ptr("media/findable.mp4"),
+	}, nil)
 	if err != nil {
 		t.Fatalf("setup CreateMedia failed: %v", err)
 	}
@@ -40,8 +40,8 @@ func TestGetMedia(t *testing.T) {
 	if fetched.Title != created.Title {
 		t.Errorf("expected Title %q, got %q", created.Title, fetched.Title)
 	}
-	if fetched.S3Key != created.S3Key {
-		t.Errorf("expected S3Key %q, got %q", created.S3Key, fetched.S3Key)
+	if fetched.S3Key == nil || *fetched.S3Key != *created.S3Key {
+		t.Errorf("expected S3Key %q, got %v", *created.S3Key, fetched.S3Key)
 	}
 }
 

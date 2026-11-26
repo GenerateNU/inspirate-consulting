@@ -18,6 +18,7 @@ func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository, verifyRol
 	//Register POST /media-access handler
 	huma.Register(api, huma.Operation{
 		OperationID: "create-media-access",
+		Middlewares: huma.Middlewares{verifyRole(api, models.CounselorRole)},
 		Method:      http.MethodPost,
 		Path:        "/media-access",
 		Description: "Allow a counselor to give a student access to a video",
@@ -53,15 +54,32 @@ func SetUpMediaAccessRoutes(api huma.API, repository *data.Repository, verifyRol
 		OperationID: "get-media-access",
 		Method:      http.MethodGet,
 		Path:        "/media-access",
-		Description: "Allow students to fetch only videos they have access to",
+		Description: "Allow students to fetch only videos they have access to, with their progress and due date",
 		Tags:        []string{"Media Access"},
 	}, func(ctx context.Context, input *models.ListAccessibleMediaInput) (*models.ListAccessibleMediaOutput, error) {
-		fetchedAccessibleMedia, err := mediaAccessHandler.ListAccessibleMedia(ctx, input.Limit, input.Offset)
+		fetchedAccessibleMedia, err := mediaAccessHandler.ListAccessibleMedia(ctx, input.Query, input.Limit, input.Offset)
 		if err != nil {
 			return nil, err
 		}
 
 		return &models.ListAccessibleMediaOutput{Body: fetchedAccessibleMedia}, nil
+	})
+
+	//Register POST /media/{id}/progress handler
+	huma.Register(api, huma.Operation{
+		OperationID: "record-media-progress",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole)},
+		Method:      http.MethodPost,
+		Path:        "/media/{id}/progress",
+		Description: "Mark media as started (student opened it) or completed (student marked it done). Idempotent",
+		Tags:        []string{"Media Access"},
+	}, func(ctx context.Context, input *models.RecordMediaProgressInput) (*models.RecordMediaProgressOutput, error) {
+		access, err := mediaAccessHandler.RecordMediaProgress(ctx, input.ID, input.Body.Status)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.RecordMediaProgressOutput{Body: *access}, nil
 	})
 
 }

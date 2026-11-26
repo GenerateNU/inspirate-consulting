@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { errorMessage } from "../api/client";
 import { useCreateGreeting } from "../api/endpoints";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export default function Greeting() {
   const [name, setName] = useState("");
@@ -32,7 +32,7 @@ export default function Greeting() {
         <button type="submit">Submit</button>
       </form>
       {greeting && <p>{greeting}</p>}
-      {error && <p>Error: {errorMessage(error)}</p>}
+      <ErrorMessage error={error} />
     </div>
   );
 }

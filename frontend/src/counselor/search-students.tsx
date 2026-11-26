@@ -8,8 +8,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react";
 import { useInfiniteStudents } from "./useInfiniteStudents";
 
-// Not built yet, placeholder paths
-const EDIT_PROFILE_PATH = "/counselor/profile";
+const EDIT_PROFILE_PATH = "/profile";
 const DASHBOARD_PATH = "/counselor/dashboard";
 
 export default function SearchStudents() {

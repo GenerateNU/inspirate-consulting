@@ -19,7 +19,6 @@ import {
   Trophy,
   Zap,
 } from "lucide-react";
-import { errorMessage } from "../api/client";
 import { useGetExtracurricular } from "../api/endpoints";
 import type { ExtracurricularDetail } from "../api/models";
 import { cn } from "cn";
@@ -39,6 +38,7 @@ import {
   statusLabel,
   wordCount,
 } from "./ExtracurricularShared";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 const byNewest = <T,>(items: T[] | null, key: (item: T) => string) =>
   [...(items ?? [])].sort((a, b) => key(b).localeCompare(key(a)));
@@ -50,22 +50,31 @@ const readOnlyBox =
 export default function ViewExtracurricular() {
   const { id } = useParams();
   const numericId = Number(id);
-  const { data, isLoading, error } = useGetExtracurricular(numericId, {
+  const { data, isLoading, error, refetch } = useGetExtracurricular(numericId, {
     query: { enabled: Number.isInteger(numericId) },
   });
 
   if (isLoading) return <p className={activityPageClass}>Loading...</p>;
   if (error || !data) {
+    const loadFailed = !!error && error.status !== 404;
     return (
       <div className={activityPageClass}>
-        <p>
-          {error && error.status !== 404
-            ? `Error: ${errorMessage(error)}`
-            : "This extracurricular doesn't exist or was removed."}
-        </p>
-        <Link to="/extracurriculars" className="underline">
-          Back to extracurriculars
-        </Link>
+        <ErrorMessage
+          variant="banner"
+          title={loadFailed ? "Couldn't load this extracurricular" : undefined}
+          error={error}
+          message={
+            loadFailed
+              ? undefined
+              : "This extracurricular doesn't exist or was removed."
+          }
+          onRetry={loadFailed ? refetch : undefined}
+          action={
+            <Link to="/extracurriculars" className="underline">
+              Back to extracurriculars
+            </Link>
+          }
+        />
       </div>
     );
   }

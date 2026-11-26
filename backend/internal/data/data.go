@@ -161,17 +161,20 @@ type PfpRepository interface {
 }
 
 type MediaRepository interface {
-	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error)
+	CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody, youtubeVideoID *string) (*models.Media, error)
 	GetMedia(ctx context.Context, id string) (*models.Media, error)
-	ListAllMedia(ctx context.Context, limit int, offset int) ([]models.Media, error)
+	ListAllMedia(ctx context.Context, query string, threshold float64, limit int, offset int) ([]models.Media, error)
 	DeleteMedia(ctx context.Context, id string) error
-	UpdateMedia(ctx context.Context, id string, change string) (*models.Media, error)
+	UpdateMedia(ctx context.Context, id string, fields models.UpdateMediaFields) (*models.Media, error)
 }
 
 type MediaAccessRepository interface {
 	GrantMediaAccess(ctx context.Context, body *models.GrantMediaAccessRequestBody) (*models.MediaAccess, error)
 	RevokeMediaAccess(ctx context.Context, id string) error
-	ListAccessibleMedia(ctx context.Context, studentID string, limit int, offset int) ([]models.Media, error)
+	ListAccessibleMedia(ctx context.Context, studentID string, query string, threshold float64, limit int, offset int) ([]models.AccessibleMedia, error)
+	HasMediaAccess(ctx context.Context, studentID string, mediaID string) (bool, error)
+	HasS3KeyAccess(ctx context.Context, studentID string, s3Key string) (bool, error)
+	RecordMediaProgress(ctx context.Context, studentID string, mediaID string, completed bool) (*models.MediaAccess, error)
 	GetMediaAccessStudentID(ctx context.Context, id string) (uuid.UUID, error)
 }
 

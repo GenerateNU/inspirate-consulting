@@ -8,6 +8,10 @@
 
 export type ListMediaParams = {
 /**
+ * Only return media whose title or description contains a close match for this text (pg_trgm word_similarity), best match first
+ */
+q?: string;
+/**
  * Maximum number of media to return
  * @minimum 1
  * @maximum 100

@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
 
-import { errorMessage } from "../../api/client";
 import {
   useListCounselorStudents,
   useListGlobalColleges,
@@ -9,6 +8,7 @@ import {
 import arrowLeftIcon from "@/assets/college/arrow-left.svg";
 import ApplicationCard from "../student/application-card";
 import { sortApplications } from "../utils/sort-applications";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 // "Anna's College List": a counselor's read-only view of one student's list
 export default function StudentCollegeList() {
@@ -37,9 +37,12 @@ export default function StudentCollegeList() {
     body = <p className="font-host text-sm">Loading...</p>;
   } else if (applicationsQuery.error) {
     body = (
-      <p className="font-host text-sm">
-        Error: {errorMessage(applicationsQuery.error)}
-      </p>
+      <ErrorMessage
+        variant="banner"
+        title="Couldn't load this student's schools"
+        error={applicationsQuery.error}
+        onRetry={applicationsQuery.refetch}
+      />
     );
   } else if (applications.length === 0) {
     body = (

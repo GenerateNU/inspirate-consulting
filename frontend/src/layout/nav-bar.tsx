@@ -44,7 +44,7 @@ const mainLinks: NavItemConfig[] = [
   { to: "/college-applications", label: "Colleges", icon: School },
   { to: "/essay", label: "Essays", icon: FileText },
   { to: "/extracurriculars", label: "Extracurriculars", icon: Palette },
-  { to: "/videos", label: "Modules", icon: SquarePlay },
+  { to: "/student-media-list", label: "Modules", icon: SquarePlay },
   { to: "/chats", label: "Chats", icon: MessageCircle },
 ];
 
@@ -112,10 +112,15 @@ export default function NavBar() {
   const collapsed = state === "collapsed" && !isMobile;
   const { role } = useAuthContext();
 
-  // My List is student-only; counselors manage the shared college list instead
+  // My List is student-only; counselors manage the shared college list instead.
+  // Modules likewise goes to the counselor's media library
+  const counselorPaths: Record<string, string> = {
+    Colleges: "/counselor-college-list",
+    Modules: "/counselor-media-list",
+  };
   const links = mainLinks.map((item) =>
-    item.label === "Colleges" && role === "counselor"
-      ? { ...item, to: "/counselor-college-list" }
+    role === "counselor" && counselorPaths[item.label]
+      ? { ...item, to: counselorPaths[item.label] }
       : item,
   );
 

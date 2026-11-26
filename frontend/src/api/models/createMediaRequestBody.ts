@@ -10,9 +10,15 @@ export interface CreateMediaRequestBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   description: string;
-  length_in_mins: number;
-  s3_key: string;
+  length_in_mins?: number;
+  /**
+     * S3 key of an uploaded video; provide exactly one of s3_key or youtube_url
+     * @minLength 1
+     */
+  s3_key?: string;
   /** @nullable */
   school_year: string | null;
   title: string;
+  /** youtube.com or youtu.be video link; only the parsed video id is stored. Provide exactly one of s3_key or youtube_url */
+  youtube_url?: string;
 }

@@ -387,7 +387,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 }
 
 /**
- * Get a media/video
+ * Get a media/video. Students can only fetch media they have access to; counselors can fetch any.
  */
 export const getMedia = async (id: string, options?: RequestInit): Promise<Media> => {
 
@@ -498,7 +498,7 @@ export const getUpdateMediaUrl = (id: string,) => {
 }
 
 /**
- * Retitle a video
+ * Update a video's title, description, and/or source (s3_key or youtube_url)
  */
 export const updateMedia = async (id: string,
     updateMediaInputBody: NonReadonly<UpdateMediaInputBody>, options?: RequestInit): Promise<Media> => {

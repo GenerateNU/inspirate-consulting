@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ChevronDown, Pencil, StickyNote } from "lucide-react";
-import { errorMessage } from "../../api/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +8,7 @@ import { edit, longDateLabel } from "../ExtracurricularShared";
 import { byNewest, FormActions, runThen } from "./FormActions";
 import type { NoteItem, NoteStore } from "./itemSources";
 import { SectionCard } from "./SectionCard";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export function NotesSection({
   store,
@@ -71,9 +71,7 @@ export function NotesSection({
             required
           />
         </div>
-        {store.error && (
-          <p className={edit.error}>Error: {errorMessage(store.error)}</p>
-        )}
+        <ErrorMessage error={store.error} prefix="Couldn't save note" />
         <FormActions
           itemLabel="Note"
           isEditing={editingId !== null}

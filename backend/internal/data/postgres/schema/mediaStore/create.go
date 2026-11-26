@@ -6,7 +6,7 @@ import (
 	"inspirate-consulting/internal/models"
 )
 
-func (r *MediaRepository) CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody) (*models.Media, error) {
+func (r *MediaRepository) CreateMedia(ctx context.Context, item *models.CreateMediaRequestBody, youtubeVideoID *string) (*models.Media, error) {
 	createdMedia := &models.Media{}
 
 	insertQuery, err := schema.ReadSQLBaseScript("create_media.sql", SqlMediaFiles)
@@ -21,6 +21,7 @@ func (r *MediaRepository) CreateMedia(ctx context.Context, item *models.CreateMe
 		item.LengthInMins,
 		item.SchoolYear,
 		item.S3Key,
+		youtubeVideoID,
 	).Scan(
 		&createdMedia.ID,
 		&createdMedia.Title,
@@ -28,6 +29,7 @@ func (r *MediaRepository) CreateMedia(ctx context.Context, item *models.CreateMe
 		&createdMedia.LengthInMins,
 		&createdMedia.SchoolYear,
 		&createdMedia.S3Key,
+		&createdMedia.YoutubeVideoID,
 	)
 	if err != nil {
 		return nil, err

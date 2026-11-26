@@ -18,8 +18,19 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID strin
 	if err != nil {
 		return nil, err
 	}
+	grantQuery, err := schema.ReadSQLBaseScript("grant_media_access_for_todo.sql", SqlTodoItemFiles)
+	if err != nil {
+		return nil, err
+	}
 
-	err = r.db.QueryRow(
+	// A todo that links media also gives the student access to it
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	err = tx.QueryRow(
 		ctx,
 		insertQuery,
 		studentID,
@@ -62,5 +73,18 @@ func (r *TodoItemRepository) CreateTodoItem(ctx context.Context, studentID strin
 		return nil, err
 	}
 
+	if createdItem.MediaID != nil {
+		if _, err := tx.Exec(ctx, grantQuery, createdItem.StudentID, *createdItem.MediaID); err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+				return nil, errs.Conflict("media access", "media_id", *createdItem.MediaID)
+			}
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
 	return createdItem, nil
 }
