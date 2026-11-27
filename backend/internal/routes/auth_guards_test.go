@@ -115,6 +115,7 @@ var routeTable = []routeAccess{
 	{http.MethodPost, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/todo-items", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodGet, "/todo-items/search", guarded, []string{roleStudent, roleCounselor}},
+	{http.MethodGet, "/todo-items/stats", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},
 	{http.MethodPatch, "/todo-items/{id}/deadline", guarded, []string{roleCounselor}},
 	{http.MethodDelete, "/todo-items/{id}", guarded, []string{roleStudent, roleCounselor}},

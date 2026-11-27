@@ -307,3 +307,17 @@ type TodoItemLink struct {
 	GlobalCollegeID   *int64
 	ExtracurricularID *int64
 }
+
+type TodoItemStats struct {
+	TotalCount       int `json:"total_count" example:"10" doc:"Every to-do item the student has"`
+	IncompleteCount  int `json:"incomplete_count" example:"4" doc:"To-do items not yet completed"`
+	DueThisWeekCount int `json:"due_this_week_count" example:"3" doc:"To-do items, completed or not, with a deadline in the current Monday-to-Sunday week (UTC)"`
+}
+
+type GetTodoItemStatsInput struct {
+	StudentID string `query:"student_id" required:"false" format:"uuid" doc:"Student whose stats to return; defaults to the authenticated student"`
+}
+
+type GetTodoItemStatsOutput struct {
+	Body TodoItemStats
+}

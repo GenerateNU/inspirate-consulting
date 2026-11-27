@@ -67,6 +67,23 @@ func SetUpTodoItemRoutes(api huma.API, repository *data.Repository, verifyRole a
 		return &models.SearchTodoItemsOutput{Body: *page}, nil
 	})
 
+	//Register GET /todo-items/stats handler
+	huma.Register(api, huma.Operation{
+		OperationID: "get-todo-item-stats",
+		Middlewares: huma.Middlewares{verifyRole(api, models.StudentRole, models.CounselorRole)},
+		Method:      http.MethodGet,
+		Path:        "/todo-items/stats",
+		Description: "Get a student's to-do item counts: total, incomplete, and due this week",
+		Tags:        []string{"Todo Items"},
+	}, func(ctx context.Context, input *models.GetTodoItemStatsInput) (*models.GetTodoItemStatsOutput, error) {
+		stats, err := todoItemHandler.GetTodoItemStats(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.GetTodoItemStatsOutput{Body: *stats}, nil
+	})
+
 	//Register PATCH /todo-items/{id} handler
 	huma.Register(api, huma.Operation{
 		OperationID: "update-todo-item-completed",
