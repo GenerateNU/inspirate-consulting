@@ -29,10 +29,12 @@ import type {
   BulkCreateTodoItemsResponse,
   CreateTodoItemRequestBody,
   ErrorModel,
+  GetTodoItemStatsParams,
   GetTodoItemsParams,
   SearchTodoItemsParams,
   TodoItem,
   TodoItemPage,
+  TodoItemStats,
   UpdateTodoAssignmentBody,
   UpdateTodoItemCompletedAtInputBody,
   UpdateTodoItemDeadlineInputBody,
@@ -607,6 +609,124 @@ export function useSearchTodoItems<TData = Awaited<ReturnType<typeof searchTodoI
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getSearchTodoItemsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetTodoItemStatsUrl = (params?: GetTodoItemStatsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/todo-items/stats?${stringifiedParams}` : `/api/todo-items/stats`
+}
+
+/**
+ * Get a student's to-do item counts: total, incomplete, and due this week
+ */
+export const getTodoItemStats = async (params?: GetTodoItemStatsParams, options?: RequestInit): Promise<TodoItemStats> => {
+
+  const res = await fetch(getGetTodoItemStatsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: TodoItemStats, status?: number} = new globalThis.Error();
+    const data : TodoItemStats = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: TodoItemStats = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getGetTodoItemStatsQueryKey = (params?: GetTodoItemStatsParams,) => {
+    return [
+    `/api/todo-items/stats`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTodoItemStatsQueryOptions = <TData = Awaited<ReturnType<typeof getTodoItemStats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(params?: GetTodoItemStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItemStats>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTodoItemStatsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTodoItemStats>>> = ({ signal }) => getTodoItemStats(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTodoItemStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTodoItemStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getTodoItemStats>>>
+export type GetTodoItemStatsQueryError = globalThis.Error & { info?: ErrorModel; status?: number }
+
+
+export function useGetTodoItemStats<TData = Awaited<ReturnType<typeof getTodoItemStats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params: undefined |  GetTodoItemStatsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItemStats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTodoItemStats>>,
+          TError,
+          Awaited<ReturnType<typeof getTodoItemStats>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTodoItemStats<TData = Awaited<ReturnType<typeof getTodoItemStats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetTodoItemStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItemStats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTodoItemStats>>,
+          TError,
+          Awaited<ReturnType<typeof getTodoItemStats>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTodoItemStats<TData = Awaited<ReturnType<typeof getTodoItemStats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetTodoItemStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItemStats>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTodoItemStats<TData = Awaited<ReturnType<typeof getTodoItemStats>>, TError = globalThis.Error & { info?: ErrorModel; status?: number }>(
+ params?: GetTodoItemStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTodoItemStats>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTodoItemStatsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

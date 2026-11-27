@@ -1796,6 +1796,21 @@ export const SearchTodoItemsResponse = /*#__PURE__*/ zod.object({
 
 
 /**
+ * Get a student's to-do item counts: total, incomplete, and due this week
+ */
+export const GetTodoItemStatsQueryParams = /*#__PURE__*/ zod.object({
+  "student_id": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.uuid()).check(/*#__PURE__*/ zod.describe('Student whose stats to return; defaults to the authenticated student'))
+})
+
+export const GetTodoItemStatsResponse = /*#__PURE__*/ zod.object({
+  "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "due_this_week_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('To-do items, completed or not, with a deadline in the current Monday-to-Sunday week (UTC)')),
+  "incomplete_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('To-do items not yet completed')),
+  "total_count": /*#__PURE__*/ zod.int().check(/*#__PURE__*/ zod.describe('Every to-do item the student has'))
+})
+
+
+/**
  * Delete a to-do item
  */
 export const DeleteTodoItemParams = /*#__PURE__*/ zod.object({
