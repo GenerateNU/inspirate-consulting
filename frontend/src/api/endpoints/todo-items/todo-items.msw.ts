@@ -16,12 +16,14 @@ import type {
 import type {
   BulkCreateTodoItemsResponse,
   TodoItem,
-  TodoItemPage
+  TodoItemPage,
+  TodoItemStats
 } from '../../models';
 
 import {
   getBulkCreateTodoItemsResponseMock,
   getCreateTodoItemResponseMock,
+  getGetTodoItemStatsResponseMock,
   getGetTodoItemsResponseMock,
   getSearchTodoItemsResponseMock,
   getUpdateTodoAssignmentResponseMock,
@@ -32,7 +34,7 @@ import {
   getUpdateTodoItemTitleResponseMock
 } from './todo-items.faker';
 
-export { getUpdateTodoAssignmentResponseMock, getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getBulkCreateTodoItemsResponseMock, getSearchTodoItemsResponseMock, getUpdateTodoItemCompletedResponseMock, getUpdateTodoItemDeadlineResponseMock, getUpdateTodoItemDescriptionResponseMock, getUpdateTodoItemLinkResponseMock, getUpdateTodoItemTitleResponseMock } from './todo-items.faker';
+export { getUpdateTodoAssignmentResponseMock, getGetTodoItemsResponseMock, getCreateTodoItemResponseMock, getBulkCreateTodoItemsResponseMock, getSearchTodoItemsResponseMock, getGetTodoItemStatsResponseMock, getUpdateTodoItemCompletedResponseMock, getUpdateTodoItemDeadlineResponseMock, getUpdateTodoItemDescriptionResponseMock, getUpdateTodoItemLinkResponseMock, getUpdateTodoItemTitleResponseMock } from './todo-items.faker';
 
 
 export const getUpdateTodoAssignmentMockHandler = (overrideResponse?: TodoItem[] | null | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<TodoItem[] | null> | TodoItem[] | null), options?: RequestHandlerOptions) => {
@@ -90,6 +92,18 @@ export const getSearchTodoItemsMockHandler = (overrideResponse?: TodoItemPage | 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getSearchTodoItemsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getGetTodoItemStatsMockHandler = (overrideResponse?: TodoItemStats | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TodoItemStats> | TodoItemStats), options?: RequestHandlerOptions) => {
+  return http.get('*/todo-items/stats', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetTodoItemStatsResponseMock(),
       { status: 200
       })
   }, options)
@@ -170,6 +184,7 @@ export const getTodoItemsMock = () => [
   getCreateTodoItemMockHandler(),
   getBulkCreateTodoItemsMockHandler(),
   getSearchTodoItemsMockHandler(),
+  getGetTodoItemStatsMockHandler(),
   getDeleteTodoItemMockHandler(),
   getUpdateTodoItemCompletedMockHandler(),
   getUpdateTodoItemDeadlineMockHandler(),

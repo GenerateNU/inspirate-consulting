@@ -106,6 +106,36 @@ func (_m *TodoItemRepository) DeleteTodoItem(ctx context.Context, id string) err
 	return r0
 }
 
+// GetTodoItemStats provides a mock function with given fields: ctx, studentID
+func (_m *TodoItemRepository) GetTodoItemStats(ctx context.Context, studentID string) (*models.TodoItemStats, error) {
+	ret := _m.Called(ctx, studentID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTodoItemStats")
+	}
+
+	var r0 *models.TodoItemStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*models.TodoItemStats, error)); ok {
+		return rf(ctx, studentID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *models.TodoItemStats); ok {
+		r0 = rf(ctx, studentID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.TodoItemStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, studentID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetTodoItemStudentID provides a mock function with given fields: ctx, todoItemID
 func (_m *TodoItemRepository) GetTodoItemStudentID(ctx context.Context, todoItemID string) (uuid.UUID, error) {
 	ret := _m.Called(ctx, todoItemID)

@@ -2435,6 +2435,39 @@ components:
         - items
         - next_cursor
       type: object
+    TodoItemStats:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - http://localhost:8080/schemas/TodoItemStats.json
+          format: uri
+          readOnly: true
+          type: string
+        due_this_week_count:
+          description: To-do items, completed or not, with a deadline in the current Monday-to-Sunday week (UTC)
+          examples:
+            - 3
+          format: int64
+          type: integer
+        incomplete_count:
+          description: To-do items not yet completed
+          examples:
+            - 4
+          format: int64
+          type: integer
+        total_count:
+          description: Every to-do item the student has
+          examples:
+            - 10
+          format: int64
+          type: integer
+      required:
+        - total_count
+        - incomplete_count
+        - due_this_week_count
+      type: object
     UpdateChatMessageReadInputBody:
       additionalProperties: false
       properties:
@@ -5391,6 +5424,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TodoItemPage"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      tags:
+        - Todo Items
+  /todo-items/stats:
+    get:
+      description: "Get a student's to-do item counts: total, incomplete, and due this week"
+      operationId: get-todo-item-stats
+      parameters:
+        - description: Student whose stats to return; defaults to the authenticated student
+          explode: false
+          in: query
+          name: student_id
+          schema:
+            description: Student whose stats to return; defaults to the authenticated student
+            format: uuid
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoItemStats"
           description: OK
         default:
           content:

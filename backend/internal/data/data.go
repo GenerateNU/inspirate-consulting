@@ -89,6 +89,7 @@ type TodoItemRepository interface {
 	UpdateTodoAssignment(ctx context.Context, p models.UpdateTodoAssignmentParams) ([]models.TodoItem, error)
 	UpdateTodoItemTitle(ctx context.Context, id string, title string) (*models.TodoItem, error)
 	UpdateTodoItemLink(ctx context.Context, id string, link models.TodoItemLink) (*models.TodoItem, error)
+	GetTodoItemStats(ctx context.Context, studentID string) (*models.TodoItemStats, error)
 }
 
 // To represent the Notification Log schema
