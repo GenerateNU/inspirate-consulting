@@ -430,11 +430,13 @@ components:
       additionalProperties: false
       properties:
         graduation_year:
-          description: Year the student graduates high school
+          description: Year the student graduates high school; null if not set yet
           examples:
             - 2027
           format: int64
-          type: integer
+          type:
+            - integer
+            - "null"
         has_pending_review:
           description: True when the student has an essay review that is still open
           type: boolean
@@ -845,13 +847,13 @@ components:
           format: date-time
           type: string
         gpa:
-          description: unweighted gpa of the student (0 to 4); required when role is student
+          description: unweighted gpa of the student (0 to 4); optional, the student can add it later
           format: double
           maximum: 4
           minimum: 0
           type: number
         graduation_year:
-          description: year the student graduates high school; required when role is student
+          description: year the student graduates high school; optional, the student can add it later
           format: int64
           maximum: 2100
           minimum: 2000
@@ -2244,7 +2246,9 @@ components:
             - "null"
         graduation_year:
           format: int64
-          type: integer
+          type:
+            - integer
+            - "null"
         high_school:
           type:
             - string
@@ -2303,7 +2307,9 @@ components:
             - "null"
         graduation_year:
           format: int64
-          type: integer
+          type:
+            - integer
+            - "null"
         id:
           type: string
         name:

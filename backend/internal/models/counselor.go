@@ -21,7 +21,7 @@ type PendingReview struct {
 type CounselorStudentRow struct {
 	StudentID            uuid.UUID  `json:"student_id" doc:"The student's unique ID"`
 	Name                 string     `json:"name" example:"Jane Doe" doc:"Name of the student"`
-	GraduationYear       int        `json:"graduation_year" example:"2027" doc:"Year the student graduates high school"`
+	GraduationYear       *int       `json:"graduation_year" nullable:"true" example:"2027" doc:"Year the student graduates high school; null if not set yet"`
 	PendingReviewCount   int        `json:"pending_review_count" doc:"Number of the student's essay reviews that are still open"`
 	OpenTaskCount        int        `json:"open_task_count" doc:"Number of the student's incomplete to-do items"`
 	UnreadMessageCount   int        `json:"unread_message_count" doc:"Number of messages from the student that the counselor hasn't read"`

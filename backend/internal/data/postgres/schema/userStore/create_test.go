@@ -190,8 +190,8 @@ func TestCreateUser_Student(t *testing.T) {
 		t.Fatalf("student lookup failed: %v", err)
 	}
 
-	if student.GraduationYear != year {
-		t.Errorf("expected graduation year %d, got %d", year, student.GraduationYear)
+	if student.GraduationYear == nil || *student.GraduationYear != year {
+		t.Errorf("expected graduation year %d, got %v", year, student.GraduationYear)
 	}
 	if student.GPA == nil || *student.GPA != gpa {
 		t.Errorf("expected gpa %v, got %v", gpa, student.GPA)

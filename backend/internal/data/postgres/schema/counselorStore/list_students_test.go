@@ -56,8 +56,8 @@ func TestListStudents(t *testing.T) {
 	if got.Name != "Alice" {
 		t.Errorf("expected Name %q, got %q", "Alice", got.Name)
 	}
-	if got.GraduationYear != 2028 {
-		t.Errorf("expected GraduationYear %d, got %d", 2028, got.GraduationYear)
+	if got.GraduationYear == nil || *got.GraduationYear != 2028 {
+		t.Errorf("expected GraduationYear %d, got %v", 2028, got.GraduationYear)
 	}
 }
 

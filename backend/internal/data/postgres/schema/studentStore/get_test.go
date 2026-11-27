@@ -28,7 +28,7 @@ func TestGetStudent(t *testing.T) {
 
 	created := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Findable Student"),
-		GraduationYear: 2028,
+		GraduationYear: ptr(2028),
 		Organization:   &organization,
 		GPA:            ptr(3.85),
 		ReviewBalance:  3,
@@ -47,8 +47,8 @@ func TestGetStudent(t *testing.T) {
 	if fetched.UserID != created.UserID {
 		t.Errorf("expected UserID %s, got %s", created.UserID, fetched.UserID)
 	}
-	if fetched.GraduationYear != created.GraduationYear {
-		t.Errorf("expected GraduationYear %d, got %d", created.GraduationYear, fetched.GraduationYear)
+	if fetched.GraduationYear == nil || *fetched.GraduationYear != *created.GraduationYear {
+		t.Errorf("expected GraduationYear %d, got %v", *created.GraduationYear, fetched.GraduationYear)
 	}
 	if fetched.GPA == nil || *fetched.GPA != *created.GPA {
 		t.Errorf("expected GPA %v, got %v", *created.GPA, fetched.GPA)
@@ -80,7 +80,7 @@ func TestGetStudent_NullableFields(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	created := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Sparse Student"),
-		GraduationYear: 2030,
+		GraduationYear: ptr(2030),
 		GPA:            ptr(3.0),
 		ReviewBalance:  0,
 		CounselorID:    &counselorID,
@@ -115,14 +115,14 @@ func TestGetStudent_ReturnsRequestedStudent(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	target := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Target Student"),
-		GraduationYear: 2027,
+		GraduationYear: ptr(2027),
 		GPA:            ptr(4.0),
 		ReviewBalance:  5,
 		CounselorID:    &counselorID,
 	})
 	other := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Other Student"),
-		GraduationYear: 2029,
+		GraduationYear: ptr(2029),
 		GPA:            ptr(2.0),
 		ReviewBalance:  1,
 		CounselorID:    &counselorID,
@@ -139,8 +139,8 @@ func TestGetStudent_ReturnsRequestedStudent(t *testing.T) {
 	if fetched.UserID != target.UserID {
 		t.Errorf("expected UserID %s, got %s", target.UserID, fetched.UserID)
 	}
-	if fetched.GraduationYear != target.GraduationYear {
-		t.Errorf("expected GraduationYear %d, got %d", target.GraduationYear, fetched.GraduationYear)
+	if fetched.GraduationYear == nil || *fetched.GraduationYear != *target.GraduationYear {
+		t.Errorf("expected GraduationYear %d, got %v", *target.GraduationYear, fetched.GraduationYear)
 	}
 	if fetched.ReviewBalance != target.ReviewBalance {
 		t.Errorf("expected ReviewBalance %d, got %d", target.ReviewBalance, fetched.ReviewBalance)

@@ -17,7 +17,7 @@ import (
 func studentRows(names ...string) []models.StudentListItem {
 	rows := make([]models.StudentListItem, len(names))
 	for i, name := range names {
-		rows[i] = models.StudentListItem{ID: uuid.New(), UserID: uuid.New(), Name: name, GraduationYear: 2028}
+		rows[i] = models.StudentListItem{ID: uuid.New(), UserID: uuid.New(), Name: name, GraduationYear: ptr(2028)}
 	}
 	return rows
 }
@@ -140,3 +140,5 @@ func TestHandler_ListStudents(t *testing.T) {
 		assert.Nil(t, page.NextCursor)
 	})
 }
+
+func ptr[T any](v T) *T { return &v }
