@@ -193,6 +193,49 @@ func TestRoute_ListTodoItems(t *testing.T) {
 	})
 }
 
+// Route tests for GET /todo-items/stats. The auth cases use the real app (real guard,
+// authorizer, and database) since test mode skips both checks.
+func TestRoute_GetTodoItemStats(t *testing.T) {
+	t.Parallel()
+
+	t.Run("student cannot view another student's stats", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthApp(t, nil)
+		resp := a.do(http.MethodGet, "/todo-items/stats?student_id="+uuid.NewString(), tokenFor(roleStudent), nil)
+
+		assert.Equal(t, http.StatusForbidden, resp.Status, "body: %s", resp.Body)
+		// the authorizer's errors are errs.HTTPError ({"code","message"}), not huma's "detail"
+		var body errs.HTTPError
+		require.NoError(t, json.Unmarshal(resp.Body, &body))
+		assert.Equal(t, "you can only access your own data", body.Message)
+	})
+
+	t.Run("counselor can view a student's stats", func(t *testing.T) {
+		t.Parallel()
+
+		a := newAuthApp(t, nil)
+		resp := a.do(http.MethodGet, "/todo-items/stats?student_id="+uuid.NewString(), tokenFor(roleCounselor), nil)
+
+		require.Equal(t, http.StatusOK, resp.Status, "body: %s", resp.Body)
+		var stats models.TodoItemStats
+		require.NoError(t, json.Unmarshal(resp.Body, &stats))
+		assert.Equal(t, models.TodoItemStats{}, stats)
+	})
+
+	t.Run("invalid student_id", func(t *testing.T) {
+		t.Parallel()
+
+		// no expectations: the repository must not be called
+		mockRepo := mocks.NewTodoItemRepository(t)
+		app, err := setupTodoItemTestApp(mockRepo)
+		require.NoError(t, err)
+
+		resp, _ := doRequest(t, app, http.MethodGet, "/todo-items/stats?student_id=not-a-uuid", nil)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
+
 // Route tests for PATCH /todo-items/{id}.
 func TestRoute_UpdateTodoItemCompletedAt(t *testing.T) {
 	t.Parallel()
