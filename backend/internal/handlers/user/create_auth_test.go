@@ -71,8 +71,6 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 	}
 
 	missingFields := map[string]func(in *models.CreateUserInput){
-		"year":         func(in *models.CreateUserInput) { in.Body.GraduationYear = nil },
-		"gpa":          func(in *models.CreateUserInput) { in.Body.GPA = nil },
 		"counselor_id": func(in *models.CreateUserInput) { in.Body.CounselorID = nil },
 	}
 	for field, clear := range missingFields {
@@ -92,7 +90,7 @@ func TestHandler_CreateUser_Auth(t *testing.T) {
 
 			out, err := NewHandler(repo, nil, nil).CreateUser(ctx, in, sb)
 			assert.Nil(t, out)
-			assert.Equal(t, errs.BadRequest("graduation_year, gpa, and counselor_id are required for students"), err)
+			assert.Equal(t, errs.BadRequest("counselor_id is required for students"), err)
 			assert.False(t, signedUp, "no Supabase account should be created for an invalid request")
 		})
 	}

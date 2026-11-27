@@ -139,9 +139,9 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: carolID, Name: "Carol", GraduationYear: 2030},
-				{StudentID: bobID, Name: "Bob", GraduationYear: 2027},
-				{StudentID: aliceID, Name: "Alice", GraduationYear: 2028},
+				{StudentID: carolID, Name: "Carol", GraduationYear: ptr(2030)},
+				{StudentID: bobID, Name: "Bob", GraduationYear: ptr(2027)},
+				{StudentID: aliceID, Name: "Alice", GraduationYear: ptr(2028)},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{{TransactionID: uuid.New(), StudentID: aliceID, StudentName: "Alice"}}, nil)
@@ -192,8 +192,8 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: bobID, Name: "Bob", GraduationYear: 2027},
-				{StudentID: aliceID, Name: "Alice", GraduationYear: 2028},
+				{StudentID: bobID, Name: "Bob", GraduationYear: ptr(2027)},
+				{StudentID: aliceID, Name: "Alice", GraduationYear: ptr(2028)},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{{TransactionID: uuid.New(), StudentID: aliceID, StudentName: "Alice"}}, nil)
@@ -229,8 +229,8 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: uuid.New(), Name: "Bob", GraduationYear: 2027},
-				{StudentID: uuid.New(), Name: "Alice", GraduationYear: 2028},
+				{StudentID: uuid.New(), Name: "Bob", GraduationYear: ptr(2027)},
+				{StudentID: uuid.New(), Name: "Alice", GraduationYear: ptr(2028)},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
@@ -266,9 +266,9 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: uuid.New(), Name: "Carol", GraduationYear: 2030},
-				{StudentID: uuid.New(), Name: "Bob", GraduationYear: 2027},
-				{StudentID: uuid.New(), Name: "Alice", GraduationYear: 2028},
+				{StudentID: uuid.New(), Name: "Carol", GraduationYear: ptr(2030)},
+				{StudentID: uuid.New(), Name: "Bob", GraduationYear: ptr(2027)},
+				{StudentID: uuid.New(), Name: "Alice", GraduationYear: ptr(2028)},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)
@@ -306,7 +306,7 @@ func TestRoute_ListCounselorStudents(t *testing.T) {
 		mockRepo := mocks.NewCounselorRepository(t)
 		mockRepo.On("ListStudents", mock.Anything, counselorID).
 			Return([]models.CounselorStudentRow{
-				{StudentID: uuid.New(), Name: "Alice", GraduationYear: 2028},
+				{StudentID: uuid.New(), Name: "Alice", GraduationYear: ptr(2028)},
 			}, nil)
 		mockRepo.On("ListPendingReviews", mock.Anything, counselorID).
 			Return([]models.PendingReview{}, nil)

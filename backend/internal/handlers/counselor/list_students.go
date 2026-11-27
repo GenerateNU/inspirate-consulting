@@ -44,7 +44,7 @@ func (h *Handler) ListStudents(ctx context.Context, input models.ListCounselorSt
 
 	for _, student := range allStudents {
 
-		if input.GraduationYear != 0 && student.GraduationYear != input.GraduationYear {
+		if input.GraduationYear != 0 && (student.GraduationYear == nil || *student.GraduationYear != input.GraduationYear) {
 			// skip students that don't match the graduation year filter when it is set
 			continue
 		}
@@ -66,14 +66,13 @@ func (h *Handler) ListStudents(ctx context.Context, input models.ListCounselorSt
 	return students, nil
 }
 
-// sorts by name, or by graduation year then name
+// sorts by name, or by graduation year then name (students without a year last)
 // ties fall back to student id
 func sortStudents(students []models.CounselorStudent, sortBy string, sortOrder string) {
 
 	slices.SortFunc(students, func(a, b models.CounselorStudent) int {
 
 		byName := cmp.Compare(a.Name, b.Name)
-		byYear := cmp.Compare(a.GraduationYear, b.GraduationYear)
 		byID := cmp.Compare(a.StudentID.String(), b.StudentID.String())
 
 		var result int
@@ -81,6 +80,17 @@ func sortStudents(students []models.CounselorStudent, sortBy string, sortOrder s
 		switch sortBy {
 
 		case "graduation_year":
+			// students without a graduation year go last in either order
+			if (a.GraduationYear == nil) != (b.GraduationYear == nil) {
+				if a.GraduationYear == nil {
+					return 1
+				}
+				return -1
+			}
+			byYear := 0
+			if a.GraduationYear != nil {
+				byYear = cmp.Compare(*a.GraduationYear, *b.GraduationYear)
+			}
 			result = cmp.Or(byYear, byName, byID)
 
 		case "name":

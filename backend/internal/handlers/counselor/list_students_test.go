@@ -29,10 +29,10 @@ var (
 // Dave (2029): pending review and falling behind
 func testRoster() []models.CounselorStudentRow {
 	return []models.CounselorStudentRow{
-		{StudentID: daveID, Name: "Dave", GraduationYear: 2029},
-		{StudentID: aliceID, Name: "Alice", GraduationYear: 2028},
-		{StudentID: carolID, Name: "Carol", GraduationYear: 2030},
-		{StudentID: bobID, Name: "Bob", GraduationYear: 2027},
+		{StudentID: daveID, Name: "Dave", GraduationYear: ptr(2029)},
+		{StudentID: aliceID, Name: "Alice", GraduationYear: ptr(2028)},
+		{StudentID: carolID, Name: "Carol", GraduationYear: ptr(2030)},
+		{StudentID: bobID, Name: "Bob", GraduationYear: ptr(2027)},
 	}
 }
 
@@ -95,10 +95,10 @@ func TestHandler_ListStudents(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, []models.CounselorStudent{
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: aliceID, Name: "Alice", GraduationYear: 2028}, IsFallingBehind: false, HasPendingReview: true},
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: bobID, Name: "Bob", GraduationYear: 2027}, IsFallingBehind: true, HasPendingReview: false},
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: carolID, Name: "Carol", GraduationYear: 2030}, IsFallingBehind: false, HasPendingReview: false},
-			{CounselorStudentRow: models.CounselorStudentRow{StudentID: daveID, Name: "Dave", GraduationYear: 2029}, IsFallingBehind: true, HasPendingReview: true},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: aliceID, Name: "Alice", GraduationYear: ptr(2028)}, IsFallingBehind: false, HasPendingReview: true},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: bobID, Name: "Bob", GraduationYear: ptr(2027)}, IsFallingBehind: true, HasPendingReview: false},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: carolID, Name: "Carol", GraduationYear: ptr(2030)}, IsFallingBehind: false, HasPendingReview: false},
+			{CounselorStudentRow: models.CounselorStudentRow{StudentID: daveID, Name: "Dave", GraduationYear: ptr(2029)}, IsFallingBehind: true, HasPendingReview: true},
 		}, res)
 	})
 
@@ -178,9 +178,9 @@ func TestHandler_ListStudents(t *testing.T) {
 
 		sameNameID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
 		roster := []models.CounselorStudentRow{
-			{StudentID: bobID, Name: "Zoe", GraduationYear: 2028},
-			{StudentID: aliceID, Name: "Amy", GraduationYear: 2028},
-			{StudentID: sameNameID, Name: "Zoe", GraduationYear: 2028},
+			{StudentID: bobID, Name: "Zoe", GraduationYear: ptr(2028)},
+			{StudentID: aliceID, Name: "Amy", GraduationYear: ptr(2028)},
+			{StudentID: sameNameID, Name: "Zoe", GraduationYear: ptr(2028)},
 		}
 
 		mockRepo := mocks.NewCounselorRepository(t)
@@ -254,3 +254,5 @@ func TestHandler_ListStudents(t *testing.T) {
 		assert.EqualError(t, err, "database error")
 	})
 }
+
+func ptr[T any](v T) *T { return &v }

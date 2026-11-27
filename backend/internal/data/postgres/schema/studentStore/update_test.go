@@ -23,7 +23,7 @@ func TestUpdateStudent(t *testing.T) {
 	counselorID := createTestCounselor(t, db)
 	created := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Updatable Student"),
-		GraduationYear: 2030,
+		GraduationYear: ptr(2030),
 		GPA:            ptr(3.0),
 		ReviewBalance:  2,
 		CounselorID:    &counselorID,
@@ -54,8 +54,8 @@ func TestUpdateStudent(t *testing.T) {
 		t.Fatalf("UpdateStudent failed: %v", err)
 	}
 
-	if updated.GraduationYear != year {
-		t.Errorf("expected GraduationYear %d, got %d", year, updated.GraduationYear)
+	if updated.GraduationYear == nil || *updated.GraduationYear != year {
+		t.Errorf("expected GraduationYear %d, got %v", year, updated.GraduationYear)
 	}
 	if updated.GPA == nil || *updated.GPA != gpa {
 		t.Errorf("expected GPA %v, got %v", gpa, updated.GPA)
@@ -104,7 +104,7 @@ func TestUpdateStudent_Partial(t *testing.T) {
 	organization := "Debate Club"
 	created := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Partly Updated Student"),
-		GraduationYear: 2028,
+		GraduationYear: ptr(2028),
 		Organization:   &organization,
 		GPA:            ptr(3.0),
 		ReviewBalance:  0,
@@ -120,8 +120,8 @@ func TestUpdateStudent_Partial(t *testing.T) {
 	if updated.GPA == nil || *updated.GPA != gpa {
 		t.Errorf("expected GPA %v, got %v", gpa, updated.GPA)
 	}
-	if updated.GraduationYear != created.GraduationYear {
-		t.Errorf("expected Year %d to be unchanged, got %d", created.GraduationYear, updated.GraduationYear)
+	if updated.GraduationYear == nil || *updated.GraduationYear != *created.GraduationYear {
+		t.Errorf("expected Year %d to be unchanged, got %v", *created.GraduationYear, updated.GraduationYear)
 	}
 	if updated.Organization == nil || *updated.Organization != organization {
 		t.Errorf("expected Organization %q to be unchanged, got %v", organization, updated.Organization)
