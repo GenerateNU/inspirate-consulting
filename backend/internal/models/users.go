@@ -30,7 +30,7 @@ type Student struct {
 	GraduationYear        int        `json:"graduation_year"`
 	Interest              *string    `json:"student_interest"`
 	Organization          *string    `json:"organization"`
-	GPA                   float64    `json:"gpa"`
+	GPA                   *float64   `json:"gpa"`
 	ReviewBalance         int        `json:"review_balance"`
 	CounselorID           *uuid.UUID `json:"counselor_id"`
 	HighSchool            *string    `json:"high_school"`
@@ -55,7 +55,7 @@ type CreateUserInput struct {
 		ExpiresAt *time.Time `json:"expires_at,omitempty" required:"false" doc:"when the account expires; omit for no expiration"`
 		// student profile fields, only used when role is student
 		GraduationYear *int       `json:"graduation_year,omitempty" required:"false" minimum:"2000" maximum:"2100" doc:"year the student graduates high school; required when role is student"`
-		GPA            *float64   `json:"gpa,omitempty" required:"false" minimum:"0" maximum:"5" doc:"gpa of the student; required when role is student"`
+		GPA            *float64   `json:"gpa,omitempty" required:"false" minimum:"0" maximum:"4" doc:"unweighted gpa of the student (0 to 4); required when role is student"`
 		Organization   *string    `json:"organization,omitempty" required:"false" doc:"organization of the student"`
 		Interest       *string    `json:"student_interest,omitempty" required:"false" doc:"interest of the student"`
 		CounselorID    *uuid.UUID `json:"counselor_id,omitempty" required:"false" doc:"counselor the student is assigned to; required when role is student"`
@@ -121,7 +121,7 @@ type StudentListItem struct {
 	PfpKey         *string    `json:"pfp_key"`
 	GraduationYear int        `json:"graduation_year"`
 	Organization   *string    `json:"organization"`
-	GPA            float64    `json:"gpa"`
+	GPA            *float64   `json:"gpa"`
 	ReviewBalance  int        `json:"review_balance"`
 	CounselorID    *uuid.UUID `json:"counselor_id"`
 }

@@ -33,14 +33,14 @@ func TestHandler_UpdateStudent(t *testing.T) {
 
 		mockStudentRepo := mocks.NewStudentRepository(t)
 		mockStudentRepo.On("UpdateStudent", ctx, studentID, input).
-			Return(&models.Student{ID: studentID, GPA: gpa}, nil)
+			Return(&models.Student{ID: studentID, GPA: &gpa}, nil)
 
 		handler := NewHandler(mocks.NewEssayReviewRepository(t), mockStudentRepo, nil)
 		res, err := handler.UpdateStudent(ctx, studentID, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, studentID, res.ID)
-		assert.Equal(t, gpa, res.GPA)
+		assert.Equal(t, &gpa, res.GPA)
 	})
 
 	t.Run("unknown student propagates the repository error", func(t *testing.T) {
@@ -71,7 +71,7 @@ func TestHandler_UpdateStudent(t *testing.T) {
 
 		mockStudentRepo := mocks.NewStudentRepository(t)
 		mockStudentRepo.On("UpdateStudent", studentCtx, studentID, input).
-			Return(&models.Student{ID: studentID, GPA: gpa}, nil)
+			Return(&models.Student{ID: studentID, GPA: &gpa}, nil)
 
 		handler := NewHandler(mocks.NewEssayReviewRepository(t), mockStudentRepo, auth.NewAuthorizer(nil))
 		res, err := handler.UpdateStudent(studentCtx, studentID, input)

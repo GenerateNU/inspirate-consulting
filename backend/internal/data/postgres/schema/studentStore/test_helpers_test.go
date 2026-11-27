@@ -103,3 +103,5 @@ func counselorOf(t *testing.T, db *pgxpool.Pool, studentUserID uuid.UUID) uuid.U
 	}
 	return counselorID
 }
+
+func ptr[T any](v T) *T { return &v }

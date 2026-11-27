@@ -30,7 +30,7 @@ func TestGetStudent(t *testing.T) {
 		UserID:         createTestUser(t, db, "Findable Student"),
 		GraduationYear: 2028,
 		Organization:   &organization,
-		GPA:            3.85,
+		GPA:            ptr(3.85),
 		ReviewBalance:  3,
 		CounselorID:    &counselorID,
 		Interest:       &interest,
@@ -50,8 +50,8 @@ func TestGetStudent(t *testing.T) {
 	if fetched.GraduationYear != created.GraduationYear {
 		t.Errorf("expected GraduationYear %d, got %d", created.GraduationYear, fetched.GraduationYear)
 	}
-	if fetched.GPA != created.GPA {
-		t.Errorf("expected GPA %v, got %v", created.GPA, fetched.GPA)
+	if fetched.GPA == nil || *fetched.GPA != *created.GPA {
+		t.Errorf("expected GPA %v, got %v", *created.GPA, fetched.GPA)
 	}
 	if fetched.ReviewBalance != created.ReviewBalance {
 		t.Errorf("expected ReviewBalance %d, got %d", created.ReviewBalance, fetched.ReviewBalance)
@@ -81,7 +81,7 @@ func TestGetStudent_NullableFields(t *testing.T) {
 	created := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Sparse Student"),
 		GraduationYear: 2030,
-		GPA:            3,
+		GPA:            ptr(3.0),
 		ReviewBalance:  0,
 		CounselorID:    &counselorID,
 	})
@@ -116,14 +116,14 @@ func TestGetStudent_ReturnsRequestedStudent(t *testing.T) {
 	target := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Target Student"),
 		GraduationYear: 2027,
-		GPA:            4,
+		GPA:            ptr(4.0),
 		ReviewBalance:  5,
 		CounselorID:    &counselorID,
 	})
 	other := createTestStudent(t, db, models.Student{
 		UserID:         createTestUser(t, db, "Other Student"),
 		GraduationYear: 2029,
-		GPA:            2,
+		GPA:            ptr(2.0),
 		ReviewBalance:  1,
 		CounselorID:    &counselorID,
 	})

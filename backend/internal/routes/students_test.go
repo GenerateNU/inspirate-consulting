@@ -37,7 +37,7 @@ func TestRoute_SetStudentReviewBalance(t *testing.T) {
 		mockRepo := mocks.NewEssayReviewRepository(t)
 		expectTx(mockRepo)
 		mockRepo.On("LockStudent", mock.Anything, mock.Anything, studentID).
-			Return(&models.Student{ID: studentID, GraduationYear: 2027, GPA: 4, ReviewBalance: 2}, nil)
+			Return(&models.Student{ID: studentID, GraduationYear: 2027, GPA: ptr(4.0), ReviewBalance: 2}, nil)
 		mockRepo.On("SetStudentBalance", mock.Anything, mock.Anything, studentID, 7).Return(nil)
 		mockRepo.On("InsertAdjustment", mock.Anything, mock.Anything, studentID, 5).Return(nil)
 
@@ -123,7 +123,7 @@ func TestRoute_UpdateStudent(t *testing.T) {
 		// fields left out of the request reach the handler as nil
 		mockRepo.On("UpdateStudent", mock.Anything, studentID, mock.MatchedBy(func(in models.UpdateStudentBody) bool {
 			return in.GPA != nil && *in.GPA == 4 && in.GraduationYear == nil && in.Organization == nil && in.Interest == nil
-		})).Return(&models.Student{ID: studentID, GraduationYear: 2028, GPA: 4}, nil)
+		})).Return(&models.Student{ID: studentID, GraduationYear: 2028, GPA: ptr(4.0)}, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)
@@ -135,7 +135,7 @@ func TestRoute_UpdateStudent(t *testing.T) {
 		var out models.Student
 		require.NoError(t, json.Unmarshal(body, &out))
 		assert.Equal(t, studentID, out.ID)
-		assert.Equal(t, 4.0, out.GPA)
+		assert.Equal(t, ptr(4.0), out.GPA)
 	})
 
 	t.Run("every editable field is passed through", func(t *testing.T) {
@@ -236,7 +236,7 @@ func setupTestAppWithStudentRepo(mockRepo data.StudentRepository) (*fiber.App, e
 func expectRouteStudentLookup(mockRepo *mocks.StudentRepository, userID, studentID uuid.UUID, current *uuid.UUID) {
 	mockRepo.On("GetStudentIDByUserID", mock.Anything, userID).Return(studentID, nil)
 	mockRepo.On("GetStudent", mock.Anything, studentID).
-		Return(&models.Student{ID: studentID, UserID: userID, GraduationYear: 2028, GPA: 4, CounselorID: current}, nil)
+		Return(&models.Student{ID: studentID, UserID: userID, GraduationYear: 2028, GPA: ptr(4.0), CounselorID: current}, nil)
 }
 
 func TestRoute_AssignCounselor(t *testing.T) {
@@ -250,7 +250,7 @@ func TestRoute_AssignCounselor(t *testing.T) {
 		mockRepo := mocks.NewStudentRepository(t)
 		expectRouteStudentLookup(mockRepo, studentUserID, studentID, nil)
 		mockRepo.On("AssignCounselor", mock.Anything, studentUserID, &counselorID).
-			Return(&models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028, GPA: 4, CounselorID: &counselorID}, nil)
+			Return(&models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028, GPA: ptr(4.0), CounselorID: &counselorID}, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)
@@ -331,7 +331,7 @@ func TestRoute_AssignCounselor(t *testing.T) {
 		mockRepo := mocks.NewStudentRepository(t)
 		expectRouteStudentLookup(mockRepo, studentUserID, studentID, &currentID)
 		mockRepo.On("AssignCounselor", mock.Anything, studentUserID, (*uuid.UUID)(nil)).
-			Return(&models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028, GPA: 4, CounselorID: nil}, nil)
+			Return(&models.Student{ID: studentID, UserID: studentUserID, GraduationYear: 2028, GPA: ptr(4.0), CounselorID: nil}, nil)
 
 		app, err := setupTestAppWithStudentRepo(mockRepo)
 		require.NoError(t, err)

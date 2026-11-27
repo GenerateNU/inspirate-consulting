@@ -193,7 +193,7 @@ func TestCreateUser_Student(t *testing.T) {
 	if student.GraduationYear != year {
 		t.Errorf("expected graduation year %d, got %d", year, student.GraduationYear)
 	}
-	if student.GPA != gpa {
+	if student.GPA == nil || *student.GPA != gpa {
 		t.Errorf("expected gpa %v, got %v", gpa, student.GPA)
 	}
 	if student.Organization == nil || *student.Organization != organization {

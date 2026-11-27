@@ -845,9 +845,9 @@ components:
           format: date-time
           type: string
         gpa:
-          description: gpa of the student; required when role is student
+          description: unweighted gpa of the student (0 to 4); required when role is student
           format: double
-          maximum: 5
+          maximum: 4
           minimum: 0
           type: number
         graduation_year:
@@ -2239,7 +2239,9 @@ components:
             - "null"
         gpa:
           format: double
-          type: number
+          type:
+            - number
+            - "null"
         graduation_year:
           format: int64
           type: integer
@@ -2296,7 +2298,9 @@ components:
           type: string
         gpa:
           format: double
-          type: number
+          type:
+            - number
+            - "null"
         graduation_year:
           format: int64
           type: integer
@@ -2790,9 +2794,9 @@ components:
           description: Geographic preferences for colleges
           type: string
         gpa:
-          description: GPA of the student
+          description: Unweighted GPA of the student (0 to 4)
           format: double
-          maximum: 5
+          maximum: 4
           minimum: 0
           type: number
         graduation_year:
