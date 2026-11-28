@@ -40,7 +40,7 @@ export default function Chats() {
         <ChatList
           chats={chats}
           currentUserId={currentUserId}
-          showAssistant={isCounselor}
+          isCounselor={isCounselor}
           isLoading={chatsQuery.isLoading}
           error={chatsQuery.error}
           onRetry={chatsQuery.refetch}

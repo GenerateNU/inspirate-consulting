@@ -10,5 +10,9 @@ import type { User } from './user';
 export interface CreateUserBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  /** False when the sign-in email couldn't be sent; the creator must give the new user temp_password themselves */
+  email_sent: boolean;
+  /** Only returned when email_sent is false, so the creator can pass the sign-in password on to the new user */
+  temp_password?: string;
   user: User;
 }

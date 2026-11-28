@@ -819,10 +819,17 @@ components:
           format: uri
           readOnly: true
           type: string
+        email_sent:
+          description: False when the sign-in email couldn't be sent; the creator must give the new user temp_password themselves
+          type: boolean
+        temp_password:
+          description: Only returned when email_sent is false, so the creator can pass the sign-in password on to the new user
+          type: string
         user:
           $ref: "#/components/schemas/User"
       required:
         - user
+        - email_sent
       type: object
     CreateUserInputBody:
       additionalProperties: false

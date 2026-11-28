@@ -10,11 +10,13 @@ import UserAvatar from "@/components/user-avatar";
 import { AssistantAvatar } from "./assistant-conversation";
 import { ASSISTANT_CHAT_ID, formatListTime, isUUID } from "./chat-utils";
 import { ErrorMessage } from "@/components/ui/error-message";
+import NewStudentChat from "./new-student-chat";
 
 interface ChatListProps {
   chats: ChatSummary[];
   currentUserId: string | null;
-  showAssistant: boolean;
+  // counselors get the assistant chat and start chats by picking one of their students
+  isCounselor: boolean;
   isLoading: boolean;
   error: unknown;
   onRetry: () => unknown;
@@ -23,7 +25,7 @@ interface ChatListProps {
 export default function ChatList({
   chats,
   currentUserId,
-  showAssistant,
+  isCounselor,
   isLoading,
   error,
   onRetry,
@@ -32,11 +34,15 @@ export default function ChatList({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="border-b border-neutral-200 px-5 py-5">
         <h1 className="text-2xl font-semibold">Messages</h1>
-        <NewChatForm currentUserId={currentUserId} />
+        {isCounselor ? (
+          <NewStudentChat />
+        ) : (
+          <NewChatForm currentUserId={currentUserId} />
+        )}
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto">
-        {showAssistant && (
+        {isCounselor && (
           <li>
             <AssistantListItem />
           </li>

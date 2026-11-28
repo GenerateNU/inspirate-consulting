@@ -2021,6 +2021,8 @@ export const CreateUserBody = /*#__PURE__*/ zod.object({
 
 export const CreateUserResponse = /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
+  "email_sent": /*#__PURE__*/ zod.boolean().check(/*#__PURE__*/ zod.describe('False when the sign-in email couldn\'t be sent; the creator must give the new user temp_password themselves')),
+  "temp_password": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.string()).check(/*#__PURE__*/ zod.describe('Only returned when email_sent is false, so the creator can pass the sign-in password on to the new user')),
   "user": /*#__PURE__*/ zod.object({
   "$schema": /*#__PURE__*/ zod.optional(/*#__PURE__*/ zod.url()).check(/*#__PURE__*/ zod.describe('A URL to the JSON Schema for this object.')),
   "email": /*#__PURE__*/ zod.string(),

@@ -38,9 +38,13 @@ func (h *Handler) CreateUser(ctx context.Context, input *models.CreateUserInput,
 		EmailType:    models.AccountCreated,
 	}
 	if _, err := h.SQSClient.SendAccountEmailNotification(ctx, notification); err != nil {
-		// TODO: surface this failure more durably than a log line so users aren't silently locked out.
+		// the user already exists, so don't fail the request; hand the temp password back
+		// so the creator can pass it on, otherwise the new user could never sign in
 		slog.Warn("failed to queue account-created email", "err", err, "email", input.Body.Email)
+		user.Body.TempPassword = &tempPassword
+		return user, nil
 	}
 
+	user.Body.EmailSent = true
 	return user, nil
 }

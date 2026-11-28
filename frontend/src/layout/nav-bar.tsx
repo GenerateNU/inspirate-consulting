@@ -2,6 +2,7 @@ import { NavLink, matchPath, useLocation } from "react-router-dom";
 import {
   CircleUserRound,
   FileText,
+  LayoutDashboard,
   ListTodo,
   MessageCircle,
   Palette,
@@ -9,6 +10,7 @@ import {
   PanelLeftOpen,
   School,
   SquarePlay,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,9 +39,13 @@ type NavItemConfig = {
   to: string;
   label: string;
   icon: LucideIcon;
+  // other paths that should highlight this item, e.g. the pages under it
+  alsoActiveOn?: string[];
+  // only highlight on this exact path, not the pages under it
+  end?: boolean;
 };
 
-const mainLinks: NavItemConfig[] = [
+const studentLinks: NavItemConfig[] = [
   { to: "/student-tasks", label: "Task Dashboard", icon: ListTodo },
   { to: "/college-applications", label: "Colleges", icon: School },
   { to: "/essay", label: "Essays", icon: FileText },
@@ -48,12 +54,30 @@ const mainLinks: NavItemConfig[] = [
   { to: "/chats", label: "Chats", icon: MessageCircle },
 ];
 
+// built around the counselor sitemap
+const counselorLinks: NavItemConfig[] = [
+  { to: "/counselor", label: "Dashboard", icon: LayoutDashboard, end: true },
+  {
+    to: "/counselor-students",
+    label: "Students",
+    icon: Users,
+    alsoActiveOn: ["/counselor/students"],
+  },
+  { to: "/counselor-media-list", label: "Modules", icon: SquarePlay },
+  { to: "/pending-reviews", label: "Essay Workspace", icon: FileText },
+  { to: "/counselor-college-list", label: "College List", icon: School },
+  { to: "/chats", label: "Chats", icon: MessageCircle },
+];
+
 const footerLinks: NavItemConfig[] = [
   { to: "/profile", label: "Profile", icon: CircleUserRound },
 ];
 
-const isActivePath = (to: string, pathname: string) =>
-  matchPath({ path: to, end: false }, pathname) !== null;
+const isActivePath = (item: NavItemConfig, pathname: string) =>
+  matchPath({ path: item.to, end: !!item.end }, pathname) !== null ||
+  (item.alsoActiveOn ?? []).some(
+    (path) => matchPath({ path, end: false }, pathname) !== null,
+  );
 
 function NavItem({
   item: { to, label, icon: Icon },
@@ -112,20 +136,10 @@ export default function NavBar() {
   const collapsed = state === "collapsed" && !isMobile;
   const { role } = useAuthContext();
 
-  // My List is student-only; counselors manage the shared college list instead.
-  // Modules likewise goes to the counselor's media library
-  const counselorPaths: Record<string, string> = {
-    Colleges: "/counselor-college-list",
-    Modules: "/counselor-media-list",
-  };
-  const links = mainLinks.map((item) =>
-    role === "counselor" && counselorPaths[item.label]
-      ? { ...item, to: counselorPaths[item.label] }
-      : item,
-  );
+  const links = role === "counselor" ? counselorLinks : studentLinks;
 
   const activePath = [...links, ...footerLinks].find((item) =>
-    isActivePath(item.to, pathname),
+    isActivePath(item, pathname),
   )?.to;
   const { containerRef, indicator, ready } = useActiveIndicator(activePath);
 

@@ -17,12 +17,17 @@ import (
 )
 
 // fakeSQS records the last message sent, so tests can assert on it without a real queue.
+// set err to make sending fail.
 type fakeSQS struct {
 	lastInput *awssqs.SendMessageInput
+	err       error
 }
 
 func (f *fakeSQS) SendMessage(ctx context.Context, params *awssqs.SendMessageInput, optFns ...func(*awssqs.Options)) (*awssqs.SendMessageOutput, error) {
 	f.lastInput = params
+	if f.err != nil {
+		return nil, f.err
+	}
 	return &awssqs.SendMessageOutput{}, nil
 }
 
@@ -63,6 +68,36 @@ func TestHandler_CreateGlobalCollege(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedUser, *res.Body.User)
 		assert.NotNil(t, fake.lastInput, "expected an account-created email to be queued")
+		assert.True(t, res.Body.EmailSent)
+		assert.Nil(t, res.Body.TempPassword, "temp password should only be returned when the email fails")
+	})
+
+	t.Run("email failure still creates the user and returns the temp password", func(t *testing.T) {
+		t.Parallel()
+
+		repoOutput := models.CreateUserOutput{Body: &models.CreateUserBody{User: &expectedUser}}
+
+		mockRepo := mocks.NewUserRepository(t)
+		mockRepo.On("CreateUser", mock.Anything, input, mock.Anything).Return(&repoOutput, nil)
+
+		var signupPassword string
+		mockSupabase := &supabase.MockSupabase{
+			SignupFunc: func(email, password, role string) (models.SignupResponse, error) {
+				signupPassword = password
+				return models.SignupResponse{User: models.UserSignupResponse{ID: uuid.New()}}, nil
+			},
+		}
+
+		sqsClient := sqsclient.NewSQSClientWithAPI(&fakeSQS{err: errors.New("no credentials")}, "test-account-queue-url")
+		handler := NewHandler(mockRepo, sqsClient, nil)
+		res, err := handler.CreateUser(ctx, &input, mockSupabase)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectedUser, *res.Body.User)
+		assert.False(t, res.Body.EmailSent)
+		if assert.NotNil(t, res.Body.TempPassword) {
+			assert.Equal(t, signupPassword, *res.Body.TempPassword, "should return the same password the account was created with")
+		}
 	})
 
 	t.Run("repository error propagates (e.g. duplicate conflict from the DB)", func(t *testing.T) {

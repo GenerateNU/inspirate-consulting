@@ -63,6 +63,23 @@ export const cyclesDraftError = (draft: CyclesDraft): string | null => {
       return `Set a deadline for ${cycleLabel(cycle)}.`;
     }
   }
+
+  // deadline order: ED < ED2 <= RD, and EA/REA < RD (ED and EA/REA can share a date).
+  // dates are YYYY-MM-DD, so they compare as strings
+  const deadline = (cycle: Cycle) =>
+    draft[cycle].enabled ? draft[cycle].deadline : null;
+  const ed = deadline(Cycle.ED);
+  const ed2 = deadline(Cycle.ED2);
+  const rd = deadline(Cycle.RD);
+  if (ed && ed2 && ed >= ed2)
+    return `${cycleLabel(Cycle.ED)} has to be due before ${cycleLabel(Cycle.ED2)}.`;
+  if (ed2 && rd && ed2 > rd)
+    return `${cycleLabel(Cycle.ED2)} can't be due after ${cycleLabel(Cycle.RD)}.`;
+  for (const early of [Cycle.ED, Cycle.EA, Cycle.REA]) {
+    const earlyDeadline = deadline(early);
+    if (earlyDeadline && rd && earlyDeadline >= rd)
+      return `${cycleLabel(early)} has to be due before ${cycleLabel(Cycle.RD)}.`;
+  }
   return null;
 };
 

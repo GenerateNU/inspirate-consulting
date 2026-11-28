@@ -63,7 +63,9 @@ type CreateUserInput struct {
 }
 
 type CreateUserBody struct {
-	User *User `json:"user"`
+	User         *User   `json:"user"`
+	EmailSent    bool    `json:"email_sent" doc:"False when the sign-in email couldn't be sent; the creator must give the new user temp_password themselves"`
+	TempPassword *string `json:"temp_password,omitempty" doc:"Only returned when email_sent is false, so the creator can pass the sign-in password on to the new user"`
 }
 
 type CreateUserOutput struct {
